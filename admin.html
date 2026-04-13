@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUXOR ADMIN PANEL</title>
+<style>
+:root {
+  --bg: #0a0a0a;
+  --bg2: #151515;
+  --card: #1a1a1a;
+  --bd: #333;
+  --bd2: #2a2a2a;
+  --t: #f0ede6;
+  --t2: #ccc;
+  --t3: #888;
+  --red: #ef5350;
+  --green: #4caf50;
+  --blue: #2196f3;
+  --orange: #ff9800;
+  --gold: #c9a84c;
+  --purple: #9c27b0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: 'SF Pro Text', -apple-system, sans-serif; 
+  background: var(--bg); 
+  color: var(--t); 
+  overflow-x: auto;
+  line-height: 1.4;
+}
+
+.admin-header {
+  background: linear-gradient(135deg, var(--card), #2a1a1a);
+  padding: 20px 24px;
+  border-bottom: 3px solid var(--red);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.admin-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 4px;
+  background: linear-gradient(45deg, var(--red), var(--orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(239, 83, 80, 0.3);
+}
+
+.admin-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.telegram-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg2);
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid var(--bd);
+}
+
+.telegram-connected { color: var(--green); }
+.telegram-disconnected { color: var(--red); }
+
+.nav-tabs {
+  background: var(--bg2);
+  padding: 0 24px;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--bd);
+  overflow-x: auto;
+}
+
+.nav-tab {
+  padding: 16px 24px;
+  background: none;
+  border: none;
+  color: var(--t3);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.nav-tab:hover { color: var(--t2); }
+.nav-tab.active { 
+  color: var(--red); 
+  border-bottom-color: var(--red);
+  background: rgba(239, 83, 80, 0.05);
+}
+
+.tab-content {
+  display: none;
+  padding: 24px;
+}
+
+.tab-content.active { display: block; }
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.admin-panel {
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--bd);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+}
+
+.admin-panel:hover { transform: translateY(-2px); }
+
+.panel-header {
+  padding: 16px 24px;
+  background: linear-gradient(135deg, var(--bg2), #1f1f2e);
+  border-bottom: 1px solid var(--bd);
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-body {
+  padding: 20px 24px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--bd2);
+  font-size: 13px;
+}
+
+.metric:last-child { border-bottom: none; }
+
+.metric-label { color: var(--t2); }
+.metric-value { 
+  font-weight: 700; 
+  font-family: 'SF Mono', monospace;
+  font-size: 15px;
+}
+
+.withdrawal-item {
+  background: var(--bg2);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--red);
+  transition: all 0.3s ease;
+}
+
+.withdrawal-item:hover { transform: translateX(4px); }
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.user-name { font-weight: 700; font-size: 16px; }
+.user-meta { font-size: 11px; color: var(--t3); }
+
+.withdrawal-amount {
+  font-family: 'SF Mono', monospace;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--red);
+  margin-bottom: 8px;
+}
+
+.withdrawal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-approve {
+  background: linear-gradient(135deg, var(--green), #388e3c);
+  color: white;
+}
+
+.btn-reject {
+  background: linear-gradient(135deg, var(--red), #d32f2f);
+  color: white;
+}
+
+.btn-ban {
+  background: linear-gradient(135deg, var(--purple), #7b1fa2);
+  color: white;
+}
+
+.btn-upgrade {
+  background: linear-gradient(135deg, var(--gold), #b8943a);
+  color: var(--bg);
+}
+
+.btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+.user-item {
+  background: var(--bg2);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 8px;
+  border-left: 4px solid var(--blue);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tier-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tier-starter { background: var(--t3); color: var(--bg); }
+.tier-active { background: var(--blue); color: white; }
+.tier-premium { background: var(--gold); color: var(--bg); }
+.tier-vip { background: var(--red); color: white; }
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.status-online { background: var(--green); }
+.status-away { background: var(--orange); }
+.status-offline { background: var(--t3); }
+
+.transaction-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bd2);
+  font-size: 13px;
+}
+
+.transaction-item:last-child { border-bottom: none; }
+
+.tx-time { color: var(--t3); font-size: 11px; }
+.tx-user { font-weight: 600; }
+.tx-type { color: var(--blue); font-size: 12px; }
+.tx-amount { font-family: 'SF Mono', monospace; font-weight: 700; font-size: 15px; }
+
+.refresh-btn {
+  background: none;
+  border: none;
+  color: var(--t3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.refresh-btn:hover { 
+  color: var(--t); 
+  background: var(--bg2);
+  transform: rotate(180deg);
+}
+
+.live-indicator {
+  animation: pulse 2s infinite;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.alert-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border-left: 4px solid;
+  font-size: 12px;
+}
+
+.alert-warning { 
+  background: rgba(255, 152, 0, 0.1);
+  border-left-color: var(--orange);
+}
+
+.alert-error { 
+  background: rgba(239, 83, 80, 0.1);
+  border-left-color: var(--red);
+}
+
+.alert-info { 
+  background: rgba(33, 150, 243, 0.1);
+  border-left-color: var(--blue);
+}
+
+.chart-container {
+  width: 100%;
+  height: 200px;
+  background: var(--bg2);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.settings-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--bd2);
+}
+
+.settings-section:last-child { border-bottom: none; }
+
+.settings-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--red);
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.input-field {
+  padding: 8px 12px;
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: 6px;
+  color: var(--t);
+  font-size: 13px;
+  width: 200px;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 24px;
+  background: var(--bd);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle-switch.on { background: var(--green); }
+
+.toggle-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.toggle-switch.on .toggle-slider { transform: translateX(26px); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 1000;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.notification.success {
+  background: linear-gradient(135deg, var(--green), #388e3c);
+  color: white;
+}
+
+.notification.error {
+  background: linear-gradient(135deg, var(--red), #d32f2f);
+  color: white;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  border-left: 4px solid;
+}
+
+.stat-card.revenue { border-left-color: var(--green); }
+.stat-card.users { border-left-color: var(--blue); }
+.stat-card.risk { border-left-color: var(--red); }
+.stat-card.growth { border-left-color: var(--gold); }
+
+.stat-value {
+  font-family: 'SF Mono', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<div class="admin-header">
+  <div class="admin-title">⚡ LUXOR ADMIN PANEL</div>
+  <div class="admin-controls">
+    <div id="telegramStatus" class="telegram-status telegram-disconnected">
+      📡 Telegram: <span>Disconnected</span>
+    </div>
+    <div class="live-indicator">● LIVE</div>
+    <button onclick="location.href='luxor-dashboard.html'" style="padding:8px 16px;background:var(--gold);color:var(--bg);border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600">CLIENT VIEW</button>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="switchTab('overview')">📊 OVERVIEW</button>
+  <button class="nav-tab" onclick="switchTab('withdrawals')">💰 WITHDRAWALS</button>
+  <button class="nav-tab" onclick="switchTab('users')">👥 USERS</button>
+  <button class="nav-tab" onclick="switchTab('analytics')">📈 ANALYTICS</button>
+  <button class="nav-tab" onclick="switchTab('compliance')">🛡️ COMPLIANCE</button>
+  <button class="nav-tab" onclick="switchTab('settings')">⚙️ SETTINGS</button>
+</div>
+
+<!-- OVERVIEW TAB -->
+<div id="tab-overview" class="tab-content active">
+  <div class="stats-grid">
+    <div class="stat-card revenue">
+      <div class="stat-value" style="color:var(--green)" id="totalRevenue">$2.4M</div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+    <div class="stat-card users">
+      <div class="stat-value" style="color:var(--blue)" id="totalUsers">847</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card risk">
+      <div class="stat-value" style="color:var(--red)" id="riskScore">Low</div>
+      <div class="stat-label">Risk Level</div>
+    </div>
+    <div class="stat-card growth">
+      <div class="stat-value" style="color:var(--gold)" id="growthRate">+12%</div>
+      <div class="stat-label">Monthly Growth</div>
+    </div>
+  </div>
+
+  <div class="admin-grid">
+    <div class="admin-panel">
+      <div class="panel-header">
+        🚨 URGENT ACTIONS
+        <button class="refresh-btn" onclick="loadUrgentActions()">🔄</button>
+      </div>
+      <div class="panel-body" id="urgentActions"></div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">
+        💳 RECENT TRANSACTIONS
+        <button class="refresh-btn" onclick="loadTransactions()">🔄</button>
+      </div>
+      <div class="panel-body" id="transactionsList"></div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">
+        ⚠️ SYSTEM ALERTS
+        <button class="refresh-btn" onclick="loadAlerts()">🔄</button>
+      </div>
+      <div class="panel-body" id="alertsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WITHDRAWALS TAB -->
+<div id="tab-withdrawals" class="tab-content">
+  <div class="admin-grid">
+    <div class="admin-panel">
+      <div class="panel-header">
+        🚨 PENDING WITHDRAWALS
+        <button class="refresh-btn" onclick="loadWithdrawals()">🔄</button>
+      </div>
+      <div class="panel-body" id="withdrawalsList"></div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">📊 WITHDRAWAL ANALYTICS</div>
+      <div class="panel-body">
+        <div class="chart-container" id="withdrawalChart">
+          <canvas id="withdrawalCanvas" width="400" height="200"></canvas>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Today's Withdrawals</span>
+          <span class="metric-value" id="todayWithdrawals">$8,450</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Weekly Average</span>
+          <span class="metric-value" id="weeklyAvgWithdrawals">$47,200</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Largest Request</span>
+          <span class="metric-value" id="largestWithdrawal">$25,000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- USERS TAB -->
+<div id="tab-users" class="tab-content">
+  <div class="admin-grid">
+    <div class="admin-panel">
+      <div class="panel-header">
+        🔍 USER SEARCH & MANAGEMENT
+      </div>
+      <div class="panel-body">
+        <input type="text" class="input-field" placeholder="Search users..." id="userSearch" style="width:100%;margin-bottom:16px">
+        <div id="usersList"></div>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">📈 USER ANALYTICS</div>
+      <div class="panel-body">
+        <div class="metric">
+          <span class="metric-label">Online Now</span>
+          <span class="metric-value" style="color:var(--green)" id="onlineNow">47</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">VIP Users</span>
+          <span class="metric-value" style="color:var(--gold)" id="vipUsers">23</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">New Today</span>
+          <span class="metric-value" style="color:var(--blue)" id="newToday">12</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Churned (7d)</span>
+          <span class="metric-value" style="color:var(--red)" id="churnedUsers">8</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">🎯 TIER DISTRIBUTION</div>
+      <div class="panel-body">
+        <div class="chart-container" id="tierChart">
+          <div style="text-align:center;color:var(--t3);padding:60px">Tier Distribution Chart</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYTICS TAB -->
+<div id="tab-analytics" class="tab-content">
+  <div class="admin-grid">
+    <div class="admin-panel">
+      <div class="panel-header">💰 FINANCIAL PERFORMANCE</div>
+      <div class="panel-body">
+        <div class="chart-container" id="revenueChart">
+          <canvas id="revenueCanvas" width="400" height="200"></canvas>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Monthly Recurring Revenue</span>
+          <span class="metric-value" style="color:var(--green)" id="mrr">$89,400</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Customer Lifetime Value</span>
+          <span class="metric-value" id="clv">$2,340</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Churn Rate</span>
+          <span class="metric-value" style="color:var(--red)" id="churnRate">2.3%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">📊 POOL PERFORMANCE</div>
+      <div class="panel-body">
+        <div class="metric">
+          <span class="metric-label">Silver Pool</span>
+          <span class="metric-value" style="color:var(--green)" id="silverPool">$340K (+$1.7K/day)</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Gold Pool</span>
+          <span class="metric-value" style="color:var(--gold)" id="goldPool">$680K (+$20.4K/week)</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Platinum Pool</span>
+          <span class="metric-value" style="color:var(--blue)" id="platinumPool">$1.2M (+$180K/month)</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Reserve Fund</span>
+          <span class="metric-value" style="color:var(--orange)" id="reserveFund">$340K (14.2%)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">🏷️ ITEM PERFORMANCE</div>
+      <div class="panel-body">
+        <div class="metric">
+          <span class="metric-label">Total Items Listed</span>
+          <span class="metric-value" id="totalItems">847</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Fully Funded</span>
+          <span class="metric-value" style="color:var(--green)" id="fundedItems">234</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Average ROI</span>
+          <span class="metric-value" style="color:var(--gold)" id="avgRoi">+28.4%</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Best Performer</span>
+          <span class="metric-value" style="color:var(--green)" id="bestItem">Rolex Daytona (+45%)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLIANCE TAB -->
+<div id="tab-compliance" class="tab-content">
+  <div class="admin-grid">
+    <div class="admin-panel">
+      <div class="panel-header">🛡️ AML MONITORING</div>
+      <div class="panel-body">
+        <div class="metric">
+          <span class="metric-label">Low Risk Users</span>
+          <span class="metric-value" style="color:var(--green)" id="lowRisk">834</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Medium Risk Users</span>
+          <span class="metric-value" style="color:var(--orange)" id="mediumRisk">23</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">High Risk Users</span>
+          <span class="metric-value" style="color:var(--red)" id="highRisk">2</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Flagged Today</span>
+          <span class="metric-value" style="color:var(--red)" id="flaggedToday">3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">📋 KYC STATUS</div>
+      <div class="panel-body">
+        <div class="metric">
+          <span class="metric-label">Verified Users</span>
+          <span class="metric-value" style="color:var(--green)" id="verifiedUsers">789</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Pending Verification</span>
+          <span class="metric-value" style="color:var(--orange)" id="pendingKyc">45</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Rejected</span>
+          <span class="metric-value" style="color:var(--red)" id="rejectedKyc">13</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Documents Review</span>
+          <span class="metric-value" style="color:var(--blue)" id="docsReview">8</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">🚨 SUSPICIOUS ACTIVITY</div>
+      <div class="panel-body" id="suspiciousActivity">
+        <div class="alert-item alert-warning">
+          <div style="font-weight:600;">Multiple accounts detected</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px;">IP 192.168.1.100 has 5 accounts - requires investigation</div>
+        </div>
+        <div class="alert-item alert-error">
+          <div style="font-weight:600;">Large cash deposit pattern</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px;">User Mike R. deposited $50K in small amounts over 3 days</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS TAB -->
+<div id="tab-settings" class="tab-content">
+  <div class="admin-grid">
+    <div class="admin-panel">
+      <div class="panel-header">📡 TELEGRAM INTEGRATION</div>
+      <div class="panel-body">
+        <div class="settings-section">
+          <div class="settings-title">Bot Configuration</div>
+          <div class="settings-item">
+            <span>Bot Token</span>
+            <input type="password" class="input-field" id="telegramToken" placeholder="123456789:AAHdqTcvCH...">
+          </div>
+          <div class="settings-item">
+            <span>Chat ID</span>
+            <input type="text" class="input-field" id="telegramChatId" placeholder="Your chat ID">
+          </div>
+          <div class="settings-item">
+            <span>Enable Notifications</span>
+            <div class="toggle-switch" id="telegramToggle" onclick="toggleTelegram()">
+              <div class="toggle-slider"></div>
+            </div>
+          </div>
+          <button class="btn btn-approve" onclick="testTelegram()" style="margin-top:12px">TEST CONNECTION</button>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">Alert Thresholds</div>
+          <div class="settings-item">
+            <span>Large Withdrawal (USD)</span>
+            <input type="number" class="input-field" value="10000" id="withdrawalThreshold">
+          </div>
+          <div class="settings-item">
+            <span>Suspicious Activity Score</span>
+            <input type="number" class="input-field" value="7" id="riskThreshold">
+          </div>
+          <div class="settings-item">
+            <span>New VIP Notifications</span>
+            <div class="toggle-switch on" onclick="toggleSetting(this)">
+              <div class="toggle-slider"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">⚙️ SYSTEM SETTINGS</div>
+      <div class="panel-body">
+        <div class="settings-section">
+          <div class="settings-title">Pool Rates</div>
+          <div class="settings-item">
+            <span>Silver Pool (%/day)</span>
+            <input type="number" class="input-field" value="0.5" step="0.1" id="silverRate">
+          </div>
+          <div class="settings-item">
+            <span>Gold Pool (%/week)</span>
+            <input type="number" class="input-field" value="3.0" step="0.1" id="goldRate">
+          </div>
+          <div class="settings-item">
+            <span>Platinum Pool (%/month)</span>
+            <input type="number" class="input-field" value="15.0" step="0.5" id="platinumRate">
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">Security</div>
+          <div class="settings-item">
+            <span>Auto-approve withdrawals under</span>
+            <input type="number" class="input-field" value="1000" id="autoApproveLimit">
+          </div>
+          <div class="settings-item">
+            <span>Maintenance Mode</span>
+            <div class="toggle-switch" onclick="toggleSetting(this)">
+              <div class="toggle-slider"></div>
+            </div>
+          </div>
+          <div class="settings-item">
+            <span>Registration Open</span>
+            <div class="toggle-switch on" onclick="toggleSetting(this)">
+              <div class="toggle-slider"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="panel-header">📧 COMMUNICATION</div>
+      <div class="panel-body">
+        <div class="settings-section">
+          <div class="settings-title">Broadcast Message</div>
+          <textarea class="input-field" style="width:100%;height:80px;resize:vertical" placeholder="Message to all users..." id="broadcastMessage"></textarea>
+          <button class="btn btn-approve" onclick="sendBroadcast()" style="margin-top:12px;width:100%">SEND TO ALL USERS</button>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">Maintenance Notice</div>
+          <textarea class="input-field" style="width:100%;height:60px;resize:vertical" placeholder="Maintenance notice..." id="maintenanceNotice"></textarea>
+          <button class="btn btn-approve" onclick="setMaintenance()" style="margin-top:12px;width:100%">SCHEDULE MAINTENANCE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const API_URL = localStorage.getItem('luxor_api_url') || 'https://luxor-backend-production.up.railway.app';
+const ADMIN_PASS = 'Luxor@2026!';
+
+// ===== ЗАЩИТА АДМИНКИ =====
+(function(){
+  const ok = sessionStorage.getItem('luxor_admin_auth');
+  if(!ok){
+    const l = prompt('Admin login:');
+    const p = prompt('Admin password:');
+    if(l==='luxor_admin' && p===ADMIN_PASS){
+      sessionStorage.setItem('luxor_admin_auth','1');
+    } else {
+      document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;font-size:24px;color:#ef5350;background:#0a0a0a">⛔ Access Denied</div>';
+      throw new Error('Access denied');
+    }
+  }
+})();
+
+// ===== API HELPERS =====
+async function apiGet(path){
+  try{const r=await fetch(API_URL+path);return await r.json();}
+  catch(e){console.warn('API unavailable, using localStorage');return null;}
+}
+async function apiPost(path,body){
+  try{const r=await fetch(API_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return await r.json();}
+  catch(e){return null;}
+}
+
+const adminData = {
+  telegramConnected: true,
+  telegramToken: '8621806564:AAE_gGGOAdk4gaSpQY070GuKoCsinCySXUM',
+  telegramChatId: '1899346258',
+  withdrawals: [],
+  users: [],
+  transactions: []
+};
+
+// Загружаем реальные данные
+async function refreshAdminData(){
+  const [stats, users, txs] = await Promise.all([
+    apiGet('/api/admin/stats?password='+encodeURIComponent(ADMIN_PASS)),
+    apiGet('/api/admin/users?password='+encodeURIComponent(ADMIN_PASS)),
+    apiGet('/api/admin/transactions?password='+encodeURIComponent(ADMIN_PASS)),
+  ]);
+
+  if(stats){
+    document.getElementById('totalRevenue').textContent = '$'+Math.round(stats.total_deposits||0).toLocaleString();
+    document.getElementById('totalUsers').textContent = stats.total_users||0;
+  }
+
+  if(users){
+    adminData.users = users.map((u,i)=>({
+      id: i+1,
+      name: u.first_name+' '+u.last_name,
+      email: u.login,
+      login: u.login,
+      tier: u.plan||'Starter',
+      balance: (u.balance||0)+(u.wallet_balance||0),
+      status: 'online',
+      ip: '—',
+      lastSeen: u.last_seen ? new Date(u.last_seen).toLocaleString() : '—',
+      riskScore: 1,
+      kycStatus: u.kyc_status||'pending',
+      banned: u.banned||false
+    }));
+  }
+
+  if(txs){
+    adminData.withdrawals = txs.filter(t=>t.type==='withdrawal'&&t.status==='pending').map(t=>({
+      id: t.id,
+      user: t.user_name||t.user_login,
+      email: t.user_login,
+      amount: t.amount,
+      tier: t.plan||'—',
+      time: new Date(t.created_at).toLocaleString(),
+      wallet: t.wallet_address||'—',
+      riskScore: 1,
+      status: t.status
+    }));
+    adminData.transactions = txs.slice(0,20).map(t=>({
+      user: t.user_name||t.user_login,
+      type: t.type==='deposit'?'Deposit':t.type==='withdrawal'?'Withdrawal':'Investment',
+      amount: t.type==='withdrawal'?-t.amount:t.amount,
+      time: new Date(t.created_at).toLocaleTimeString(),
+      id: t.id
+    }));
+    loadWithdrawals();
+    loadTransactions();
+    loadUsers();
+    loadUrgentActions();
+  }
+}
+
+// Панель сообщений пользователю
+function openMessageModal(login){
+  const msg = prompt('Message to '+login+':');
+  if(!msg) return;
+  apiPost('/api/admin/message',{user_login:login,text:msg,admin_password:ADMIN_PASS})
+    .then(r=>{if(r&&r.ok)showNotification('Message sent to '+login,'success');});
+}
+
+// Tab switching
+function switchTab(tabName) {
+  // Remove active class from all tabs and contents
+  document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  
+  // Add active class to selected tab and content
+  event.target.classList.add('active');
+  document.getElementById(`tab-${tabName}`).classList.add('active');
+  
+  // Load data for the active tab
+  switch(tabName) {
+    case 'overview': 
+      loadUrgentActions(); 
+      loadTransactions(); 
+      loadAlerts(); 
+      break;
+    case 'withdrawals': 
+      loadWithdrawals(); 
+      drawWithdrawalChart(); 
+      break;
+    case 'users': 
+      loadUsers(); 
+      break;
+    case 'analytics': 
+      drawRevenueChart(); 
+      break;
+  }
+}
+
+// Telegram integration
+function toggleTelegram() {
+  const toggle = document.getElementById('telegramToggle');
+  const status = document.getElementById('telegramStatus');
+  
+  if (toggle.classList.contains('on')) {
+    toggle.classList.remove('on');
+    adminData.telegramConnected = false;
+    status.classList.remove('telegram-connected');
+    status.classList.add('telegram-disconnected');
+    status.innerHTML = '📡 Telegram: <span>Disconnected</span>';
+  } else {
+    const token = document.getElementById('telegramToken').value;
+    const chatId = document.getElementById('telegramChatId').value;
+    
+    if (!token || !chatId) {
+      showNotification('Please enter Bot Token and Chat ID first', 'error');
+      return;
+    }
+    
+    toggle.classList.add('on');
+    adminData.telegramConnected = true;
+    adminData.telegramToken = token;
+    adminData.telegramChatId = chatId;
+    status.classList.remove('telegram-disconnected');
+    status.classList.add('telegram-connected');
+    status.innerHTML = '📡 Telegram: <span>Connected</span>';
+    showNotification('Telegram connected successfully', 'success');
+  }
+}
+
+function testTelegram() {
+  if (!adminData.telegramConnected) {
+    showNotification('Please connect Telegram first', 'error');
+    return;
+  }
+  
+  sendTelegramMessage('🧪 Test message from LUXOR Admin Panel');
+  showNotification('Test message sent to Telegram', 'success');
+}
+
+function sendTelegramMessage(message) {
+  if (!adminData.telegramConnected) return;
+  
+  // In real implementation, this would call Telegram API
+  console.log(`Telegram message: ${message}`);
+  
+  // Mock API call
+  fetch(`https://api.telegram.org/bot${adminData.telegramToken}/sendMessage`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      chat_id: adminData.telegramChatId,
+      text: message,
+      parse_mode: 'Markdown'
+    })
+  }).catch(err => console.log('Telegram error:', err));
+}
+
+// Data loading functions
+function loadUrgentActions() {
+  const container = document.getElementById('urgentActions');
+  const urgentWithdrawals = adminData.withdrawals.filter(w => w.amount >= 10000 || w.riskScore >= 5);
+  const urgentKyc = adminData.users.filter(u => u.kycStatus === 'pending' && u.balance >= 5000);
+  
+  let html = '';
+  
+  urgentWithdrawals.forEach(w => {
+    html += `
+      <div class="alert-item alert-error">
+        <div style="font-weight:600;">🚨 Large Withdrawal: $${w.amount.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px;">${w.user} (${w.tier}) - Risk Score: ${w.riskScore}</div>
+        <div style="margin-top:8px;">
+          <button class="btn btn-approve" onclick="approveWithdrawal(${w.id})">APPROVE</button>
+          <button class="btn btn-reject" onclick="rejectWithdrawal(${w.id})">REJECT</button>
+        </div>
+      </div>
+    `;
+  });
+  
+  urgentKyc.forEach(u => {
+    html += `
+      <div class="alert-item alert-warning">
+        <div style="font-weight:600;">⚠️ KYC Required: ${u.name}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px;">Balance: $${u.balance.toLocaleString()} - Verification pending</div>
+      </div>
+    `;
+  });
+  
+  if (!html) {
+    html = '<div style="text-align:center;color:var(--t3);padding:20px">No urgent actions required</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+function loadWithdrawals() {
+  const container = document.getElementById('withdrawalsList');
+  
+  if (adminData.withdrawals.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:var(--t3);padding:40px">No pending withdrawals</div>';
+    return;
+  }
+  
+  container.innerHTML = adminData.withdrawals.map(w => `
+    <div class="withdrawal-item">
+      <div class="user-info">
+        <div class="user-name">${w.user}</div>
+        <div class="user-meta">${w.email} • ${w.tier} • Risk Score: ${w.riskScore}/10</div>
+        <div class="user-meta">IP: ${w.ip} • ${w.time} today</div>
+        <div class="user-meta">Wallet: ${w.wallet.substring(0, 25)}...</div>
+      </div>
+      <div style="text-align: right;">
+        <div class="withdrawal-amount">$${w.amount.toLocaleString()}</div>
+        <div class="withdrawal-actions">
+          <button class="btn btn-approve" onclick="approveWithdrawal(${w.id})">✓ APPROVE</button>
+          <button class="btn btn-reject" onclick="rejectWithdrawal(${w.id})">✗ REJECT</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadUsers() {
+  const container = document.getElementById('usersList');
+  
+  container.innerHTML = adminData.users.map(u => `
+    <div class="user-item">
+      <div class="user-info">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <span class="status-indicator status-${u.status}"></span>
+          <div class="user-name">${u.name}</div>
+          <span class="tier-badge tier-${u.tier.toLowerCase()}">${u.tier}</span>
+        </div>
+        <div class="user-meta">${u.email} • IP: ${u.ip}</div>
+        <div class="user-meta">Risk: ${u.riskScore}/10 • KYC: ${u.kycStatus} • ${u.lastSeen}</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-family: 'SF Mono', monospace; font-weight: 700; color: var(--gold); margin-bottom: 8px;">$${u.balance.toLocaleString()}</div>
+        <div style="display: flex; gap: 4px;">
+          <button class="btn btn-ban" onclick="banUser(${u.id})">BAN</button>
+          <button class="btn btn-upgrade" onclick="upgradeUser(${u.id})">VIP</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadTransactions() {
+  const container = document.getElementById('transactionsList');
+  container.innerHTML = adminData.transactions.map(t => `
+    <div class="transaction-item">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span class="tx-user">${t.user}</span> • 
+          <span class="tx-type">${t.type}</span>
+        </div>
+        <div style="text-align: right;">
+          <div class="tx-amount" style="color: ${t.amount > 0 ? 'var(--green)' : 'var(--red)'}">
+            ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toLocaleString()}
+          </div>
+        </div>
+      </div>
+      <div class="tx-time">${t.time}</div>
+    </div>
+  `).join('');
+}
+
+function loadAlerts() {
+  const alerts = [
+    { type: 'warning', message: 'High withdrawal volume detected in last 2 hours', time: '5 min ago' },
+    { type: 'info', message: 'New VIP user qualified: Alex Johnson ($24.5K)', time: '1 hour ago' },
+    { type: 'error', message: 'Failed login attempts from IP 203.0.113.15 (15 attempts)', time: '2 hours ago' }
+  ];
+  
+  const container = document.getElementById('alertsList');
+  
+  if (alerts.length === 0) {
+    container.innerHTML = '<div style="color:var(--t3);text-align:center;padding:20px">All systems operational</div>';
+    return;
+  }
+  
+  container.innerHTML = alerts.map(a => `
+    <div class="alert-item alert-${a.type}">
+      <div style="color: ${a.type === 'warning' ? 'var(--orange)' : a.type === 'error' ? 'var(--red)' : 'var(--blue)'}; font-weight: 600;">
+        ${a.type === 'warning' ? '⚠️' : a.type === 'error' ? '🚨' : 'ℹ️'} ${a.message}
+      </div>
+      <div style="font-size: 11px; color: var(--t3); margin-top: 4px;">${a.time}</div>
+    </div>
+  `).join('');
+}
+
+// Action functions
+function approveWithdrawal(id) {
+  const withdrawal = adminData.withdrawals.find(w => w.id === id);
+  if (!withdrawal) return;
+  
+  if (confirm(`Approve withdrawal of $${withdrawal.amount.toLocaleString()} to ${withdrawal.user}?`)) {
+    adminData.withdrawals = adminData.withdrawals.filter(w => w.id !== id);
+    loadWithdrawals();
+    loadUrgentActions();
+    showNotification('Withdrawal approved successfully', 'success');
+    
+    // Send Telegram notification
+    if (adminData.telegramConnected) {
+      sendTelegramMessage(`✅ *WITHDRAWAL APPROVED*\n👤 ${withdrawal.user}\n💰 $${withdrawal.amount.toLocaleString()}\n⏰ ${new Date().toLocaleTimeString()}`);
+    }
+  }
+}
+
+function rejectWithdrawal(id) {
+  const withdrawal = adminData.withdrawals.find(w => w.id === id);
+  if (!withdrawal) return;
+  
+  const reason = prompt('Reason for rejection:') || 'No reason provided';
+  
+  if (confirm(`Reject withdrawal of $${withdrawal.amount.toLocaleString()} from ${withdrawal.user}?`)) {
+    adminData.withdrawals = adminData.withdrawals.filter(w => w.id !== id);
+    loadWithdrawals();
+    loadUrgentActions();
+    showNotification(`Withdrawal rejected: ${reason}`, 'error');
+    
+    // Send Telegram notification
+    if (adminData.telegramConnected) {
+      sendTelegramMessage(`❌ *WITHDRAWAL REJECTED*\n👤 ${withdrawal.user}\n💰 $${withdrawal.amount.toLocaleString()}\n📝 Reason: ${reason}`);
+    }
+  }
+}
+
+function banUser(id) {
+  const user = adminData.users.find(u => u.id === id);
+  if (!user) return;
+  
+  if (confirm(`Ban user ${user.name}? This will lock their account immediately.`)) {
+    user.status = 'banned';
+    loadUsers();
+    showNotification(`${user.name} has been banned`, 'error');
+    
+    if (adminData.telegramConnected) {
+      sendTelegramMessage(`🚫 *USER BANNED*\n👤 ${user.name}\n📧 ${user.email}\n💰 Balance: $${user.balance.toLocaleString()}`);
+    }
+  }
+}
+
+function upgradeUser(id) {
+  const user = adminData.users.find(u => u.id === id);
+  if (!user) return;
+  
+  if (confirm(`Upgrade ${user.name} to VIP tier?`)) {
+    user.tier = 'VIP';
+    loadUsers();
+    showNotification(`${user.name} upgraded to VIP`, 'success');
+    
+    if (adminData.telegramConnected) {
+      sendTelegramMessage(`💎 *VIP UPGRADE*\n👤 ${user.name}\n🎯 Manually upgraded to VIP tier\n💰 Balance: $${user.balance.toLocaleString()}`);
+    }
+  }
+}
+
+function sendBroadcast() {
+  const message = document.getElementById('broadcastMessage').value;
+  if (!message.trim()) {
+    showNotification('Please enter a message', 'error');
+    return;
+  }
+  
+  if (confirm(`Send broadcast message to all ${adminData.users.length + 843} users?`)) {
+    showNotification('Broadcast message sent to all users', 'success');
+    document.getElementById('broadcastMessage').value = '';
+    
+    if (adminData.telegramConnected) {
+      sendTelegramMessage(`📢 *BROADCAST SENT*\n👥 To: All users\n📝 Message: "${message}"`);
+    }
+  }
+}
+
+function toggleSetting(toggle) {
+  toggle.classList.toggle('on');
+}
+
+// Chart drawing functions
+function drawWithdrawalChart() {
+  const canvas = document.getElementById('withdrawalCanvas');
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  // Mock withdrawal data over time
+  const data = [12000, 8500, 15000, 9200, 18000, 11000, 14500];
+  const max = Math.max(...data);
+  
+  ctx.clearRect(0, 0, width, height);
+  
+  // Draw line
+  ctx.beginPath();
+  ctx.strokeStyle = '#ef5350';
+  ctx.lineWidth = 3;
+  
+  data.forEach((value, index) => {
+    const x = (index / (data.length - 1)) * (width - 40) + 20;
+    const y = height - 40 - ((value / max) * (height - 60));
+    
+    if (index === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+  
+  ctx.stroke();
+  
+  // Draw points
+  data.forEach((value, index) => {
+    const x = (index / (data.length - 1)) * (width - 40) + 20;
+    const y = height - 40 - ((value / max) * (height - 60));
+    
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#ef5350';
+    ctx.fill();
+  });
+}
+
+function drawRevenueChart() {
+  const canvas = document.getElementById('revenueCanvas');
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  // Mock revenue data
+  const data = [45000, 52000, 48000, 67000, 71000, 89000, 94000];
+  const max = Math.max(...data);
+  
+  ctx.clearRect(0, 0, width, height);
+  
+  // Draw gradient fill
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, 'rgba(76, 175, 80, 0.3)');
+  gradient.addColorStop(1, 'rgba(76, 175, 80, 0.05)');
+  
+  ctx.beginPath();
+  ctx.moveTo(20, height - 40);
+  
+  data.forEach((value, index) => {
+    const x = (index / (data.length - 1)) * (width - 40) + 20;
+    const y = height - 40 - ((value / max) * (height - 60));
+    ctx.lineTo(x, y);
+  });
+  
+  ctx.lineTo(width - 20, height - 40);
+  ctx.closePath();
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  
+  // Draw line
+  ctx.beginPath();
+  ctx.strokeStyle = '#4caf50';
+  ctx.lineWidth = 3;
+  
+  data.forEach((value, index) => {
+    const x = (index / (data.length - 1)) * (width - 40) + 20;
+    const y = height - 40 - ((value / max) * (height - 60));
+    
+    if (index === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+  
+  ctx.stroke();
+}
+
+// Utility functions
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 4000);
+}
+
+// User search
+document.addEventListener('DOMContentLoaded', function() {
+  const userSearch = document.getElementById('userSearch');
+  if (userSearch) {
+    userSearch.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const filteredUsers = adminData.users.filter(user => 
+        user.name.toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm)
+      );
+      
+      // Update users list with filtered results
+      const container = document.getElementById('usersList');
+      container.innerHTML = filteredUsers.map(u => `
+        <div class="user-item">
+          <div class="user-info">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span class="status-indicator status-${u.status}"></span>
+              <div class="user-name">${u.name}</div>
+              <span class="tier-badge tier-${u.tier.toLowerCase()}">${u.tier}</span>
+            </div>
+            <div class="user-meta">${u.email} • IP: ${u.ip}</div>
+            <div class="user-meta">Risk: ${u.riskScore}/10 • KYC: ${u.kycStatus} • ${u.lastSeen}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-family: 'SF Mono', monospace; font-weight: 700; color: var(--gold); margin-bottom: 8px;">$${u.balance.toLocaleString()}</div>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-ban" onclick="banUser(${u.id})">BAN</button>
+              <button class="btn btn-upgrade" onclick="upgradeUser(${u.id})">VIP</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    });
+  }
+});
+
+// Auto-refresh every 30 seconds
+setInterval(() => {
+  const activeTab = document.querySelector('.tab-content.active');
+  if (activeTab) {
+    const tabId = activeTab.id;
+    switch(tabId) {
+      case 'tab-overview':
+        loadUrgentActions();
+        loadTransactions();
+        loadAlerts();
+        break;
+      case 'tab-withdrawals':
+        loadWithdrawals();
+        break;
+      case 'tab-users':
+        loadUsers();
+        break;
+    }
+  }
+}, 30000);
+
+// Initial load
+document.addEventListener('DOMContentLoaded', () => {
+  loadUrgentActions();
+  loadTransactions();
+  loadAlerts();
+  loadWithdrawals();
+  loadUsers();
+});
+</script>
+
+</body>
+</html>
