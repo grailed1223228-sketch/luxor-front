@@ -226,7 +226,7 @@ body{padding-bottom:52px}}
 </div></div>
 <div class="thm-toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='light'?'dark':'light'"></div>
 <div class="avatar" id="userAvatar">A</div>
-<button class="logout" onclick="sessionStorage.clear();location.href='luxor-invest.html'">Log out</button>
+<button class="logout" onclick="sessionStorage.clear();location.href='index.html'">Log out</button>
 </div></nav>
 
 <div class="layout">
@@ -262,7 +262,7 @@ body{padding-bottom:52px}}
 <div class="side-item" onclick="go('settings',this)"><span class="ico">
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>Settings</div>
 <div class="side-div"></div>
-<div class="side-item" onclick="location.href='luxor-invest.html'" style="color:var(--t3);font-size:11px"><span class="ico" style="font-size:12px">←</span>Back to main</div>
+<div class="side-item" onclick="location.href='index.html'" style="color:var(--t3);font-size:11px"><span class="ico" style="font-size:12px">←</span>Back to main</div>
 </div>
 
 <!-- CONTENT -->
@@ -680,54 +680,36 @@ body{padding-bottom:52px}}
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ═══ DATA ═══ */
-// API CONFIG
-const API_URL = localStorage.getItem('luxor_api_url') || 'https://luxor-backend-production.up.railway.app';
-
+const API_URL = 'https://luxor-backend-production.up.railway.app';
 const U=JSON.parse(sessionStorage.getItem('luxor_user')||'{"fn":"Guest","ln":"","plan":"","rate":"","tier":0,"amt":0}');
 
-// Загружаем актуальные данные с сервера
-async function syncUserData(){
-  if(!U.login) return;
+// Синхронизация баланса с сервером
+async function syncBalance(){
+  if(!U.login||U.isAdmin) return;
   try{
-    const res = await fetch(API_URL+'/api/user/'+U.login);
-    if(res.ok){
-      const u = await res.json();
-      state.wallet = u.wallet_balance || 0;
-      state.balance = u.balance || 0;
-      updateUI();
-    }
+    const r=await fetch(API_URL+'/api/user/'+U.login);
+    if(r.ok){const u=await r.json();if(u.wallet_balance!=null){state.wallet=u.wallet_balance;state.balance=u.balance||0;updateUI();}}
   }catch(e){}
 }
 
-// Загружаем сообщения от админа
-async function loadAdminMessages(){
-  if(!U.login) return;
+// Сообщения от админа
+async function checkMessages(){
+  if(!U.login||U.isAdmin) return;
   try{
-    const res = await fetch(API_URL+'/api/user/'+U.login+'/messages');
-    if(!res.ok) return;
-    const msgs = await res.json();
-    const unread = msgs.filter(m=>!m.read && m.from_admin);
-    if(unread.length > 0){
-      showAdminMessages(unread);
-    }
+    const r=await fetch(API_URL+'/api/user/'+U.login+'/messages');
+    if(!r.ok) return;
+    const msgs=await r.json();
+    const unread=msgs.filter(m=>m.from_admin&&!m.read);
+    if(unread.length>0) showAdminMsgs(unread);
   }catch(e){}
 }
 
-function showAdminMessages(msgs){
-  const existing = document.getElementById('adminMsgPanel');
-  if(existing) existing.remove();
-  const panel = document.createElement('div');
-  panel.id = 'adminMsgPanel';
-  panel.style.cssText = 'position:fixed;top:70px;right:16px;z-index:999;max-width:320px;display:flex;flex-direction:column;gap:8px;';
-  panel.innerHTML = msgs.map(m=>`
-    <div style="background:var(--card);border:1px solid var(--gold);border-radius:10px;padding:14px;box-shadow:0 4px 20px rgba(0,0,0,0.3);animation:slideIn .3s ease">
-      <div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:6px;letter-spacing:1px">📨 MESSAGE FROM ADMIN</div>
-      <div style="font-size:13px;line-height:1.5">${m.text}</div>
-      <div style="font-size:10px;color:var(--t3);margin-top:6px">${new Date(m.created_at).toLocaleString()}</div>
-    </div>
-  `).join('');
-  document.body.appendChild(panel);
-  setTimeout(()=>panel.remove(), 10000);
+function showAdminMsgs(msgs){
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;top:70px;right:16px;z-index:9999;max-width:300px;';
+  d.innerHTML=msgs.map(m=>`<div style="background:var(--card);border:1px solid var(--gold);border-radius:10px;padding:14px;margin-bottom:8px;box-shadow:0 4px 20px rgba(0,0,0,.3)"><div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:6px">📨 MESSAGE FROM ADMIN</div><div style="font-size:13px">${m.text}</div></div>`).join('');
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),10000);
 }
 const NAMES=['James W.','Sofia R.','Ahmed K.','Lisa T.','Park J.','Marco V.','Anna S.','Tom H.'];
 const ITEMS=[
@@ -1240,12 +1222,7 @@ let payTimerInterval;function startPayTimer(){clearInterval(payTimerInterval);le
 function selectPay(el){}
 function processTopUp(){const amt=window._topUpAmount||0;if(!amt||amt<100){alert('Minimum $100');return}
 clearInterval(payTimerInterval);state.wallet+=amt;closeModal();addTx('Wallet deposit +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState();
-// Отправляем на сервер
-try{
-  if(U.login){
-    fetch(API_URL+'/api/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:U.login,amount:amt})}).catch(()=>{});
-  }
-}catch(e){}
+if(U.login){fetch(API_URL+'/api/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:U.login,amount:amt})}).catch(()=>{});}
 }
 
 /* ═══ POOL INVEST ═══ */
@@ -1290,12 +1267,7 @@ function processWithdraw(){const amt=parseFloat(document.getElementById('wdAmoun
 if(!w||!amt){alert('Fill all fields');return}const avail=state.free+state.wallet;if(amt>avail){alert('Exceeds available balance');return}
 state.savedWallet=w;if(amt<=state.wallet){state.wallet-=amt}else{const rest=amt-state.wallet;state.wallet=0;state.free-=rest;state.balance-=rest}
 closeModal();showGoldRain();addTx('Withdrawal -$'+amt.toFixed(2),'processing');updateUI();saveState();
-// Отправляем на сервер
-try{
-  if(U.login){
-    fetch(API_URL+'/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:U.login,amount:amt,wallet:w})}).catch(()=>{});
-  }
-}catch(e){}
+if(U.login){fetch(API_URL+'/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:U.login,amount:amt,wallet:w})}).catch(()=>{});}
 }
 
 /* ═══ TX ═══ */
