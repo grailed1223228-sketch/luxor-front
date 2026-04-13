@@ -852,35 +852,24 @@ body {
 </div>
 
 <script>
-// ===== CONFIG =====
-const API_URL = localStorage.getItem('luxor_api_url') || 'https://luxor-backend-production.up.railway.app';
-const ADMIN_PASS = 'Luxor@2026!';
-
 // ===== ЗАЩИТА АДМИНКИ =====
 (function(){
-  const ok = sessionStorage.getItem('luxor_admin_auth');
+  const ok=sessionStorage.getItem('luxor_admin_ok');
   if(!ok){
-    const l = prompt('Admin login:');
-    const p = prompt('Admin password:');
-    if(l==='luxor_admin' && p===ADMIN_PASS){
-      sessionStorage.setItem('luxor_admin_auth','1');
-    } else {
-      document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;font-size:24px;color:#ef5350;background:#0a0a0a">⛔ Access Denied</div>';
-      throw new Error('Access denied');
-    }
+    const l=prompt('Admin login:'),p=prompt('Admin password:');
+    if(l==='luxor_admin'&&p==='Luxor@2026!'){sessionStorage.setItem('luxor_admin_ok','1');}
+    else{document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;color:#ef5350;font-size:24px">⛔ Access Denied</div>';throw new Error('denied');}
   }
 })();
 
-// ===== API HELPERS =====
-async function apiGet(path){
-  try{const r=await fetch(API_URL+path);return await r.json();}
-  catch(e){console.warn('API unavailable, using localStorage');return null;}
-}
-async function apiPost(path,body){
-  try{const r=await fetch(API_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return await r.json();}
-  catch(e){return null;}
-}
+const API_URL = 'https://luxor-backend-production.up.railway.app';
+const ADMIN_PASS = 'Luxor@2026!';
 
+// ===== API HELPERS =====
+async function apiGet(path){try{const r=await fetch(API_URL+path);return await r.json();}catch(e){return null;}}
+async function apiPost(path,body){try{const r=await fetch(API_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return await r.json();}catch(e){return null;}}
+
+// ===== ДАННЫЕ =====
 const adminData = {
   telegramConnected: true,
   telegramToken: '8621806564:AAE_gGGOAdk4gaSpQY070GuKoCsinCySXUM',
@@ -890,69 +879,64 @@ const adminData = {
   transactions: []
 };
 
-// Загружаем реальные данные
 async function refreshAdminData(){
-  const [stats, users, txs] = await Promise.all([
+  const [stats,users,txs]=await Promise.all([
     apiGet('/api/admin/stats?password='+encodeURIComponent(ADMIN_PASS)),
     apiGet('/api/admin/users?password='+encodeURIComponent(ADMIN_PASS)),
     apiGet('/api/admin/transactions?password='+encodeURIComponent(ADMIN_PASS)),
   ]);
-
   if(stats){
-    document.getElementById('totalRevenue').textContent = '$'+Math.round(stats.total_deposits||0).toLocaleString();
-    document.getElementById('totalUsers').textContent = stats.total_users||0;
+    const el1=document.getElementById('totalRevenue');
+    const el2=document.getElementById('totalUsers');
+    if(el1) el1.textContent='$'+Math.round(stats.total_deposits||0).toLocaleString();
+    if(el2) el2.textContent=stats.total_users||0;
   }
-
   if(users){
-    adminData.users = users.map((u,i)=>({
-      id: i+1,
-      name: u.first_name+' '+u.last_name,
-      email: u.login,
-      login: u.login,
-      tier: u.plan||'Starter',
-      balance: (u.balance||0)+(u.wallet_balance||0),
-      status: 'online',
-      ip: '—',
-      lastSeen: u.last_seen ? new Date(u.last_seen).toLocaleString() : '—',
-      riskScore: 1,
-      kycStatus: u.kyc_status||'pending',
-      banned: u.banned||false
-    }));
-  }
-
-  if(txs){
-    adminData.withdrawals = txs.filter(t=>t.type==='withdrawal'&&t.status==='pending').map(t=>({
-      id: t.id,
-      user: t.user_name||t.user_login,
-      email: t.user_login,
-      amount: t.amount,
-      tier: t.plan||'—',
-      time: new Date(t.created_at).toLocaleString(),
-      wallet: t.wallet_address||'—',
-      riskScore: 1,
-      status: t.status
-    }));
-    adminData.transactions = txs.slice(0,20).map(t=>({
-      user: t.user_name||t.user_login,
-      type: t.type==='deposit'?'Deposit':t.type==='withdrawal'?'Withdrawal':'Investment',
-      amount: t.type==='withdrawal'?-t.amount:t.amount,
-      time: new Date(t.created_at).toLocaleTimeString(),
-      id: t.id
-    }));
-    loadWithdrawals();
-    loadTransactions();
+    adminData.users=users.map((u,i)=>({
+      id:i+1,name:(u.first_name||'')+' '+(u.last_name||''),
+      email:u.login,login:u.login,tier:u.plan||'Starter',
+      balance:(u.balance||0)+(u.wallet_balance||0),
+      status:u.banned?'banned':'online',ip:'—',
+      lastSeen:u.last_seen?new Date(u.last_seen).toLocaleString():'—',
+      riskScore:1,kycStatus:u.kyc_status||'pending',banned:u.banned||false
+    })));
     loadUsers();
-    loadUrgentActions();
+  }
+  if(txs){
+    adminData.withdrawals=txs.filter(t=>t.type==='withdrawal'&&t.status==='pending').map(t=>(({
+      id:t.id,user:t.user_name||t.user_login,email:t.user_login,
+      amount:t.amount,tier:t.plan||'—',
+      time:new Date(t.created_at).toLocaleString(),
+      wallet:t.wallet_address||'—',riskScore:1,status:t.status
+    })));
+    adminData.transactions=txs.slice(0,20).map(t=>(({
+      user:t.user_name||t.user_login,
+      type:t.type==='deposit'?'Deposit':t.type==='withdrawal'?'Withdrawal':'Investment',
+      amount:t.type==='withdrawal'?-t.amount:t.amount,
+      time:new Date(t.created_at).toLocaleTimeString(),id:t.id
+    })));
+    loadWithdrawals();loadTransactions();loadUrgentActions();
   }
 }
 
-// Панель сообщений пользователю
 function openMessageModal(login){
-  const msg = prompt('Message to '+login+':');
+  const msg=prompt('Message to '+login+':');
   if(!msg) return;
   apiPost('/api/admin/message',{user_login:login,text:msg,admin_password:ADMIN_PASS})
-    .then(r=>{if(r&&r.ok)showNotification('Message sent to '+login,'success');});
+    .then(r=>{if(r&&r.ok) showNotification('Message sent to '+login,'success');});
 }
+
+// Admin data store
+const adminData_orig = {
+  telegramConnected: false,
+  telegramToken: '',
+  telegramChatId: '',
+  withdrawals: [],
+  users: [],
+  transactions: []
+};
+// alias
+Object.assign(adminData, adminData_orig);
 
 // Tab switching
 function switchTab(tabName) {
@@ -1400,8 +1384,9 @@ document.addEventListener('DOMContentLoaded', function() {
           <div style="text-align: right;">
             <div style="font-family: 'SF Mono', monospace; font-weight: 700; color: var(--gold); margin-bottom: 8px;">$${u.balance.toLocaleString()}</div>
             <div style="display: flex; gap: 4px;">
-              <button class="btn btn-ban" onclick="banUser(${u.id})">BAN</button>
-              <button class="btn btn-upgrade" onclick="upgradeUser(${u.id})">VIP</button>
+              <button class="btn btn-ban" onclick="banUser(${u.id})" style="font-size:10px;padding:6px 10px">${u.banned?'UNBAN':'BAN'}</button>
+              <button class="btn btn-upgrade" onclick="upgradeUser(${u.id})" style="font-size:10px;padding:6px 10px">VIP</button>
+              <button class="btn" onclick="openMessageModal('${u.login||u.email}')" style="background:var(--blue);color:white;font-size:10px;padding:6px 10px">MSG</button>
             </div>
           </div>
         </div>
@@ -1433,11 +1418,15 @@ setInterval(() => {
 
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
-  loadUrgentActions();
-  loadTransactions();
+  refreshAdminData();
+  setInterval(refreshAdminData, 30000);
   loadAlerts();
-  loadWithdrawals();
-  loadUsers();
+  // Telegram status
+  const ts=document.getElementById('telegramStatus');
+  if(ts){ts.classList.remove('telegram-disconnected');ts.classList.add('telegram-connected');ts.innerHTML='📡 Telegram: <span>Connected</span>';}
+  const tt=document.getElementById('telegramToggle');if(tt)tt.classList.add('on');
+  const ti=document.getElementById('telegramToken');if(ti)ti.value=adminData.telegramToken;
+  const tc=document.getElementById('telegramChatId');if(tc)tc.value=adminData.telegramChatId;
 });
 </script>
 
