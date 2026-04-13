@@ -226,6 +226,7 @@ textarea.inp{resize:vertical;min-height:60px;}
       </div>
     </div>
     <div class="inp-row"><label>Description</label><textarea class="inp" id="iDesc" placeholder="Brief description of the item..."></textarea></div>
+    <div class="inp-row"><label>Image URL (optional)</label><input class="inp" id="iImageUrl" placeholder="https://example.com/image.jpg"></div>
     <div class="form-grid">
       <div class="inp-row"><label>Purchase Price ($) *</label><input class="inp" id="iPrice" type="number" placeholder="24000"></div>
       <div class="inp-row"><label>Total Slots ($) *</label><input class="inp" id="iSlots" type="number" placeholder="24000"></div>
@@ -474,7 +475,8 @@ function renderUsers(users){
             ${u.note?`<span class="badge" style="background:var(--orange);color:#000">${u.note}</span>`:''}
           </div>
           <div style="font-size:11px;color:var(--t3)">🔑 ${u.login} · Joined: ${u.created_at?new Date(u.created_at).toLocaleDateString():'—'}</div>
-          <div style="font-size:11px;color:var(--t3)">Last seen: ${u.last_seen?new Date(u.last_seen).toLocaleString():'—'}</div>
+          <div style="font-size:11px;color:var(--t3)">📧 ${u.email||u.login} · Last seen: ${u.last_seen?new Date(u.last_seen).toLocaleString():'—'}</div>
+          <div style="font-size:11px;color:var(--blue)">💰 Wallet: ${fmt(u.wallet_balance||0)} · Balance: ${fmt(u.balance||0)}</div>
           ${u.referred_by_login?`<div style="font-size:11px;color:var(--purple)">👥 Referred by: ${u.referred_by_login}</div>`:''}
           ${u.referral_count?`<div style="font-size:11px;color:var(--green)">🔗 Referrals: ${u.referral_count} people · Earned: ${fmt(u.referral_earnings||0)}</div>`:''}
         </div>
@@ -621,6 +623,7 @@ async function loadItems(){
         <span class="badge" style="background:${item.status==='active'?'var(--green)':item.status==='sold'?'var(--t3)':'var(--orange)'}">${item.status}</span>
       </div>
       <div class="pb">
+        ${item.image_url?`<img src="${item.image_url}" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:10px" onerror="this.style.display='none'">`:''}
         ${item.description?`<p style="font-size:12px;color:var(--t2);margin-bottom:10px">${item.description}</p>`:''}
         <div class="metric"><span class="ml">Purchase Price</span><span class="mv" style="color:var(--gold)">${fmt(item.purchase_price)}</span></div>
         <div class="metric"><span class="ml">Guaranteed Return</span><span class="mv" style="color:var(--green)">${item.guaranteed_return}%</span></div>
@@ -702,7 +705,7 @@ function drawChart(canvasId, history){
 function openAddItem(){
   document.getElementById('itemModalTitle').textContent = '➕ ADD NEW ITEM';
   document.getElementById('editItemId').value = '';
-  ['iName','iDesc','iPrice','iSlots','iGuaranteed','iExpected','iPeriod'].forEach(id=>{
+  ['iName','iDesc','iPrice','iSlots','iGuaranteed','iExpected','iPeriod','iImageUrl'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   for(let i=0;i<5;i++){
@@ -727,6 +730,7 @@ async function editItem(id){
   document.getElementById('iExpected').value = item.expected_return||'';
   document.getElementById('iPeriod').value = item.return_period_days||'';
   document.getElementById('iStatus').value = item.status||'active';
+  document.getElementById('iImageUrl').value = item.image_url||'';
   const history = typeof item.price_history==='string' ? JSON.parse(item.price_history||'[]') : (item.price_history||[]);
   for(let i=0;i<5;i++){
     const pt = history[i]||{};
@@ -759,6 +763,7 @@ async function saveItem(){
     expected_return: +document.getElementById('iExpected').value||0,
     return_period_days: +document.getElementById('iPeriod').value||30,
     status: document.getElementById('iStatus').value,
+    image_url: document.getElementById('iImageUrl').value||'',
   };
   const editId = document.getElementById('editItemId').value;
   let r;
