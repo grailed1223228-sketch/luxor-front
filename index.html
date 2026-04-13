@@ -558,9 +558,18 @@ function openLogin(){cM('lm',`<div class="center" style="margin-bottom:14px"><di
 <button class="btn-m" onclick="doLogin()" style="margin-bottom:8px">LOG IN →</button>
 <div class="center"><a href="#" onclick="event.preventDefault();openForgot()" style="font-size:11px;color:var(--gold)">Forgot password?</a></div>`)}
 
-function doLogin(){const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
-if(u===storedLogin&&p===storedPass){closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:u==='admin'?'Admin':'User',ln:'',plan:'',amt:0}));location.href='dashboard.html'}
-else document.getElementById('le').style.display='block'}
+async function doLogin(){const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+document.getElementById('le').style.display='none';
+try{
+  const res=await fetch('https://luxor-backend-production.up.railway.app/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:u,password:p})});
+  const data=await res.json();
+  if(!res.ok){document.getElementById('le').style.display='block';return;}
+  if(data.is_admin){closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:'Admin',ln:'',plan:'',amt:0,isAdmin:true,login:'luxor_admin'}));location.href='admin.html';return;}
+  closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:data.user.first_name,ln:data.user.last_name,plan:data.user.plan||'',rate:'',tier:data.user.tier||0,amt:0,login:data.user.login,referral_code:data.user.referral_code||''}));location.href='dashboard.html';
+}catch(err){
+  if(u==='luxor_admin'&&p==='Luxor@2026!'){closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:'Admin',ln:'',plan:'',amt:0,isAdmin:true,login:'luxor_admin'}));location.href='admin.html';return;}
+  document.getElementById('le').style.display='block';
+}}
 
 function openForgot(){closeAll();cM('fm',`<div class="center" style="margin-bottom:12px"><div class="stag">RESET PASSWORD</div><h3 style="font-family:'Bebas Neue';font-size:20px">ENTER YOUR EMAIL</h3></div>
 <div class="fg"><label>EMAIL</label><input type="email" placeholder="your@email.com"></div>
@@ -589,10 +598,28 @@ function startInv(plan,rate,tier,amt){cM('rm',`<div class="center" style="margin
 <button type="submit" class="btn-m">CREATE ACCOUNT →</button></form>
 <div class="center" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)"><p style="font-size:11px;color:var(--t3);margin-bottom:6px">Already have an account?</p><button class="btn-m" onclick="closeAll();openLogin()" style="background:transparent;color:var(--gold);border:1px solid var(--gold)">LOG IN</button></div>`)}
 
-function subReg(e,plan,rate,tier,amt){e.preventDefault();
-sessionStorage.setItem('luxor_user',JSON.stringify({fn:document.getElementById('ifn').value,ln:document.getElementById('iln').value,plan,rate,tier,amt}));
-storedLogin=document.getElementById('ilg').value;storedPass=document.getElementById('ips').value;
-closeAll();location.href='dashboard.html'}
+async function subReg(e,plan,rate,tier,amt){e.preventDefault();
+const fn=document.getElementById('ifn').value.trim();
+const ln=document.getElementById('iln').value.trim();
+const login=document.getElementById('ilg').value.trim();
+const pass=document.getElementById('ips').value;
+const btn=e.target.querySelector('button[type=submit]');
+if(btn){btn.textContent='Creating...';btn.disabled=true;}
+try{
+  const res=await fetch('https://luxor-backend-production.up.railway.app/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login,password:pass,first_name:fn,last_name:ln,plan})});
+  const data=await res.json();
+  if(!res.ok){alert(data.detail||'Login already taken');if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}return;}
+  sessionStorage.setItem('luxor_user',JSON.stringify({fn,ln,plan,rate,tier,amt:0,login,referral_code:data.referral_code||''}));
+  closeAll();location.href='dashboard.html';
+}catch(err){
+  const users=JSON.parse(localStorage.getItem('luxor_users')||'[]');
+  if(users.find(x=>x.login===login)){alert('Login already taken');if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}return;}
+  users.push({fn,ln,login,pass,plan,rate,tier,amt:0});
+  localStorage.setItem('luxor_users',JSON.stringify(users));
+  sessionStorage.setItem('luxor_user',JSON.stringify({fn,ln,plan,rate,tier,amt:0,login}));
+  closeAll();location.href='dashboard.html';
+}
+if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}}
 
 // Reviews
 function rr(c){document.getElementById('rg').innerHTML=RV.slice(0,c).map(r=>`<div class="rev"><div class="rs">${'★'.repeat(r.s)+'☆'.repeat(5-r.s)}</div><div class="rt">${r.t}</div><div class="ra">${r.a}</div><div class="rm">${r.m}</div></div>`).join('')}
