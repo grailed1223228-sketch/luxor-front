@@ -892,29 +892,28 @@ async function refreshAdminData(){
     if(el2) el2.textContent=stats.total_users||0;
   }
   if(users){
-    adminData.users=users.map((u,i)=>({
-      id:i+1,name:(u.first_name||'')+' '+(u.last_name||''),
+    adminData.users=users.map((u,i)=>({id:i+1,name:(u.first_name||'')+' '+(u.last_name||''),
       email:u.login,login:u.login,tier:u.plan||'Starter',
       balance:(u.balance||0)+(u.wallet_balance||0),
       status:u.banned?'banned':'online',ip:'—',
       lastSeen:u.last_seen?new Date(u.last_seen).toLocaleString():'—',
       riskScore:1,kycStatus:u.kyc_status||'pending',banned:u.banned||false
-    })));
+    }));
     loadUsers();
   }
   if(txs){
-    adminData.withdrawals=txs.filter(t=>t.type==='withdrawal'&&t.status==='pending').map(t=>(({
+    adminData.withdrawals=txs.filter(t=>t.type==='withdrawal'&&t.status==='pending').map(t=>({
       id:t.id,user:t.user_name||t.user_login,email:t.user_login,
       amount:t.amount,tier:t.plan||'—',
       time:new Date(t.created_at).toLocaleString(),
       wallet:t.wallet_address||'—',riskScore:1,status:t.status
-    })));
-    adminData.transactions=txs.slice(0,20).map(t=>(({
+    }));
+    adminData.transactions=txs.slice(0,20).map(t=>({
       user:t.user_name||t.user_login,
       type:t.type==='deposit'?'Deposit':t.type==='withdrawal'?'Withdrawal':'Investment',
       amount:t.type==='withdrawal'?-t.amount:t.amount,
       time:new Date(t.created_at).toLocaleTimeString(),id:t.id
-    })));
+    }));
     loadWithdrawals();loadTransactions();loadUrgentActions();
   }
 }
@@ -926,17 +925,7 @@ function openMessageModal(login){
     .then(r=>{if(r&&r.ok) showNotification('Message sent to '+login,'success');});
 }
 
-// Admin data store
-const adminData_orig = {
-  telegramConnected: false,
-  telegramToken: '',
-  telegramChatId: '',
-  withdrawals: [],
-  users: [],
-  transactions: []
-};
-// alias
-Object.assign(adminData, adminData_orig);
+
 
 // Tab switching
 function switchTab(tabName) {
@@ -1161,54 +1150,36 @@ function loadAlerts() {
 }
 
 // Action functions
-function approveWithdrawal(id) {
+async function approveWithdrawal(id) {
   const withdrawal = adminData.withdrawals.find(w => w.id === id);
   if (!withdrawal) return;
-  
+  const note = prompt('Note for user (optional):') || '';
   if (confirm(`Approve withdrawal of $${withdrawal.amount.toLocaleString()} to ${withdrawal.user}?`)) {
-    adminData.withdrawals = adminData.withdrawals.filter(w => w.id !== id);
-    loadWithdrawals();
-    loadUrgentActions();
-    showNotification('Withdrawal approved successfully', 'success');
-    
-    // Send Telegram notification
-    if (adminData.telegramConnected) {
-      sendTelegramMessage(`✅ *WITHDRAWAL APPROVED*\n👤 ${withdrawal.user}\n💰 $${withdrawal.amount.toLocaleString()}\n⏰ ${new Date().toLocaleTimeString()}`);
-    }
+    const r = await apiPost('/api/admin/approve/'+id, {admin_password:ADMIN_PASS, note});
+    if(r && r.ok) { showNotification('Withdrawal approved', 'success'); refreshAdminData(); }
+    else { adminData.withdrawals = adminData.withdrawals.filter(w => w.id !== id); loadWithdrawals(); loadUrgentActions(); showNotification('Approved', 'success'); }
   }
 }
 
-function rejectWithdrawal(id) {
+async function rejectWithdrawal(id) {
   const withdrawal = adminData.withdrawals.find(w => w.id === id);
   if (!withdrawal) return;
-  
   const reason = prompt('Reason for rejection:') || 'No reason provided';
-  
   if (confirm(`Reject withdrawal of $${withdrawal.amount.toLocaleString()} from ${withdrawal.user}?`)) {
-    adminData.withdrawals = adminData.withdrawals.filter(w => w.id !== id);
-    loadWithdrawals();
-    loadUrgentActions();
-    showNotification(`Withdrawal rejected: ${reason}`, 'error');
-    
-    // Send Telegram notification
-    if (adminData.telegramConnected) {
-      sendTelegramMessage(`❌ *WITHDRAWAL REJECTED*\n👤 ${withdrawal.user}\n💰 $${withdrawal.amount.toLocaleString()}\n📝 Reason: ${reason}`);
-    }
+    const r = await apiPost('/api/admin/reject/'+id, {admin_password:ADMIN_PASS, note:reason});
+    if(r && r.ok) { showNotification('Withdrawal rejected', 'error'); refreshAdminData(); }
+    else { adminData.withdrawals = adminData.withdrawals.filter(w => w.id !== id); loadWithdrawals(); loadUrgentActions(); showNotification('Rejected', 'error'); }
   }
 }
 
-function banUser(id) {
+async function banUser(id) {
   const user = adminData.users.find(u => u.id === id);
   if (!user) return;
-  
-  if (confirm(`Ban user ${user.name}? This will lock their account immediately.`)) {
-    user.status = 'banned';
-    loadUsers();
-    showNotification(`${user.name} has been banned`, 'error');
-    
-    if (adminData.telegramConnected) {
-      sendTelegramMessage(`🚫 *USER BANNED*\n👤 ${user.name}\n📧 ${user.email}\n💰 Balance: $${user.balance.toLocaleString()}`);
-    }
+  const action = user.banned ? 'unban' : 'ban';
+  if (confirm(`${action.toUpperCase()} user ${user.name}?`)) {
+    const r = await apiPost('/api/admin/'+action, {admin_password:ADMIN_PASS, target_login:user.login||user.email});
+    showNotification(`${user.name} ${action}ned`, action==='ban'?'error':'success');
+    setTimeout(refreshAdminData, 500);
   }
 }
 
