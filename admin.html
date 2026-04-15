@@ -861,7 +861,7 @@ function renderUsers(users){
           ${u.referral_count?`<div style="font-size:11px;color:var(--green)">🔗 Referrals: ${u.referral_count} people · Earned: ${fmt(u.referral_earnings||0)}</div>`:''}
         </div>
         <div style="text-align:right;min-width:160px">
-          <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:6px">${fmt((u.wallet_balance||0)+(u.balance||0))}</div>
+          <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:6px">${fmt(u.wallet_balance||0)}</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">
             <button class="btn btn-b btn-sm" onclick="showUserDetail('${u.login}')">DETAIL</button>
             <button class="btn btn-g btn-sm" onclick="addBalancePrompt('${u.login}','${u.first_name} ${u.last_name}')">+$</button>
@@ -932,7 +932,7 @@ async function showUserDetail(login){
     <h3 style="font-size:20px;font-weight:800;margin-bottom:16px">👤 ${u.first_name||''} ${u.last_name||''}</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
-        <div style="font-size:18px;font-weight:700;color:var(--gold)">${fmt((u.wallet_balance||0)+(u.balance||0))}</div>
+        <div style="font-size:18px;font-weight:700;color:var(--gold)">${fmt(u.wallet_balance||0)}</div>
         <div style="font-size:10px;color:var(--t3)">CURRENT BALANCE</div>
       </div>
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
@@ -957,7 +957,7 @@ async function showUserDetail(login){
     ${refs.length>0?`
     <div style="margin-bottom:14px">
       <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:6px">🔗 REFERRALS (${refs.length} people)</div>
-      ${refs.map(r=>`<div style="font-size:11px;color:var(--t3);padding:4px 0;border-bottom:1px solid var(--bd)">👤 ${r.first_name} ${r.last_name} (${r.login}) · ${fmt((r.wallet_balance||0)+(r.balance||0))}</div>`).join('')}
+      ${refs.map(r=>`<div style="font-size:11px;color:var(--t3);padding:4px 0;border-bottom:1px solid var(--bd)">👤 ${r.first_name} ${r.last_name} (${r.login}) · ${fmt(r.wallet_balance||0)}</div>`).join('')}
     </div>`:''}
     <div style="font-size:12px;font-weight:700;margin-bottom:8px">TRANSACTION HISTORY (${(txs||[]).length})</div>
     <div style="max-height:220px;overflow-y:auto">
