@@ -707,6 +707,23 @@ let currentPeriod='1W';
 let currentView='pools';
 const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
 if(saved)state=saved;
+/* ── ЗАГРУЖАЕМ РЕАЛЬНЫЙ БАЛАНС С БЭКЕНДА ── */
+(async function loadBalanceFromBackend(){
+  try{
+    const userLogin = U.login || sessionStorage.getItem('luxor_login');
+    if(!userLogin || userLogin==='unknown') return;
+    const r = await fetch('https://luxor-backend-production.up.railway.app/api/user/'+userLogin);
+    const data = await r.json();
+    if(data.ok && data.user){
+      state.wallet  = data.user.wallet_balance || 0;
+      state.balance = data.user.balance || 0;
+      U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
+      sessionStorage.setItem('luxor_login', userLogin);
+      try{updateUI()}catch(e){}
+      saveState();
+    }
+  }catch(e){console.warn('Balance load error:',e);}
+})();
 
 /* ═══ INIT ═══ */
 try{const un=document.getElementById('userName');if(un)un.textContent=U.fn;
