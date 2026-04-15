@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUXOR INVEST — Blog</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+[data-theme="light"]{--bg:#fafafa;--bg2:#f4f3f0;--bg3:#eae8e4;--dark:#0a0a0a;--gold:#c9a84c;--gold2:#b8943a;--goldL:#dfc368;--gg:rgba(201,168,76,.08);--t:#0a0a0a;--t2:#5a5a5a;--t3:#9a9a9a;--bd:rgba(0,0,0,.06);--bd2:rgba(201,168,76,.15);--green:#2d8f3e;--blue:#3a7bd5;--red:#c0392b;--card:#fff;--nav:rgba(250,250,250,.95);--side:#f7f6f3}
+[data-theme="dark"]{--bg:#08080d;--bg2:#101018;--bg3:#18181f;--dark:#eae7e0;--gold:#d4a853;--gold2:#c49b38;--goldL:#e8cc80;--gg:rgba(212,168,83,.08);--t:#eae7e0;--t2:#7a756c;--t3:#4a4640;--bd:rgba(255,255,255,.05);--bd2:rgba(212,168,83,.12);--green:#3da34d;--blue:#5a9ee0;--red:#d44;--card:#111118;--nav:rgba(8,8,13,.95);--side:#0c0c14}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);transition:background .3s,color .3s;font-size:13px;line-height:1.6}a{text-decoration:none;color:inherit}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--gold2);border-radius:9px}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 20px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(24px);background:var(--nav);border-bottom:1px solid var(--bd);height:50px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;cursor:pointer}.logo span{color:var(--gold)}
+.nav-r{display:flex;gap:10px;align-items:center}
+.nav-r a{font-size:11px;color:var(--t3);font-weight:500;padding:8px 12px;border-radius:6px;transition:all .3s}.nav-r a:hover,.nav-r a.active{color:var(--gold);background:var(--gg)}
+.thm-toggle{width:32px;height:18px;background:var(--bg3);border-radius:9px;position:relative;cursor:pointer;border:1px solid var(--bd)}.thm-toggle::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:var(--gold);border-radius:50%;transition:left .3s}[data-theme="dark"] .thm-toggle::after{left:16px}
+
+/* MAIN */
+.main{max-width:900px;margin:0 auto;padding:80px 20px 40px;min-height:100vh}
+.hero{text-align:center;margin-bottom:60px;padding:40px 0}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:4px;margin-bottom:16px;background:linear-gradient(135deg,var(--gold),var(--goldL));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:16px;color:var(--t2);max-width:600px;margin:0 auto}
+
+/* BLOG GRID */
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-bottom:40px}
+.blog-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden;transition:all .3s;cursor:pointer}
+.blog-card:hover{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 8px 24px rgba(201,168,76,.1)}
+.blog-img{width:100%;height:200px;background:linear-gradient(135deg,var(--bg2),var(--bg3));position:relative;display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--t3)}
+.blog-content{padding:20px}
+.blog-date{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.blog-title{font-size:18px;font-weight:700;margin-bottom:12px;line-height:1.4}
+.blog-excerpt{font-size:14px;color:var(--t2);line-height:1.5;margin-bottom:16px}
+.blog-tags{display:flex;gap:6px;flex-wrap:wrap}
+.blog-tag{background:var(--bg3);color:var(--t2);padding:4px 8px;border-radius:12px;font-size:10px;font-weight:500}
+
+/* CATEGORIES */
+.categories{display:flex;gap:12px;justify-content:center;margin-bottom:40px;flex-wrap:wrap}
+.cat-btn{padding:8px 16px;border:1px solid var(--bd);background:var(--bg2);color:var(--t2);border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;transition:all .3s}
+.cat-btn:hover,.cat-btn.active{background:var(--gold);color:#0a0a0a;border-color:var(--gold)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+.hero h1{font-size:36px}
+.hero p{font-size:14px}
+.blog-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+<div class="logo" onclick="window.location.href='dashboard.html'">LUXOR <span>INVEST</span></div>
+<div class="nav-r">
+<a href="dashboard.html">Dashboard</a>
+<a href="blog.html" class="active">Blog</a>
+<a href="charts.html">Charts</a>
+<div class="thm-toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"></div>
+</div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+<!-- Hero -->
+<div class="hero">
+<h1>LUXOR BLOG</h1>
+<p>Insights, market analysis, and investment strategies for luxury assets</p>
+</div>
+
+<!-- Categories -->
+<div class="categories">
+<button class="cat-btn active" onclick="filterPosts('all')">All Posts</button>
+<button class="cat-btn" onclick="filterPosts('market')">Market Analysis</button>
+<button class="cat-btn" onclick="filterPosts('strategy')">Strategies</button>
+<button class="cat-btn" onclick="filterPosts('news')">News</button>
+<button class="cat-btn" onclick="filterPosts('education')">Education</button>
+</div>
+
+<!-- Blog Grid -->
+<div class="blog-grid" id="blogGrid">
+
+<article class="blog-card" data-category="market" onclick="openPost(1)">
+<div class="blog-img">📈</div>
+<div class="blog-content">
+<div class="blog-date">April 15, 2026</div>
+<h2 class="blog-title">Luxury Watch Market Reaches New Heights</h2>
+<p class="blog-excerpt">Rolex and Patek Philippe prices continue to surge as wealthy investors seek alternative assets. Our analysis shows 24% growth YoY...</p>
+<div class="blog-tags">
+<span class="blog-tag">Watches</span>
+<span class="blog-tag">Market Analysis</span>
+</div>
+</div>
+</article>
+
+<article class="blog-card" data-category="strategy" onclick="openPost(2)">
+<div class="blog-img">💰</div>
+<div class="blog-content">
+<div class="blog-date">April 12, 2026</div>
+<h2 class="blog-title">Fractional Investing: The Future of Luxury Assets</h2>
+<p class="blog-excerpt">How splitting ownership of high-value items democratizes access to luxury investments. Learn the benefits and risks...</p>
+<div class="blog-tags">
+<span class="blog-tag">Strategy</span>
+<span class="blog-tag">Investment</span>
+</div>
+</div>
+</article>
+
+<article class="blog-card" data-category="news" onclick="openPost(3)">
+<div class="blog-img">🏆</div>
+<div class="blog-content">
+<div class="blog-date">April 10, 2026</div>
+<h2 class="blog-title">LUXOR Platform Reaches $50M in Assets</h2>
+<p class="blog-excerpt">Milestone achievement as our platform manages over $50 million in luxury assets. Thank you to our investors...</p>
+<div class="blog-tags">
+<span class="blog-tag">Company</span>
+<span class="blog-tag">Milestone</span>
+</div>
+</div>
+</article>
+
+<article class="blog-card" data-category="education" onclick="openPost(4)">
+<div class="blog-img">📚</div>
+<div class="blog-content">
+<div class="blog-date">April 8, 2026</div>
+<h2 class="blog-title">Understanding APY in Luxury Asset Pools</h2>
+<p class="blog-excerpt">A beginner's guide to Annual Percentage Yield and how our investment pools generate consistent returns...</p>
+<div class="blog-tags">
+<span class="blog-tag">Education</span>
+<span class="blog-tag">Pools</span>
+</div>
+</div>
+</article>
+
+<article class="blog-card" data-category="market" onclick="openPost(5)">
+<div class="blog-img">💎</div>
+<div class="blog-content">
+<div class="blog-date">April 5, 2026</div>
+<h2 class="blog-title">Hermès Birkin Bags: The Ultimate Store of Value</h2>
+<p class="blog-excerpt">Why luxury handbags have outperformed traditional investments. Historical data shows impressive 15% annual returns...</p>
+<div class="blog-tags">
+<span class="blog-tag">Hermès</span>
+<span class="blog-tag">Analysis</span>
+</div>
+</div>
+</article>
+
+<article class="blog-card" data-category="strategy" onclick="openPost(6)">
+<div class="blog-img">⚖️</div>
+<div class="blog-content">
+<div class="blog-date">April 3, 2026</div>
+<h2 class="blog-title">Portfolio Diversification with Alternative Assets</h2>
+<p class="blog-excerpt">Building a balanced portfolio that includes luxury goods alongside traditional stocks and bonds...</p>
+<div class="blog-tags">
+<span class="blog-tag">Diversification</span>
+<span class="blog-tag">Portfolio</span>
+</div>
+</div>
+</article>
+
+</div>
+
+<!-- Newsletter Signup -->
+<div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:40px;text-align:center;margin-top:60px">
+<h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:12px">Stay Updated</h3>
+<p style="color:var(--t2);margin-bottom:24px">Get weekly insights on luxury asset markets and investment opportunities</p>
+<div style="display:flex;gap:12px;max-width:400px;margin:0 auto;align-items:center">
+<input type="email" placeholder="Enter your email" style="flex:1;padding:12px 16px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;color:var(--t);font-size:14px">
+<button onclick="subscribeNewsletter()" style="background:var(--gold);color:#0a0a0a;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap">Subscribe</button>
+</div>
+</div>
+
+</div>
+
+<script>
+function filterPosts(category) {
+  // Update active button
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Show/hide posts
+  const posts = document.querySelectorAll('.blog-card');
+  posts.forEach(post => {
+    const postCategory = post.dataset.category;
+    if (category === 'all' || postCategory === category) {
+      post.style.display = 'block';
+    } else {
+      post.style.display = 'none';
+    }
+  });
+}
+
+function openPost(id) {
+  // Simulate opening blog post
+  const posts = {
+    1: {
+      title: "Luxury Watch Market Reaches New Heights",
+      content: "The luxury watch market continues its unprecedented growth trajectory, with Rolex and Patek Philippe leading the charge. Our comprehensive analysis reveals a 24% year-over-year increase in average prices, driven by supply constraints and increased demand from high-net-worth individuals seeking alternative investments..."
+    },
+    2: {
+      title: "Fractional Investing: The Future of Luxury Assets", 
+      content: "Fractional investing is revolutionizing access to luxury assets. By allowing multiple investors to own shares of high-value items like Rolex watches or Hermès bags, we're democratizing an investment class previously reserved for the ultra-wealthy..."
+    }
+    // Add more posts as needed
+  };
+  
+  if (posts[id]) {
+    alert(`${posts[id].title}\n\n${posts[id].content.substring(0, 200)}...\n\n[Full article functionality coming soon]`);
+  }
+}
+
+function subscribeNewsletter() {
+  const email = document.querySelector('input[type="email"]').value;
+  if (!email) {
+    alert('Please enter your email address');
+    return;
+  }
+  
+  if (!email.includes('@')) {
+    alert('Please enter a valid email address');
+    return;
+  }
+  
+  alert(`Thank you for subscribing with ${email}!\n\nYou'll receive our weekly luxury investment insights.`);
+  document.querySelector('input[type="email"]').value = '';
+}
+
+console.log('📰 LUXOR Blog loaded successfully');
+</script>
+
+</body>
+</html>
