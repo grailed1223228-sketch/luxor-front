@@ -573,30 +573,32 @@ const WINDOW_MS = 60000; // 1 minute
 // ============================================================
 // 4. JWT AUTHENTICATION
 // ============================================================
-function authenticateJWT() {
+async function authenticateJWT() {
   const login = document.getElementById('adminLogin').value;
   const password = document.getElementById('adminPassword').value;
-  
-  if (!login || !password) {
-    notify('Please enter login and password', false);
-    return;
-  }
-  
-  // Mock JWT authentication - replace with real JWT endpoint
-  if (login === 'luxor_admin' && password === 'Luxor@2026!') {
-    jwtToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsdXhvcl9hZG1pbiIsImlhdCI6MTYzMDAwMDAwMCwiZXhwIjoxNjMwMDA3MjAwfQ.fake_jwt_token_for_demo';
-    localStorage.setItem('jwt_token', jwtToken);
-    localStorage.setItem('jwt_expires', Date.now() + (24 * 60 * 60 * 1000)); // 24 hours
-    
-    document.getElementById('authModal').classList.remove('show');
-    document.getElementById('authModal').style.display = 'none';
-    document.getElementById('securityBadge').style.display = 'block';
-    
-    notify('✅ JWT Authentication successful!');
-    loadOverview();
-    startTokenRefresh();
-  } else {
-    notify('❌ Invalid credentials', false);
+  if (!login || !password) { notify('Please enter login and password', false); return; }
+  try {
+    const r = await fetch(API + '/api/auth/jwt', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({login, password})
+    });
+    const d = await r.json();
+    if (d.ok && d.access_token) {
+      jwtToken = d.access_token;
+      localStorage.setItem('jwt_token', jwtToken);
+      localStorage.setItem('jwt_expires', Date.now() + (24 * 60 * 60 * 1000));
+      document.getElementById('authModal').classList.remove('show');
+      document.getElementById('authModal').style.display = 'none';
+      document.getElementById('securityBadge').style.display = 'block';
+      notify('✅ Authenticated!');
+      loadOverview();
+      startTokenRefresh();
+    } else {
+      notify('❌ Invalid credentials', false);
+    }
+  } catch(e) {
+    notify('❌ Connection error', false);
   }
 }
 
@@ -677,18 +679,8 @@ async function api(path, options = {}) {
   }
   
   try {
-    console.log('API call:', API + path);
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Security-Policy': 'default-src \'self\'',
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
-      'X-XSS-Protection': '1; mode=block'
-    };
-    
-    if (jwtToken) {
-      headers['Authorization'] = `Bearer ${jwtToken}`;
-    }
+    const headers = {'Accept': 'application/json', 'Content-Type': 'application/json'};
+    if (jwtToken) { headers['Authorization'] = `Bearer ${jwtToken}`; }
     
     const response = await fetch(API + path, {
       method: options.method || 'GET',
@@ -706,11 +698,9 @@ async function api(path, options = {}) {
 }
 
 async function post(path, body) {
-  return api(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  const headers = {'Content-Type': 'application/json'};
+  if (jwtToken) { headers['Authorization'] = `Bearer ${jwtToken}`; }
+  return api(path, { method: 'POST', headers, body: JSON.stringify(body) });
 }
 
 // ============================================================
@@ -915,7 +905,7 @@ function clearFilters() {
 // 3. REAL-TIME BALANCE LOADING
 // ============================================================
 async function loadOverview() {
-  const stats = await api('/api/admin/stats?password=Luxor@2026!');
+  const stats = await api('/api/admin/stats');
   if (!stats) { 
     notify('Failed to load stats', false); 
     return; 
@@ -945,7 +935,7 @@ async function loadOverview() {
 }
 
 async function loadRecentTxs() {
-  const txs = await api('/api/admin/transactions?password=Luxor@2026!');
+  const txs = await api('/api/admin/transactions');
   if (!txs) return;
   
   const c = document.getElementById('recentTxs');
@@ -973,7 +963,7 @@ async function loadRecentTxs() {
 // ENHANCED ITEMS LOADING WITH FILTERING
 // ============================================================
 async function loadItems() {
-  const items = await api('/api/admin/items?password=Luxor@2026!');
+  const items = await api('/api/admin/items');
   const c = document.getElementById('itemsList');
   
   if (!items || !items.length) {
@@ -1338,7 +1328,7 @@ async function exportInvestorData() {
 // OTHER FUNCTIONS (Users, Wallets, etc.)
 // ============================================================
 async function loadUsers() {
-  const users = await api('/api/admin/users?password=Luxor@2026!');
+  const users = await api('/api/admin/users');
   if (!users) { 
     notify('❌ Failed to load users', false); 
     return; 
@@ -1393,7 +1383,7 @@ function renderUsers(users) {
 
 // Load wallets, withdrawals, deposits (similar structure)
 async function loadWithdrawals() {
-  const txs = await api('/api/admin/transactions?password=Luxor@2026!&type=withdrawal&status=pending');
+  const txs = await api('/api/admin/transactions&type=withdrawal&status=pending');
   const c = document.getElementById('withdrawalsList');
   if (!txs || !txs.length) { 
     c.innerHTML = '<div style="color:var(--t3);text-align:center;padding:40px">✅ No pending withdrawals</div>'; 
@@ -1421,7 +1411,7 @@ async function loadWithdrawals() {
 }
 
 async function loadDeposits() {
-  const txs = await api('/api/admin/transactions?password=Luxor@2026!&type=deposit');
+  const txs = await api('/api/admin/transactions&type=deposit');
   const c = document.getElementById('depositsList');
   if (!txs || !txs.length) { 
     c.innerHTML = '<div style="color:var(--t3);text-align:center;padding:40px">No deposits yet</div>'; 
@@ -1445,7 +1435,7 @@ async function loadDeposits() {
 }
 
 async function loadWallets() {
-  const wallets = await api('/api/admin/wallets?password=Luxor@2026!');
+  const wallets = await api('/api/admin/wallets');
   const c = document.getElementById('walletsList');
   if (!wallets || !wallets.length) { 
     c.innerHTML = '<div style="color:var(--t3);text-align:center;padding:30px">💳 No wallets added yet</div>'; 
