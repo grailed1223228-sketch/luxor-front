@@ -864,6 +864,7 @@ balAmt=inv;profitAmt=maxProfit;
 lbl='ITEMS INVESTED';profitSub=inv>0?'Guaranteed minimum: <strong style="color:#c9a84c">+$'+Math.round(minProfit).toLocaleString()+'</strong> · when items are sold':'Buy fractions from Marketplace to see potential earnings'}
 try{document.getElementById('balLabel').textContent=lbl}catch(e){}
 try{document.getElementById('balAmount').textContent='$'+Math.round(balAmt).toLocaleString()}catch(e){}
+try{document.getElementById('walletBalance').textContent='$'+Math.round(state.wallet).toLocaleString()}catch(e){}
 try{document.getElementById('balProfit').textContent='+$'+Math.round(profitAmt).toLocaleString()}catch(e){}
 try{document.getElementById('balProfitSub').innerHTML=profitSub}catch(e){}
 // Render items list in items view
