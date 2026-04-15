@@ -214,9 +214,9 @@ body{padding-bottom:52px}}
 <nav>
 <div class="logo">LUXOR <span>INVEST</span></div>
 <div class="nav-r">
-<a href="luxin-charts.html">Charts</a>
-<a href="luxin-blog.html">Blog</a>
-<div class="bell" onclick="document.getElementById('bellDrop').classList.toggle('show')">
+<a href="#" onclick="showChartsComingSoon();return false">Charts</a>
+<a href="#" onclick="showBlogComingSoon();return false">Blog</a>
+<div class="bell" id="bellBtn" onclick="toggleNotifications()">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
 <div class="bell-badge"></div>
 <div class="bell-d" id="bellDrop" style="display:none;position:absolute;top:28px;right:0;width:240px;background:var(--card);border:1px solid var(--bd);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.1);padding:6px;z-index:10">
@@ -518,10 +518,25 @@ body{padding-bottom:52px}}
 <div class="panel" id="p-referral">
 <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:4px">Referral Program</h2>
 <p style="font-size:11px;color:var(--t3);margin-bottom:14px">Earn 3% of every friend's first investment. No limits.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+  <div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--bd)">
+    <div style="font-size:20px;font-weight:700;color:var(--gold)" id="refInvited">0</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">INVITED</div>
+  </div>
+  <div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--bd)">
+    <div style="font-size:20px;font-weight:700;color:var(--green)" id="refEarned">$0</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">EARNED</div>
+  </div>
+  <div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--bd)">
+    <div style="font-size:20px;font-weight:700;color:var(--blue)">3%</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">COMMISSION</div>
+  </div>
+</div>
 <div class="ref-code">
 <div style="font-size:10px;opacity:.4;letter-spacing:2px;margin-bottom:4px">YOUR REFERRAL CODE</div>
 <div class="code" id="refCode">LUXOR-XXXXX</div>
 <button style="padding:8px 20px;background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;cursor:pointer" onclick="copyRefCode()">COPY CODE</button>
+<div style="margin-top:10px"><div style="font-size:10px;color:var(--t3);margin-bottom:4px;letter-spacing:1px">REFERRAL LINK</div><input id="refLink" style="width:100%;background:var(--bg2);border:1px solid var(--bd);color:var(--t2);padding:8px;border-radius:6px;font-size:11px" readonly onclick="this.select()"></div>
 </div>
 <div class="ref-stats">
 <div class="ref-stat"><div class="rv">0</div><div class="rl">Friends invited</div></div>
@@ -595,7 +610,7 @@ body{padding-bottom:52px}}
 </div>
 
 <div class="card">
-<div class="card-header">Request a callback</div>
+<div class="card-header">Contact Your Manager</div>
 <p style="font-size:10px;color:var(--t3);margin-bottom:10px">Available for investors with $5,000+ deposited. Your manager will call within 2 business hours.</p>
 <div class="input-group"><label>Your phone number</label><input type="tel" placeholder="+1 555 000 0000" id="mgrPhone"></div>
 <div class="input-group"><label>Preferred time</label><select><option>ASAP</option><option>Today, morning (9–12)</option><option>Today, afternoon (12–18)</option><option>Tomorrow</option></select></div>
@@ -711,6 +726,30 @@ async function loadUserFromServer(){
     if(d.ok&&d.user){
       state.wallet=d.user.balance||0;state.balance=d.user.balance||0;
       U.hasBonus=d.user.has_first_deposit_bonus;
+      // Sync user data
+      if(d.user.first_name){U.fn=d.user.first_name;U.ln=d.user.last_name||'';}
+      if(d.user.email){const em=document.getElementById('setEmail');if(em)em.value=d.user.email;}
+      if(d.user.plan){
+        U.plan=d.user.plan;
+        const lvl=document.getElementById('userLevel');
+        if(lvl){
+          const colors={Starter:'rgba(160,160,160,.08)',Silver:'rgba(150,180,220,.15)',Gold:'rgba(201,168,76,.2)',Platinum:'rgba(100,180,255,.2)',VIP:'rgba(200,100,255,.2)'};
+          const textColors={Starter:'var(--t3)',Silver:'#96b4dc',Gold:'var(--gold)',Platinum:'#64b4ff',VIP:'#c864ff'};
+          lvl.textContent=d.user.plan.toUpperCase();
+          lvl.style.background=colors[d.user.plan]||colors.Starter;
+          lvl.style.color=textColors[d.user.plan]||textColors.Starter;
+        }
+        // Update plan based on balance
+        const bal=state.wallet;
+        let newPlan='Starter';
+        if(bal>=10000)newPlan='VIP';
+        else if(bal>=5000)newPlan='Platinum';
+        else if(bal>=2000)newPlan='Gold';
+        else if(bal>=1000)newPlan='Silver';
+        if(newPlan!==d.user.plan){
+          fetch(API+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:U.login,password:'__skip__'})}).catch(()=>{});
+        }
+      }
       updateUI();updateBonusBanner();
     }
   }catch(e){}
@@ -756,10 +795,27 @@ const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
 if(saved)state=saved;
 
 /* === INIT === */
-try{const un=document.getElementById('userName');if(un)un.textContent=U.fn;
-const ua=document.getElementById('userAvatar');if(ua)ua.textContent=U.fn[0]||'A';
-const sn=document.getElementById('setName');if(sn)sn.value=U.fn+(U.ln?' '+U.ln:'');
-const rc=document.getElementById('refCode');if(rc)rc.textContent='LUXOR-'+U.fn.substring(0,3).toUpperCase()+Math.floor(Math.random()*900+100);
+try{
+  const un=document.getElementById('userName');if(un)un.textContent=U.fn;
+  const ua=document.getElementById('userAvatar');if(ua)ua.textContent=(U.fn||'U')[0].toUpperCase();
+  const sn=document.getElementById('setName');if(sn)sn.value=U.fn+(U.ln?' '+U.ln:'');
+  const rc=document.getElementById('refCode');
+  const refStr='LUXOR-'+(U.login||U.fn||'').toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,8)||'LUXOR-'+Math.random().toString(36).substring(2,8).toUpperCase();
+  if(rc)rc.textContent=refStr;
+  U._refCode=refStr;
+  // Set referral link
+  const rl=document.getElementById('refLink');
+  if(rl)rl.value=window.location.origin+window.location.pathname.replace('dashboard.html','index.html')+'?ref='+encodeURIComponent(refStr);
+  // Plan badge
+  const lvl=document.getElementById('userLevel');
+  if(lvl){
+    const plan=U.plan||'Starter';
+    const colors={Starter:'rgba(160,160,160,.08)',Silver:'rgba(150,180,220,.15)',Gold:'rgba(201,168,76,.2)',Platinum:'rgba(100,180,255,.2)',VIP:'rgba(200,100,255,.2)'};
+    const textColors={Starter:'var(--t3)',Silver:'#96b4dc',Gold:'var(--gold)',Platinum:'#64b4ff',VIP:'#c864ff'};
+    lvl.textContent=plan.toUpperCase();
+    lvl.style.background=colors[plan]||colors.Starter;
+    lvl.style.color=textColors[plan]||textColors.Starter;
+  }
 }catch(e){console.warn('init',e)}
 if(U.hasBonus===undefined)U.hasBonus=true;
 try{updateUI()}catch(e){console.warn('updateUI',e)}
@@ -863,7 +919,19 @@ if(poolStrip)poolStrip.style.display=v==='pools'&&(state.positions.length>0||sta
 updateUI()}
 function viewTabDetails(){go(currentView==='pools'?'pools':'items')}
 
-function updateUI(){
+function getPlanByBalance(bal){
+  if(bal>=10000)return{name:'VIP',color:'rgba(200,100,255,.2)',text:'#c864ff'};
+  if(bal>=5000)return{name:'Platinum',color:'rgba(100,180,255,.2)',text:'#64b4ff'};
+  if(bal>=2000)return{name:'Gold',color:'rgba(201,168,76,.2)',text:'var(--gold)'};
+  if(bal>=1000)return{name:'Silver',color:'rgba(150,180,220,.15)',text:'#96b4dc'};
+  return{name:'Starter',color:'rgba(160,160,160,.08)',text:'var(--t3)'};
+}
+function updatePlanBadge(){
+  const plan=getPlanByBalance(state.wallet||0);
+  const lvl=document.getElementById('userLevel');
+  if(lvl){lvl.textContent=plan.name.toUpperCase();lvl.style.background=plan.color;lvl.style.color=plan.text;}
+}
+function updateUI(){try{updatePlanBadge();}catch(e){}
 let balAmt,lbl,profitAmt,profitSub;
 if(currentView==='pools'){
 const inv=state.positions.reduce((s,p)=>s+p.amount,0);const earn=state.positions.reduce((s,p)=>s+p.earned,0);
@@ -1150,16 +1218,35 @@ ctx.beginPath();ctx.moveTo(mx2,0);ctx.lineTo(mx2,hh);ctx.stroke();
 ctx.beginPath();ctx.moveTo(0,my);ctx.lineTo(w,my);ctx.stroke();ctx.setLineDash([])};
 c.onmouseleave=()=>drawItemChart(itemId)}
 
-function toggleFav(id,btn){const idx=state.favorites.indexOf(id);if(idx>-1){state.favorites.splice(idx,1);btn.classList.remove('on');btn.textContent='<3 Save to favorites'}else{state.favorites.push(id);btn.classList.add('on');btn.textContent='<3 Saved'}saveState();renderFavs()}
+function toggleFav(id,btn){const idx=state.favorites.indexOf(id);if(idx>-1){state.favorites.splice(idx,1);btn.classList.remove('on');btn.textContent='<3 Save to favorites'}else{state.favorites.push(id);btn.classList.add('on');btn.textContent='<3 Saved'}
+try{localStorage.setItem('luxor_favs_'+(U.login||''),JSON.stringify(state.favorites));}catch(e){}
+saveState();renderFavs()}
 
-function buyFraction(id){const i=ITEMS.find(x=>x.id===id);const amt=parseInt(document.getElementById('lotSlider').value);
-if(amt<i.min){alert('Minimum $'+i.min);return}
-if(state.wallet>=amt){state.wallet-=amt}else if(state.wallet+state.free>=amt){const fromWallet=state.wallet;state.wallet=0;state.free-=amt-fromWallet;state.balance-=amt-fromWallet}else{closeModal();openTopUp();return}
-// Item funding % increases - less capacity for others
-const addPct=Math.min(amt/i.price*100,100-i.funded);i.funded=Math.min(100,i.funded+addPct);i.inv+=1;
-state.myItems.push({id:i.id,name:i.name,ico:i.ico,invested:amt,pct:(amt/i.price*100).toFixed(1),status:'buying',ret:Math.round((i.ret[0]+i.ret[1])/2),retMin:i.ret[0],retMax:i.ret[1],guaranteed:Math.round(i.ret[0]*0.6),daysTotal:Math.round((i.days[0]+i.days[1])/2),daysMin:i.days[0],daysMax:i.days[1],purchaseDate:Date.now(),desc:i.desc});
-state.balance+=amt;state.free+=0;
-closeModal();addTx('Fraction: '+i.name+' $'+amt.toLocaleString(),'done');updateUI();renderMarketplace('all');showConfetti();saveState();setTimeout(()=>showCertificate(i,amt),500)}
+async function buyFraction(id){
+const i=ITEMS.find(x=>x.id===id);
+const amt=parseInt(document.getElementById('lotSlider').value);
+if(amt<(i.min||100)){alert('Minimum $'+(i.min||100));return}
+if((state.wallet||0)<amt){closeModal();openTopUp();return}
+// Deduct from backend
+const r=await fetch(API+'/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({user_login:U.login||U.fn,amount:amt,wallet_address:'ITEM_PURCHASE:'+i.name})
+}).then(r=>r.json()).catch(()=>null);
+if(!r||!r.ok){alert(r?.error||'Not enough balance');return}
+state.wallet-=amt;state.balance=state.wallet;
+const addPct=Math.min(amt/(i.price||1)*100,100-(i.funded||0));
+i.funded=Math.min(100,(i.funded||0)+addPct);i.inv=(i.inv||0)+1;
+state.myItems.push({id:i.id,name:i.name,ico:i.ico||'📦',invested:amt,
+  pct:(amt/(i.price||1)*100).toFixed(1),status:'buying',
+  ret:Math.round(((i.ret||[10,20])[0]+(i.ret||[10,20])[1])/2),
+  retMin:(i.ret||[10,20])[0],retMax:(i.ret||[10,20])[1],
+  guaranteed:Math.round(((i.ret||[10,20])[0])*0.6),
+  daysTotal:Math.round(((i.days||[7,30])[0]+(i.days||[7,30])[1])/2),
+  daysMin:(i.days||[7,30])[0],daysMax:(i.days||[7,30])[1],
+  purchaseDate:Date.now(),desc:i.desc||''});
+closeModal();addTx('Fraction: '+i.name+' -$'+amt.toLocaleString(),'done');
+updateUI();renderMarketplace('all');renderMyItems();showConfetti();saveState();
+setTimeout(()=>showCertificate&&showCertificate(i,amt),500)
+}
 
 /* === TOP UP === */
 function openTopUp(){showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 1 OF 3</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">How much to deposit?</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Enter amount, then choose payment method</p></div>
@@ -1199,6 +1286,42 @@ showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">S
 </div>
 <button class="btn-outline" onclick="openTopUp()"><- Back</button>`)}
 
+function toggleNotifications(){
+  const d=document.getElementById('bellDrop');
+  if(!d)return;
+  d.classList.toggle('show');
+  // Load real notifications from transactions
+  loadNotifications();
+}
+function loadNotifications(){
+  const login=U.login||U.fn;if(!login)return;
+  const d=document.getElementById('bellDrop');if(!d)return;
+  fetch(API+'/api/transactions/'+login).then(r=>r.json()).then(data=>{
+    if(!data.ok||!data.transactions?.length){
+      d.innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:var(--t3)">No notifications yet</div>';
+      return;
+    }
+    const txs=data.transactions.slice(0,5);
+    const badge=document.querySelector('.bell-badge');
+    const unread=txs.filter(t=>t.status==='pending').length;
+    if(badge)badge.style.display=unread>0?'block':'none';
+    d.innerHTML=txs.map(t=>`
+      <div style="padding:10px 14px;border-bottom:1px solid var(--bd);font-size:12px">
+        <div style="font-weight:600;color:${t.type==='deposit'?'var(--green)':t.type==='withdrawal'?'var(--orange)':'var(--gold)'}">
+          ${t.type==='deposit'?'💰 Deposit received':t.type==='withdrawal'?'💸 Withdrawal '+t.status:'🎁 Bonus added'}
+        </div>
+        <div style="color:var(--t2);margin-top:2px">$${parseFloat(t.amount).toLocaleString()}</div>
+        <div style="color:var(--t3);font-size:10px;margin-top:1px">${new Date(t.created_at).toLocaleString()}</div>
+      </div>`).join('');
+  }).catch(()=>{});
+}
+function openTelegramManager(){
+  const phone=document.getElementById('mgrPhone')?.value||'';
+  const msg=encodeURIComponent('Hello! I would like to schedule a consultation. My login: '+(U.login||U.fn)+(phone?' Phone: '+phone:''));
+  window.open('https://t.me/Luxi_admin_bot?text='+msg,'_blank');
+}
+function showBlogComingSoon(){showModal('<div style="text-align:center;padding:20px"><div style="font-size:48px;margin-bottom:12px">📰</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;letter-spacing:3px;color:var(--gold)">BLOG COMING SOON</div><p style="color:var(--t2);margin-top:8px;font-size:13px">Investment guides, market analysis<br>and luxury trends — launching soon.</p><button onclick="closeModal()" style="margin-top:16px;padding:10px 24px;background:var(--gold);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">CLOSE</button></div>');}
+function showChartsComingSoon(){showModal('<div style="text-align:center;padding:20px"><div style="font-size:48px;margin-bottom:12px">📈</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;letter-spacing:3px;color:var(--gold)">CHARTS COMING SOON</div><p style="color:var(--t2);margin-top:8px;font-size:13px">Live market data and portfolio analytics<br>— launching soon.</p><button onclick="closeModal()" style="margin-top:16px;padding:10px 24px;background:var(--gold);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">CLOSE</button></div>');}
 function showComingSoon(){
   showModal('<div style="text-align:center;padding:20px"><div style="font-size:48px;margin-bottom:12px">🚀</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;letter-spacing:3px;color:var(--gold)">COMING SOON</div><p style="color:var(--t2);margin-top:8px;font-size:13px">Card payments will be available soon.<br>Use crypto for now.</p><button onclick="topUpStep2()" style="margin-top:16px;padding:10px 24px;background:var(--gold);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px">← BACK</button></div>');
 }
@@ -1431,9 +1554,9 @@ body{padding-bottom:52px}}
 <nav>
 <div class="logo">LUXOR <span>INVEST</span></div>
 <div class="nav-r">
-<a href="luxin-charts.html">Charts</a>
-<a href="luxin-blog.html">Blog</a>
-<div class="bell" onclick="document.getElementById('bellDrop').classList.toggle('show')">
+<a href="#" onclick="showChartsComingSoon();return false">Charts</a>
+<a href="#" onclick="showBlogComingSoon();return false">Blog</a>
+<div class="bell" id="bellBtn" onclick="toggleNotifications()">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
 <div class="bell-badge"></div>
 <div class="bell-d" id="bellDrop" style="display:none;position:absolute;top:28px;right:0;width:240px;background:var(--card);border:1px solid var(--bd);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.1);padding:6px;z-index:10">
@@ -1735,6 +1858,20 @@ body{padding-bottom:52px}}
 <div class="panel" id="p-referral">
 <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:4px">Referral Program</h2>
 <p style="font-size:11px;color:var(--t3);margin-bottom:14px">Earn 3% of every friend's first investment. No limits.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+  <div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--bd)">
+    <div style="font-size:20px;font-weight:700;color:var(--gold)" id="refInvited">0</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">INVITED</div>
+  </div>
+  <div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--bd)">
+    <div style="font-size:20px;font-weight:700;color:var(--green)" id="refEarned">$0</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">EARNED</div>
+  </div>
+  <div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--bd)">
+    <div style="font-size:20px;font-weight:700;color:var(--blue)">3%</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">COMMISSION</div>
+  </div>
+</div>
 <div class="ref-code">
 <div style="font-size:10px;opacity:.4;letter-spacing:2px;margin-bottom:4px">YOUR REFERRAL CODE</div>
 <div class="code" id="refCode">LUXOR-XXXXX</div>
@@ -1812,7 +1949,7 @@ body{padding-bottom:52px}}
 </div>
 
 <div class="card">
-<div class="card-header">Request a callback</div>
+<div class="card-header">Contact Your Manager</div>
 <p style="font-size:10px;color:var(--t3);margin-bottom:10px">Available for investors with $5,000+ deposited. Your manager will call within 2 business hours.</p>
 <div class="input-group"><label>Your phone number</label><input type="tel" placeholder="+1 555 000 0000" id="mgrPhone"></div>
 <div class="input-group"><label>Preferred time</label><select><option>ASAP</option><option>Today, morning (9–12)</option><option>Today, afternoon (12–18)</option><option>Tomorrow</option></select></div>
@@ -1913,683 +2050,4 @@ async function processWithdrawBackend(amount,wallet){
       body:JSON.stringify({user_login:U.login||U.fn,amount:parseFloat(amount),wallet_address:wallet})});
     const d=await r.json();
     if(d.ok){
-      state.wallet-=parseFloat(amount);state.balance=state.wallet;
-      addTx('Withdrawal $'+amount,'processing');
-      updateUI();saveState();loadTransactions();return true;
-    }else{alert(d.error||'Error');return false;}
-  }catch(e){alert('Network error');return false;}
-}
-
-async function loadUserFromServer(){
-  const login=U.login||U.fn;if(!login)return;
-  try{
-    const r=await fetch(API+'/api/user/'+login);
-    const d=await r.json();
-    if(d.ok&&d.user){
-      state.wallet=d.user.balance||0;state.balance=d.user.balance||0;
-      U.hasBonus=d.user.has_first_deposit_bonus;
-      updateUI();updateBonusBanner();
-    }
-  }catch(e){}
-}
-
-async function loadTransactions(){
-  const login=U.login||U.fn;if(!login)return;
-  try{
-    const r=await fetch(API+'/api/transactions/'+login);
-    const d=await r.json();
-    if(d.ok&&d.transactions){
-      state.txs=d.transactions.map(t=>({
-        desc:t.note||t.type,
-        amt:(t.type==='withdrawal'?'-':'+')+String.fromCharCode(36)+parseFloat(t.amount||0).toFixed(2),
-        time:new Date(t.created_at).toLocaleString(),
-        status:t.status==='completed'?'done':'processing'
-      }));
-      saveState();renderTxs();
-    }
-  }catch(e){}
-}
-
-
-/* === DATA === */
-const U=JSON.parse(sessionStorage.getItem('luxor_user')||'{"fn":"Admin","ln":"","plan":"","rate":"","tier":0,"amt":0}');
-const NAMES=['James W.','Sofia R.','Ahmed K.','Lisa T.','Park J.','Marco V.','Anna S.','Tom H.'];
-const ITEMS=[
-{id:1,cat:'watch',ico:'(watch)',name:'Rolex Daytona 116500LN',desc:'Ceramic bezel   White dial   2023   Box & Papers',price:24000,funded:77,ret:[32,48],days:[7,21],inv:18,min:100,badge:'HOT',likes:124,views:47,closes:62},
-{id:2,cat:'bag',ico:' ',name:'Herm s Birkin 25',desc:'Togo leather   Gold hardware   2024',price:15000,funded:64,ret:[45,80],days:[14,45],inv:12,min:100,badge:'PREMIUM',likes:89,views:32,closes:168},
-{id:3,cat:'fashion',ico:' ',name:'Chrome Hearts Hoodie',desc:'Cross patch   Black   Deadstock   Size L',price:2800,funded:75,ret:[80,142],days:[1,7],inv:8,min:100,badge:'FAST SELL',likes:203,views:61,closes:14},
-{id:4,cat:'watch',ico:'(watch)',name:'Patek Philippe Nautilus 5711',desc:'Blue dial   2022   Full set',price:45000,funded:62,ret:[25,40],days:[21,60],inv:24,min:200,badge:'RARE',likes:67,views:19,closes:240},
-{id:5,cat:'snkr',ico:' ',name:'Jordan 1 Retro Chicago',desc:'Lost & Found   Deadstock   Size 10',price:800,funded:70,ret:[60,110],days:[1,5],inv:14,min:100,badge:'FAST SELL',likes:312,views:88,closes:8},
-{id:6,cat:'bag',ico:' ',name:'Chanel Classic Flap Medium',desc:'Caviar leather   Black   Gold HW',price:12000,funded:60,ret:[35,55],days:[10,30],inv:16,min:100,badge:'HOT',likes:156,views:42,closes:96},
-{id:7,cat:'jewelry',ico:' ',name:'Cartier Love Bracelet',desc:'18K Yellow Gold   Size 17',price:8500,funded:60,ret:[28,42],days:[14,30],inv:10,min:100,badge:'CLASSIC',likes:78,views:24,closes:120},
-{id:8,cat:'fashion',ico:' ',name:'Rick Owens Ramones Low',desc:'Black leather   Size 42   DS',price:1200,funded:70,ret:[70,95],days:[3,14],inv:6,min:100,badge:'HOT',likes:145,views:38,closes:36},
-{id:9,cat:'snkr',ico:' ',name:'Nike Dunk Low Panda',desc:'Deadstock   Size 9.5   2024',price:600,funded:70,ret:[50,92],days:[1,3],inv:11,min:100,badge:'FAST SELL',likes:267,views:73,closes:4},
-];
-
-let state={positions:[],myItems:[],favorites:[],balance:0,free:0,wallet:0,txs:[],savedWallet:''};
-let currentPeriod='1W';
-let currentView='pools';
-const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
-if(saved)state=saved;
-
-/* === INIT === */
-try{const un=document.getElementById('userName');if(un)un.textContent=U.fn;
-const ua=document.getElementById('userAvatar');if(ua)ua.textContent=U.fn[0]||'A';
-const sn=document.getElementById('setName');if(sn)sn.value=U.fn+(U.ln?' '+U.ln:'');
-const rc=document.getElementById('refCode');if(rc)rc.textContent='LUXOR-'+U.fn.substring(0,3).toUpperCase()+Math.floor(Math.random()*900+100);
-}catch(e){console.warn('init',e)}
-if(U.hasBonus===undefined)U.hasBonus=true;
-try{updateUI()}catch(e){console.warn('updateUI',e)}
-try{updateBonusBanner()}catch(e){}
-try{renderMarketplace('all')}catch(e){console.warn('renderMk',e)}
-setTimeout(function(){loadUserFromServer();loadTransactions();},500);
-setInterval(function(){loadUserFromServer();},30000);
-try{setInterval(()=>{if(state.myItems.length>0){try{renderMyItems()}catch(e){}}},10000)}catch(e){}
-try{if(U.amt>0&&!saved)setTimeout(()=>openPoolInvest(U.plan||'Silver',U.rate||'0.5%/day',U.tier||1),800)}catch(e){}
-
-function saveState(){sessionStorage.setItem('luxor_state2',JSON.stringify(state))}
-
-/* Pool card slider updaters */
-function slUpdate(v){v=parseInt(v);const day=v*0.005;const week=day*7;const total=v+week;
-document.getElementById('slAmt').textContent='$'+v.toLocaleString();
-document.getElementById('slDay').textContent='+$'+day.toFixed(2);
-document.getElementById('slWeek').textContent='$'+week.toFixed(2);
-document.getElementById('slTotal').textContent='$'+total.toFixed(2)}
-function gdUpdate(v){v=parseInt(v);const week=v*0.03;const month=week*4;const total=v+month;
-document.getElementById('gdAmt').textContent='$'+v.toLocaleString();
-document.getElementById('gdWeek').textContent='+$'+Math.round(week).toLocaleString();
-document.getElementById('gdMonth').textContent='$'+Math.round(month).toLocaleString();
-document.getElementById('gdTotal').textContent='$'+Math.round(total).toLocaleString()}
-function ptUpdate(v){v=parseInt(v);const month=v*0.15;const year=month*12;const total=v+year;
-document.getElementById('ptAmt').textContent='$'+v.toLocaleString();
-document.getElementById('ptMonth').textContent='+$'+Math.round(month).toLocaleString();
-document.getElementById('ptYear').textContent='$'+Math.round(year).toLocaleString();
-document.getElementById('ptTotal').textContent='$'+Math.round(total).toLocaleString()}
-
-/* First deposit bonus banner */
-function updateBonusBanner(){
-const b=document.getElementById('firstDepositBanner');if(!b)return;
-const show=U.hasBonus!==undefined?U.hasBonus:!state.txs.some(t=>t.desc&&t.desc.toLowerCase().includes('deposit'));
-b.style.display=show?'block':'none';
-}
-
-/* Quick Invest */
-function quickInvest(amt){if(state.wallet<amt){if(confirm('Insufficient balance. Top up $'+amt+' now?'))openTopUp();return}
-const sorted=[...ITEMS].sort((a,b)=>b.views-a.views);const hotItem=sorted[Math.floor(Math.random()*3)];
-if(confirm('Invest $'+amt+' in '+hotItem.name+' ('+hotItem.ret[0]+'-'+hotItem.ret[1]+'% expected return)?')){
-state.wallet-=amt;
-const addPct=Math.min(amt/hotItem.price*100,100-hotItem.funded);hotItem.funded=Math.min(100,hotItem.funded+addPct);hotItem.inv+=1;
-state.myItems.push({id:hotItem.id,name:hotItem.name,ico:hotItem.ico,invested:amt,pct:(amt/hotItem.price*100).toFixed(1),status:'buying',ret:Math.round((hotItem.ret[0]+hotItem.ret[1])/2),desc:hotItem.desc});
-state.balance+=amt;
-addTx('Quick Invest: '+hotItem.name+' $'+amt,'done');updateUI();showConfetti();saveState();
-setTimeout(()=>showCertificate(hotItem,amt),500)}}
-
-/* Digital certificate */
-function showCertificate(item,amt){const pct=(amt/item.price*100).toFixed(2);const id='LUX-'+Date.now().toString().slice(-8);
-showModal(`<div style="border:3px double var(--gold);padding:24px;background:linear-gradient(135deg,#faf8f2,#f0ede0);color:#0a0a0a;border-radius:8px;text-align:center;font-family:serif">
-<div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:4px;color:#8b6f2e;margin-bottom:4px">LUXOR INVEST   CERTIFICATE OF OWNERSHIP</div>
-<div style="width:50px;height:2px;background:#c9a84c;margin:6px auto"></div>
-<div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin:10px 0">FRACTIONAL OWNERSHIP</div>
-<div style="font-size:10px;color:#666;margin-bottom:14px">This certifies that the bearer owns a verified fraction of:</div>
-<div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;color:#0a0a0a;margin-bottom:4px">${item.name}</div>
-<div style="font-size:10px;color:#666;margin-bottom:14px">${item.desc}</div>
-<div style="display:flex;justify-content:space-around;padding:12px;background:rgba(201,168,76,.1);border-radius:6px;margin-bottom:14px">
-<div><div style="font-size:8px;letter-spacing:1px;color:#8b6f2e">OWNERSHIP</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#0a0a0a">${pct}%</div></div>
-<div><div style="font-size:8px;letter-spacing:1px;color:#8b6f2e">INVESTED</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#0a0a0a">$${amt.toLocaleString()}</div></div>
-<div><div style="font-size:8px;letter-spacing:1px;color:#8b6f2e">CERTIFICATE</div><div style="font-family:'Space Mono',monospace;font-size:11px;color:#0a0a0a;margin-top:5px">${id}</div></div>
-</div>
-<div style="font-size:9px;color:#888;line-height:1.5">Issued on ${new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'})}<br>LUXOR INVEST LTD   UK Company No. 14582937</div>
-<div style="margin-top:14px;font-family:'Space Mono',monospace;font-size:8px;color:#c9a84c">  VERIFIED   SIGNED   AUTHENTICATED</div>
-</div>
-<button class="btn-gold" style="margin-top:12px" onclick="alert('Certificate downloaded as PDF');closeModal()">DOWNLOAD CERTIFICATE (PDF)</button>
-<button class="btn-outline" style="margin-top:6px" onclick="closeModal()">Close</button>`)}
-
-/* Diversify tip */
-function updateDiversifyTip(){const tip=document.getElementById('diversifyTip');if(!tip)return;
-if(state.myItems.length===0){tip.innerHTML='Start investing to get personalized diversification tips based on your portfolio.';return}
-const cats={};state.myItems.forEach(i=>{const it=ITEMS.find(x=>x.id===i.id);if(it){cats[it.cat]=(cats[it.cat]||0)+i.invested}});
-const total=Object.values(cats).reduce((a,b)=>a+b,0);
-const max=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];const pct=(max[1]/total*100).toFixed(0);
-const names={watch:'Watches',bag:'Bags',fashion:'Fashion',snkr:'Sneakers',jewelry:'Jewelry'};
-tip.innerHTML=pct>60?`Your portfolio is <strong>${pct}% in ${names[max[0]]}</strong>. Consider diversifying with other categories (Jewelry +5.1%, Watches +4.2%) to reduce risk.`:`Good diversification! Your largest category is ${names[max[0]]} at ${pct}%. Keep monitoring market trends for rebalancing opportunities.`}
-
-function switchInvTab(){} // removed
-function updateInvTabs(){} // removed
-function go(panel,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));const target=document.getElementById('p-'+panel);if(!target){console.error('Panel not found:',panel);return}target.classList.add('show');document.querySelectorAll('.side-item').forEach(s=>s.classList.remove('active'));if(el){el.classList.add('active')}else{document.querySelectorAll('.side-item').forEach(s=>{const oc=s.getAttribute('onclick')||'';if(oc.indexOf("'"+panel+"'")>-1)s.classList.add('active')})}window.scrollTo(0,0)}
-
-function poolsTab(t,el){document.querySelectorAll('.pool-subpanel').forEach(p=>p.style.display='none');document.getElementById('pools-'+t).style.display='';document.querySelectorAll('.ptab-pool').forEach(tab=>{tab.style.color='var(--t3)';tab.style.borderBottomColor='transparent'});el.style.color='var(--gold)';el.style.borderBottomColor='var(--gold)'}
-
-function itemsTab(t,el){document.querySelectorAll('.itab').forEach(tab=>{tab.style.color='var(--t3)';tab.style.borderBottomColor='transparent'});el.style.color='var(--gold)';el.style.borderBottomColor='var(--gold)';window._itemsFilter=t;renderMyItems()}
-
-/* === UI UPDATE === */
-function switchView(v){currentView=v;
-const tP=document.getElementById('tabPools'),tI=document.getElementById('tabItems');
-if(v==='pools'){tP.style.background='var(--dark)';tP.style.color='#f0ede6';tI.style.background='transparent';tI.style.color='var(--t3)'}
-else{tI.style.background='var(--dark)';tI.style.color='#f0ede6';tP.style.background='transparent';tP.style.color='var(--t3)'}
-// Swap second button: Withdraw for pools, Browse Marketplace for items
-const b2=document.getElementById('balBtn2');
-if(b2){if(v==='items'){b2.textContent='BROWSE MARKETPLACE';b2.setAttribute('onclick',"go('market')")}else{b2.textContent='WITHDRAW';b2.setAttribute('onclick','openWithdraw()')}}
-// Hide quick invest and trending for items view
-const qi=document.getElementById('quickInvestCard'),tr=document.getElementById('trendingCard');
-if(qi)qi.style.display=v==='pools'?'':'none';
-if(tr)tr.style.display=v==='pools'?'':'none';
-// Show items earnings strip
-const itemStrip=document.getElementById('itemEarnStrip'),poolStrip=document.getElementById('statsGrid');
-if(itemStrip)itemStrip.style.display=v==='items'&&state.myItems.length>0?'grid':'none';
-if(poolStrip)poolStrip.style.display=v==='pools'&&(state.positions.length>0||state.myItems.length>0)?'':'none';
-updateUI()}
-function viewTabDetails(){go(currentView==='pools'?'pools':'items')}
-
-function updateUI(){
-let balAmt,lbl,profitAmt,profitSub;
-if(currentView==='pools'){
-const inv=state.positions.reduce((s,p)=>s+p.amount,0);const earn=state.positions.reduce((s,p)=>s+p.earned,0);
-// Projected annual earnings
-const annual=state.positions.reduce((s,p)=>{const pl=getPlan(p.amount);const perYear=pl.period==='day'?365*pl.rate:pl.period==='week'?52*pl.rate:12*pl.rate;return s+p.amount*perYear},0);
-balAmt=inv+earn+state.wallet;profitAmt=annual;
-lbl='POOLS BALANCE';profitSub=inv>0?'Projected earnings per year at current rate':'Invest in pools to earn fixed returns'
-}else{
-const inv=state.myItems.reduce((s,i)=>s+i.invested,0);
-const maxProfit=state.myItems.reduce((s,i)=>s+i.invested*(i.retMax||i.ret)/100,0);
-const minProfit=state.myItems.reduce((s,i)=>s+i.invested*(i.retMin||i.ret*0.7)/100,0);
-balAmt=inv;profitAmt=maxProfit;
-lbl='ITEMS INVESTED';profitSub=inv>0?'Guaranteed minimum: <strong style="color:#c9a84c">+$'+Math.round(minProfit).toLocaleString()+'</strong>   when items are sold':'Buy fractions from Marketplace to see potential earnings'}
-try{document.getElementById('balLabel').textContent=lbl}catch(e){}
-try{document.getElementById('balAmount').textContent='$'+Math.round(balAmt).toLocaleString()}catch(e){}
-try{document.getElementById('balProfit').textContent='+$'+Math.round(profitAmt).toLocaleString()}catch(e){}
-try{document.getElementById('balProfitSub').innerHTML=profitSub}catch(e){}
-try{updateLevel(state.balance+state.wallet)}catch(e){}
-try{updateStats()}catch(e){}
-try{renderPositions()}catch(e){}
-try{renderMyItems()}catch(e){}
-try{renderFavs()}catch(e){}
-try{renderTxs()}catch(e){}
-try{updateROI()}catch(e){}
-try{updateGoals()}catch(e){}
-try{renderTrending()}catch(e){}
-try{renderActivity()}catch(e){}
-try{renderAlerts()}catch(e){}
-try{updateBonusBanner()}catch(e){}
-try{
-// Update items earning strip
-const maxProfit=state.myItems.reduce((s,i)=>s+i.invested*(i.retMax||i.ret)/100,0);
-const minProfit=state.myItems.reduce((s,i)=>s+i.invested*(i.retMin||i.ret*0.7)/100,0);
-const sc=document.getElementById('itemStatCount');if(sc)sc.textContent=state.myItems.length;
-const sM=document.getElementById('itemStatMax');if(sM)sM.textContent='+$'+Math.round(maxProfit).toLocaleString();
-const sN=document.getElementById('itemStatMin');if(sN)sN.textContent='+$'+Math.round(minProfit).toLocaleString();
-// Sync strips visibility based on currentView
-const ies=document.getElementById('itemEarnStrip'),sg=document.getElementById('statsGrid');
-if(ies)ies.style.display=currentView==='items'&&state.myItems.length>0?'grid':'none';
-if(sg)sg.style.display=currentView==='pools'&&(state.positions.length>0||state.myItems.length>0)?'':'none';
-}catch(e){}
-try{updateDiversifyTip()}catch(e){}
-try{updateBreakdown()}catch(e){}
-try{updateInvTabs()}catch(e){}
-if(state.positions.length>0||state.myItems.length>0){
-try{document.getElementById('statsGrid').style.display='';document.getElementById('payoutProg').style.display='';document.getElementById('graphCard').style.display='';drawGraph();
-document.getElementById('payoutFill').style.width='65%';document.getElementById('payoutPct').textContent='65%'}catch(e){}}}
-
-function updateROI(){const invested=state.positions.reduce((s,p)=>s+p.amount,0)+state.myItems.reduce((s,i)=>s+i.invested,0);const earned=state.positions.reduce((s,p)=>s+p.earned,0);const roi=invested>0?(earned/invested*100).toFixed(1):0;document.getElementById('roiVal').textContent=(roi>0?'+':'')+roi+'%';document.getElementById('avgSale').textContent=state.myItems.length>0?'12 days':'-'}
-
-function updateBreakdown(){
-// Pools
-const poolsTotal=state.positions.reduce((s,p)=>s+p.amount,0);
-const poolsDaily=state.positions.reduce((s,p)=>{const pl=getPlan(p.amount);const r=pl.period==='day'?pl.rate:pl.period==='week'?pl.rate/7:pl.rate/30;return s+p.amount*r},0);
-const poolsEarned=state.positions.reduce((s,p)=>s+p.earned,0);
-document.getElementById('bdPools').textContent='$'+Math.round(poolsTotal).toLocaleString();
-document.getElementById('bdPoolsDaily').textContent='$'+poolsDaily.toFixed(2);
-const bpn=document.getElementById('bdPoolsNext');
-if(state.positions.length>0){const firstPool=state.positions[0];const pl=getPlan(firstPool.amount);const nextH=pl.period==='day'?24:pl.period==='week'?168:720;bpn.textContent='Next payout in ~'+(nextH>24?Math.floor(nextH/24)+'d':nextH+'h')}else{bpn.textContent='No active pools'}
-// Items
-const itemsTotal=state.myItems.reduce((s,i)=>s+i.invested,0);
-const itemsExpected=state.myItems.reduce((s,i)=>s+i.invested*i.ret/100,0);
-document.getElementById('bdItems').textContent='$'+Math.round(itemsTotal).toLocaleString();
-document.getElementById('bdItemsExp').textContent='+$'+Math.round(itemsExpected).toLocaleString();
-document.getElementById('bdItemsCount').textContent=state.myItems.length>0?state.myItems.length+' item'+(state.myItems.length>1?'s':'')+' owned':'No items owned';
-// Total
-const totalEarned=poolsEarned+state.myItems.reduce((s,i)=>{try{return s+getItemEarnings(i).currentEarned}catch(e){return s}},0);
-document.getElementById('totalEarned').textContent='+$'+totalEarned.toFixed(2);
-const projected=poolsDaily*30+itemsExpected*0.3;
-document.getElementById('projectedEarn').textContent='+$'+Math.round(projected).toLocaleString();
-const totalInvested=poolsTotal+itemsTotal;
-const prog=totalInvested>0?Math.min(100,(totalEarned/Math.max(1,projected))*100):0;
-document.getElementById('earnProgress').style.width=prog+'%';
-const lbl=document.getElementById('earnProgressLabel');
-if(totalInvested>0){lbl.textContent=prog>=100?'  Goal reached!':'You are '+Math.round(prog)+'% towards your 30-day projection'}else{lbl.textContent='Start investing to see projections'}}
-
-function updateGoals(){try{const sum=state.positions.reduce((s,p)=>s+p.amount,0)+state.myItems.reduce((s,i)=>s+i.invested,0);document.getElementById('goalCur').textContent='$'+Math.round(sum).toLocaleString();document.getElementById('goalFill').style.width=Math.min(100,sum/1000*100)+'%'}catch(e){console.warn('goals',e)}}
-
-function updateAchievements(){const ach={first:state.myItems.length>0||state.positions.length>0,five:state.myItems.length>=5,ref:state.refCount>0,diamond:state.myItems.some(i=>i.status==='sold'),whale:(state.balance+state.wallet)>=10000};
-document.querySelectorAll('.badge').forEach(b=>{const key=b.dataset.ach;if(ach[key]){b.style.opacity='1';b.style.borderColor='var(--gold)';b.style.background='var(--gg)'}else{b.style.opacity='.35';b.style.borderColor='var(--bd)';b.style.background='var(--bg2)'}})}
-
-function renderTrending(){const sorted=[...ITEMS].sort((a,b)=>b.views-a.views).slice(0,5);
-document.getElementById('trendingList').innerHTML=sorted.map(i=>{const d=Math.floor(i.closes/24),h=i.closes%24;
-return`<div onclick="openItemDetail(${i.id})" style="min-width:140px;flex-shrink:0;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:10px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--bd)'">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div style="font-size:22px">${i.ico}</div><span style="font-size:8px;color:var(--red);font-weight:700">  ${i.views}</span></div>
-<div style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">${i.name}</div>
-<div style="font-size:8px;color:var(--green);font-weight:700">+${i.ret[0]}-${i.ret[1]}%</div>
-<div style="font-size:7px;color:var(--t3)">  ${i.inv}   ${d>0?d+'d':h+'h'} left</div>
-<div style="font-size:7px;color:var(--t3);margin-top:2px">  ${Math.floor(Math.random()*8+3)} bought today</div>
-</div>`}).join('')}
-
-function renderActivity(){const events=[];
-state.txs.slice(0,5).forEach(t=>events.push({icon:t.desc.includes('Fraction')?' ':t.desc.includes('Pool')?'  ':t.desc.includes('deposit')?' ':' ',text:t.desc,time:t.time,color:'var(--t)'}));
-const platform=[{icon:' ',text:'Rolex Daytona sold for +38% - investors received payouts',time:'2h ago',color:'var(--green)'},{icon:' ',text:'New lot added: Audemars Piguet Royal Oak',time:'5h ago',color:'var(--gold)'},{icon:' ',text:'Chrome Hearts Hoodie 100% funded - closing soon',time:'8h ago',color:'var(--blue)'},{icon:' ',text:'Jordan 1 Chicago sold +92% in just 3 days',time:'1d ago',color:'var(--green)'}];
-events.push(...platform);
-document.getElementById('activityFeed').innerHTML=events.slice(0,8).map(e=>`<div style="display:flex;gap:10px;padding:8px 4px;border-bottom:1px solid var(--bd);font-size:10px"><div style="font-size:16px;flex-shrink:0">${e.icon}</div><div style="flex:1"><div style="color:${e.color};line-height:1.4">${e.text}</div><div style="font-size:8px;color:var(--t3);margin-top:1px">${e.time}</div></div></div>`).join('')||'<div class="empty-state" style="padding:12px">No activity yet.</div>'}
-
-function renderAlerts(){const c=document.getElementById('alertsList');if(!state.favorites.length){c.innerHTML='<div class="empty-state" style="padding:12px">No alerts. Go to Favorites to create alerts.</div>';return}
-c.innerHTML=state.favorites.slice(0,3).map(id=>{const i=ITEMS.find(x=>x.id===id);if(!i)return'';const d=Math.floor(i.closes/24),h=i.closes%24;
-return`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;margin-bottom:4px;font-size:11px"><div style="font-size:20px">${i.ico}</div><div style="flex:1"><div style="font-weight:700">${i.name}</div><div style="font-size:9px;color:var(--t3)">Closes in ${d>0?d+'d '+h+'h':h+'h'}   ${i.funded}% funded</div></div><button onclick="openItemDetail(${i.id})" style="padding:5px 10px;background:var(--gold);color:#0a0a0a;border:none;border-radius:4px;font-family:'Bebas Neue';font-size:9px;letter-spacing:1px;cursor:pointer">VIEW</button></div>`}).join('')}
-
-function updateStats(){
-const daily=state.positions.reduce((s,p)=>{const pl=getPlan(p.amount);return s+(pl.period==='day'?p.amount*pl.rate:pl.period==='week'?p.amount*pl.rate/7:p.amount*pl.rate/30)},0);
-document.getElementById('statToday').textContent='$'+daily.toFixed(2);
-document.getElementById('statWeek').textContent='$'+(daily*7).toFixed(2);
-document.getElementById('statMonth').textContent='$'+(daily*30).toFixed(2)}
-
-function updateLevel(total){
-const el=document.getElementById('userLevel'),f=document.getElementById('levelFill'),c=document.getElementById('levelCur'),n=document.getElementById('levelNext');
-if(total>=50000){el.textContent='ELITE';el.style.cssText='background:rgba(45,143,62,.08);color:var(--green)';f.style.width='100%';c.textContent='Elite';n.textContent='Maximum level'}
-else if(total>=10000){el.textContent='VIP';el.style.cssText='background:rgba(58,123,213,.08);color:var(--blue)';f.style.width=((total-10000)/40000*100)+'%';c.textContent='VIP';n.textContent='Next: Elite ($50K)'}
-else if(total>=1000){el.textContent='ACTIVE';el.style.cssText='background:var(--gg);color:var(--gold)';f.style.width=((total-1000)/9000*100)+'%';c.textContent='Active';n.textContent='Next: VIP ($10K)'}
-else{el.textContent='STARTER';el.style.cssText='background:rgba(160,160,160,.08);color:var(--t3)';f.style.width=Math.min(100,total/1000*100)+'%';c.textContent='Starter';n.textContent='Next: Active ($1K)'}}
-
-function getPlan(a){if(a>=10000)return{name:'Platinum',display:'15%/month',tier:3,rate:.15,period:'month'};if(a>=1000)return{name:'Gold',display:'3%/week',tier:2,rate:.03,period:'week'};return{name:'Silver',display:'0.5%/day',tier:1,rate:.005,period:'day'}}
-
-/* === RENDERS === */
-function renderPositions(){
-const html=state.positions.length?state.positions.map(p=>`<div class="position"><div class="pos-row"><span class="pos-label">Plan</span><span class="pos-value">${p.plan}</span></div><div class="pos-row"><span class="pos-label">Invested</span><span class="pos-value">$${p.amount.toLocaleString()}</span></div><div class="pos-row"><span class="pos-label">Rate</span><span class="pos-gold">${p.rate}</span></div><div class="pos-row"><span class="pos-label">Earned</span><span class="pos-green">+$${Math.round(p.earned).toLocaleString()}</span></div></div>`).join(''):'<div class="empty-state">No pool positions.</div>';
-document.getElementById('dashPositions').innerHTML=html;
-document.getElementById('poolPositions').innerHTML=html}
-
-function getItemEarnings(i){
-// Calculate based on days elapsed since purchase
-const now=Date.now();const purchaseDate=i.purchaseDate||now;
-const daysElapsed=(now-purchaseDate)/(1000*60*60*24);
-const daysTotal=i.daysTotal||15;
-const progress=Math.min(1,daysElapsed/daysTotal);
-const daysLeft=Math.max(0,daysTotal-daysElapsed);
-const guaranteed=i.guaranteed||Math.round((i.retMin||i.ret*0.7));
-const guaranteedUsd=i.invested*guaranteed/100;
-const expectedUsd=i.invested*i.ret/100;
-const currentEarned=guaranteedUsd*progress;// Linear interpolation to guaranteed min
-return{daysElapsed,daysLeft,daysTotal,progress,guaranteed,guaranteedUsd,expectedUsd,currentEarned,expectedPct:i.ret}}
-
-function renderMyItems(){
-const c1=document.getElementById('myItemsList'),c2=document.getElementById('dashItems');
-if(!c1)return;
-// Update counters
-const cntAll=document.getElementById('cntAll'),cntActive=document.getElementById('cntActive'),cntSelling=document.getElementById('cntSelling'),cntSold=document.getElementById('cntSold');
-if(cntAll){cntAll.textContent='('+state.myItems.length+')';cntActive.textContent='('+state.myItems.filter(i=>i.status==='buying').length+')';cntSelling.textContent='('+state.myItems.filter(i=>i.status==='selling').length+')';cntSold.textContent='('+state.myItems.filter(i=>i.status==='sold').length+')'}
-// Filter
-const filter=window._itemsFilter||'all';
-const filtered=filter==='all'?state.myItems:state.myItems.filter(i=>filter==='active'?i.status==='buying':i.status===filter);
-if(!filtered.length){c1.innerHTML='<div class="empty-state">No items in this category.</div>';if(c2&&!state.myItems.length)c2.innerHTML='<div class="empty-state">No items yet.</div>';return}
-const html=filtered.map(i=>{const e=getItemEarnings(i);const stLabel={buying:'Acquiring',selling:'On Sale',sold:'Sold'};const stClass={buying:'status-acquiring',selling:'status-selling',sold:'status-sold'};const daysLeftTxt=e.daysLeft<1?'Selling soon':Math.ceil(e.daysLeft)+' days left';
-return`<div class="my-item"><div class="my-item-top"><div class="my-item-ico">${i.ico}</div><div class="my-item-info" style="flex:1"><h4>${i.name}</h4><p>${i.desc}   ${i.pct}% share</p><span class="my-item-status ${stClass[i.status]}">${stLabel[i.status]}</span></div></div>
-<div style="padding:12px 14px;background:var(--bg2);border-top:1px solid var(--bd)">
-<div style="background:var(--card);border:1px solid var(--bd2);border-radius:6px;padding:10px;margin-bottom:8px">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:10px;color:var(--t3);letter-spacing:1px">CURRENT EARNINGS</span><span style="font-size:9px;color:var(--gold);font-weight:700"> ${daysLeftTxt}</span></div>
-<div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--green)">+$${e.currentEarned.toFixed(2)}</span><span style="font-size:10px;color:var(--t3)">accumulating</span></div>
-<div style="height:4px;background:var(--bg3);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:2px;width:${e.progress*100}%"></div></div>
-<div style="display:flex;justify-content:space-between;font-size:8px;color:var(--t3);margin-top:3px"><span>Day ${Math.floor(e.daysElapsed)}</span><span>${Math.round(e.progress*100)}%</span><span>Day ${e.daysTotal}</span></div>
-</div>
-<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--t3)">You invested</span><span style="font-weight:600">$${i.invested.toLocaleString()}</span></div>
-<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--t3)">Guaranteed min</span><span style="color:var(--gold);font-weight:600">+${e.guaranteed}%   $${e.guaranteedUsd.toFixed(0)}</span></div>
-<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px"><span style="color:var(--t3)">Expected return</span><span style="color:var(--green);font-weight:700">+${e.expectedPct}%   $${e.expectedUsd.toFixed(0)}</span></div>
-<div style="display:flex;gap:6px"><button onclick="sellNow(${i.id})" style="flex:1;padding:8px;background:var(--red);color:#fff;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer">SELL NOW -5%</button><button onclick="openItemDetail(${i.id})" style="flex:1;padding:8px;background:transparent;color:var(--t);border:1px solid var(--bd);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer">VIEW DETAILS</button></div>
-<div style="font-size:9px;color:var(--t3);margin-top:6px;text-align:center">Early exit: receive 95% of invested amount instantly</div>
-</div></div>`}).join('');
-c1.innerHTML=html;
-if(c2)c2.innerHTML=state.myItems.slice(0,3).map(i=>{const e=getItemEarnings(i);const daysLeftTxt=e.daysLeft<1?'soon':Math.ceil(e.daysLeft)+'d';
-return`<div onclick="go('items')" style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card);border:1px solid var(--bd);border-radius:8px;margin-bottom:5px;cursor:pointer" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--bd)'">
-<div style="width:44px;height:44px;background:var(--bg2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${i.ico}</div>
-<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.name}</div><div style="font-size:9px;color:var(--green);font-weight:600">+$${e.currentEarned.toFixed(2)} <span style="color:var(--t3);font-weight:400">earned   ${daysLeftTxt} left</span></div></div>
-<div style="text-align:right"><div style="font-size:11px;color:var(--green);font-weight:700">+${i.ret}%</div><div style="font-size:8px;color:var(--gold)">+${e.guaranteed}% min</div></div></div>`}).join('')+(state.myItems.length>3?`<div onclick="go('items')" style="text-align:center;padding:8px;cursor:pointer;font-size:10px;color:var(--gold);font-weight:600">View all ${state.myItems.length} items -></div>`:'')}
-
-function renderFavs(){const c=document.getElementById('favsList');
-if(!state.favorites.length){c.innerHTML='<div class="empty-state">No favorites yet.</div>';return}
-c.innerHTML=state.favorites.map(id=>{const i=ITEMS.find(x=>x.id===id);if(!i)return'';
-return`<div class="mk-card" onclick="openItemDetail(${i.id})" style="display:inline-block;width:220px;margin-right:8px;margin-bottom:8px"><div class="mk-thumb">${i.ico}</div><div class="mk-info"><h4>${i.name}</h4><div class="mk-meta"><span class="mk-return">+${i.ret[0]}-${i.ret[1]}%</span></div></div></div>`}).join('')}
-
-function renderTxs(){document.getElementById('txBody').innerHTML=state.txs.length?state.txs.map((t,idx)=>`<div class="tx-item" onclick="showReceipt(${idx})" style="cursor:pointer;transition:all .2s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><div class="tx-left"><div class="tx-desc">${t.desc}</div><div class="tx-time">${t.time}</div></div><span class="tx-status ${t.status==='processing'?'tx-pending':'tx-done'}">${t.status==='processing'?'Processing':'Completed'}</span></div>`).join(''):'<div class="empty-state">No transactions.</div>'}
-
-function showReceipt(idx){const t=state.txs[idx];if(!t)return;
-const isDeposit=t.desc.toLowerCase().includes('deposit')||t.desc.includes('+$')&&!t.desc.includes('Pool:')&&!t.desc.includes('Fraction');
-const isWithdraw=t.desc.toLowerCase().includes('withdraw');
-const amtMatch=t.desc.match(/\$[\d,]+/);const amt=amtMatch?amtMatch[0]:'$0';
-const id='RCP-'+(Date.now()+idx).toString().slice(-10);
-const type=t.desc.includes('Pool:')?'POOL INVESTMENT':t.desc.includes('Fraction')||t.desc.includes('Quick')?'ITEM PURCHASE':isWithdraw?'WITHDRAWAL':isDeposit?'DEPOSIT':'TRANSACTION';
-showModal(`<div style="border:2px dashed var(--bd);padding:20px;background:var(--bg2);border-radius:8px;font-family:'Space Mono',monospace">
-<div style="text-align:center;border-bottom:1px dashed var(--bd);padding-bottom:12px;margin-bottom:12px">
-<div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold)">LUXOR INVEST</div>
-<div style="font-size:9px;color:var(--t3);margin-top:2px">OFFICIAL RECEIPT</div>
-</div>
-<div style="font-size:11px;line-height:2">
-<div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Receipt #</span><strong>${id}</strong></div>
-<div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Date</span><strong>${new Date().toLocaleDateString('en-GB')}</strong></div>
-<div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Time</span><strong>${t.time}</strong></div>
-<div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Type</span><strong>${type}</strong></div>
-<div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Status</span><strong style="color:${t.status==='processing'?'var(--red)':'var(--green)'}">${t.status==='processing'?'PROCESSING':'COMPLETED  '}</strong></div>
-</div>
-<div style="border-top:1px dashed var(--bd);margin-top:12px;padding-top:12px">
-<div style="font-size:10px;color:var(--t3);margin-bottom:2px">Description</div>
-<div style="font-size:12px;font-weight:700">${t.desc}</div>
-</div>
-<div style="border-top:1px dashed var(--bd);margin-top:12px;padding-top:12px;text-align:center">
-<div style="font-size:10px;color:var(--t3);letter-spacing:2px;margin-bottom:4px">AMOUNT</div>
-<div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);letter-spacing:1px">${amt}</div>
-</div>
-<div style="border-top:1px dashed var(--bd);margin-top:12px;padding-top:10px;font-size:8px;color:var(--t3);text-align:center;line-height:1.5">
-LUXOR INVEST LTD   UK Company No. 14582937<br>71-75 Shelton Street, London, WC2H 9JQ<br>This is an official transaction record. Keep for your records.
-</div>
-</div>
-<button class="btn-gold" style="margin-top:10px" onclick="alert('Receipt saved to your downloads');closeModal()">DOWNLOAD PDF</button>
-<button class="btn-outline" style="margin-top:5px" onclick="closeModal()">Close</button>`)}
-
-/* === MARKETPLACE === */
-function renderMarketplace(cat){const grid=document.getElementById('mkGrid');if(!grid)return;const items=cat==='all'?ITEMS:ITEMS.filter(i=>i.cat===cat);
-grid.innerHTML=items.map(i=>{const d=Math.floor(i.closes/24),h=i.closes%24;const cdTxt=d>0?d+'d '+h+'h':h+'h';
-return`<div class="mk-card" onclick="openItemDetail(${i.id})"><div class="mk-thumb">${i.ico}<div class="mk-badge">${i.badge}</div><div class="mk-countdown">Closes in ${cdTxt}</div></div><div class="mk-info"><h4>${i.name}</h4><div class="sub">${i.desc}</div><canvas class="mini-candles" id="mc${i.id}" width="200" height="32"></canvas><div class="mk-progress"><div class="mk-prog-header"><span>${i.funded}% funded</span><span>${i.inv} investors</span></div><div class="mk-prog-bar"><div class="mk-prog-fill" style="width:${i.funded}%"></div></div></div><div class="mk-meta"><span>${i.days[0]}-${i.days[1]} days</span><span class="mk-return">+${i.ret[0]}-${i.ret[1]}%</span></div></div></div>`}).join('');
-setTimeout(()=>items.forEach(i=>drawMiniCandles('mc'+i.id)),50)}
-
-function filterMk(cat,el){document.querySelectorAll('.mk-fil').forEach(f=>f.classList.remove('on'));el.classList.add('on');renderMarketplace(cat)}
-
-/* === ITEM DETAIL === */
-function openItemDetail(id){const i=ITEMS.find(x=>x.id===id);if(!i)return;
-const slots=Math.max(1,Math.floor((100-i.funded)/100*20));const isFav=state.favorites.includes(id);
-const d=Math.floor(i.closes/24),h=i.closes%24;const cdTxt=d>0?d+'d '+h+'h':h+'h';
-showModal(`<div class="item-modal">
-<div class="item-photo">${i.ico}<div style="position:absolute;bottom:8px;left:8px;font-size:9px;padding:3px 8px;background:rgba(192,57,43,.85);color:#fff;border-radius:4px;font-family:'Space Mono',monospace">Closes in ${cdTxt}</div></div>
-<div class="item-right">
-<h2>${i.name}</h2>
-<div class="desc">${i.desc}</div>
-<canvas id="itemCandle" width="600" height="180" style="width:100%;height:180px;border-radius:6px;margin-bottom:8px;background:linear-gradient(135deg,#0d0d0d,#1a1a1a);display:block;cursor:crosshair"></canvas>
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:4px 8px;background:var(--bg2);border-radius:4px">
-<span style="font-size:9px;color:var(--t3);font-family:'Space Mono',monospace">Price History   30 candles</span>
-<div style="display:flex;gap:3px"><span onclick="switchItemPeriod('1H',this)" class="ip-tab active" style="padding:2px 8px;font-size:9px;border-radius:3px;cursor:pointer;background:var(--gold);color:#0a0a0a;font-family:'Space Mono',monospace;font-weight:700">1H</span><span onclick="switchItemPeriod('1D',this)" class="ip-tab" style="padding:2px 8px;font-size:9px;border-radius:3px;cursor:pointer;background:transparent;color:var(--t3);font-family:'Space Mono',monospace">1D</span><span onclick="switchItemPeriod('1W',this)" class="ip-tab" style="padding:2px 8px;font-size:9px;border-radius:3px;cursor:pointer;background:transparent;color:var(--t3);font-family:'Space Mono',monospace">1W</span><span onclick="switchItemPeriod('1M',this)" class="ip-tab" style="padding:2px 8px;font-size:9px;border-radius:3px;cursor:pointer;background:transparent;color:var(--t3);font-family:'Space Mono',monospace">1M</span></div>
-</div>
-<div class="item-stat"><span>${i.views} viewing now</span><span>${i.likes} likes</span><span>${i.inv} investors</span></div>
-<button class="fav-btn ${isFav?'on':''}" onclick="toggleFav(${id},this)">${isFav?'<3 Saved':'<3 Save to favorites'}</button>
-<div class="lot-info" style="margin-top:12px">
-<div class="lot-row"><span class="lot-label">Item price</span><span class="lot-value">$${i.price.toLocaleString()}</span></div>
-<div class="lot-row"><span class="lot-label">Expected return</span><span class="lot-value" style="color:var(--green)">+${i.ret[0]}% - +${i.ret[1]}%</span></div>
-<div class="lot-row"><span class="lot-label">Sale period</span><span class="lot-value">${i.days[0]} - ${i.days[1]} days</span></div>
-<div class="lot-row"><span class="lot-label">Slots remaining</span><span class="lot-value" style="color:var(--red)">${slots} of 20</span></div>
-<div class="lot-row"><span class="lot-label">Min fraction</span><span class="lot-value">$${i.min}</span></div>
-</div>
-<div class="lot-slider"><label>Investment amount</label>
-<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><div class="lot-amount" id="lotAmt" style="flex:1">$${i.min}</div><input type="number" id="lotManual" value="${i.min}" min="${i.min}" max="${Math.min(i.price*0.3,10000)}" style="width:100px;padding:8px;border:1px solid var(--bd);border-radius:6px;font-family:'Space Mono',monospace;font-size:13px;background:var(--bg2);color:var(--t);outline:none" oninput="const v=parseInt(this.value)||0;document.getElementById('lotSlider').value=v;document.getElementById('lotAmt').textContent='$'+v.toLocaleString();document.getElementById('lotPct').textContent=(v/${i.price}*100).toFixed(1)+'%'"></div>
-<input type="range" id="lotSlider" min="${i.min}" max="${Math.min(i.price*0.3,10000)}" value="${i.min}" step="${Math.max(25,i.min/4)}" style="margin-bottom:4px" oninput="const v=parseInt(this.value);document.getElementById('lotAmt').textContent='$'+v.toLocaleString();document.getElementById('lotManual').value=v;document.getElementById('lotPct').textContent=(v/${i.price}*100).toFixed(1)+'%'">
-<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3)"><span>Your share: <strong id="lotPct">${(i.min/i.price*100).toFixed(1)}%</strong></span><span>Wallet: <strong style="color:var(--gold)">$${Math.round(state.wallet).toLocaleString()}</strong></span></div></div>
-<button class="btn-gold" style="margin-top:10px" onclick="buyFraction(${i.id})">BUY FRACTION</button>
-</div></div>`);
-setTimeout(()=>{drawItemChart(i.id)},100)}
-
-function switchItemPeriod(p,el){document.querySelectorAll('.ip-tab').forEach(t=>{t.classList.remove('active');t.style.background='transparent';t.style.color='var(--t3)'});el.classList.add('active');el.style.background='var(--gold)';el.style.color='#0a0a0a';window._itemPeriod=p;drawItemChart(window._lastItemId||1)}
-
-function drawItemChart(itemId){window._lastItemId=itemId;const c=document.getElementById('itemCandle');if(!c)return;
-const ctx=c.getContext('2d');const w=c.width,hh=c.height;
-// Generate candles based on period
-const periodCounts={'1H':24,'1D':30,'1W':45,'1M':60};const n=periodCounts[window._itemPeriod||'1H']||30;
-const candles=[];let p=50+(itemId*3);
-for(let j=0;j<n;j++){const o=p;const vol=2+Math.random()*4;const cl=o+Math.random()*vol*2-vol;const hi=Math.max(o,cl)+Math.random()*2;const lo=Math.min(o,cl)-Math.random()*2;candles.push({o,c:cl,h:hi,l:lo});p=cl}
-const all=candles.flatMap(cd=>[cd.h,cd.l]);const mn=Math.min(...all)-1,mx=Math.max(...all)+1;const rng=mx-mn;
-// Clear and dark gradient bg
-const bg=ctx.createLinearGradient(0,0,0,hh);bg.addColorStop(0,'#0d0d0d');bg.addColorStop(1,'#1a1a1a');
-ctx.fillStyle=bg;ctx.fillRect(0,0,w,hh);
-// Grid
-ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;
-for(let i=1;i<5;i++){const y=i*hh/5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
-for(let i=1;i<6;i++){const x=i*w/6;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,hh);ctx.stroke()}
-// Price labels on right
-ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='9px monospace';ctx.textAlign='right';
-for(let i=0;i<=4;i++){const y=i*hh/4;const price=mx-(mx-mn)*(i/4);ctx.fillText('$'+price.toFixed(0),w-4,y+3)}
-ctx.textAlign='left';
-// Candles
-const bw=w/candles.length*.7;
-candles.forEach((cd,j)=>{const x=j/candles.length*w+bw/2;const bull=cd.c>=cd.o;const color=bull?'#26a69a':'#ef5350';
-const wx=x+bw/2;ctx.beginPath();ctx.moveTo(wx,hh-(cd.h-mn)/rng*hh);ctx.lineTo(wx,hh-(cd.l-mn)/rng*hh);ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();
-const bt=hh-(Math.max(cd.o,cd.c)-mn)/rng*hh;const bb=hh-(Math.min(cd.o,cd.c)-mn)/rng*hh;
-ctx.fillStyle=color;ctx.fillRect(x,bt,bw,Math.max(bb-bt,1));
-// Bull candle border highlight
-if(bull){ctx.strokeStyle='#26a69a';ctx.lineWidth=1;ctx.strokeRect(x,bt,bw,Math.max(bb-bt,1))}});
-// Last price line
-const lastPrice=candles[candles.length-1].c;const ly=hh-(lastPrice-mn)/rng*hh;
-ctx.strokeStyle='rgba(201,168,76,.6)';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(0,ly);ctx.lineTo(w,ly);ctx.stroke();ctx.setLineDash([]);
-// Last price label
-ctx.fillStyle='#c9a84c';ctx.fillRect(w-50,ly-8,48,16);ctx.fillStyle='#0a0a0a';ctx.font='bold 10px monospace';ctx.fillText('$'+lastPrice.toFixed(1),w-46,ly+3);
-// Crosshair on hover
-c.onmousemove=e=>{const r=c.getBoundingClientRect();const mx2=(e.clientX-r.left)/r.width*w;const my=(e.clientY-r.top)/r.height*hh;
-drawItemChart(itemId);ctx.strokeStyle='rgba(255,255,255,.2)';ctx.setLineDash([2,2]);ctx.lineWidth=1;
-ctx.beginPath();ctx.moveTo(mx2,0);ctx.lineTo(mx2,hh);ctx.stroke();
-ctx.beginPath();ctx.moveTo(0,my);ctx.lineTo(w,my);ctx.stroke();ctx.setLineDash([])};
-c.onmouseleave=()=>drawItemChart(itemId)}
-
-function toggleFav(id,btn){const idx=state.favorites.indexOf(id);if(idx>-1){state.favorites.splice(idx,1);btn.classList.remove('on');btn.textContent='<3 Save to favorites'}else{state.favorites.push(id);btn.classList.add('on');btn.textContent='<3 Saved'}saveState();renderFavs()}
-
-function buyFraction(id){const i=ITEMS.find(x=>x.id===id);const amt=parseInt(document.getElementById('lotSlider').value);
-if(amt<i.min){alert('Minimum $'+i.min);return}
-if(state.wallet>=amt){state.wallet-=amt}else if(state.wallet+state.free>=amt){const fromWallet=state.wallet;state.wallet=0;state.free-=amt-fromWallet;state.balance-=amt-fromWallet}else{closeModal();openTopUp();return}
-// Item funding % increases - less capacity for others
-const addPct=Math.min(amt/i.price*100,100-i.funded);i.funded=Math.min(100,i.funded+addPct);i.inv+=1;
-state.myItems.push({id:i.id,name:i.name,ico:i.ico,invested:amt,pct:(amt/i.price*100).toFixed(1),status:'buying',ret:Math.round((i.ret[0]+i.ret[1])/2),retMin:i.ret[0],retMax:i.ret[1],guaranteed:Math.round(i.ret[0]*0.6),daysTotal:Math.round((i.days[0]+i.days[1])/2),daysMin:i.days[0],daysMax:i.days[1],purchaseDate:Date.now(),desc:i.desc});
-state.balance+=amt;state.free+=0;
-closeModal();addTx('Fraction: '+i.name+' $'+amt.toLocaleString(),'done');updateUI();renderMarketplace('all');showConfetti();saveState();setTimeout(()=>showCertificate(i,amt),500)}
-
-/* === TOP UP === */
-function openTopUp(){showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 1 OF 3</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">How much to deposit?</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Enter amount, then choose payment method</p></div>
-<div class="input-group"><label>Amount in USD</label><input type="number" id="topUpAmt" placeholder="100" min="100" style="font-size:18px;font-weight:700;padding:14px;text-align:center"></div>
-<div style="display:flex;gap:5px;margin-bottom:10px">
-<button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('topUpAmt').value=100">$100</button>
-<button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('topUpAmt').value=500">$500</button>
-<button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('topUpAmt').value=1000">$1,000</button>
-<button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('topUpAmt').value=5000">$5,000</button>
-</div>
-<button class="btn-gold" onclick="topUpStep2()">CONTINUE -></button>`)}
-
-function topUpStep2(){const amt=parseFloat(document.getElementById('topUpAmt')?.value);if(!amt||amt<100){alert('Minimum $100');return}
-window._topUpAmount=amt;
-showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 2 OF 3</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">Choose payment method</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Depositing <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong></p></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-<div onclick="topUpStep3('crypto')" style="padding:20px;background:linear-gradient(135deg,#0f2027,#1a3a2a);border:2px solid #f7931a;border-radius:10px;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(247,147,26,0.3)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-<div style="display:flex;justify-content:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">
-  <span style="width:28px;height:28px;border-radius:50%;background:#f7931a;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0">₿</span>
-  <span style="width:28px;height:28px;border-radius:50%;background:#627eea;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0">ETH</span>
-  <span style="width:28px;height:28px;border-radius:50%;background:#26a17b;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#fff;flex-shrink:0">USDT</span>
-  <span style="width:28px;height:28px;border-radius:50%;background:#9945ff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0">SOL</span>
-  <span style="width:28px;height:28px;border-radius:50%;background:#f0b90b;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;flex-shrink:0">BNB</span>
-</div>
-<div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#f7931a">CRYPTOCURRENCY</div>
-<div style="font-size:9px;color:#aaa;margin-top:3px">BTC · ETH · USDT · SOL · BNB · TRX</div>
-</div>
-<div onclick="showComingSoon()" style="padding:20px;background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid #555;border-radius:10px;text-align:center;cursor:pointer;transition:all .3s;position:relative;opacity:0.75" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.75'">
-<div style="position:absolute;top:8px;right:8px;background:#ff9800;color:#000;font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:1px">SOON</div>
-<div style="display:flex;justify-content:center;gap:6px;margin-bottom:8px">
-  <svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect width="28" height="18" rx="2" fill="#1a1f71"/><text x="14" y="12" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="7" fill="#fff">VISA</text></svg>
-  <svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect width="28" height="18" rx="2" fill="#000"/><circle cx="11" cy="9" r="5" fill="#eb001b"/><circle cx="17" cy="9" r="5" fill="#f79e1b" opacity=".8"/></svg>
-</div>
-<div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#888">CARD PAYMENT</div>
-<div style="font-size:9px;color:#666;margin-top:3px">Visa · Mastercard · 3D Secure</div>
-</div-bottom:6px"> </div><div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px">CARD PAYMENT</div><div style="font-size:9px;color:var(--t3);margin-top:4px">Visa   Mastercard   3D Secure</div></div>
-</div>
-<button class="btn-outline" onclick="openTopUp()"><- Back</button>`)}
-
-function showComingSoon(){
-  showModal('<div style="text-align:center;padding:20px"><div style="font-size:48px;margin-bottom:12px">🚀</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;letter-spacing:3px;color:var(--gold)">COMING SOON</div><p style="color:var(--t2);margin-top:8px;font-size:13px">Card payments will be available soon.<br>Use crypto for now.</p><button onclick="topUpStep2()" style="margin-top:16px;padding:10px 24px;background:var(--gold);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px">← BACK</button></div>');
-}
-function topUpStep3(method){window._useBonus=U.hasBonus&&window._topUpAmount>=100;const amt=window._topUpAmount;
-if(method==='card'){showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 3 OF 3   CARD</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Secure payment</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Amount: <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong></p></div>
-<div style="padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:10px">
-<div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:10px;color:var(--t2)"><span>Secured by our payment processor</span><span style="display:flex;gap:4px"><svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect width="28" height="18" rx="2" fill="#1a1f71"/><text x="14" y="12" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="7" fill="#fff">VISA</text></svg><svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect width="28" height="18" rx="2" fill="#000"/><circle cx="11" cy="9" r="5" fill="#eb001b"/><circle cx="17" cy="9" r="5" fill="#f79e1b" opacity=".8"/></svg></span></div>
-<div class="input-group"><label>Card Number</label><input type="text" placeholder="0000 0000 0000 0000" maxlength="19" id="cardNum"></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div class="input-group"><label>Expiry</label><input type="text" placeholder="MM/YY" maxlength="5"></div><div class="input-group"><label>CVV</label><input type="password" placeholder="***" maxlength="4"></div></div>
-<div class="input-group"><label>Cardholder Name</label><input type="text" placeholder="JOHN DOE"></div>
-<div style="font-size:8px;color:var(--t3);margin-top:4px;line-height:1.5">  3D Secure verification required. Your card data is encrypted end-to-end and never stored on our servers.</div>
-</div>
-<button class="btn-gold" onclick="processTopUp()">PAY $${amt.toLocaleString()}</button>
-<button class="btn-outline" style="margin-top:6px" onclick="topUpStep2()"><- Back</button>`);return}
-// Crypto selection
-showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 3 OF 3   CRYPTO</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Select cryptocurrency</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Amount: <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong></p></div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
-<div class="pay-m" onclick="showCryptoQR('usdt','TRC20')"><span class="symbol">MNT</span>USDT<div style="font-size:7px;color:var(--t3);margin-top:2px">TRC20</div></div>
-<div class="pay-m" onclick="showCryptoQR('eth','ERC20')"><span class="symbol"> </span>ETH<div style="font-size:7px;color:var(--t3);margin-top:2px">ERC20</div></div>
-<div class="pay-m" onclick="showCryptoQR('btc','Bitcoin')"><span class="symbol">BTC</span>BTC<div style="font-size:7px;color:var(--t3);margin-top:2px">Bitcoin</div></div>
-<div class="pay-m" onclick="showCryptoQR('sol','Solana')"><span class="symbol">o</span>SOL<div style="font-size:7px;color:var(--t3);margin-top:2px">Solana</div></div>
-<div class="pay-m" onclick="showCryptoQR('bnb','BEP20')"><span class="symbol">*</span>BNB<div style="font-size:7px;color:var(--t3);margin-top:2px">BEP20</div></div>
-<div class="pay-m" onclick="showCryptoQR('trx','TRC20')"><span class="symbol">o</span>TRX<div style="font-size:7px;color:var(--t3);margin-top:2px">TRC20</div></div>
-</div>
-<button class="btn-outline" onclick="topUpStep2()"><- Back</button>`)}
-
-function showCryptoQR(coin,network){const amt=window._topUpAmount;const coinNames={usdt:'USDT',eth:'Ethereum',btc:'Bitcoin',sol:'Solana',bnb:'BNB',trx:'TRON'};
-showModal(`<div style="text-align:center;margin-bottom:10px"><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Send ${coinNames[coin]}</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Network: <strong style="color:var(--gold)">${network}</strong></p></div>
-<div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:10px">
-<div style="width:150px;height:150px;background:#fff;border:2px solid var(--bd);border-radius:8px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" width="120" height="120"><rect fill="#fff" width="100" height="100"/><g fill="#000"><rect x="5" y="5" width="25" height="25"/><rect x="70" y="5" width="25" height="25"/><rect x="5" y="70" width="25" height="25"/><rect x="8" y="8" width="19" height="19" fill="#fff"/><rect x="73" y="8" width="19" height="19" fill="#fff"/><rect x="8" y="73" width="19" height="19" fill="#fff"/><rect x="11" y="11" width="13" height="13"/><rect x="76" y="11" width="13" height="13"/><rect x="11" y="76" width="13" height="13"/><rect x="40" y="40" width="20" height="20"/><rect x="35" y="5" width="5" height="5"/><rect x="50" y="10" width="5" height="5"/><rect x="55" y="35" width="5" height="5"/><rect x="40" y="60" width="5" height="5"/></g></svg></div>
-<div style="font-size:10px;color:var(--t3);margin-bottom:4px">Amount to send</div>
-<div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px">$${amt.toLocaleString()} ${coin.toUpperCase()}</div>
-<div style="font-size:9px;color:var(--t3);margin-bottom:4px">Deposit address (${network})</div>
-<div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--t2);word-break:break-all;background:var(--bg3);padding:8px;border-radius:4px;margin-bottom:8px;cursor:pointer" onclick="navigator.clipboard?.writeText('TXqR7nM3k9Fp2mE8vN5qL4jH7aB2cD')" title="Click to copy">TXqR7nM3k9Fp2mE8vN5qL4jH7aB2cD</div>
-<div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;background:rgba(192,57,43,.08);border-radius:4px;margin-bottom:4px"><span style="font-size:14px"></span><span style="font-size:11px;font-weight:700;color:var(--red)" id="payTimer">14:59</span></div>
-<div style="font-size:9px;color:var(--t3)">Complete payment within 15 minutes or transaction expires</div>
-</div>
-<button class="btn-gold" onclick="processTopUp()">I'VE PAID -></button>
-<button class="btn-outline" style="margin-top:6px" onclick="topUpStep3('crypto')"><- Back</button>`);startPayTimer()}
-let payTimerInterval;function startPayTimer(){clearInterval(payTimerInterval);let sec=899;payTimerInterval=setInterval(()=>{if(sec<=0){clearInterval(payTimerInterval);return}sec--;const m=Math.floor(sec/60),s=sec%60;const el=document.getElementById('payTimer');if(el)el.textContent=m+':'+String(s).padStart(2,'0')},1000)}
-function selectPay(el){}
-async function processTopUp(){
-const amt=window._topUpAmount||0;
-if(!amt||amt<100){alert('Minimum $100');return;}
-clearInterval(payTimerInterval);
-const useBonus=window._useBonus||false;
-const result=await processDeposit(amt,useBonus);
-if(result){closeModal();showConfetti();}
-}
-
-/* === POOL INVEST === */
-function openPoolInvest(plan,rate,tier,presetAmt){
-const mins={1:100,2:1000,3:10000},maxs={1:1000,2:10000,3:300000},steps={1:50,2:500,3:5000},defs={1:300,2:3000,3:25000};
-// Use preset amount from pool card slider if provided, else default
-const startVal=presetAmt&&presetAmt>=mins[tier]&&presetAmt<=maxs[tier]?presetAmt:defs[tier];
-showModal(`<div style="text-align:center;margin-bottom:12px"><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">${plan} Pool</h3><p style="font-size:12px;color:var(--t3)">${rate}</p></div>
-<div class="slider-display" id="poolSliderVal">$${startVal.toLocaleString()}</div>
-<input type="range" id="poolSlider" min="${mins[tier]}" max="${maxs[tier]}" value="${startVal}" step="${steps[tier]}" oninput="updatePoolCalc(${tier},this.value)">
-<div class="calc-box" id="poolCalc"></div>
-<p style="font-size:10px;color:var(--t3);margin:8px 0;text-align:center">Wallet: <strong style="color:var(--gold)">$${Math.round(state.wallet).toLocaleString()}</strong></p>
-<button class="btn-gold" onclick="processPoolInvest('${plan}','${rate}',${tier})">INVEST</button>`);
-updatePoolCalc(tier,startVal)}
-function updatePoolCalc(tier,v){v=parseInt(v);document.getElementById('poolSliderVal').textContent='$'+v.toLocaleString();
-const c=document.getElementById('poolCalc');const wallet=Math.round(state.wallet);const afterBal=wallet-v;const balColor=afterBal>=0?'var(--green)':'var(--red)';
-if(tier===1){const day=v*.005,week=day*7,month=day*30,year=day*365;
-c.innerHTML=`<div class="calc-row"><span class="calc-label">Daily profit</span><span class="calc-value" style="color:var(--green)">+$${day.toFixed(2)}</span></div><div class="calc-row"><span class="calc-label">Weekly profit</span><span class="calc-value">+$${week.toFixed(2)}</span></div><div class="calc-row"><span class="calc-label">Monthly profit</span><span class="calc-value">+$${month.toFixed(2)}</span></div><div class="calc-row"><span class="calc-label">Yearly profit</span><span class="calc-value" style="color:var(--gold)">+$${Math.round(year).toLocaleString()}</span></div><div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--bd)"><div class="calc-row"><span class="calc-label" style="font-weight:700">Total after 1 week</span><span class="calc-value" style="font-size:14px;color:var(--gold)">$${Math.round(v+week).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Wallet after investment</span><span class="calc-value" style="color:${balColor};font-size:10px">$${afterBal.toLocaleString()}</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Payout frequency</span><span class="calc-value" style="font-size:10px">Every 24h</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Lock-up period</span><span class="calc-value" style="font-size:10px">None   withdraw anytime</span></div></div>`}
-else if(tier===2){const week=v*.03,month=week*4,year=week*52;
-c.innerHTML=`<div class="calc-row"><span class="calc-label">Weekly profit</span><span class="calc-value" style="color:var(--green)">+$${Math.round(week).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label">Monthly profit</span><span class="calc-value">+$${Math.round(month).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label">Yearly profit</span><span class="calc-value" style="color:var(--gold)">+$${Math.round(year).toLocaleString()}</span></div><div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--bd)"><div class="calc-row"><span class="calc-label" style="font-weight:700">Total after 1 month</span><span class="calc-value" style="font-size:14px;color:var(--gold)">$${Math.round(v+month).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Wallet after investment</span><span class="calc-value" style="color:${balColor};font-size:10px">$${afterBal.toLocaleString()}</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Payout frequency</span><span class="calc-value" style="font-size:10px">Every 7 days</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Focus assets</span><span class="calc-value" style="font-size:10px">Designer   Watches</span></div></div>`}
-else{const month=v*.15,year=month*12;
-c.innerHTML=`<div class="calc-row"><span class="calc-label">Monthly profit</span><span class="calc-value" style="color:var(--green)">+$${Math.round(month).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label">Quarterly profit</span><span class="calc-value">+$${Math.round(month*3).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label">Yearly profit</span><span class="calc-value" style="color:var(--gold)">+$${Math.round(year).toLocaleString()}</span></div><div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--bd)"><div class="calc-row"><span class="calc-label" style="font-weight:700">Total after 1 year</span><span class="calc-value" style="font-size:14px;color:var(--gold)">$${Math.round(v+year).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Wallet after investment</span><span class="calc-value" style="color:${balColor};font-size:10px">$${afterBal.toLocaleString()}</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Payout frequency</span><span class="calc-value" style="font-size:10px">Every 30 days</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Focus assets</span><span class="calc-value" style="font-size:10px">Rolex   Patek   Herm s</span></div></div>`}}
-
-function processPoolInvest(plan,rate,tier){const amt=parseInt(document.getElementById('poolSlider').value);const pl=getPlan(amt);
-if(state.wallet<amt){
-closeModal();
-setTimeout(()=>{showModal(`<div style="text-align:center;padding:8px"><div style="font-size:42px;margin-bottom:8px"> </div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:6px">INSUFFICIENT BALANCE</h3><p style="font-size:12px;color:var(--t2);margin-bottom:6px">You need <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong> to invest in ${plan} Pool</p><p style="font-size:10px;color:var(--t3);margin-bottom:14px">Current wallet balance: <strong>$${Math.round(state.wallet).toLocaleString()}</strong>   Need to top up: <strong style="color:var(--red)">$${Math.round(amt-state.wallet).toLocaleString()}</strong></p><button class="btn-gold" onclick="closeModal();openTopUp()">TOP UP NOW</button><button class="btn-outline" style="margin-top:6px" onclick="closeModal();openPoolInvest('${plan}','${rate}',${tier},${amt})"><- Back to Pool</button></div>`)},200);return}
-state.wallet-=amt;
-state.positions.push({plan,rate,tier,amount:amt,earned:amt*pl.rate,date:Date.now()});
-state.balance+=amt+amt*pl.rate;state.free+=amt*pl.rate;
-closeModal();addTx('Pool: '+plan+' +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState()}
-
-/* === WITHDRAW === */
-function openWithdraw(){showModal(`<div style="text-align:center;margin-bottom:12px"><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">Withdraw Funds</h3></div>
-<div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--t3)">Available</span><span style="color:var(--green);font-weight:700">$${Math.round(state.free+state.wallet).toLocaleString()}</span></div></div>
-<div class="input-group"><label>Wallet address</label><input type="text" id="wdWallet" value="${state.savedWallet}" placeholder="Your crypto wallet"></div>
-<div class="input-group"><label>Network</label><select><option>USDT (TRC20)</option><option>ETH (ERC20)</option><option>BTC</option></select></div>
-<div class="input-group"><label>Amount ($)</label><input type="number" id="wdAmount" placeholder="0" min="1"></div>
-<button class="btn-primary" style="background:var(--red)" onclick="processWithdraw()">WITHDRAW</button>`)}
-
-function processWithdraw(){const amt=parseFloat(document.getElementById('wdAmount')?.value),w=document.getElementById('wdWallet')?.value;
-if(!w||!amt){alert('Fill all fields');return}const avail=state.free+state.wallet;if(amt>avail){alert('Exceeds available balance');return}
-state.savedWallet=w;if(amt<=state.wallet){state.wallet-=amt}else{const rest=amt-state.wallet;state.wallet=0;state.free-=rest;state.balance-=rest}
-processWithdrawBackend(amt,wallet).then(ok=>{if(ok){closeModal();showGoldRain();}});}
-
-/* === TX === */
-function addTx(desc,status){state.txs.unshift({desc,status,time:new Date().toLocaleTimeString()});renderTxs()}
-
-/* === MODAL === */
-function showModal(html){let o=document.getElementById('mainOverlay');if(!o){o=document.createElement('div');o.id='mainOverlay';o.className='overlay';document.body.appendChild(o)}
-o.innerHTML=`<div class="modal"><button class="modal-close" onclick="closeModal()"> </button><div class="modal-body">${html}</div></div>`;o.classList.add('show');document.body.style.overflow='hidden'}
-function closeModal(){const o=document.getElementById('mainOverlay');if(o)o.classList.remove('show');document.body.style.overflow=''}
-
-/* === GRAPH === */
-function sellNow(id){const idx=state.myItems.findIndex(x=>x.id===id);if(idx<0)return;const item=state.myItems[idx];const refund=Math.round(item.invested*0.95);
-if(!confirm('Sell your '+item.pct+'% of '+item.name+' now?\n\nYou will receive: $'+refund.toLocaleString()+' (95% of invested)\nLoss: $'+Math.round(item.invested*0.05).toLocaleString()+' (5% early exit fee)'))return;
-state.myItems.splice(idx,1);state.wallet+=refund;state.balance-=item.invested;
-addTx('Early sale: '+item.name+' +$'+refund.toLocaleString(),'done');updateUI();saveState();showGoldRain()}
-
-let chartState={zoom:1,offset:0,candles:null};
-function setPeriod(p,el){currentPeriod=p;document.querySelectorAll('.ptab').forEach(t=>{t.classList.remove('active');t.style.background='rgba(255,255,255,.08)';t.style.color='#f0ede6'});el.classList.add('active');el.style.background='var(--gold)';el.style.color='#0a0a0a';drawGraph()}
-
-function drawGraph(){const c=document.getElementById('portCanvas');if(!c)return;const ctx=c.getContext('2d');const w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
-// Generate points based on period
-const counts={'1W':7,'1M':30,'3M':90,'ALL':180};const n=counts[currentPeriod]||30;
-const pts=[];let v=100;const bal=state.balance+state.wallet;
-for(let i=0;i<n;i++){const trend=bal>0?0.8:0;v+=Math.random()*5-2.2+trend;pts.push(v)}
-// Ensure last point reflects current balance trend
-if(bal>0){const target=100+((bal/100)*(Math.random()*0.3+0.1));pts[pts.length-1]=target}
-const mn=Math.min(...pts)-3,mx=Math.max(...pts)+3;const rng=mx-mn;
-// Grid lines
-ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;for(let i=1;i<4;i++){const y=i*h/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
-// Gradient fill
-const grad=ctx.createLinearGradient(0,0,0,h);grad.addColorStop(0,'rgba(201,168,76,0.25)');grad.addColorStop(1,'rgba(201,168,76,0.0)');
-ctx.beginPath();ctx.moveTo(0,h);pts.forEach((p,i)=>{const x=i/(pts.length-1)*w;const y=h-(p-mn)/rng*h;if(i===0)ctx.lineTo(x,y);else{const px=(i-1)/(pts.length-1)*w;const py=h-(pts[i-1]-mn)/rng*h;const cx=(px+x)/2;ctx.quadraticCurveTo(cx,py,x,y)}});ctx.lineTo(w,h);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-// Line
-ctx.beginPath();pts.forEach((p,i)=>{const x=i/(pts.length-1)*w;const y=h-(p-mn)/rng*h;if(i===0)ctx.moveTo(x,y);else{const px=(i-1)/(pts.length-1)*w;const py=h-(pts[i-1]-mn)/rng*h;const cx=(px+x)/2;ctx.quadraticCurveTo(cx,py,x,y)}});
-ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.5;ctx.shadowColor='rgba(201,168,76,0.4)';ctx.shadowBlur=8;ctx.stroke();ctx.shadowBlur=0;
-// Last point glow
-const lx=w,ly=h-(pts[pts.length-1]-mn)/rng*h;ctx.beginPath();ctx.arc(lx-4,ly,4,0,Math.PI*2);ctx.fillStyle='#c9a84c';ctx.fill();ctx.beginPath();ctx.arc(lx-4,ly,8,0,Math.PI*2);ctx.fillStyle='rgba(201,168,76,0.2)';ctx.fill();
-// Update portfolio stats
-const invested=state.positions.reduce((s,p)=>s+p.amount,0)+state.myItems.reduce((s,i)=>s+i.invested,0);const earned=state.positions.reduce((s,p)=>s+p.earned,0);const total=state.balance+state.wallet;const pct=invested>0?(earned/invested*100):0;
-const pv=document.getElementById('portVal');if(pv)pv.textContent='$'+Math.round(total).toLocaleString();
-const pc=document.getElementById('portChange');if(pc){pc.textContent=(earned>=0?'+':'')+'$'+Math.round(earned).toLocaleString();pc.style.color=earned>=0?'var(--green)':'var(--red)'}
-const pp=document.getElementById('portPct');if(pp){pp.textContent=(pct>=0?'+':'')+pct.toFixed(1)+'%';pp.style.color=pct>=0?'var(--green)':'var(--red)';pp.style.background=pct>=0?'rgba(45,143,62,.15)':'rgba(192,57,43,.15)'}
-const pi=document.getElementById('portInvested');if(pi)pi.textContent='$'+Math.round(invested).toLocaleString();
-const pe=document.getElementById('portEarned');if(pe)pe.textContent=(earned>=0?'+':'')+'$'+Math.round(earned).toLocaleString();
-const pos=document.getElementById('portPositions');if(pos)pos.textContent=state.positions.length;
-const pit=document.getElementById('portItems');if(pit)pit.textContent=state.myItems.length}
-
-function resetChartZoom(){drawGraph()}
-
-function drawMiniCandles(id){const c=document.getElementById(id);if(!c)return;const ctx=c.getContext('2d');const w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
-const candles=[];let p=50;for(let i=0;i<15;i++){const o=p;const cl=o+Math.random()*6-2;const hi=Math.max(o,cl)+Math.random()*3;const lo=Math.min(o,cl)-Math.random()*3;candles.push({o,c:cl,h:hi,l:lo});p=cl}
-const all=candles.flatMap(c=>[c.h,c.l]);const mn=Math.min(...all)-1,mx=Math.max(...all)+1;const rng=mx-mn;const bw=w/candles.length*.6;
-candles.forEach((cd,i)=>{const x=i/candles.length*w+bw/2;const bull=cd.c>=cd.o;const color=bull?'#2d8f3e':'#c0392b';
-const wickX=x+bw/2;ctx.beginPath();ctx.moveTo(wickX,h-(cd.h-mn)/rng*h);ctx.lineTo(wickX,h-(cd.l-mn)/rng*h);ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();
-const bodyTop=h-(Math.max(cd.o,cd.c)-mn)/rng*h;const bodyBot=h-(Math.min(cd.o,cd.c)-mn)/rng*h;
-ctx.fillStyle=color;ctx.fillRect(x,bodyTop,bw,Math.max(bodyBot-bodyTop,1))})}
-
-function withdrawRefToBalance(){state.wallet+=0;closeModal();showModal('<div style="text-align:center"><div style="font-size:36px;margin-bottom:8px;opacity:.5"> </div><h3 style="font-family:Bebas Neue,sans-serif;font-size:20px">Referral earnings transferred</h3><p style="font-size:11px;color:var(--t3);margin-top:6px">$0 transferred to your main balance.</p><button class="btn-primary" style="margin-top:12px" onclick="closeModal()">Done</button></div>')}
-
-/* === EFFECTS === */
-function showConfetti(){const w=document.getElementById('confettiWrap');w.innerHTML='';w.classList.add('show');
-const colors=['#c9a84c','#2d8f3e','#3a7bd5','#c0392b','#dfc368'];
-for(let i=0;i<50;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.cssText=`left:${Math.random()*100}%;background:${colors[i%5]};animation-duration:${2+Math.random()*2}s;animation-delay:${Math.random()}s;border-radius:${Math.random()>.5?'50%':'0'}`;w.appendChild(p)}
-setTimeout(()=>w.classList.remove('show'),4000)}
-
-function showGoldRain(){const r=document.getElementById('goldRain');r.innerHTML='';r.classList.add('show');
-for(let i=0;i<30;i++){const d=document.createElement('div');d.className='gold-drop';d.textContent='$';d.style.cssText=`left:${Math.random()*100}%;font-family:'Bebas Neue',sans-serif;font-size:${14+Math.random()*10}px;color:var(--gold);animation-duration:${2+Math.random()*2}s;animation-delay:${Math.random()*1.5}s`;r.appendChild(d)}
-setTimeout(()=>r.classList.remove('show'),4000)}
-
-/* === MISC === */
-function updateName(v){U.fn=v.split(' ')[0];U.ln=v.split(' ')[1]||'';document.getElementById('userName').textContent=U.fn;document.getElementById('userAvatar').textContent=U.fn[0]}
-function copyRefCode(){const code=document.getElementById('refCode').textContent;navigator.clipboard?.writeText(code);alert('Copied: '+code)}
-function toggleChat(){document.getElementById('chatPanel').classList.toggle('show')}
-function sendChat(){const inp=document.getElementById('chatInput'),msg=inp.value.trim();if(!msg)return;
-document.getElementById('chatMessages').innerHTML+=`<div class="chat-msg user">${msg}</div>`;inp.value='';
-const m=document.getElementById('chatMessages');m.scrollTop=m.scrollHeight;
-document.getElementById('chatTyping').classList.add('show');
-setTimeout(()=>{document.getElementById('chatTyping').classList.remove('show');
-m.innerHTML+=`<div class="chat-msg bot">${['Thank you for reaching out. Our team will review your message shortly.','We typically respond within 5 minutes. Please wait.','Your request has been forwarded to our support team.','Is there anything specific I can help you with?'][Math.floor(Math.random()*4)]}</div>`;m.scrollTop=m.scrollHeight},2000)}
-
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-document.addEventListener('click',e=>{if(!e.target.closest('.bell'))document.getElementById('bellDrop').style.display='none'});
-document.querySelector('.bell').addEventListener('click',()=>{const d=document.getElementById('bellDrop');d.style.display=d.style.display==='none'?'block':'none'});
-</script>
-</body>
-</html>
+      state.wallet-=parseFloat(amount);state.balance=state.
