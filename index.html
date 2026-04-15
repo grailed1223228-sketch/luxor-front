@@ -603,12 +603,21 @@ const fn=document.getElementById('ifn').value.trim();
 const ln=document.getElementById('iln').value.trim();
 const login=document.getElementById('ilg').value.trim();
 const pass=document.getElementById('ips').value;
+const email=document.getElementById('iem').value.trim();
+const birth_day=parseInt(document.getElementById('ibd').value);
+const birth_month=document.getElementById('ibm').value;
+const birth_year=parseInt(document.getElementById('iby').value);
+const address=document.getElementById('iad').value.trim();
+const investment_experience=document.getElementById('iex').value;
 const btn=e.target.querySelector('button[type=submit]');
-if(btn){btn.textContent='Creating...';btn.disabled=true;}
+if(btn){btn.textContent='CREATING...';btn.disabled=true;}
 try{
-  const res=await fetch('https://luxor-backend-production.up.railway.app/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login,password:pass,first_name:fn,last_name:ln,plan})});
+  const res=await fetch('https://luxor-backend-production.up.railway.app/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login,password:pass,first_name:fn,last_name:ln,email,birth_day,birth_month,birth_year,address,investment_experience})});
   const data=await res.json();
-  if(!res.ok){alert(data.detail||'Login already taken');if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}return;}
+  if(!res.ok){
+    const msg=Array.isArray(data.detail)?data.detail.map(e=>e.msg).join('\n'):(data.detail||data.error||'Login already taken');
+    alert(msg);if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}return;
+  }
   sessionStorage.setItem('luxor_user',JSON.stringify({fn,ln,plan,rate,tier,amt:0,login,referral_code:data.referral_code||''}));
   closeAll();location.href='dashboard.html';
 }catch(err){
