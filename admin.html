@@ -583,21 +583,25 @@ function authenticateJWT() {
   }
   
   // Mock JWT authentication - replace with real JWT endpoint
-  if (login === 'luxor_admin' && password === 'Luxor@2026!') {
-    jwtToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsdXhvcl9hZG1pbiIsImlhdCI6MTYzMDAwMDAwMCwiZXhwIjoxNjMwMDA3MjAwfQ.fake_jwt_token_for_demo';
-    localStorage.setItem('jwt_token', jwtToken);
-    localStorage.setItem('jwt_expires', Date.now() + (24 * 60 * 60 * 1000)); // 24 hours
-    
-    document.getElementById('authModal').classList.remove('show');
-    document.getElementById('authModal').style.display = 'none';
-    document.getElementById('securityBadge').style.display = 'block';
-    
-    notify('✅ JWT Authentication successful!');
-    loadOverview();
-    startTokenRefresh();
-  } else {
-    notify('❌ Invalid credentials', false);
-  }
+  fetch('https://luxor-backend-production.up.railway.app/api/auth/jwt', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({login, password})
+  }).then(r => r.json()).then(d => {
+    if (d.ok && d.access_token) {
+      jwtToken = d.access_token;
+      localStorage.setItem('jwt_token', jwtToken);
+      localStorage.setItem('jwt_expires', Date.now() + (24 * 60 * 60 * 1000));
+      document.getElementById('authModal').classList.remove('show');
+      document.getElementById('authModal').style.display = 'none';
+      document.getElementById('securityBadge').style.display = 'block';
+      notify('✅ JWT Authentication successful!');
+      loadOverview();
+      startTokenRefresh();
+    } else {
+      notify('❌ Invalid credentials', false);
+    }
+  }).catch(() => notify('❌ Connection error', false));
 }
 
 function startTokenRefresh() {
