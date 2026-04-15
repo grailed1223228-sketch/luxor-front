@@ -565,7 +565,10 @@ try{
   const data=await res.json();
   if(!res.ok){document.getElementById('le').style.display='block';return;}
   if(data.is_admin){closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:'Admin',ln:'',plan:'',amt:0,isAdmin:true,login:'luxor_admin'}));location.href='admin.html';return;}
-  closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:data.user.first_name,ln:data.user.last_name,plan:data.user.plan||'',rate:'',tier:data.user.tier||0,amt:0,login:data.user.login,referral_code:data.user.referral_code||''}));location.href='dashboard.html';
+  closeAll();
+  sessionStorage.setItem('luxor_user',JSON.stringify({fn:data.user.first_name,ln:data.user.last_name,plan:data.user.plan||'',rate:'',tier:data.user.tier||0,amt:0,login:data.user.login,referral_code:data.user.referral_code||'',has_first_deposit_bonus:data.user.has_first_deposit_bonus||false}));
+  sessionStorage.setItem('luxor_login', data.user.login);
+  location.href='dashboard.html';
 }catch(err){
   if(u==='luxor_admin'&&p==='Luxor@2026!'){closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:'Admin',ln:'',plan:'',amt:0,isAdmin:true,login:'luxor_admin'}));location.href='admin.html';return;}
   document.getElementById('le').style.display='block';
@@ -618,15 +621,13 @@ try{
     const msg=Array.isArray(data.detail)?data.detail.map(e=>e.msg).join('\n'):(data.detail||data.error||'Login already taken');
     alert(msg);if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}return;
   }
-  sessionStorage.setItem('luxor_user',JSON.stringify({fn,ln,plan,rate,tier,amt:0,login,referral_code:data.referral_code||''}));
+  sessionStorage.setItem('luxor_user',JSON.stringify({fn,ln,plan,rate,tier,amt:0,login,referral_code:data.referral_code||'',has_first_deposit_bonus:true}));
+  sessionStorage.setItem('luxor_login', login);
   closeAll();location.href='dashboard.html';
 }catch(err){
-  const users=JSON.parse(localStorage.getItem('luxor_users')||'[]');
-  if(users.find(x=>x.login===login)){alert('Login already taken');if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}return;}
-  users.push({fn,ln,login,pass,plan,rate,tier,amt:0});
-  localStorage.setItem('luxor_users',JSON.stringify(users));
-  sessionStorage.setItem('luxor_user',JSON.stringify({fn,ln,plan,rate,tier,amt:0,login}));
-  closeAll();location.href='dashboard.html';
+  alert('Server error. Please try again later.');
+  if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}
+  return;
 }
 if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}}
 
