@@ -688,7 +688,13 @@ body{padding-bottom:52px}}
 /* ═══ DATA ═══ */
 const U=JSON.parse(sessionStorage.getItem('luxor_user')||'{"fn":"Admin","ln":"","plan":"","rate":"","tier":0,"amt":0}');
 // Гарантируем что логин доступен везде
-if(!U.login) U.login = sessionStorage.getItem("luxor_login") || U.fn || "unknown";
+// Надёжно достаём логин из сессии
+try {
+  const _raw = JSON.parse(sessionStorage.getItem('luxor_user')||'{}');
+  if(!U.login && _raw.login) U.login = _raw.login;
+  if(!U.login) U.login = sessionStorage.getItem('luxor_login') || '';
+  if(U.login) sessionStorage.setItem('luxor_login', U.login);
+} catch(e) {}
 const NAMES=['James W.','Sofia R.','Ahmed K.','Lisa T.','Park J.','Marco V.','Anna S.','Tom H.'];
 const ITEMS=[
 {id:1,cat:'watch',ico:'⌚',name:'Rolex Daytona 116500LN',desc:'Ceramic bezel · White dial · 2023 · Box & Papers',price:24000,funded:77,ret:[32,48],days:[7,21],inv:18,min:100,badge:'HOT',likes:124,views:47,closes:62},
@@ -1216,24 +1222,34 @@ showModal(`<div style="text-align:center;margin-bottom:10px"><h3 style="font-fam
 let payTimerInterval;function startPayTimer(){clearInterval(payTimerInterval);let sec=899;payTimerInterval=setInterval(()=>{if(sec<=0){clearInterval(payTimerInterval);return}sec--;const m=Math.floor(sec/60),s=sec%60;const el=document.getElementById('payTimer');if(el)el.textContent=m+':'+String(s).padStart(2,'0')},1000)}
 function selectPay(el){}
 function processTopUp(){const amt=window._topUpAmount||0;if(!amt||amt<100){alert('Minimum $100');return}
-clearInterval(payTimerInterval);state.wallet+=amt;closeModal();addTx('Wallet deposit +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState();
-// ── ОТПРАВКА ДЕПОЗИТА НА БЭКЕНД ──
-(function(){
-  const userLogin = U.login || sessionStorage.getItem('luxor_login') || U.fn;
-  const useBonus  = !!(U.has_first_deposit_bonus) && amt >= 500;
-  fetch('https://luxor-backend-production.up.railway.app/api/deposit', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ user_login: userLogin, amount: amt, use_bonus: useBonus })
-  }).then(r=>r.json()).then(res=>{
-    if(res.ok && res.bonus_applied){
-      // Начисляем бонус на локальный стейт тоже
-      const bonus = res.bonus_amount || 0;
-      state.wallet += bonus;
-      addTx('First deposit bonus +$'+bonus.toLocaleString(),'done');
-      updateUI(); saveState();
+clearInterval(payTimerInterval);
+// ── ЗАЧИСЛЯЕМ НА БЭКЕНД АВТОМАТИЧЕСКИ ──
+(async function(){
+  try{
+    const userLogin = U.login || sessionStorage.getItem('luxor_login');
+    if(!userLogin){state.wallet+=amt;closeModal();addTx('Wallet deposit +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState();return;}
+    const useBonus = !!(U.has_first_deposit_bonus) && amt >= 500;
+    const res = await fetch('https://luxor-backend-production.up.railway.app/api/deposit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_login:userLogin, amount:amt, use_bonus:useBonus})
+    });
+    const data = await res.json();
+    if(data.ok){
+      state.wallet = data.new_wallet_balance;
+      closeModal();
+      addTx('Wallet deposit +$'+amt.toLocaleString(),'done');
+      if(data.bonus_applied && data.bonus_amount>0){
+        addTx('First deposit bonus +$'+data.bonus_amount.toLocaleString(),'done');
+      }
+      U.has_first_deposit_bonus = false;
+      updateUI();showConfetti();saveState();
+    } else {
+      state.wallet+=amt;closeModal();addTx('Wallet deposit +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState();
     }
-  }).catch(e=>console.error('Deposit API error:',e));
+  }catch(e){
+    state.wallet+=amt;closeModal();addTx('Wallet deposit +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState();
+  }
 })();}
 
 /* ═══ POOL INVEST ═══ */
