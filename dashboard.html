@@ -673,10 +673,69 @@ body{padding-bottom:52px}}
 <div class="confetti-wrap" id="confettiWrap"></div>
 
 <script>
-/* ═══ CONFIG & DATA ═══ */
+/* ═══ BACKEND ═══ */
 const API='https://luxor-backend-production.up.railway.app';
-const U=JSON.parse(sessionStorage.getItem('luxor_user')||'{}');
-if(!U.login){location.href='index.html';}
+
+async function processDeposit(amount,useBonus){
+  try{
+    const r=await fetch(API+'/api/deposit',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_login:U.login||U.fn,amount:parseFloat(amount),use_bonus:!!useBonus})});
+    const d=await r.json();
+    if(d.ok){
+      state.wallet=d.new_balance;state.balance=d.new_balance;
+      U.hasBonus=false;
+      addTx('Deposit $'+amount+(d.bonus_applied?' (+5% bonus)':''),'done');
+      updateUI();updateBonusBanner();saveState();loadTransactions();
+      return d;
+    }else{alert(d.error||'Error');return null;}
+  }catch(e){alert('Network error');return null;}
+}
+
+async function processWithdrawBackend(amount,wallet){
+  try{
+    const r=await fetch(API+'/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_login:U.login||U.fn,amount:parseFloat(amount),wallet_address:wallet})});
+    const d=await r.json();
+    if(d.ok){
+      state.wallet-=parseFloat(amount);state.balance=state.wallet;
+      addTx('Withdrawal $'+amount+' → '+wallet.substring(0,12)+'...','processing');
+      updateUI();saveState();loadTransactions();return true;
+    }else{alert(d.error||'Error');return false;}
+  }catch(e){alert('Network error');return false;}
+}
+
+async function loadUserFromServer(){
+  const login=U.login||U.fn;if(!login)return;
+  try{
+    const r=await fetch(API+'/api/user/'+login);
+    const d=await r.json();
+    if(d.ok&&d.user){
+      state.wallet=d.user.balance||0;state.balance=d.user.balance||0;
+      U.hasBonus=d.user.has_first_deposit_bonus;
+      updateUI();updateBonusBanner();
+    }
+  }catch(e){}
+}
+
+async function loadTransactions(){
+  const login=U.login||U.fn;if(!login)return;
+  try{
+    const r=await fetch(API+'/api/transactions/'+login);
+    const d=await r.json();
+    if(d.ok&&d.transactions){
+      state.txs=d.transactions.map(t=>({
+        desc:t.note||t.type,
+        amt:(t.type==='withdrawal'?'-':'+')+'\$'+parseFloat(t.amount||0).toFixed(2),
+        time:new Date(t.created_at).toLocaleString(),
+        status:t.status==='completed'?'done':'processing'
+      }));
+      saveState();renderTxs();
+    }
+  }catch(e){}
+}
+
+/* ═══ DATA ═══ */
+const U=JSON.parse(sessionStorage.getItem('luxor_user')||'{"fn":"Admin","ln":"","plan":"","rate":"","tier":0,"amt":0}');
 const NAMES=['James W.','Sofia R.','Ahmed K.','Lisa T.','Park J.','Marco V.','Anna S.','Tom H.'];
 const ITEMS=[
 {id:1,cat:'watch',ico:'⌚',name:'Rolex Daytona 116500LN',desc:'Ceramic bezel · White dial · 2023 · Box & Papers',price:24000,funded:77,ret:[32,48],days:[7,21],inv:18,min:100,badge:'HOT',likes:124,views:47,closes:62},
@@ -696,126 +755,24 @@ let currentView='pools';
 const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
 if(saved)state=saved;
 
-/* ═══ BACKEND FUNCTIONS ═══ */
-async function loadUserFromServer(){
-  try{
-    const r=await fetch(`${API}/api/user/${U.login}`);
-    const d=await r.json();
-    if(d.ok&&d.user){
-      state.wallet=d.user.balance||0;
-      state.balance=d.user.balance||0;
-      U.hasBonus=d.user.has_first_deposit_bonus;
-      updateUI();
-      updateBonusBanner();
-    }
-  }catch(e){console.warn('loadUser',e)}
-}
-
-async function loadTransactions(){
-  try{
-    const r=await fetch(`${API}/api/transactions/${U.login}`);
-    const d=await r.json();
-    if(d.ok){
-      state.txs=d.transactions.map(t=>({
-        desc:t.note||t.type,
-        amt:(t.type==='withdrawal'?'-':'+')+'$'+parseFloat(t.amount).toFixed(2),
-        time:new Date(t.created_at).toLocaleString(),
-        status:t.status==='completed'?'done':'processing'
-      }));
-      saveState();
-      renderTxs();
-    }
-  }catch(e){console.warn('loadTxs',e)}
-}
-
-async function loadServerItems(){
-  try{
-    const r=await fetch(`${API}/api/items`);
-    const d=await r.json();
-    if(d.ok&&d.items&&d.items.length>0){
-      const catMap={watches:'watch',bags:'bag',sneakers:'snkr',jewelry:'jewelry',clothing:'fashion',electronics:'fashion',other:'fashion'};
-      const icoMap={watches:'⌚',bags:'👜',sneakers:'👟',jewelry:'💎',clothing:'👕',electronics:'📱',other:'📦'};
-      d.items.forEach(i=>{
-        ITEMS.push({
-          id:'sv'+i.id, cat:catMap[i.category]||'fashion',
-          ico:i.image_url&&i.image_url.startsWith('data:')?'🖼️':(icoMap[i.category]||'📦'),
-          imgUrl:i.image_url||null,
-          name:i.name, desc:i.description||'Luxury item',
-          price:i.purchase_price,
-          funded:Math.round(((i.filled_slots||0)/(i.total_slots||i.purchase_price||1))*100)||5,
-          ret:[Math.round(i.guaranteed_return)||10, Math.round(i.expected_return)||20],
-          days:[Math.round((i.return_period_days||30)*0.7), i.return_period_days||30],
-          inv:0, min:100, badge:'NEW', likes:0, views:0, closes:(i.return_period_days||30)*24
-        });
-      });
-    }
-  }catch(e){console.warn('loadServerItems',e)}
-  renderMarketplace('all');
-}
-
-/* ═══ DEPOSIT WITH BACKEND ═══ */
-async function processDeposit(amount, useBonus){
-  try{
-    const r=await fetch(`${API}/api/deposit`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({user_login:U.login,amount:parseFloat(amount),use_bonus:!!useBonus})
-    });
-    const d=await r.json();
-    if(d.ok){
-      state.wallet=d.new_balance;
-      state.balance=d.new_balance;
-      U.hasBonus=false;
-      addTx(`Deposit $${amount}${d.bonus_applied?' (+5% bonus)':''}`, 'done');
-      updateUI();
-      updateBonusBanner();
-      saveState();
-      loadTransactions();
-      return d;
-    }else{
-      alert(d.error||'Deposit failed');
-      return null;
-    }
-  }catch(e){alert('Network error');return null}
-}
-
-/* ═══ WITHDRAW WITH BACKEND ═══ */
-async function processWithdraw(amount, wallet_address){
-  try{
-    const r=await fetch(`${API}/api/withdraw`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({user_login:U.login,amount:parseFloat(amount),wallet_address})
-    });
-    const d=await r.json();
-    if(d.ok){
-      state.wallet-=parseFloat(amount);
-      state.balance=state.wallet;
-      addTx(`Withdrawal $${amount} → ${wallet_address.substring(0,12)}...`, 'processing');
-      updateUI();
-      saveState();
-      loadTransactions();
-      return true;
-    }else{
-      alert(d.error||'Withdrawal failed');
-      return false;
-    }
-  }catch(e){alert('Network error');return false}
-}
-
 /* ═══ INIT ═══ */
-try{const un=document.getElementById('userName');if(un)un.textContent=U.fn||U.first_name||'User';
-const ua=document.getElementById('userAvatar');if(ua)ua.textContent=(U.fn||U.first_name||'U')[0].toUpperCase();
-const sn=document.getElementById('setName');if(sn)sn.value=(U.fn||'')+(U.ln?' '+U.ln:'');
-const rc=document.getElementById('refCode');if(rc)rc.textContent='LUXOR-'+(U.fn||'USR').substring(0,3).toUpperCase()+Math.floor(Math.random()*900+100);
+try{const un=document.getElementById('userName');if(un)un.textContent=U.fn;
+const ua=document.getElementById('userAvatar');if(ua)ua.textContent=(U.fn||'U')[0];
+const sn=document.getElementById('setName');if(sn)sn.value=U.fn+(U.ln?' '+U.ln:'');
+const rc=document.getElementById('refCode');if(rc)rc.textContent='LUXOR-'+U.fn.substring(0,3).toUpperCase()+Math.floor(Math.random()*900+100);
 }catch(e){console.warn('init',e)}
+// Set hasBonus default for new users
+if(U.hasBonus===undefined)U.hasBonus=true;
 try{updateUI()}catch(e){console.warn('updateUI',e)}
-try{loadServerItems()}catch(e){renderMarketplace('all')}
-try{loadUserFromServer()}catch(e){}
-try{loadTransactions()}catch(e){}
-try{setInterval(()=>{loadUserFromServer();if(state.myItems.length>0){try{renderMyItems()}catch(e){}}},30000)}catch(e){}
+try{updateBonusBanner()}catch(e){}
+try{renderMarketplace('all')}catch(e){console.warn('renderMk',e)}
+// Load real data from server
+setTimeout(()=>{loadUserFromServer();loadTransactions();},500);
+setInterval(()=>{loadUserFromServer();},30000);
+try{setInterval(()=>{if(state.myItems.length>0){try{renderMyItems()}catch(e){}}},10000)}catch(e){}
 try{if(U.amt>0&&!saved)setTimeout(()=>openPoolInvest(U.plan||'Silver',U.rate||'0.5%/day',U.tier||1),800)}catch(e){}
 
+function saveState(){sessionStorage.setItem('luxor_state2',JSON.stringify(state))}
 
 /* Pool card slider updaters */
 function slUpdate(v){v=parseInt(v);const day=v*0.005;const week=day*7;const total=v+week;
@@ -835,9 +792,12 @@ document.getElementById('ptYear').textContent='$'+Math.round(year).toLocaleStrin
 document.getElementById('ptTotal').textContent='$'+Math.round(total).toLocaleString()}
 
 /* First deposit bonus banner */
-function updateBonusBanner(){const b=document.getElementById('firstDepositBanner');if(!b)return;
-const hasBonus=U.hasBonus!==undefined?U.hasBonus:(state.txs.filter(t=>t.desc&&t.desc.toLowerCase().includes('deposit')).length===0);
-b.style.display=hasBonus?'block':'none';}
+function updateBonusBanner(){
+  const b=document.getElementById('firstDepositBanner');
+  if(!b)return;
+  const show = U.hasBonus===true || (U.hasBonus===undefined && !state.txs.some(t=>t.desc&&t.desc.toLowerCase().includes('deposit')));
+  b.style.display = show ? 'block' : 'none';
+}
 
 /* Quick Invest */
 function quickInvest(amt){if(state.wallet<amt){if(confirm('Insufficient balance. Top up $'+amt+' now?'))openTopUp();return}
@@ -1226,7 +1186,7 @@ showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">S
 </div>
 <button class="btn-outline" onclick="openTopUp()">← Back</button>`)}
 
-function topUpStep3(method){window._useBonus=U.hasBonus&&window._topUpAmount>=500;const amt=window._topUpAmount;
+function topUpStep3(method){window._useBonus=U.hasBonus&&window._topUpAmount>=100;const amt=window._topUpAmount;
 if(method==='card'){showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 3 OF 3 · CARD</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Secure payment</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Amount: <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong></p></div>
 <div style="padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:10px">
 <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:10px;color:var(--t2)"><span>Secured by our payment processor</span><span style="display:flex;gap:4px"><svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect width="28" height="18" rx="2" fill="#1a1f71"/><text x="14" y="12" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="7" fill="#fff">VISA</text></svg><svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect width="28" height="18" rx="2" fill="#000"/><circle cx="11" cy="9" r="5" fill="#eb001b"/><circle cx="17" cy="9" r="5" fill="#f79e1b" opacity=".8"/></svg></span></div>
@@ -1264,13 +1224,14 @@ showModal(`<div style="text-align:center;margin-bottom:10px"><h3 style="font-fam
 <button class="btn-outline" style="margin-top:6px" onclick="topUpStep3('crypto')">← Back</button>`);startPayTimer()}
 let payTimerInterval;function startPayTimer(){clearInterval(payTimerInterval);let sec=899;payTimerInterval=setInterval(()=>{if(sec<=0){clearInterval(payTimerInterval);return}sec--;const m=Math.floor(sec/60),s=sec%60;const el=document.getElementById('payTimer');if(el)el.textContent=m+':'+String(s).padStart(2,'0')},1000)}
 function selectPay(el){}
-async function processTopUp(){const amt=window._topUpAmount||0;if(!amt||amt<100){alert('Minimum $100');return}
-clearInterval(payTimerInterval);
-const useBonus=window._useBonus||false;
-const btn=document.getElementById('confirmPayBtn');if(btn){btn.textContent='Processing...';btn.disabled=true;}
-const result=await processDeposit(amt,useBonus);
-if(result){closeModal();showConfetti();}
-else{if(btn){btn.textContent='CONFIRM PAYMENT';btn.disabled=false;}}}
+async function processTopUp(){
+  const amt=window._topUpAmount||0;
+  if(!amt||amt<100){alert('Minimum $100');return;}
+  clearInterval(payTimerInterval);
+  const useBonus=window._useBonus||false;
+  const result=await processDeposit(amt,useBonus);
+  if(result){closeModal();showConfetti();}
+}
 
 /* ═══ POOL INVEST ═══ */
 function openPoolInvest(plan,rate,tier,presetAmt){
@@ -1303,7 +1264,7 @@ state.balance+=amt+amt*pl.rate;state.free+=amt*pl.rate;
 closeModal();addTx('Pool: '+plan+' +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState()}
 
 /* ═══ WITHDRAW ═══ */
-function openWithdraw(){showModal(`<div style="text-align:center;margin-bottom:12px"><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">Withdraw Funds</h3></div>
+async function openWithdraw(){showModal(`<div style="text-align:center;margin-bottom:12px"><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">Withdraw Funds</h3></div>
 <div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--t3)">Available</span><span style="color:var(--green);font-weight:700">$${Math.round(state.free+state.wallet).toLocaleString()}</span></div></div>
 <div class="input-group"><label>Wallet address</label><input type="text" id="wdWallet" value="${state.savedWallet}" placeholder="Your crypto wallet"></div>
 <div class="input-group"><label>Network</label><select><option>USDT (TRC20)</option><option>ETH (ERC20)</option><option>BTC</option></select></div>
@@ -1313,7 +1274,7 @@ function openWithdraw(){showModal(`<div style="text-align:center;margin-bottom:1
 function processWithdraw(){const amt=parseFloat(document.getElementById('wdAmount')?.value),w=document.getElementById('wdWallet')?.value;
 if(!w||!amt){alert('Fill all fields');return}const avail=state.free+state.wallet;if(amt>avail){alert('Exceeds available balance');return}
 state.savedWallet=w;if(amt<=state.wallet){state.wallet-=amt}else{const rest=amt-state.wallet;state.wallet=0;state.free-=rest;state.balance-=rest}
-const ok=await processWithdraw(amt,wallet);if(ok){closeModal();showGoldRain();}}
+const ok=await processWithdrawBackend(amt,wallet);if(ok){closeModal();showGoldRain();}}
 
 /* ═══ TX ═══ */
 function addTx(desc,status){state.txs.unshift({desc,status,time:new Date().toLocaleTimeString()});renderTxs()}
@@ -1383,7 +1344,7 @@ for(let i=0;i<30;i++){const d=document.createElement('div');d.className='gold-dr
 setTimeout(()=>r.classList.remove('show'),4000)}
 
 /* ═══ MISC ═══ */
-function updateName(v){U.fn=v.split(' ')[0];U.ln=v.split(' ')[1]||'';document.getElementById('userName').textContent=U.fn;document.getElementById('userAvatar').textContent=U.fn[0]}
+function updateName(v){U.fn=v.split(' ')[0];U.ln=v.split(' ')[1]||'';document.getElementById('userName').textContent=U.fn;document.getElementById('userAvatar').textContent=(U.fn||'U')[0]}
 function copyRefCode(){const code=document.getElementById('refCode').textContent;navigator.clipboard?.writeText(code);alert('Copied: '+code)}
 function toggleChat(){document.getElementById('chatPanel').classList.toggle('show')}
 function sendChat(){const inp=document.getElementById('chatInput'),msg=inp.value.trim();if(!msg)return;
