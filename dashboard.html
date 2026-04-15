@@ -713,6 +713,7 @@ let currentPeriod='1W';
 let currentView='pools';
 const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
 if(saved)state=saved;
+state.wallet=0;state.balance=0;
 /* ── ЗАГРУЖАЕМ РЕАЛЬНЫЙ БАЛАНС С БЭКЕНДА ── */
 (async function loadBalanceFromBackend(){
   try{
