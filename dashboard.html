@@ -1331,7 +1331,7 @@ async function depSubmitStart(){
     const res = await fetch(API_URL + '/api/deposit/start', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ user_login:userLogin, amount_usd:amt, currency:cur, use_bonus:useBonus })
+      body: JSON.stringify({ user_login:userLogin, amount_usd:amt, crypto_currency:cur, use_bonus:useBonus })
     });
     const data = await res.json();
 
@@ -1367,7 +1367,7 @@ async function depSubmitStart(){
 
 /* Payment screen: address + QR + locked crypto amount + timer + "I paid" button */
 function depShowPaymentScreen(d){
-  const cur = d.currency;
+  const cur = d.crypto_currency || d.currency;
   const m = COIN_META[cur] || {name:cur, network:cur, sym:'●', warn:cur};
   const addr = d.address;
   const cryptoAmt = d.amount_crypto;
