@@ -1163,96 +1163,422 @@ state.myItems.push({id:i.id,name:i.name,ico:i.ico,invested:amt,pct:(amt/i.price*
 state.balance+=amt;state.free+=0;
 closeModal();addTx('Fraction: '+i.name+' $'+amt.toLocaleString(),'done');updateUI();renderMarketplace('all');showConfetti();saveState();setTimeout(()=>showCertificate(i,amt),500)}
 
-/* ═══ TOP UP ═══ */
-function openTopUp(){showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 1 OF 3</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">How much to deposit?</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Enter amount, then choose payment method</p></div>
-<div class="input-group"><label>Amount in USD</label><input type="number" id="topUpAmt" placeholder="100" min="100" style="font-size:18px;font-weight:700;padding:14px;text-align:center"></div>
-<div style="display:flex;gap:5px;margin-bottom:10px">
-<button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('topUpAmt').value=100">$100</button>
-<button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('topUpAmt').value=500">$500</button>
-<button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('topUpAmt').value=1000">$1,000</button>
-<button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('topUpAmt').value=5000">$5,000</button>
-</div>
-<button class="btn-gold" onclick="topUpStep2()">CONTINUE →</button>`)}
+/* ═══ TOP UP / DEPOSIT FLOW (Phase 2) ═══ */
+/* Flow: choose bonus → choose coin+amount → pay screen (QR + address + locked crypto amount + 15min timer) → loader (polling) → success/rejected */
 
-function topUpStep2(){const amt=parseFloat(document.getElementById('topUpAmt')?.value);if(!amt||amt<100){alert('Minimum $100');return}
-window._topUpAmount=amt;
-showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 2 OF 3</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">Choose payment method</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Depositing <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong></p></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-<div onclick="topUpStep3('crypto')" style="padding:20px;background:var(--bg2);border:2px solid var(--bd);border-radius:10px;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--bd)'">
-<div style="font-size:36px;margin-bottom:6px">₿</div><div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px">CRYPTOCURRENCY</div><div style="font-size:9px;color:var(--t3);margin-top:4px">USDT · ETH · BTC · SOL · BNB</div></div>
-<div onclick="topUpStep3('card')" style="padding:20px;background:var(--bg2);border:2px solid var(--bd);border-radius:10px;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--bd)'">
-<div style="font-size:32px;margin-bottom:6px">💳</div><div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px">CARD PAYMENT</div><div style="font-size:9px;color:var(--t3);margin-top:4px">Visa · Mastercard · 3D Secure</div></div>
-</div>
-<button class="btn-outline" onclick="openTopUp()">← Back</button>`)}
+const API_URL = 'https://luxor-backend-production.up.railway.app';
 
-function topUpStep3(method){const amt=window._topUpAmount;
-if(method==='card'){showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 3 OF 3 · CARD</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Secure payment</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Amount: <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong></p></div>
-<div style="padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:10px">
-<div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:10px;color:var(--t2)"><span>Secured by our payment processor</span><span style="display:flex;gap:4px"><svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect width="28" height="18" rx="2" fill="#1a1f71"/><text x="14" y="12" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="7" fill="#fff">VISA</text></svg><svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect width="28" height="18" rx="2" fill="#000"/><circle cx="11" cy="9" r="5" fill="#eb001b"/><circle cx="17" cy="9" r="5" fill="#f79e1b" opacity=".8"/></svg></span></div>
-<div class="input-group"><label>Card Number</label><input type="text" placeholder="0000 0000 0000 0000" maxlength="19" id="cardNum"></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div class="input-group"><label>Expiry</label><input type="text" placeholder="MM/YY" maxlength="5"></div><div class="input-group"><label>CVV</label><input type="password" placeholder="•••" maxlength="4"></div></div>
-<div class="input-group"><label>Cardholder Name</label><input type="text" placeholder="JOHN DOE"></div>
-<div style="font-size:8px;color:var(--t3);margin-top:4px;line-height:1.5">🔒 3D Secure verification required. Your card data is encrypted end-to-end and never stored on our servers.</div>
-</div>
-<button class="btn-gold" onclick="processTopUp()">PAY $${amt.toLocaleString()}</button>
-<button class="btn-outline" style="margin-top:6px" onclick="topUpStep2()">← Back</button>`);return}
-// Crypto selection
-showModal(`<div style="text-align:center;margin-bottom:14px"><div class="stag">STEP 3 OF 3 · CRYPTO</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Select cryptocurrency</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Amount: <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong></p></div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
-<div class="pay-m" onclick="showCryptoQR('usdt','TRC20')"><span class="symbol">₮</span>USDT<div style="font-size:7px;color:var(--t3);margin-top:2px">TRC20</div></div>
-<div class="pay-m" onclick="showCryptoQR('eth','ERC20')"><span class="symbol">Ξ</span>ETH<div style="font-size:7px;color:var(--t3);margin-top:2px">ERC20</div></div>
-<div class="pay-m" onclick="showCryptoQR('btc','Bitcoin')"><span class="symbol">₿</span>BTC<div style="font-size:7px;color:var(--t3);margin-top:2px">Bitcoin</div></div>
-<div class="pay-m" onclick="showCryptoQR('sol','Solana')"><span class="symbol">◎</span>SOL<div style="font-size:7px;color:var(--t3);margin-top:2px">Solana</div></div>
-<div class="pay-m" onclick="showCryptoQR('bnb','BEP20')"><span class="symbol">◆</span>BNB<div style="font-size:7px;color:var(--t3);margin-top:2px">BEP20</div></div>
-<div class="pay-m" onclick="showCryptoQR('trx','TRC20')"><span class="symbol">◊</span>TRX<div style="font-size:7px;color:var(--t3);margin-top:2px">TRC20</div></div>
-</div>
-<button class="btn-outline" onclick="topUpStep2()">← Back</button>`)}
+/* State for current deposit session */
+window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
 
-function showCryptoQR(coin,network){const amt=window._topUpAmount;const coinNames={usdt:'USDT',eth:'Ethereum',btc:'Bitcoin',sol:'Solana',bnb:'BNB',trx:'TRON'};
-showModal(`<div style="text-align:center;margin-bottom:10px"><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Send ${coinNames[coin]}</h3><p style="font-size:11px;color:var(--t3);margin-top:4px">Network: <strong style="color:var(--gold)">${network}</strong></p></div>
-<div style="text-align:center;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:10px">
-<div style="width:150px;height:150px;background:#fff;border:2px solid var(--bd);border-radius:8px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" width="120" height="120"><rect fill="#fff" width="100" height="100"/><g fill="#000"><rect x="5" y="5" width="25" height="25"/><rect x="70" y="5" width="25" height="25"/><rect x="5" y="70" width="25" height="25"/><rect x="8" y="8" width="19" height="19" fill="#fff"/><rect x="73" y="8" width="19" height="19" fill="#fff"/><rect x="8" y="73" width="19" height="19" fill="#fff"/><rect x="11" y="11" width="13" height="13"/><rect x="76" y="11" width="13" height="13"/><rect x="11" y="76" width="13" height="13"/><rect x="40" y="40" width="20" height="20"/><rect x="35" y="5" width="5" height="5"/><rect x="50" y="10" width="5" height="5"/><rect x="55" y="35" width="5" height="5"/><rect x="40" y="60" width="5" height="5"/></g></svg></div>
-<div style="font-size:10px;color:var(--t3);margin-bottom:4px">Amount to send</div>
-<div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px">$${amt.toLocaleString()} ${coin.toUpperCase()}</div>
-<div style="font-size:9px;color:var(--t3);margin-bottom:4px">Deposit address (${network})</div>
-<div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--t2);word-break:break-all;background:var(--bg3);padding:8px;border-radius:4px;margin-bottom:8px;cursor:pointer" onclick="navigator.clipboard?.writeText('TXqR7nM3k9Fp2mE8vN5qL4jH7aB2cD')" title="Click to copy">TXqR7nM3k9Fp2mE8vN5qL4jH7aB2cD</div>
-<div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;background:rgba(192,57,43,.08);border-radius:4px;margin-bottom:4px"><span style="font-size:14px">⏱</span><span style="font-size:11px;font-weight:700;color:var(--red)" id="payTimer">14:59</span></div>
-<div style="font-size:9px;color:var(--t3)">Complete payment within 15 minutes or transaction expires</div>
-</div>
-<button class="btn-gold" onclick="processTopUp()">I'VE PAID →</button>
-<button class="btn-outline" style="margin-top:6px" onclick="topUpStep3('crypto')">← Back</button>`);startPayTimer()}
-let payTimerInterval;function startPayTimer(){clearInterval(payTimerInterval);let sec=899;payTimerInterval=setInterval(()=>{if(sec<=0){clearInterval(payTimerInterval);return}sec--;const m=Math.floor(sec/60),s=sec%60;const el=document.getElementById('payTimer');if(el)el.textContent=m+':'+String(s).padStart(2,'0')},1000)}
-function selectPay(el){}
-function processTopUp(){const amt=window._topUpAmount||0;if(!amt||amt<100){alert('Minimum $100');return}
-clearInterval(payTimerInterval);
-// ── ЗАЧИСЛЯЕМ НА БЭКЕНД АВТОМАТИЧЕСКИ ──
-(async function(){
+/* Coin pretty names & network labels */
+const COIN_META = {
+  'USDT-TRC20': { name:'USDT', network:'TRON (TRC20)', sym:'₮', warn:'TRON network only' },
+  'USDT-ERC20': { name:'USDT', network:'Ethereum (ERC20)', sym:'₮', warn:'Ethereum network only' },
+  'BTC':        { name:'Bitcoin', network:'Bitcoin', sym:'₿', warn:'Bitcoin network only' },
+  'ETH':        { name:'Ethereum', network:'Ethereum (ERC20)', sym:'Ξ', warn:'Ethereum network only' },
+  'TON':        { name:'Toncoin', network:'TON', sym:'◆', warn:'TON network only' }
+};
+
+/* STEP 1: bonus choice (if eligible) OR jump straight to amount */
+function openTopUp(){
+  // Clear any prior session state
+  if(window._dep.timerInt) clearInterval(window._dep.timerInt);
+  if(window._dep.pollInt) clearInterval(window._dep.pollInt);
+  window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
+
+  const eligible = !!(U.has_first_deposit_bonus);
+  if(eligible){
+    // Show bonus-choice card
+    showModal(`<div style="text-align:center;margin-bottom:14px">
+      <div class="stag">STEP 1 OF 3</div>
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">Deposit options</h3>
+      <p style="font-size:11px;color:var(--t3);margin-top:4px">You qualify for a first deposit bonus</p>
+    </div>
+    <div style="display:grid;gap:10px;margin-bottom:10px">
+      <div onclick="depSetBonus(true)" style="padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;border-radius:10px;cursor:pointer;text-align:center;position:relative">
+        <div style="position:absolute;top:8px;right:10px;font-size:9px;font-weight:700;background:#0a0a0a;color:var(--gold);padding:3px 8px;border-radius:3px;letter-spacing:1px">RECOMMENDED</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">🎁 WITH BONUS +5%</div>
+        <div style="font-size:11px;font-weight:600;opacity:.85">Get +5% extra on deposits of $500 or more</div>
+        <div style="font-size:10px;font-weight:700;margin-top:6px">Example: $1,000 → $1,050</div>
+      </div>
+      <div onclick="depSetBonus(false)" style="padding:16px;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;cursor:pointer;text-align:center;transition:border .2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--bd)'">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:2px">REGULAR DEPOSIT</div>
+        <div style="font-size:10px;color:var(--t3)">Deposit any amount · No bonus</div>
+      </div>
+    </div>
+    <div style="font-size:9px;color:var(--t3);text-align:center;line-height:1.5">The bonus is a one-time offer for your first deposit. After use, it will no longer be available.</div>`);
+  } else {
+    depSetBonus(false);
+  }
+}
+
+function depSetBonus(useBonus){
+  window._dep.useBonus = !!useBonus;
+  depStepAmount();
+}
+
+/* STEP 2: amount + currency */
+async function depStepAmount(){
+  const useBonus = window._dep.useBonus;
+  const minHint = useBonus ? '500' : '100';
+  const stepLabel = U.has_first_deposit_bonus ? 'STEP 2 OF 3' : 'STEP 1 OF 2';
+
+  showModal(`<div style="text-align:center;margin-bottom:14px">
+    <div class="stag">${stepLabel}</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">Amount & currency</h3>
+    ${useBonus?'<p style="font-size:11px;color:var(--gold);margin-top:4px;font-weight:600">🎁 +5% bonus applied (min $500)</p>':'<p style="font-size:11px;color:var(--t3);margin-top:4px">Enter amount and choose cryptocurrency</p>'}
+  </div>
+  <div class="input-group">
+    <label>Amount in USD${useBonus?' (min $500)':''}</label>
+    <input type="number" id="depAmt" placeholder="${minHint}" min="${useBonus?500:100}" style="font-size:18px;font-weight:700;padding:14px;text-align:center" oninput="depRenderBonusLine()">
+  </div>
+  <div style="display:flex;gap:5px;margin-bottom:10px">
+    <button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('depAmt').value=${useBonus?500:100};depRenderBonusLine()">$${useBonus?500:100}</button>
+    <button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('depAmt').value=1000;depRenderBonusLine()">$1,000</button>
+    <button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('depAmt').value=5000;depRenderBonusLine()">$5,000</button>
+    <button style="flex:1;padding:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;font-weight:600" onclick="document.getElementById('depAmt').value=10000;depRenderBonusLine()">$10,000</button>
+  </div>
+  <div id="depBonusLine" style="font-size:11px;text-align:center;margin-bottom:10px;color:var(--t3)"></div>
+  <div class="input-group">
+    <label>Cryptocurrency</label>
+    <div id="depCoinList" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div style="grid-column:span 2;text-align:center;padding:16px;color:var(--t3);font-size:11px">Loading available currencies…</div>
+    </div>
+  </div>
+  <div id="depErr" style="display:none;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);color:var(--red);padding:10px;border-radius:6px;font-size:11px;margin-bottom:10px;text-align:center"></div>
+  <button class="btn-gold" onclick="depSubmitStart()">CONTINUE →</button>
+  ${U.has_first_deposit_bonus?'<button class="btn-outline" style="margin-top:6px" onclick="openTopUp()">← Back</button>':''}`);
+
+  depRenderBonusLine();
+  // Load available currencies from backend
   try{
-    const userLogin = U.login || sessionStorage.getItem('luxor_login');
-    if(!userLogin){state.wallet+=amt;closeModal();addTx('Wallet deposit +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState();return;}
-    const useBonus = !!(U.has_first_deposit_bonus) && amt >= 500;
-    const res = await fetch('https://luxor-backend-production.up.railway.app/api/deposit',{
+    const res = await fetch(API_URL + '/api/crypto/currencies');
+    const data = await res.json();
+    const list = document.getElementById('depCoinList');
+    if(!list) return;
+    const coins = (data && data.ok && Array.isArray(data.currencies)) ? data.currencies : [];
+    if(coins.length === 0){
+      list.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:16px;color:var(--red);font-size:11px">No payment methods available right now. Please try again later.</div>';
+      return;
+    }
+    list.innerHTML = coins.map(c=>{
+      const m = COIN_META[c] || {name:c, network:c, sym:'●'};
+      return `<div class="pay-m" data-cur="${c}" onclick="depPickCoin('${c}',this)" style="padding:12px 6px">
+        <span class="symbol">${m.sym}</span>${m.name}
+        <div style="font-size:8px;color:var(--t3);margin-top:2px">${m.network}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    const list = document.getElementById('depCoinList');
+    if(list) list.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:16px;color:var(--red);font-size:11px">Network error. Check connection and try again.</div>';
+  }
+}
+
+function depRenderBonusLine(){
+  const el = document.getElementById('depBonusLine'); if(!el) return;
+  const amt = parseFloat(document.getElementById('depAmt')?.value || 0);
+  if(!amt){ el.innerHTML=''; return; }
+  if(window._dep.useBonus){
+    if(amt < 500){
+      el.style.color = 'var(--red)';
+      el.innerHTML = '⚠ Minimum $500 required for bonus';
+    } else {
+      const bonus = Math.round(amt * 0.05 * 100)/100;
+      el.style.color = 'var(--gold)';
+      el.innerHTML = `🎁 You'll get <strong>$${(amt+bonus).toLocaleString()}</strong> (deposit $${amt.toLocaleString()} + bonus $${bonus.toLocaleString()})`;
+    }
+  } else {
+    el.style.color = 'var(--t3)';
+    el.innerHTML = `You'll receive <strong style="color:var(--green)">$${amt.toLocaleString()}</strong> to your balance`;
+  }
+}
+
+function depPickCoin(cur, el){
+  window._dep.currency = cur;
+  document.querySelectorAll('#depCoinList .pay-m').forEach(n=>n.classList.remove('selected'));
+  if(el) el.classList.add('selected');
+}
+
+/* STEP 3: Submit to backend, get address + crypto amount + timer */
+async function depSubmitStart(){
+  const errEl = document.getElementById('depErr');
+  const showErr = (msg) => { if(errEl){ errEl.style.display='block'; errEl.textContent = msg; } };
+  if(errEl){ errEl.style.display='none'; errEl.textContent=''; }
+
+  const amt = parseFloat(document.getElementById('depAmt')?.value || 0);
+  const cur = window._dep.currency;
+  const useBonus = window._dep.useBonus;
+
+  if(!amt || amt < 100){ showErr('Minimum deposit is $100'); return; }
+  if(useBonus && amt < 500){ showErr('Minimum $500 required to use the bonus'); return; }
+  if(!cur){ showErr('Please select a cryptocurrency'); return; }
+
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin){ showErr('Session expired. Please log in again.'); return; }
+
+  window._dep.amount = amt;
+
+  // Show "creating..." loader inside modal
+  showModal(`<div style="text-align:center;padding:40px 20px">
+    <div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">PREPARING PAYMENT</div>
+    <div style="font-size:11px;color:var(--t3);margin-top:6px">Fetching current rate…</div>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+
+  try{
+    const res = await fetch(API_URL + '/api/deposit/start', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({user_login:userLogin, amount:amt, use_bonus:useBonus})
+      body: JSON.stringify({ user_login:userLogin, amount_usd:amt, currency:cur, use_bonus:useBonus })
     });
     const data = await res.json();
-    if(data.ok){
-      state.wallet = data.new_wallet_balance;
-      closeModal();
-      addTx('Wallet deposit +$'+amt.toLocaleString(),'done');
-      if(data.bonus_applied && data.bonus_amount>0){
-        addTx('First deposit bonus +$'+data.bonus_amount.toLocaleString(),'done');
-      }
-      U.has_first_deposit_bonus = false;
-      updateUI();showConfetti();saveState();
-    } else {
-      state.wallet+=amt;closeModal();addTx('Wallet deposit +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState();
+
+    if(!data || !data.ok){
+      const code = data?.error || 'unknown';
+      const msg = {
+        'rate_unavailable':'Exchange rate temporarily unavailable. Please try again in a minute.',
+        'bonus_min_amount_not_met':'Bonus requires a minimum of $500',
+        'bonus_already_used':'Bonus already used on a previous deposit',
+        'no_wallets_available':'This currency is temporarily unavailable',
+        'unknown_currency':'Selected currency is not supported',
+        'user_not_found':'Session error. Please log in again.'
+      }[code] || ('Error: ' + code);
+      // go back to amount screen and show error
+      window._dep.useBonus = useBonus; // preserve
+      window._dep.currency = cur;
+      depStepAmount();
+      setTimeout(()=>{ const e=document.getElementById('depErr'); if(e){ e.style.display='block'; e.textContent=msg; } }, 100);
+      return;
     }
+
+    // Success → show payment screen
+    window._dep.depositId = data.deposit_id;
+    window._dep.paymentData = data;
+    depShowPaymentScreen(data);
   }catch(e){
-    state.wallet+=amt;closeModal();addTx('Wallet deposit +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState();
+    window._dep.useBonus = useBonus;
+    window._dep.currency = cur;
+    depStepAmount();
+    setTimeout(()=>{ const er=document.getElementById('depErr'); if(er){ er.style.display='block'; er.textContent='Network error. Please try again.'; } }, 100);
   }
-})();}
+}
+
+/* Payment screen: address + QR + locked crypto amount + timer + "I paid" button */
+function depShowPaymentScreen(d){
+  const cur = d.currency;
+  const m = COIN_META[cur] || {name:cur, network:cur, sym:'●', warn:cur};
+  const addr = d.address;
+  const cryptoAmt = d.amount_crypto;
+  const rate = d.exchange_rate;
+  const usdAmt = d.amount_usd;
+  const bonus = d.bonus_amount || 0;
+  const totalCredit = usdAmt + bonus;
+  const expiresAt = d.rate_locked_until_ts ? d.rate_locked_until_ts*1000 : (Date.now() + 15*60*1000);
+
+  const qrData = cur.startsWith('BTC') ? `bitcoin:${addr}?amount=${cryptoAmt}` : (cur==='ETH' || cur.startsWith('USDT-ERC')) ? `ethereum:${addr}` : addr;
+
+  showModal(`<div style="text-align:center;margin-bottom:12px">
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Send ${m.name}</h3>
+    <p style="font-size:11px;color:var(--t3);margin-top:4px">Network: <strong style="color:var(--gold)">${m.network}</strong></p>
+  </div>
+
+  <div style="padding:10px 12px;background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.3);border-radius:8px;margin-bottom:10px;font-size:11px;color:var(--red);text-align:center;line-height:1.5">
+    <strong>⚠ ${m.warn}</strong><br>
+    <span style="font-size:10px;color:var(--t2)">Sending from a different network will result in permanent loss of funds</span>
+  </div>
+
+  <div style="text-align:center;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:10px">
+    <div id="depQr" style="width:170px;height:170px;background:#fff;border:2px solid var(--bd);border-radius:8px;margin:0 auto 10px;padding:8px;display:flex;align-items:center;justify-content:center"></div>
+
+    <div style="font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:2px">SEND EXACTLY</div>
+    <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);margin-bottom:4px;cursor:pointer" onclick="depCopy('${cryptoAmt}',this)" title="Tap to copy">${cryptoAmt} <span style="font-size:14px">${m.name}</span></div>
+    <div style="font-size:10px;color:var(--t3);margin-bottom:8px">≈ $${usdAmt.toLocaleString()} USD${bonus>0?` · +$${bonus} bonus`:''} · rate: 1 ${m.name} ≈ $${Number(rate).toLocaleString()}</div>
+
+    <div style="font-size:9px;color:var(--t3);margin-bottom:4px">DEPOSIT ADDRESS (${m.network})</div>
+    <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--t);word-break:break-all;background:var(--bg3);padding:10px;border-radius:4px;margin-bottom:8px;cursor:pointer" onclick="depCopy('${addr}',this)" title="Tap to copy">${addr}</div>
+
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;background:rgba(192,57,43,.08);border-radius:4px">
+      <span style="font-size:14px">⏱</span>
+      <span style="font-size:12px;font-weight:700;color:var(--red)">Rate locked for</span>
+      <span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--red)" id="depTimer">15:00</span>
+    </div>
+    <div style="font-size:9px;color:var(--t3);margin-top:4px">After expiry you'll need to request a new quote</div>
+  </div>
+
+  <div style="font-size:10px;color:var(--t2);padding:8px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;margin-bottom:10px;line-height:1.5">
+    <strong style="color:var(--t)">After payment:</strong> Click "I've paid" below. Our team will verify the transaction on-chain and credit your balance within a few minutes.
+  </div>
+
+  <button class="btn-gold" id="depPaidBtn" onclick="depIPaid()">I'VE PAID →</button>
+  <button class="btn-outline" style="margin-top:6px" onclick="depCancel()">Cancel</button>`);
+
+  // Render QR via external lib (qrcode.js from CDN if available, else fallback)
+  depRenderQR(qrData);
+  // Start countdown
+  depStartTimer(expiresAt);
+}
+
+function depRenderQR(data){
+  const holder = document.getElementById('depQr');
+  if(!holder) return;
+  // Use public QR service (google charts fallback is dead; use api.qrserver.com)
+  const url = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=0&data=' + encodeURIComponent(data);
+  holder.innerHTML = `<img src="${url}" alt="QR" style="width:100%;height:100%;object-fit:contain" onerror="this.outerHTML='<div style=\\'font-size:10px;color:#333;text-align:center;padding:20px\\'>QR unavailable<br>Use address below</div>'">`;
+}
+
+function depCopy(text, el){
+  navigator.clipboard?.writeText(text);
+  if(el){
+    const orig = el.style.background;
+    el.style.background = 'rgba(45,143,62,.2)';
+    const hint = document.createElement('div');
+    hint.textContent = '✓ Copied';
+    hint.style.cssText = 'font-size:9px;color:var(--green);margin-top:4px;font-weight:700';
+    el.appendChild(hint);
+    setTimeout(()=>{ el.style.background=orig; if(hint.parentNode) hint.remove(); }, 1500);
+  }
+}
+
+function depStartTimer(expiresAtMs){
+  if(window._dep.timerInt) clearInterval(window._dep.timerInt);
+  const tick = () => {
+    const left = Math.max(0, Math.floor((expiresAtMs - Date.now())/1000));
+    const el = document.getElementById('depTimer');
+    if(!el){ clearInterval(window._dep.timerInt); return; }
+    const m = Math.floor(left/60), s = left%60;
+    el.textContent = m + ':' + String(s).padStart(2,'0');
+    if(left <= 0){
+      clearInterval(window._dep.timerInt);
+      el.textContent = 'EXPIRED';
+      const btn = document.getElementById('depPaidBtn');
+      if(btn){ btn.disabled = true; btn.style.opacity = '.5'; btn.textContent = 'RATE EXPIRED — START OVER'; btn.onclick = openTopUp; }
+    }
+  };
+  tick();
+  window._dep.timerInt = setInterval(tick, 1000);
+}
+
+/* User clicks "I've paid" → mark awaiting → pending, start polling */
+async function depIPaid(){
+  const id = window._dep.depositId;
+  if(!id){ return; }
+  const btn = document.getElementById('depPaidBtn');
+  if(btn){ btn.disabled = true; btn.style.opacity = '.6'; btn.textContent = 'Submitting...'; }
+
+  try{
+    const res = await fetch(API_URL + `/api/deposit/${id}/paid`, { method:'POST' });
+    const data = await res.json();
+    if(!data || !data.ok){
+      // show error but let user retry
+      if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.textContent = "I'VE PAID →"; }
+      alert('Could not submit: ' + (data?.error || 'try again'));
+      return;
+    }
+    depShowWaiting();
+    depStartPolling(id);
+  }catch(e){
+    if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.textContent = "I'VE PAID →"; }
+    alert('Network error. Please try again.');
+  }
+}
+
+/* Waiting screen with polling */
+function depShowWaiting(){
+  if(window._dep.timerInt) clearInterval(window._dep.timerInt);
+  showModal(`<div style="text-align:center;padding:40px 20px">
+    <div style="width:56px;height:56px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:6px">VERIFYING PAYMENT</h3>
+    <p style="font-size:12px;color:var(--t2);line-height:1.6;max-width:320px;margin:0 auto">Our team is verifying your transaction on the blockchain. This usually takes a few minutes.</p>
+    <p style="font-size:10px;color:var(--t3);margin-top:16px">You can safely close this window — we'll email you when the deposit is credited.</p>
+    <button class="btn-outline" style="margin-top:20px;max-width:200px" onclick="closeModal()">Close</button>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+}
+
+function depStartPolling(id){
+  if(window._dep.pollInt) clearInterval(window._dep.pollInt);
+  let tries = 0;
+  const maxTries = 400; // ~20 minutes at 3s interval
+  const poll = async () => {
+    tries++;
+    if(tries > maxTries){ clearInterval(window._dep.pollInt); return; }
+    try{
+      const res = await fetch(API_URL + `/api/deposit/${id}/status`);
+      const data = await res.json();
+      if(!data || !data.ok) return;
+      if(data.status === 'completed'){
+        clearInterval(window._dep.pollInt);
+        depShowSuccess(data);
+      } else if(data.status === 'rejected'){
+        clearInterval(window._dep.pollInt);
+        depShowRejected(data);
+      }
+      // else keep polling (pending / awaiting_payment)
+    }catch(e){ /* ignore transient errors */ }
+  };
+  poll();
+  window._dep.pollInt = setInterval(poll, 3000);
+}
+
+function depShowSuccess(data){
+  const credited = (data.amount_usd || 0) + (data.bonus_amount || 0);
+  // Update local balance & refresh UI
+  if(typeof refreshUserFromBackend === 'function'){ try{ refreshUserFromBackend(); }catch(e){} }
+  state.wallet = (state.wallet || 0) + credited;
+  addTx('Deposit +$'+ (data.amount_usd||0).toLocaleString(), 'done');
+  if(data.bonus_amount && data.bonus_amount > 0){
+    addTx('First deposit bonus +$'+ data.bonus_amount.toLocaleString(), 'done');
+    U.has_first_deposit_bonus = false;
+    try{ sessionStorage.setItem('luxor_user', JSON.stringify(U)); }catch(e){}
+  }
+  updateUI(); saveState();
+
+  showModal(`<div style="text-align:center;padding:24px 12px">
+    <div style="width:72px;height:72px;background:var(--green);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff">✓</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:4px">DEPOSIT CREDITED</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:16px">Your funds are now available in your wallet</p>
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-bottom:16px;text-align:left">
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t3)">Deposit</span><span style="font-weight:700">+$${(data.amount_usd||0).toLocaleString()}</span></div>
+      ${data.bonus_amount>0?`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--gold)">Bonus (+5%)</span><span style="color:var(--gold);font-weight:700">+$${data.bonus_amount.toLocaleString()}</span></div>`:''}
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-top:1px solid var(--bd);margin-top:4px"><span style="font-weight:700">Total credited</span><span style="color:var(--green);font-weight:700">+$${credited.toLocaleString()}</span></div>
+    </div>
+    <button class="btn-gold" onclick="closeModal()">CONTINUE</button>
+  </div>`);
+  showConfetti();
+}
+
+function depShowRejected(data){
+  const reason = data.rejection_reason || 'Payment not received';
+  showModal(`<div style="text-align:center;padding:20px 12px">
+    <div style="width:64px;height:64px;background:rgba(192,57,43,.15);border:2px solid var(--red);border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--red)">✕</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">PAYMENT NOT CONFIRMED</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:14px;line-height:1.5">Our team could not confirm your payment on-chain.</p>
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:10px;font-size:11px;color:var(--t2);margin-bottom:14px;text-align:left;line-height:1.5">
+      <strong style="color:var(--t)">Reason:</strong> ${reason}
+    </div>
+    <div style="font-size:11px;color:var(--t2);margin-bottom:14px;line-height:1.6">
+      If you believe this is an error and you did send the payment, please contact us at<br>
+      <a href="mailto:support@luxorinvest.com" style="color:var(--gold);font-weight:600">support@luxorinvest.com</a> with your transaction hash.
+    </div>
+    <button class="btn-outline" onclick="closeModal()">Close</button>
+  </div>`);
+}
+
+function depCancel(){
+  if(window._dep.timerInt) clearInterval(window._dep.timerInt);
+  if(window._dep.pollInt) clearInterval(window._dep.pollInt);
+  window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
+  closeModal();
+}
+
+/* Legacy shims — old code elsewhere still references these names */
+function topUpStep2(){ depStepAmount(); }
+function topUpStep3(){ depStepAmount(); }
+function showCryptoQR(){ /* no-op; old entry point */ }
+function processTopUp(){ depSubmitStart(); }
+function selectPay(){}
 
 /* ═══ POOL INVEST ═══ */
 function openPoolInvest(plan,rate,tier,presetAmt){
