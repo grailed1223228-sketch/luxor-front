@@ -724,6 +724,30 @@ const ITEMS=[
 let state={positions:[],myItems:[],favorites:[],balance:0,free:0,wallet:0,txs:[],savedWallet:''};
 let currentPeriod='1W';
 let currentView='pools';
+
+/* ═══ API HELPERS — ОБЯЗАТЕЛЬНО ДО loadBalanceFromBackend! ═══ */
+const API_URL = 'https://luxor-backend-production.up.railway.app';
+
+function _token(){ return sessionStorage.getItem('luxor_token') || ''; }
+function _authHeaders(){
+  const t = _token();
+  return t ? { 'Authorization': 'Bearer ' + t } : {};
+}
+async function apiFetch(path, opts){
+  opts = opts || {};
+  const headers = Object.assign({}, opts.headers || {}, _authHeaders());
+  if(opts.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+  const r = await fetch(API_URL + path, Object.assign({}, opts, {headers}));
+  if(r.status === 401){
+    sessionStorage.removeItem('luxor_token');
+    sessionStorage.removeItem('luxor_user');
+    sessionStorage.removeItem('luxor_login');
+    location.href = 'index.html';
+    throw new Error('Session expired');
+  }
+  return r;
+}
+
 const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
 if(saved)state=saved;
 state.wallet=0;state.balance=0;
@@ -735,21 +759,33 @@ state.closedItems=[];
 (async function loadBalanceFromBackend(){
   try{
     const userLogin = U.login || sessionStorage.getItem('luxor_login');
-    if(!userLogin || userLogin==='unknown') return;
-    const r = await apiFetch('/api/user/'+userLogin);
+    if(!userLogin || userLogin==='unknown'){
+      console.warn('[balance] no userLogin — redirect to login');
+      location.href='index.html';
+      return;
+    }
+    console.log('[balance] loading for:', userLogin);
+    const r = await apiFetch('/api/user/'+encodeURIComponent(userLogin));
     const data = await r.json();
+    console.log('[balance] server returned:', data);
     if(data.ok && data.user){
-      state.wallet  = data.user.wallet_balance || 0;
-      state.balance = data.user.balance || 0;
+      state.wallet  = Number(data.user.wallet_balance) || 0;
+      state.balance = Number(data.user.balance) || 0;
       U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
       sessionStorage.setItem('luxor_login', userLogin);
-      try{updateUI()}catch(e){}
+      try{updateUI()}catch(e){ console.warn('updateUI after balance load:', e); }
       saveState();
+    } else {
+      console.warn('[balance] server responded but no user data');
     }
     // Pool positions — всегда из БД, не из localStorage
-    try{await loadPoolPositions()}catch(e){}
-    try{await loadMyItems()}catch(e){}
-  }catch(e){console.warn('Balance load error:',e);}
+    try{await loadPoolPositions()}catch(e){ console.warn('[balance] loadPoolPositions failed:', e); }
+    try{await loadMyItems()}catch(e){ console.warn('[balance] loadMyItems failed:', e); }
+    // После загрузки всех источников — обновляем UI с правильным total
+    try{updateUI()}catch(e){}
+  }catch(e){
+    console.error('[balance] load error:', e);
+  }
 })();
 
 /* ═══ INIT ═══ */
@@ -1348,30 +1384,6 @@ async function loadMyItems(){
 
 /* ═══ TOP UP / DEPOSIT FLOW (Phase 2) ═══ */
 /* Flow: choose bonus → choose coin+amount → pay screen (QR + address + locked crypto amount + 15min timer) → loader (polling) → success/rejected */
-
-const API_URL = 'https://luxor-backend-production.up.railway.app';
-
-/* JWT token helpers */
-function _token(){ return sessionStorage.getItem('luxor_token') || ''; }
-function _authHeaders(){
-  const t = _token();
-  return t ? { 'Authorization': 'Bearer ' + t } : {};
-}
-async function apiFetch(path, opts){
-  opts = opts || {};
-  const headers = Object.assign({}, opts.headers || {}, _authHeaders());
-  if(opts.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
-  const r = await fetch(API_URL + path, Object.assign({}, opts, {headers}));
-  // Если токен протух — сбрасываем и перезагружаем (юзер увидит index.html)
-  if(r.status === 401){
-    sessionStorage.removeItem('luxor_token');
-    sessionStorage.removeItem('luxor_user');
-    sessionStorage.removeItem('luxor_login');
-    location.href = 'index.html';
-    throw new Error('Session expired');
-  }
-  return r;
-}
 
 /* State for current deposit session */
 window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
