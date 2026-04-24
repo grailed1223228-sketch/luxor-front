@@ -529,23 +529,107 @@ textarea.inp{resize:vertical;min-height:60px;}
 // CONFIG & AUTH
 // ============================================================
 const API = 'https://luxor-backend-production.up.railway.app';
-const PASS = 'Luxor@2026!';
+let TOKEN = sessionStorage.getItem('luxor_admin_token') || '';
 
-// Auth check
-(function(){
-  const ok = sessionStorage.getItem('lx_admin');
+// Auth check: проверяем валидность токена через защищённый эндпоинт.
+// Если токена нет / токен истёк — показываем форму логина.
+(async function(){
+  async function checkToken(){
+    if(!TOKEN) return false;
+    try{
+      const r = await fetch(API+'/api/admin/stats', {
+        headers: { 'Authorization': 'Bearer '+TOKEN }
+      });
+      return r.status === 200;
+    }catch(e){ return false; }
+  }
+
+  async function loginAdmin(){
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a0a0a;padding:20px">
+        <div style="background:#141414;border:1px solid #2a2a2a;border-radius:12px;padding:32px;max-width:400px;width:100%">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#c9a84c;text-align:center;margin-bottom:8px">LUXOR ADMIN</div>
+          <div style="color:#888;font-size:13px;text-align:center;margin-bottom:24px">Sign in to manage the platform</div>
+          <input id="al_login" placeholder="Admin login" style="width:100%;padding:12px;margin-bottom:10px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:6px;color:#fff;font-size:14px">
+          <input id="al_pwd" type="password" placeholder="Admin password" style="width:100%;padding:12px;margin-bottom:16px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:6px;color:#fff;font-size:14px">
+          <button id="al_btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#c9a84c,#b8943a);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;cursor:pointer;font-weight:700">SIGN IN</button>
+          <div id="al_err" style="color:#ef5350;font-size:12px;margin-top:10px;min-height:16px;text-align:center"></div>
+        </div>
+      </div>`;
+    const doLogin = async ()=>{
+      const login = document.getElementById('al_login').value.trim();
+      const password = document.getElementById('al_pwd').value;
+      const errEl = document.getElementById('al_err');
+      errEl.textContent = '';
+      if(!login || !password){ errEl.textContent = 'Enter login and password'; return; }
+      try{
+        const r = await fetch(API+'/api/login', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({login, password})
+        });
+        const data = await r.json();
+        if(!r.ok || !data.ok){ errEl.textContent = data.detail || 'Incorrect credentials'; return; }
+        if(!data.is_admin){ errEl.textContent = 'Not an admin account'; return; }
+        TOKEN = data.token;
+        sessionStorage.setItem('luxor_admin_token', TOKEN);
+        location.reload();
+      }catch(e){
+        errEl.textContent = 'Network error';
+      }
+    };
+    document.getElementById('al_btn').onclick = doLogin;
+    document.getElementById('al_pwd').onkeydown = (e)=>{ if(e.key==='Enter') doLogin(); };
+    throw 0; // останавливаем дальнейшую загрузку страницы
+  }
+
+  const ok = await checkToken();
   if(!ok){
-    const l = prompt('Admin login:'), p = prompt('Admin password:');
-    if(l==='luxor_admin' && p===PASS){ sessionStorage.setItem('lx_admin','1'); }
-    else{ document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;color:#ef5350;font-size:28px;font-weight:800">⛔ Access Denied</div>'; throw 0; }
+    await loginAdmin();
   }
 })();
 
+function logoutAdmin(){
+  sessionStorage.removeItem('luxor_admin_token');
+  TOKEN = '';
+  location.reload();
+}
+
 // ============================================================
-// HELPERS
+// HELPERS — все запросы с Bearer-токеном
 // ============================================================
-async function api(path){ try{ const r=await fetch(API+path); return await r.json(); }catch(e){ return null; } }
-async function post(path,body){ try{ const r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); return await r.json(); }catch(e){ return null; } }
+function _authHeaders(){
+  return TOKEN ? { 'Authorization': 'Bearer '+TOKEN } : {};
+}
+
+async function api(path){
+  try{
+    const r = await fetch(API+path, { headers: _authHeaders() });
+    if(r.status === 401 || r.status === 403){
+      // Токен протух — форсим релогин
+      sessionStorage.removeItem('luxor_admin_token');
+      location.reload();
+      return null;
+    }
+    return await r.json();
+  }catch(e){ return null; }
+}
+
+async function post(path, body){
+  try{
+    const r = await fetch(API+path, {
+      method:'POST',
+      headers: { 'Content-Type':'application/json', ..._authHeaders() },
+      body: JSON.stringify(body || {})
+    });
+    if(r.status === 401 || r.status === 403){
+      sessionStorage.removeItem('luxor_admin_token');
+      location.reload();
+      return null;
+    }
+    return await r.json();
+  }catch(e){ return null; }
+}
 
 function notify(msg, ok=true){
   const n=document.createElement('div');
@@ -577,7 +661,7 @@ function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 // OVERVIEW
 // ============================================================
 async function loadOverview(){
-  let stats = await api('/api/admin/stats?password='+encodeURIComponent(PASS));
+  let stats = await api('/api/admin/stats');
   
   if (!stats) {
     // Если админские эндпоинты не работают, создаем статистику из доступных данных
@@ -660,7 +744,7 @@ async function loadOverview(){
 }
 
 async function loadRecentTxs(){
-  let txs = await api('/api/admin/transactions?password='+encodeURIComponent(PASS));
+  let txs = await api('/api/admin/transactions');
   
   if (!txs) {
     // Если админские транзакции недоступны, создаем демо данные из пользователей
@@ -724,7 +808,7 @@ async function loadUsersForTxs() {
 // WITHDRAWALS
 // ============================================================
 async function loadWithdrawals(){
-  const txs = await api('/api/admin/transactions?password='+encodeURIComponent(PASS)+'&type=withdrawal&status=pending');
+  const txs = await api('/api/admin/transactions?type=withdrawal&status=pending');
   const c = document.getElementById('withdrawalsList');
   if(!txs||!txs.length){ c.innerHTML='<div style="color:var(--t3);text-align:center;padding:40px">✅ No pending withdrawals</div>'; return; }
   c.innerHTML = txs.map(t=>`
@@ -749,7 +833,7 @@ async function loadWithdrawals(){
 
 async function approveWd(id){
   if(!confirm('Approve this withdrawal?')) return;
-  const r = await post('/api/admin/approve/'+id, {admin_password:PASS});
+  const r = await post('/api/admin/approve/'+id, {});
   if(r&&r.ok){ notify('Withdrawal approved!'); loadWithdrawals(); loadOverview(); }
   else notify('Error', false);
 }
@@ -757,7 +841,7 @@ async function approveWd(id){
 async function rejectWd(id){
   const reason = prompt('Reason for rejection:') || '';
   if(!confirm('Reject this withdrawal?')) return;
-  const r = await post('/api/admin/reject/'+id, {admin_password:PASS, note:reason});
+  const r = await post('/api/admin/reject/'+id, {note:reason});
   if(r&&r.ok){ notify('Withdrawal rejected'); loadWithdrawals(); }
   else notify('Error', false);
 }
@@ -766,7 +850,7 @@ async function rejectWd(id){
 // DEPOSITS
 // ============================================================
 async function loadDeposits(){
-  const txs = await api('/api/admin/transactions?password='+encodeURIComponent(PASS)+'&type=deposit');
+  const txs = await api('/api/admin/transactions?type=deposit');
   const c = document.getElementById('depositsList');
   if(!txs||!txs.length){ c.innerHTML='<div style="color:var(--t3);text-align:center;padding:40px">No deposits yet</div>'; return; }
   c.innerHTML = txs.map(t=>`
@@ -794,7 +878,7 @@ let allUsers = [];
 
 async function loadUsers(){
   // Попробуем разные эндпоинты для получения пользователей
-  let users = await api('/api/admin/users?password='+encodeURIComponent(PASS));
+  let users = await api('/api/admin/users');
   
   if (!users) {
     // Если админские эндпоинты не работают, пробуем обычные
@@ -879,7 +963,7 @@ async function addBalancePrompt(login, name){
   const amt = prompt(`Add balance to ${name}:\nAmount in $:`);
   if(!amt || isNaN(+amt)) return;
   const note = prompt('Note (optional, e.g. "Bonus for referral"):') || 'Admin bonus';
-  const r = await post('/api/admin/add_balance', {admin_password:PASS, target_login:login, amount:+amt, note});
+  const r = await post('/api/admin/add_balance', {target_login:login, amount:+amt, note});
   if(r&&r.ok){ notify(`✅ $${(+amt).toLocaleString()} added to ${name}!`); loadUsers(); }
   else notify('Error: '+(r?.error||'unknown'), false);
 }
@@ -887,20 +971,20 @@ async function addBalancePrompt(login, name){
 async function setNotePrompt(login, current){
   const note = prompt(`Set tag/note for ${login}:\nCurrent: ${current||'none'}\n\nExamples: VIP, whale, suspect, test`, current||'');
   if(note===null) return;
-  const r = await post('/api/admin/set_note', {admin_password:PASS, target_login:login, note});
+  const r = await post('/api/admin/set_note', {target_login:login, note});
   if(r&&r.ok){ notify('Note updated'); loadUsers(); }
 }
 
 async function toggleBan(login, banned){
   if(!confirm(`${banned?'Unban':'BAN'} user ${login}?`)) return;
-  const r = await post('/api/admin/'+(banned?'unban':'ban'), {admin_password:PASS, target_login:login});
+  const r = await post('/api/admin/'+(banned?'unban':'ban'), {target_login:login});
   if(r&&r.ok){ notify(banned?'User unbanned':'User banned', !banned); loadUsers(); }
 }
 
 async function sendMsgPrompt(login){
   const msg = prompt(`Message to ${login}:`);
   if(!msg) return;
-  const r = await post('/api/admin/message', {admin_password:PASS, user_login:login, text:msg});
+  const r = await post('/api/admin/message', {user_login:login, text:msg});
   if(r&&r.ok) notify('Message sent to '+login);
 }
 
@@ -984,7 +1068,7 @@ async function showUserDetail(login){
 // MARKETPLACE ITEMS
 // ============================================================
 async function loadItems(){
-  const items = await api('/api/admin/items?password='+encodeURIComponent(PASS));
+  const items = await api('/api/admin/items');
   const c = document.getElementById('itemsList');
   if(!items||!items.length){
     c.innerHTML='<div style="color:var(--t3);padding:40px;text-align:center;grid-column:1/-1">No items yet. Click "+ ADD NEW ITEM"</div>';
@@ -1096,7 +1180,7 @@ function openAddItem(){
 }
 
 async function editItem(id){
-  const items = await api('/api/admin/items?password='+encodeURIComponent(PASS));
+  const items = await api('/api/admin/items');
   const item = items.find(i=>i.id===id);
   if(!item) return;
   document.getElementById('itemModalTitle').textContent = '✏️ EDIT ITEM';
@@ -1133,7 +1217,7 @@ async function saveItem(){
     if(l&&p) history.push({label:l, price:+p});
   }
   const data = {
-    admin_password: PASS,
+    
     name, price_history: history,
     category: document.getElementById('iCategory').value,
     description: document.getElementById('iDesc').value,
@@ -1155,7 +1239,7 @@ async function saveItem(){
 
 async function toggleItemStatus(id, currentStatus){
   const newStatus = currentStatus==='active'?'paused':'active';
-  const r = await post('/api/admin/items/'+id, {admin_password:PASS, status:newStatus});
+  const r = await post('/api/admin/items/'+id, {status:newStatus});
   if(r&&r.ok){ notify('Status updated'); loadItems(); }
 }
 
@@ -1231,7 +1315,7 @@ async function submitSell(mode, realPct){
   if(!_sellCtx) return;
   const itemName = _sellCtx.itemName;
   if(!confirm('Mark "'+itemName+'" as sold?\n\nMode: '+mode.toUpperCase()+(mode==='profit'?'\nReal %: '+realPct:''))) return;
-  const body = { admin_password: PASS, mode: mode };
+  const body = {  mode: mode };
   if(mode === 'profit') body.real_percent = realPct;
   const r = await post('/api/admin/items/'+_sellCtx.itemId+'/sell', body);
   if(!r || !r.ok){
@@ -1258,7 +1342,7 @@ async function submitSellProfit(){
 // WALLETS
 // ============================================================
 async function loadWallets(){
-  const wallets = await api('/api/admin/wallets?password='+encodeURIComponent(PASS));
+  const wallets = await api('/api/admin/wallets');
   const c = document.getElementById('walletsList');
   if(!wallets||!wallets.length){ c.innerHTML='<div style="color:var(--t3);text-align:center;padding:30px">No wallets added yet</div>'; return; }
   const byCurrency = {};
@@ -1287,14 +1371,14 @@ async function addWallet(){
   const address = document.getElementById('wAddress').value.trim();
   const label = document.getElementById('wLabel').value.trim();
   if(!address){ notify('Enter wallet address', false); return; }
-  const r = await post('/api/admin/wallets', {admin_password:PASS, currency, address, label});
+  const r = await post('/api/admin/wallets', {currency, address, label});
   if(r&&r.ok){ notify('Wallet added!'); document.getElementById('wAddress').value=''; document.getElementById('wLabel').value=''; loadWallets(); }
   else notify('Error adding wallet', false);
 }
 
 async function deleteWallet(id){
   if(!confirm('Delete this wallet?')) return;
-  const r = await post('/api/admin/wallets/'+id, {admin_password:PASS});
+  const r = await post('/api/admin/wallets/'+id, {});
   if(r&&r.ok){ notify('Wallet deleted'); loadWallets(); }
 }
 
@@ -1311,7 +1395,7 @@ async function loadRates(){
 
 async function saveRates(){
   const r = await post('/api/admin/pool_rates', {
-    admin_password: PASS,
+    
     pool_silver: document.getElementById('rSilver').value,
     pool_gold: document.getElementById('rGold').value,
     pool_platinum: document.getElementById('rPlatinum').value,
@@ -1455,7 +1539,7 @@ async function saveItem() {
   
   try {
     // Try to save to backend (you can implement this endpoint)
-    const result = await post('/api/admin/items?password=' + encodeURIComponent(PASS), itemData);
+    const result = await post('/api/admin/items', itemData);
     
     if (result && !result.error) {
       notify(`✅ Item "${name}" saved successfully!`, true);
@@ -1512,7 +1596,7 @@ async function uploadPhoto(photoData) {
 
 // Load marketplace items
 async function loadItems() {
-  let items = await api('/api/admin/items?password=' + encodeURIComponent(PASS));
+  let items = await api('/api/admin/items');
   
   if (!items) {
     // Fallback demo items if no backend
@@ -1683,7 +1767,7 @@ async function createNewUser() {
   
   try {
     // Сначала пробуем админский эндпоинт
-    let result = await post('/api/admin/users?password='+encodeURIComponent(PASS), userData);
+    let result = await post('/api/admin/users', userData);
     
     if (!result) {
       // Если админский не работает, пробуем обычный
