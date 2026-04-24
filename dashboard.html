@@ -709,17 +709,85 @@ try {
   if(U.login) sessionStorage.setItem('luxor_login', U.login);
 } catch(e) {}
 const NAMES=['James W.','Sofia R.','Ahmed K.','Lisa T.','Park J.','Marco V.','Anna S.','Tom H.'];
-const ITEMS=[
+/* ═══ MARKETPLACE ITEMS — загружаются с бэкенда ═══
+   Fallback — если бэк недоступен, показываем заглушечные items чтобы UI не был пустой. */
+const ITEMS_FALLBACK=[
 {id:1,cat:'watch',ico:'⌚',name:'Rolex Daytona 116500LN',desc:'Ceramic bezel · White dial · 2023 · Box & Papers',price:24000,funded:77,ret:[32,48],days:[7,21],inv:18,min:100,badge:'HOT',likes:124,views:47,closes:62},
 {id:2,cat:'bag',ico:'👜',name:'Hermès Birkin 25',desc:'Togo leather · Gold hardware · 2024',price:15000,funded:64,ret:[45,80],days:[14,45],inv:12,min:100,badge:'PREMIUM',likes:89,views:32,closes:168},
-{id:3,cat:'fashion',ico:'👕',name:'Chrome Hearts Hoodie',desc:'Cross patch · Black · Deadstock · Size L',price:2800,funded:75,ret:[80,142],days:[1,7],inv:8,min:100,badge:'FAST SELL',likes:203,views:61,closes:14},
-{id:4,cat:'watch',ico:'⌚',name:'Patek Philippe Nautilus 5711',desc:'Blue dial · 2022 · Full set',price:45000,funded:62,ret:[25,40],days:[21,60],inv:24,min:200,badge:'RARE',likes:67,views:19,closes:240},
-{id:5,cat:'snkr',ico:'👟',name:'Jordan 1 Retro Chicago',desc:'Lost & Found · Deadstock · Size 10',price:800,funded:70,ret:[60,110],days:[1,5],inv:14,min:100,badge:'FAST SELL',likes:312,views:88,closes:8},
-{id:6,cat:'bag',ico:'👜',name:'Chanel Classic Flap Medium',desc:'Caviar leather · Black · Gold HW',price:12000,funded:60,ret:[35,55],days:[10,30],inv:16,min:100,badge:'HOT',likes:156,views:42,closes:96},
-{id:7,cat:'jewelry',ico:'💎',name:'Cartier Love Bracelet',desc:'18K Yellow Gold · Size 17',price:8500,funded:60,ret:[28,42],days:[14,30],inv:10,min:100,badge:'CLASSIC',likes:78,views:24,closes:120},
-{id:8,cat:'fashion',ico:'👕',name:'Rick Owens Ramones Low',desc:'Black leather · Size 42 · DS',price:1200,funded:70,ret:[70,95],days:[3,14],inv:6,min:100,badge:'HOT',likes:145,views:38,closes:36},
-{id:9,cat:'snkr',ico:'👟',name:'Nike Dunk Low Panda',desc:'Deadstock · Size 9.5 · 2024',price:600,funded:70,ret:[50,92],days:[1,3],inv:11,min:100,badge:'FAST SELL',likes:267,views:73,closes:4},
 ];
+let ITEMS = [];
+
+/* Маппинг категорий бэк → фронт */
+const _CAT_ICONS = {
+  watches:'⌚', watch:'⌚',
+  bags:'👜', bag:'👜',
+  sneakers:'👟', snkr:'👟',
+  clothing:'👕', fashion:'👕',
+  jewelry:'💎',
+  electronics:'📱', electronic:'📱',
+  other:'💎', art:'🎨',
+};
+const _CAT_ALIAS = { watches:'watch', bags:'bag', sneakers:'snkr', clothing:'fashion' };
+
+/* Маппер: серверный item → фронт-формат (тот же что был в ITEMS hardcode) */
+function _mapServerItem(srv){
+  const price = Number(srv.purchase_price || 0);
+  const gRet = Number(srv.guaranteed_return || 0);
+  const eRet = Number(srv.expected_return || 0);
+  const periodDays = Number(srv.return_period_days || 30);
+  const avail = Number(srv.available_fraction !== undefined ? srv.available_fraction : 100);
+  const raised = Number(srv.total_raised || 0);
+  const funded = Math.max(0, Math.min(100, 100 - avail));
+  const categoryRaw = (srv.category || 'other').toLowerCase();
+  const cat = _CAT_ALIAS[categoryRaw] || categoryRaw;
+  const ico = _CAT_ICONS[categoryRaw] || _CAT_ICONS[cat] || '💎';
+  // badge по эвристике
+  let badge = 'PREMIUM';
+  if(funded > 70) badge = 'HOT';
+  else if(periodDays <= 14) badge = 'FAST SELL';
+  else if(price > 30000) badge = 'RARE';
+  return {
+    id: Number(srv.id),
+    cat: cat,
+    ico: ico,
+    name: srv.name || 'Item',
+    desc: srv.description || '',
+    image_url: srv.image_url || '',
+    price: price,
+    funded: funded,
+    available_fraction: avail,
+    total_raised: raised,
+    ret: [gRet, eRet],
+    days: [Math.max(1, Math.floor(periodDays * 0.5)), periodDays],
+    inv: 0,
+    min: Math.max(10, Math.round(price / 100)),
+    badge: badge,
+    likes: 0,
+    views: 0,
+    closes: periodDays * 24,
+    price_history: Array.isArray(srv.price_history) ? srv.price_history : [],
+  };
+}
+
+/* Загружает актуальные items с бэкенда. Вызывается в init + после покупок. */
+async function loadMarketplaceItems(){
+  try{
+    const r = await fetch(API_URL + '/api/items');
+    const data = await r.json();
+    if(data && data.ok && Array.isArray(data.items)){
+      ITEMS = data.items.map(_mapServerItem);
+      console.log('[marketplace] loaded', ITEMS.length, 'items from backend');
+    } else {
+      console.warn('[marketplace] backend returned no items, using fallback');
+      ITEMS = ITEMS_FALLBACK.slice();
+    }
+  }catch(e){
+    console.warn('[marketplace] load failed, using fallback:', e);
+    ITEMS = ITEMS_FALLBACK.slice();
+  }
+  // Перерисовываем если маркетплейс уже открыт
+  try{ renderMarketplace('all'); }catch(e){}
+}
 
 let state={positions:[],myItems:[],favorites:[],balance:0,free:0,wallet:0,txs:[],savedWallet:''};
 let currentPeriod='1W';
@@ -781,6 +849,7 @@ state.closedItems=[];
     // Pool positions — всегда из БД, не из localStorage
     try{await loadPoolPositions()}catch(e){ console.warn('[balance] loadPoolPositions failed:', e); }
     try{await loadMyItems()}catch(e){ console.warn('[balance] loadMyItems failed:', e); }
+    try{await loadMarketplaceItems()}catch(e){ console.warn('[balance] loadMarketplaceItems failed:', e); }
     // После загрузки всех источников — обновляем UI с правильным total
     try{updateUI()}catch(e){}
   }catch(e){
@@ -795,6 +864,8 @@ const sn=document.getElementById('setName');if(sn)sn.value=U.fn+(U.ln?' '+U.ln:'
 const rc=document.getElementById('refCode');if(rc)rc.textContent='LUXOR-'+U.fn.substring(0,3).toUpperCase()+Math.floor(Math.random()*900+100);
 }catch(e){console.warn('init',e)}
 try{updateUI()}catch(e){console.warn('updateUI',e)}
+/* Загрузка маркетплейса — параллельно с остальной инициализацией */
+loadMarketplaceItems();
 try{renderMarketplace('all')}catch(e){console.warn('renderMk',e)}
 try{setInterval(()=>{if(state.myItems.length>0){try{renderMyItems()}catch(e){}}},10000)}catch(e){}
 try{if(U.amt>0&&!saved)setTimeout(()=>openPoolInvest(U.plan||'Silver',U.rate||'0.5%/day',U.tier||1),800)}catch(e){}
@@ -1337,7 +1408,9 @@ async function buyFraction(id){
     closeModal();
     addTx('Fraction: '+(data.item_name||i.name)+' $'+amt.toLocaleString(),'done');
     await loadMyItems();
-    updateUI();renderMarketplace('all');showConfetti();saveState();
+    // Перезагружаем маркетплейс — обновить available_fraction и funded%
+    try{ await loadMarketplaceItems(); }catch(e){}
+    updateUI();showConfetti();saveState();
     setTimeout(()=>showCertificate(i,amt),500);
   }catch(e){
     closeModal();
