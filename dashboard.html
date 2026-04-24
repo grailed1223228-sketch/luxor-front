@@ -723,7 +723,7 @@ state.closedItems=[];
   try{
     const userLogin = U.login || sessionStorage.getItem('luxor_login');
     if(!userLogin || userLogin==='unknown') return;
-    const r = await fetch('https://luxor-backend-production.up.railway.app/api/user/'+userLogin);
+    const r = await apiFetch('/api/user/'+userLogin);
     const data = await r.json();
     if(data.ok && data.user){
       state.wallet  = data.user.wallet_balance || 0;
@@ -1179,7 +1179,7 @@ async function buyFraction(id){
   // Loader
   showModal(`<div style="text-align:center;padding:40px 20px"><div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div><div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">PROCESSING PURCHASE</div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
   try{
-    const res=await fetch(API_URL+'/api/items/buy',{
+    const res=await apiFetch('/api/items/buy',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({user_login:userLogin,item_id:id,amount_usd:amt})
     });
@@ -1217,7 +1217,7 @@ async function loadMyItems(){
   const userLogin=U.login||sessionStorage.getItem('luxor_login');
   if(!userLogin)return;
   try{
-    const res=await fetch(API_URL+'/api/items/my/'+encodeURIComponent(userLogin));
+    const res=await apiFetch('/api/items/my/'+encodeURIComponent(userLogin));
     const data=await res.json();
     if(data&&data.ok&&Array.isArray(data.purchases)){
       // Keep only active purchases in myItems to match old UI expectations,
@@ -1253,6 +1253,28 @@ async function loadMyItems(){
 /* Flow: choose bonus → choose coin+amount → pay screen (QR + address + locked crypto amount + 15min timer) → loader (polling) → success/rejected */
 
 const API_URL = 'https://luxor-backend-production.up.railway.app';
+
+/* JWT token helpers */
+function _token(){ return sessionStorage.getItem('luxor_token') || ''; }
+function _authHeaders(){
+  const t = _token();
+  return t ? { 'Authorization': 'Bearer ' + t } : {};
+}
+async function apiFetch(path, opts){
+  opts = opts || {};
+  const headers = Object.assign({}, opts.headers || {}, _authHeaders());
+  if(opts.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+  const r = await fetch(API_URL + path, Object.assign({}, opts, {headers}));
+  // Если токен протух — сбрасываем и перезагружаем (юзер увидит index.html)
+  if(r.status === 401){
+    sessionStorage.removeItem('luxor_token');
+    sessionStorage.removeItem('luxor_user');
+    sessionStorage.removeItem('luxor_login');
+    location.href = 'index.html';
+    throw new Error('Session expired');
+  }
+  return r;
+}
 
 /* State for current deposit session */
 window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
@@ -1339,7 +1361,7 @@ async function depStepAmount(){
   depRenderBonusLine();
   // Load available currencies from backend
   try{
-    const res = await fetch(API_URL + '/api/crypto/currencies');
+    const res = await apiFetch('/api/crypto/currencies');
     const data = await res.json();
     const list = document.getElementById('depCoinList');
     if(!list) return;
@@ -1414,7 +1436,7 @@ async function depSubmitStart(){
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
 
   try{
-    const res = await fetch(API_URL + '/api/deposit/start', {
+    const res = await apiFetch('/api/deposit/start', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ user_login:userLogin, amount_usd:amt, crypto_currency:cur, use_bonus:useBonus })
@@ -1554,7 +1576,7 @@ async function depIPaid(){
   if(btn){ btn.disabled = true; btn.style.opacity = '.6'; btn.textContent = 'Submitting...'; }
 
   try{
-    const res = await fetch(API_URL + `/api/deposit/${id}/paid`, { method:'POST' });
+    const res = await apiFetch(`/api/deposit/${id}/paid`, { method:'POST' });
     const data = await res.json();
     if(!data || !data.ok){
       // show error but let user retry
@@ -1591,7 +1613,7 @@ function depStartPolling(id){
     tries++;
     if(tries > maxTries){ clearInterval(window._dep.pollInt); return; }
     try{
-      const res = await fetch(API_URL + `/api/deposit/${id}/status`);
+      const res = await apiFetch(`/api/deposit/${id}/status`);
       const data = await res.json();
       if(!data || !data.ok) return;
       if(data.status === 'completed'){
@@ -1699,7 +1721,7 @@ async function processPoolInvest(plan,rate,tier){
   // Loader
   showModal(`<div style="text-align:center;padding:40px 20px"><div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div><div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">CREATING POSITION</div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
   try{
-    const res=await fetch(API_URL+'/api/pool/invest',{
+    const res=await apiFetch('/api/pool/invest',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({user_login:userLogin,plan,amount_usd:amt})
     });
@@ -1736,7 +1758,7 @@ async function loadPoolPositions(){
   const userLogin=U.login||sessionStorage.getItem('luxor_login');
   if(!userLogin)return;
   try{
-    const res=await fetch(API_URL+'/api/pool/positions/'+encodeURIComponent(userLogin));
+    const res=await apiFetch('/api/pool/positions/'+encodeURIComponent(userLogin));
     const data=await res.json();
     if(data&&data.ok&&Array.isArray(data.positions)){
       state.positions=data.positions;
@@ -1755,7 +1777,7 @@ async function withdrawFromPool(positionId){
   if(!confirm('Withdraw from '+pos.plan+' Pool?\n\nPrincipal: $'+(pos.amount_usd||pos.amount||0).toLocaleString()+'\nEarned: $'+Math.round(pos.earned_usd||pos.earned||0).toLocaleString()+'\nTotal to wallet: $'+Math.round(total).toLocaleString()))return;
   const userLogin=U.login||sessionStorage.getItem('luxor_login');
   try{
-    const res=await fetch(API_URL+'/api/pool/withdraw/'+positionId,{
+    const res=await apiFetch('/api/pool/withdraw/'+positionId,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({user_login:userLogin})
     });
@@ -1773,26 +1795,206 @@ async function withdrawFromPool(positionId){
 }
 
 /* ═══ WITHDRAW ═══ */
-function openWithdraw(){showModal(`<div style="text-align:center;margin-bottom:12px"><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">Withdraw Funds</h3></div>
-<div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--t3)">Available</span><span style="color:var(--green);font-weight:700">$${Math.round(state.free+state.wallet).toLocaleString()}</span></div></div>
-<div class="input-group"><label>Wallet address</label><input type="text" id="wdWallet" value="${state.savedWallet}" placeholder="Your crypto wallet"></div>
-<div class="input-group"><label>Network</label><select><option>USDT (TRC20)</option><option>ETH (ERC20)</option><option>BTC</option></select></div>
-<div class="input-group"><label>Amount ($)</label><input type="number" id="wdAmount" placeholder="0" min="1"></div>
-<button class="btn-primary" style="background:var(--red)" onclick="processWithdraw()">WITHDRAW</button>`)}
+/* ═══ WITHDRAW FLOW (Phase 3 — TG-подтверждение) ═══ */
 
-function processWithdraw(){const amt=parseFloat(document.getElementById('wdAmount')?.value),w=document.getElementById('wdWallet')?.value;
-if(!w||!amt){alert('Fill all fields');return}const avail=state.free+state.wallet;if(amt>avail){alert('Exceeds available balance');return}
-state.savedWallet=w;if(amt<=state.wallet){state.wallet-=amt}else{const rest=amt-state.wallet;state.wallet=0;state.free-=rest;state.balance-=rest}
-closeModal();showGoldRain();addTx('Withdrawal -$'+amt.toFixed(2),'processing');updateUI();saveState();
-// ── ОТПРАВКА ВЫВОДА НА БЭКЕНД ──
-(function(){
-  const userLogin = U.login || sessionStorage.getItem('luxor_login') || U.fn;
-  fetch('https://luxor-backend-production.up.railway.app/api/withdraw', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ user_login: userLogin, amount: amt, wallet_address: w })
-  }).catch(e=>console.error('Withdraw API error:',e));
-})();}
+const WITHDRAW_MIN_BY_CURRENCY = {
+  'USDT-TRC20': 10,
+  'USDT-ERC20': 30,
+  'BTC': 50,
+  'ETH': 50,
+  'TON': 20
+};
+const WITHDRAW_MAX_SINGLE = 10000;
+
+window._wd = { withdrawalId: null, pollInt: null };
+
+function openWithdraw(){
+  const avail = Math.round(state.wallet);
+  showModal(`<div style="text-align:center;margin-bottom:12px">
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">WITHDRAW FUNDS</h3>
+    <div style="font-size:11px;color:var(--t3);margin-top:4px">Processed within 24 hours</div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;font-size:12px">
+      <span style="color:var(--t3)">Available wallet balance</span>
+      <span style="color:var(--green);font-weight:700">$${avail.toLocaleString()}</span>
+    </div>
+  </div>
+  <div class="input-group"><label>Network</label>
+    <select id="wdNetwork" onchange="updateWdMinHint()">
+      <option value="USDT-TRC20">USDT (TRC20) · min $10</option>
+      <option value="USDT-ERC20">USDT (ERC20) · min $30</option>
+      <option value="BTC">BTC · min $50</option>
+      <option value="ETH">ETH · min $50</option>
+      <option value="TON">TON · min $20</option>
+    </select>
+  </div>
+  <div class="input-group"><label>Wallet address</label>
+    <input type="text" id="wdWallet" value="${state.savedWallet||''}" placeholder="Your crypto wallet">
+  </div>
+  <div class="input-group"><label>Amount (USD) <span id="wdMinHint" style="color:var(--t3);font-weight:400">· min $10</span></label>
+    <input type="number" id="wdAmount" placeholder="0" min="1" step="any">
+  </div>
+  <div id="wdErrBox" style="color:var(--red);font-size:11px;margin-bottom:8px;min-height:14px"></div>
+  <button class="btn-primary" style="background:var(--red)" onclick="processWithdraw()">REQUEST WITHDRAWAL</button>
+  <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--t3)">Daily limit: $10,000 per 24h</div>`);
+  try{updateWdMinHint()}catch(e){}
+}
+
+function updateWdMinHint(){
+  const net=document.getElementById('wdNetwork')?.value;
+  const hint=document.getElementById('wdMinHint');
+  if(!hint||!net)return;
+  hint.textContent='· min $'+(WITHDRAW_MIN_BY_CURRENCY[net]||10);
+}
+
+async function processWithdraw(){
+  const amt=parseFloat(document.getElementById('wdAmount')?.value||0);
+  const addr=(document.getElementById('wdWallet')?.value||'').trim();
+  const net=document.getElementById('wdNetwork')?.value;
+  const errBox=document.getElementById('wdErrBox');
+  if(errBox)errBox.textContent='';
+
+  // Frontend валидация
+  if(!addr||addr.length<10){if(errBox)errBox.textContent='Please enter a valid wallet address';return}
+  if(!amt||amt<=0){if(errBox)errBox.textContent='Please enter a valid amount';return}
+  const minAmt=WITHDRAW_MIN_BY_CURRENCY[net]||10;
+  if(amt<minAmt){if(errBox)errBox.textContent='Minimum for '+net+' is $'+minAmt;return}
+  if(amt>WITHDRAW_MAX_SINGLE){if(errBox)errBox.textContent='Maximum per transaction is $'+WITHDRAW_MAX_SINGLE;return}
+  if(amt>state.wallet){if(errBox)errBox.textContent='Exceeds available wallet balance';return}
+
+  const userLogin=U.login||sessionStorage.getItem('luxor_login');
+  if(!userLogin){alert('Session expired. Please log in again.');return}
+
+  state.savedWallet=addr;saveState();
+
+  // Loader
+  showModal(`<div style="text-align:center;padding:40px 20px">
+    <div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">SUBMITTING REQUEST</div>
+  </div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+
+  try{
+    const res=await apiFetch('/api/withdraw/start',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_login:userLogin,amount_usd:amt,
+                            wallet_address:addr,crypto_currency:net})
+    });
+    const data=await res.json();
+    if(!res.ok||!data||!data.ok){
+      const err=(data&&data.detail&&data.detail.error)||(data&&data.error)||'unknown';
+      const map={
+        'below_minimum':'Amount below minimum for this network.',
+        'above_max_single':'Amount exceeds single-transaction limit ($10,000).',
+        'above_max_daily':'Daily limit $10,000 reached. Remaining: $'+(((data.detail||{}).remaining)||0),
+        'insufficient_balance':'Not enough balance.',
+        'invalid_wallet_address':'Invalid wallet address.',
+        'unknown_currency':'Unsupported network.',
+        'invalid_amount':'Invalid amount.',
+        'user_not_found':'Session error. Please log in again.',
+      };
+      closeModal();
+      setTimeout(()=>openWithdraw(),100);
+      setTimeout(()=>{
+        const eb=document.getElementById('wdErrBox');
+        if(eb)eb.textContent=map[err]||err;
+      },200);
+      return;
+    }
+    // Success — moved to waiting screen
+    state.wallet=data.new_wallet_balance;
+    addTx('Withdrawal -$'+amt.toFixed(2),'processing');
+    updateUI();saveState();
+    _wd.withdrawalId=data.withdrawal_id;
+    showWithdrawWaiting(data);
+    startWithdrawPolling(data.withdrawal_id);
+  }catch(e){
+    closeModal();
+    setTimeout(()=>alert('Network error. Please try again.'),100);
+  }
+}
+
+function showWithdrawWaiting(data){
+  showModal(`<div style="text-align:center;padding:12px">
+    <div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:8px">PROCESSING WITHDRAWAL</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:14px">Your request is being reviewed. You'll be notified once approved.</p>
+    <div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:14px;text-align:left">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Amount</span><span style="font-weight:700">$${data.amount_usd.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Network</span><span>${data.crypto_currency}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--t3)">Request ID</span><span>#${data.withdrawal_id}</span></div>
+    </div>
+    <p style="font-size:10px;color:var(--t3)">Usually takes under 24 hours.<br>You can safely close this window — we'll update your dashboard.</p>
+    <button class="btn-outline" style="margin-top:10px" onclick="closeWithdrawWaiting()">CLOSE</button>
+  </div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+}
+
+function closeWithdrawWaiting(){
+  if(_wd.pollInt){clearInterval(_wd.pollInt);_wd.pollInt=null}
+  closeModal();
+}
+
+function startWithdrawPolling(wid){
+  if(_wd.pollInt)clearInterval(_wd.pollInt);
+  let attempts=0;
+  const maxAttempts=120; // 10 минут при интервале 5с
+  _wd.pollInt=setInterval(async ()=>{
+    attempts++;
+    if(attempts>maxAttempts){clearInterval(_wd.pollInt);_wd.pollInt=null;return}
+    try{
+      const res=await apiFetch('/api/withdraw/'+wid+'/status');
+      const data=await res.json();
+      if(!data||!data.ok)return;
+      if(data.status==='completed'){
+        clearInterval(_wd.pollInt);_wd.pollInt=null;
+        showWithdrawSuccess(data);
+        addTx('Withdrawal sent: $'+data.amount_usd.toLocaleString(),'done');
+      }else if(data.status==='rejected'){
+        clearInterval(_wd.pollInt);_wd.pollInt=null;
+        // Refresh balance (деньги вернулись)
+        try{
+          const r=await apiFetch('/api/user/'+encodeURIComponent(U.login||sessionStorage.getItem('luxor_login')));
+          const d2=await r.json();
+          if(d2&&d2.ok&&d2.user){state.wallet=d2.user.wallet_balance||0;updateUI();saveState()}
+        }catch(e){}
+        showWithdrawRejected(data);
+        addTx('Withdrawal rejected: refunded $'+data.amount_usd.toLocaleString(),'done');
+      }
+    }catch(e){/* ignore transient errors */}
+  },5000);
+}
+
+function showWithdrawSuccess(data){
+  const txLine=data.tx_hash?`<div style="margin-top:10px;padding:8px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;word-break:break-all;font-size:10px;font-family:monospace">${data.tx_hash}</div>`:'';
+  showModal(`<div style="text-align:center;padding:8px">
+    <div style="font-size:48px;margin-bottom:10px">✅</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--green);margin-bottom:8px">WITHDRAWAL SENT</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Your funds have been sent to the blockchain.</p>
+    <div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:12px;text-align:left">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Amount</span><span style="font-weight:700;color:var(--green)">$${data.amount_usd.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Network</span><span>${data.crypto_currency||'—'}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--t3)">Address</span><span style="font-family:monospace;font-size:9px">${(data.wallet_address||'').substring(0,8)}...${(data.wallet_address||'').slice(-6)}</span></div>
+      ${txLine}
+    </div>
+    <button class="btn-gold" onclick="closeModal()">DONE</button>
+  </div>`);
+  showGoldRain();
+}
+
+function showWithdrawRejected(data){
+  showModal(`<div style="text-align:center;padding:8px">
+    <div style="font-size:48px;margin-bottom:10px">❌</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--red);margin-bottom:8px">WITHDRAWAL REJECTED</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:6px">Your withdrawal request was not approved.</p>
+    <p style="font-size:11px;color:var(--t3);margin-bottom:12px">Funds have been returned to your wallet balance.</p>
+    <div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:12px;text-align:left">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Amount refunded</span><span style="font-weight:700">$${data.amount_usd.toLocaleString()}</span></div>
+      ${data.rejection_reason?`<div style="font-size:11px;color:var(--t3);margin-top:6px">Reason: ${data.rejection_reason}</div>`:''}
+    </div>
+    <p style="font-size:10px;color:var(--t3);margin-bottom:10px">Questions? Contact <a href="mailto:dispute@luxorinvest.com" style="color:var(--gold)">dispute@luxorinvest.com</a></p>
+    <button class="btn-outline" onclick="closeModal()">CLOSE</button>
+  </div>`);
+}
 
 /* ═══ TX ═══ */
 function addTx(desc,status){state.txs.unshift({desc,status,time:new Date().toLocaleTimeString()});renderTxs()}
@@ -1813,7 +2015,7 @@ async function sellNow(id){
   if(!confirm('Sell your '+item.pct+'% of '+item.name+' now?\n\nYou will receive: $'+refund.toLocaleString()+' (90% of invested)\nEarly exit fee: $'+loss.toLocaleString()+' (10%)'))return;
   const userLogin=U.login||sessionStorage.getItem('luxor_login');
   try{
-    const res=await fetch(API_URL+'/api/items/sell-early/'+purchaseId,{
+    const res=await apiFetch('/api/items/sell-early/'+purchaseId,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({user_login:userLogin})
     });
