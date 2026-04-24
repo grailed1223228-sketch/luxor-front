@@ -415,7 +415,7 @@ textarea.inp{resize:vertical;min-height:60px;}
     
     <div class="form-grid">
       <div class="inp-row"><label>Purchase Price ($) *</label><input class="inp" id="iPrice" type="number" placeholder="24000"></div>
-      <div class="inp-row"><label>Total Slots ($) *</label><input class="inp" id="iSlots" type="number" placeholder="24000"></div>
+      <div class="inp-row"><label>Total Slots ($, optional)</label><input class="inp" id="iSlots" type="number" placeholder="Defaults to price"></div>
     </div>
     
     <div class="form-grid">
@@ -437,26 +437,77 @@ textarea.inp{resize:vertical;min-height:60px;}
     <!-- PRICE HISTORY (optional, for chart) -->
     <div style="margin-bottom:14px">
       <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">📈 Price History (optional, up to 5 points)</label>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:8px">Pick a period and price. Leave empty rows to skip.</div>
       <div id="pricePoints">
         <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. 1 year ago)" id="pp_label_0">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_0">
+          <select class="inp" id="pp_label_0">
+            <option value="">— period —</option>
+            <option value="2 years ago">2 years ago</option>
+            <option value="1 year ago" selected>1 year ago</option>
+            <option value="9 months ago">9 months ago</option>
+            <option value="6 months ago">6 months ago</option>
+            <option value="3 months ago">3 months ago</option>
+            <option value="1 month ago">1 month ago</option>
+            <option value="1 week ago">1 week ago</option>
+            <option value="Now">Now</option>
+          </select>
+          <input class="inp" type="number" step="0.01" placeholder="Price $" id="pp_price_0">
         </div>
         <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. 6 months ago)" id="pp_label_1">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_1">
+          <select class="inp" id="pp_label_1">
+            <option value="">— period —</option>
+            <option value="2 years ago">2 years ago</option>
+            <option value="1 year ago">1 year ago</option>
+            <option value="9 months ago">9 months ago</option>
+            <option value="6 months ago" selected>6 months ago</option>
+            <option value="3 months ago">3 months ago</option>
+            <option value="1 month ago">1 month ago</option>
+            <option value="1 week ago">1 week ago</option>
+            <option value="Now">Now</option>
+          </select>
+          <input class="inp" type="number" step="0.01" placeholder="Price $" id="pp_price_1">
         </div>
         <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. 3 months ago)" id="pp_label_2">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_2">
+          <select class="inp" id="pp_label_2">
+            <option value="">— period —</option>
+            <option value="2 years ago">2 years ago</option>
+            <option value="1 year ago">1 year ago</option>
+            <option value="9 months ago">9 months ago</option>
+            <option value="6 months ago">6 months ago</option>
+            <option value="3 months ago" selected>3 months ago</option>
+            <option value="1 month ago">1 month ago</option>
+            <option value="1 week ago">1 week ago</option>
+            <option value="Now">Now</option>
+          </select>
+          <input class="inp" type="number" step="0.01" placeholder="Price $" id="pp_price_2">
         </div>
         <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. 1 month ago)" id="pp_label_3">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_3">
+          <select class="inp" id="pp_label_3">
+            <option value="">— period —</option>
+            <option value="2 years ago">2 years ago</option>
+            <option value="1 year ago">1 year ago</option>
+            <option value="9 months ago">9 months ago</option>
+            <option value="6 months ago">6 months ago</option>
+            <option value="3 months ago">3 months ago</option>
+            <option value="1 month ago" selected>1 month ago</option>
+            <option value="1 week ago">1 week ago</option>
+            <option value="Now">Now</option>
+          </select>
+          <input class="inp" type="number" step="0.01" placeholder="Price $" id="pp_price_3">
         </div>
         <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. Now)" id="pp_label_4">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_4">
+          <select class="inp" id="pp_label_4">
+            <option value="">— period —</option>
+            <option value="2 years ago">2 years ago</option>
+            <option value="1 year ago">1 year ago</option>
+            <option value="9 months ago">9 months ago</option>
+            <option value="6 months ago">6 months ago</option>
+            <option value="3 months ago">3 months ago</option>
+            <option value="1 month ago">1 month ago</option>
+            <option value="1 week ago">1 week ago</option>
+            <option value="Now" selected>Now</option>
+          </select>
+          <input class="inp" type="number" step="0.01" placeholder="Price $" id="pp_price_4">
         </div>
       </div>
     </div>
@@ -1178,19 +1229,6 @@ function drawChart(canvasId, history){
   });
 }
 
-function openAddItem(){
-  document.getElementById('itemModalTitle').textContent = '➕ ADD NEW ITEM';
-  document.getElementById('editItemId').value = '';
-  ['iName','iDesc','iPrice','iSlots','iGuaranteed','iExpected','iPeriod','iImageUrl'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
-  for(let i=0;i<5;i++){
-    const l=document.getElementById('pp_label_'+i), p=document.getElementById('pp_price_'+i);
-    if(l) l.value=''; if(p) p.value='';
-  }
-  document.getElementById('addItemModal').classList.add('show');
-}
-
 async function editItem(id){
   const items = await api('/api/admin/items');
   if(!items || !Array.isArray(items)){ notify('Could not load items', false); return; }
@@ -1213,7 +1251,16 @@ async function editItem(id){
   for(let i=0;i<5;i++){
     const pt = history[i]||{};
     const l=document.getElementById('pp_label_'+i), p=document.getElementById('pp_price_'+i);
-    if(l) l.value=pt.label||''; if(p) p.value=pt.price||'';
+    if(l){
+      // Для <select> — проверяем что такая опция существует, иначе "— period —"
+      if(l.tagName === 'SELECT'){
+        const opts = Array.from(l.options).map(o => o.value);
+        l.value = opts.includes(pt.label || '') ? (pt.label || '') : '';
+      } else {
+        l.value = pt.label || '';
+      }
+    }
+    if(p) p.value = pt.price || '';
   }
   document.getElementById('addItemModal').classList.add('show');
 }
@@ -1221,34 +1268,52 @@ async function editItem(id){
 async function saveItem(){
   const name = document.getElementById('iName').value.trim();
   const price = +document.getElementById('iPrice').value;
-  const slots = +document.getElementById('iSlots').value;
-  if(!name||!price||!slots){ notify('Fill required fields: Name, Price, Slots', false); return; }
-  // Collect price history
+  const slots = +document.getElementById('iSlots').value || price;   // дефолт = price
+  if(!name){ notify('Fill required field: Name', false); return; }
+  if(!price || price <= 0){ notify('Fill required field: Price', false); return; }
+  
+  // Собираем price history — только валидные пары period + цена > 0
   const history = [];
-  for(let i=0;i<5;i++){
-    const l=document.getElementById('pp_label_'+i)?.value;
-    const p=document.getElementById('pp_price_'+i)?.value;
-    if(l&&p) history.push({label:l, price:+p});
+  for(let i=0; i<5; i++){
+    const l = document.getElementById('pp_label_'+i)?.value?.trim();
+    const p = parseFloat(document.getElementById('pp_price_'+i)?.value);
+    if(l && !isNaN(p) && p > 0) history.push({label: l, price: p});
   }
+  
+  const guaranteed = +document.getElementById('iGuaranteed').value || 0;
+  const expected = +document.getElementById('iExpected').value || 0;
+  // Валидация: expected >= guaranteed
+  if(expected < guaranteed){
+    if(!confirm('Warning: Expected return ('+expected+'%) < Guaranteed ('+guaranteed+'%).\n\nHolders will always get guaranteed. Save anyway?')) return;
+  }
+  
   const data = {
-    
-    name, price_history: history,
+    name,
+    price_history: history,
     category: document.getElementById('iCategory').value,
     description: document.getElementById('iDesc').value,
     purchase_price: price,
     total_slots: slots,
-    guaranteed_return: +document.getElementById('iGuaranteed').value||0,
-    expected_return: +document.getElementById('iExpected').value||0,
-    return_period_days: +document.getElementById('iPeriod').value||30,
+    guaranteed_return: guaranteed,
+    expected_return: expected,
+    return_period_days: +document.getElementById('iPeriod').value || 30,
     status: document.getElementById('iStatus').value,
-    image_url: document.getElementById('iImageUrl').value||'',
+    image_url: document.getElementById('iImageUrl').value || '',
   };
+  
   const editId = document.getElementById('editItemId').value;
   let r;
   if(editId){ r = await post('/api/admin/items/'+editId, data); }
   else { r = await post('/api/admin/items', data); }
-  if(r&&r.ok){ notify('Item saved!'); closeModal('addItemModal'); loadItems(); }
-  else notify('Error saving item', false);
+  
+  if(r && r.ok){
+    notify(editId ? 'Item updated!' : 'Item created — visible in user marketplace now.');
+    closeModal('addItemModal');
+    loadItems();
+  } else {
+    const err = (r && r.detail && r.detail.error) || (r && r.error) || 'unknown';
+    notify('Error saving item: ' + err, false);
+  }
 }
 
 async function toggleItemStatus(id, currentStatus){
@@ -1453,6 +1518,22 @@ function openAddItem() {
   document.getElementById('iExpected').value = '';
   document.getElementById('iPeriod').value = '';
   document.getElementById('iStatus').value = 'active';
+  document.getElementById('iImageUrl').value = '';
+  
+  // Сброс price history: select'ы в дефолтные периоды, цены очищаются
+  const defaults = ['1 year ago', '6 months ago', '3 months ago', '1 month ago', 'Now'];
+  for(let i=0; i<5; i++){
+    const l = document.getElementById('pp_label_'+i);
+    const p = document.getElementById('pp_price_'+i);
+    if(l){
+      if(l.tagName === 'SELECT' && defaults[i]){
+        l.value = defaults[i];
+      } else {
+        l.value = '';
+      }
+    }
+    if(p) p.value = '';
+  }
   
   // Clear photo
   selectedPhoto = null;
