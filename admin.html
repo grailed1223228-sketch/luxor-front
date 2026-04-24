@@ -304,92 +304,6 @@ textarea.inp{resize:vertical;min-height:60px;}
 </div>
 
 <!-- ADD ITEM MODAL -->
-<div class="modal-bg" id="addItemModal">
-  <div class="modal">
-    <button class="mc" onclick="closeModal('addItemModal')">✕</button>
-    <h3 style="font-size:18px;font-weight:800;margin-bottom:16px" id="itemModalTitle">➕ ADD NEW ITEM</h3>
-    <input type="hidden" id="editItemId">
-    <div class="form-grid">
-      <div class="inp-row"><label>Item Name *</label><input class="inp" id="iName" placeholder="Rolex Daytona 2023"></div>
-      <div class="inp-row"><label>Category</label>
-        <select class="inp" id="iCategory">
-          <option value="watches">⌚ Watches</option>
-          <option value="bags">👜 Bags</option>
-          <option value="sneakers">👟 Sneakers</option>
-          <option value="clothing">👕 Clothing</option>
-          <option value="jewelry">💎 Jewelry</option>
-          <option value="electronics">📱 Electronics</option>
-          <option value="other">📦 Other</option>
-        </select>
-      </div>
-    </div>
-    <div class="inp-row"><label>Description</label><textarea class="inp" id="iDesc" placeholder="Brief description of the item..."></textarea></div>
-    
-    <!-- DRAG & DROP PHOTO UPLOAD -->
-    <div class="inp-row">
-      <label>Product Photo</label>
-      <div id="photoUploadArea" class="photo-upload-area">
-        <div class="upload-content">
-          <div class="upload-icon">📸</div>
-          <div class="upload-text">
-            <strong>Drag & Drop photo here</strong><br>
-            <span>or <a href="#" id="browsePhoto">browse files</a></span><br>
-            <small>Supports: JPG, PNG, WEBP (Max 5MB)</small>
-          </div>
-        </div>
-        <input type="file" id="photoInput" accept="image/*" style="display:none;">
-        <div id="photoPreview" class="photo-preview" style="display:none;">
-          <img id="previewImage" src="" alt="Preview">
-          <div class="photo-actions">
-            <button type="button" class="btn-remove" onclick="removePhoto()">✕ Remove</button>
-          </div>
-        </div>
-      </div>
-      <input type="hidden" id="iImageUrl" placeholder="Image will be uploaded automatically">
-    </div>
-    <div class="form-grid">
-      <div class="inp-row"><label>Purchase Price ($) *</label><input class="inp" id="iPrice" type="number" placeholder="24000"></div>
-      <div class="inp-row"><label>Total Slots ($) *</label><input class="inp" id="iSlots" type="number" placeholder="24000"></div>
-    </div>
-    <div class="form-grid">
-      <div class="inp-row"><label>Guaranteed Return (%)</label><input class="inp" id="iGuaranteed" type="number" step="0.1" placeholder="35"></div>
-      <div class="inp-row"><label>Expected Return (%)</label><input class="inp" id="iExpected" type="number" step="0.1" placeholder="55"></div>
-    </div>
-    <div class="form-grid">
-      <div class="inp-row"><label>Return Period (days)</label><input class="inp" id="iPeriod" type="number" placeholder="10"></div>
-      <div class="inp-row"><label>Status</label>
-        <select class="inp" id="iStatus"><option value="active">Active</option><option value="paused">Paused</option><option value="sold">Sold</option></select>
-      </div>
-    </div>
-    <div style="margin-bottom:14px">
-      <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">📈 PRICE HISTORY (for chart) — up to 5 points</label>
-      <div id="pricePoints">
-        <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. 1 year ago)" id="pp_label_0">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_0">
-        </div>
-        <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. 6 months ago)" id="pp_label_1">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_1">
-        </div>
-        <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. 3 months ago)" id="pp_label_2">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_2">
-        </div>
-        <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. 1 month ago)" id="pp_label_3">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_3">
-        </div>
-        <div class="form-grid" style="margin-bottom:6px">
-          <input class="inp" placeholder="Label (e.g. Now)" id="pp_label_4">
-          <input class="inp" type="number" placeholder="Price $" id="pp_price_4">
-        </div>
-      </div>
-    </div>
-    <button class="btn btn-g" onclick="saveItem()" style="width:100%;padding:12px;font-size:14px">SAVE ITEM</button>
-  </div>
-</div>
-
 <!-- USER DETAIL MODAL -->
 <div class="modal-bg" id="userDetailModal">
   <div class="modal" style="max-width:680px">
@@ -519,7 +433,37 @@ textarea.inp{resize:vertical;min-height:60px;}
         </select>
       </div>
     </div>
-    
+
+    <!-- PRICE HISTORY (optional, for chart) -->
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">📈 Price History (optional, up to 5 points)</label>
+      <div id="pricePoints">
+        <div class="form-grid" style="margin-bottom:6px">
+          <input class="inp" placeholder="Label (e.g. 1 year ago)" id="pp_label_0">
+          <input class="inp" type="number" placeholder="Price $" id="pp_price_0">
+        </div>
+        <div class="form-grid" style="margin-bottom:6px">
+          <input class="inp" placeholder="Label (e.g. 6 months ago)" id="pp_label_1">
+          <input class="inp" type="number" placeholder="Price $" id="pp_price_1">
+        </div>
+        <div class="form-grid" style="margin-bottom:6px">
+          <input class="inp" placeholder="Label (e.g. 3 months ago)" id="pp_label_2">
+          <input class="inp" type="number" placeholder="Price $" id="pp_price_2">
+        </div>
+        <div class="form-grid" style="margin-bottom:6px">
+          <input class="inp" placeholder="Label (e.g. 1 month ago)" id="pp_label_3">
+          <input class="inp" type="number" placeholder="Price $" id="pp_price_3">
+        </div>
+        <div class="form-grid" style="margin-bottom:6px">
+          <input class="inp" placeholder="Label (e.g. Now)" id="pp_label_4">
+          <input class="inp" type="number" placeholder="Price $" id="pp_price_4">
+        </div>
+      </div>
+    </div>
+
+    <!-- hidden image URL (filled after photo upload) -->
+    <input type="hidden" id="iImageUrl" value="">
+
     <button class="btn btn-g" onclick="saveItem()" style="width:100%;padding:12px;font-size:14px;margin-top:16px;">💾 SAVE ITEM</button>
   </div>
 </div>
@@ -1106,55 +1050,87 @@ async function showUserDetail(login){
 async function loadItems(){
   const items = await api('/api/admin/items');
   const c = document.getElementById('itemsList');
-  if(!items||!items.length){
-    c.innerHTML='<div style="color:var(--t3);padding:40px;text-align:center;grid-column:1/-1">No items yet. Click "+ ADD NEW ITEM"</div>';
+  if(!c){ console.warn('[loadItems] no #itemsList container'); return; }
+  if(!items || !Array.isArray(items) || !items.length){
+    c.innerHTML = '<div style="color:var(--t3);padding:40px;text-align:center;grid-column:1/-1">No items yet. Click "+ ADD NEW ITEM"</div>';
     return;
   }
   const catIcon = {watches:'⌚',bags:'👜',sneakers:'👟',clothing:'👕',jewelry:'💎',electronics:'📱',other:'📦'};
-  c.innerHTML = items.map(item=>{
-    const history = typeof item.price_history==='string' ? JSON.parse(item.price_history||'[]') : (item.price_history||[]);
-    const filled = item.filled_slots||0;
-    const total = item.purchase_price||1;
-    const pct = Math.round((filled/total)*100);
+  c.innerHTML = items.map(item => {
+    const history = typeof item.price_history === 'string' ? JSON.parse(item.price_history || '[]') : (item.price_history || []);
+    // Available fraction и total_raised из бэкенда
+    const availFrac = item.available_fraction !== undefined ? Number(item.available_fraction) : 100;
+    const totalRaised = item.total_raised !== undefined ? Number(item.total_raised) : 0;
+    const pctFilled = Math.max(0, Math.min(100, 100 - availFrac));
+    const price = Number(item.purchase_price || 0);
+    const gRet = Number(item.guaranteed_return || 0);
+    const eRet = Number(item.expected_return || 0);
+    const periodDays = Number(item.return_period_days || 30);
+
+    // Safe-escape имени для onclick
+    const safeName = String(item.name || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+
+    // Кнопки в зависимости от статуса
+    let actionButtons = '';
+    if(item.status === 'active'){
+      actionButtons = `
+        <button class="btn btn-b btn-sm" onclick="editItem('${item.id}')">EDIT</button>
+        <button class="btn btn-sm" style="background:#3498db;color:#fff" onclick="toggleItemStatus('${item.id}','active')">PAUSE</button>
+        <button class="btn btn-sm" style="background:var(--green);color:#000" onclick="openSellModal('${item.id}','${safeName}',${gRet},${eRet})">MARK AS SOLD</button>
+        <button class="btn btn-r btn-sm" onclick="deleteItem('${item.id}')">DELETE</button>`;
+    } else if(item.status === 'sold'){
+      const soldMode = item.sold_mode ? String(item.sold_mode).toUpperCase() : '';
+      const soldPct = item.sold_percent !== null && item.sold_percent !== undefined ? Number(item.sold_percent).toFixed(0) : '—';
+      actionButtons = `
+        <span style="padding:6px 10px;background:rgba(39,174,96,.15);color:var(--green);border-radius:4px;font-size:11px;font-weight:700">SOLD · ${soldMode} ${soldPct}%</span>
+        <button class="btn btn-r btn-sm" onclick="deleteItem('${item.id}')">DELETE</button>`;
+    } else {
+      // paused
+      actionButtons = `
+        <button class="btn btn-b btn-sm" onclick="editItem('${item.id}')">EDIT</button>
+        <button class="btn btn-sm" style="background:var(--gold);color:#000" onclick="toggleItemStatus('${item.id}','paused')">ACTIVATE</button>
+        <button class="btn btn-r btn-sm" onclick="deleteItem('${item.id}')">DELETE</button>`;
+    }
+
     return `
     <div class="panel">
       <div class="ph" style="justify-content:space-between">
-        <span>${catIcon[item.category]||'📦'} ${item.name}</span>
-        <span class="badge" style="background:${item.status==='active'?'var(--green)':item.status==='sold'?'var(--t3)':'var(--orange)'}">${item.status}</span>
+        <span>${catIcon[item.category] || '📦'} ${item.name || 'Untitled'}</span>
+        <span class="badge" style="background:${item.status === 'active' ? 'var(--green)' : item.status === 'sold' ? 'var(--t3)' : 'var(--orange)'}">${item.status || 'active'}</span>
       </div>
       <div class="pb">
-        ${item.image_url?`<img src="${item.image_url}" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:10px" onerror="this.style.display='none'">`:''}
-        ${item.description?`<p style="font-size:12px;color:var(--t2);margin-bottom:10px">${item.description}</p>`:''}
-        <div class="metric"><span class="ml">Purchase Price</span><span class="mv" style="color:var(--gold)">${fmt(item.purchase_price)}</span></div>
-        <div class="metric"><span class="ml">Guaranteed Return</span><span class="mv" style="color:var(--green)">${item.guaranteed_return}%</span></div>
-        <div class="metric"><span class="ml">Expected Return</span><span class="mv" style="color:var(--blue)">${item.expected_return}%</span></div>
-        <div class="metric"><span class="ml">Return Period</span><span class="mv">${item.return_period_days} days</span></div>
+        ${item.image_url ? `<img src="${item.image_url}" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:10px" onerror="this.style.display='none'">` : ''}
+        ${item.description ? `<p style="font-size:12px;color:var(--t2);margin-bottom:10px">${item.description}</p>` : ''}
+        <div class="metric"><span class="ml">Purchase Price</span><span class="mv" style="color:var(--gold)">${fmt(price)}</span></div>
+        <div class="metric"><span class="ml">Guaranteed Return</span><span class="mv" style="color:var(--green)">${gRet}%</span></div>
+        <div class="metric"><span class="ml">Expected Return</span><span class="mv" style="color:var(--blue)">${eRet}%</span></div>
+        <div class="metric"><span class="ml">Return Period</span><span class="mv">${periodDays} days</span></div>
+        <div class="metric"><span class="ml">Available</span><span class="mv">${availFrac.toFixed(1)}%</span></div>
+        <div class="metric"><span class="ml">Total Raised</span><span class="mv" style="color:var(--gold)">${fmt(totalRaised)}</span></div>
         <div style="margin:10px 0">
           <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px">
-            <span>Filled: ${fmt(filled)} / ${fmt(total)}</span>
-            <span>${pct}%</span>
+            <span>Sold: ${pctFilled.toFixed(1)}% of 100%</span>
           </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pctFilled}%"></div></div>
         </div>
-        ${history.length>0?`
+        ${history.length > 0 ? `
         <div style="margin:10px 0">
           <div style="font-size:11px;color:var(--t3);margin-bottom:6px">📈 Price History</div>
           <canvas id="chart_${item.id}" height="80"></canvas>
-        </div>`:''}
-        <div style="display:flex;gap:6px;margin-top:10px">
-          <button class="btn btn-b btn-sm" onclick="editItem('${item.id}')">EDIT</button>
-          <button class="btn btn-r btn-sm" onclick="toggleItemStatus('${item.id}','${item.status}')">
-            ${item.status==='active'?'PAUSE':'ACTIVATE'}
-          </button>
+        </div>` : ''}
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          ${actionButtons}
         </div>
       </div>
     </div>`;
   }).join('');
   // Draw charts
-  setTimeout(()=>{
-    items.forEach(item=>{
-      const history = typeof item.price_history==='string' ? JSON.parse(item.price_history||'[]') : (item.price_history||[]);
-      if(history.length>=2) drawChart('chart_'+item.id, history);
+  setTimeout(() => {
+    items.forEach(item => {
+      const history = typeof item.price_history === 'string' ? JSON.parse(item.price_history || '[]') : (item.price_history || []);
+      if(history.length >= 2){
+        try{ drawChart('chart_' + item.id, history); }catch(e){}
+      }
     });
   }, 100);
 }
@@ -1217,10 +1193,12 @@ function openAddItem(){
 
 async function editItem(id){
   const items = await api('/api/admin/items');
-  const item = items.find(i=>i.id===id);
-  if(!item) return;
+  if(!items || !Array.isArray(items)){ notify('Could not load items', false); return; }
+  // id может приходить как string из onclick, а в бэке int — приводим оба к string
+  const item = items.find(i => String(i.id) === String(id));
+  if(!item){ notify('Item not found', false); return; }
   document.getElementById('itemModalTitle').textContent = '✏️ EDIT ITEM';
-  document.getElementById('editItemId').value = id;
+  document.getElementById('editItemId').value = item.id;
   document.getElementById('iName').value = item.name||'';
   document.getElementById('iCategory').value = item.category||'other';
   document.getElementById('iDesc').value = item.description||'';
@@ -1277,6 +1255,22 @@ async function toggleItemStatus(id, currentStatus){
   const newStatus = currentStatus==='active'?'paused':'active';
   const r = await post('/api/admin/items/'+id, {status:newStatus});
   if(r&&r.ok){ notify('Status updated'); loadItems(); }
+}
+
+async function deleteItem(id){
+  if(!confirm('Delete this item permanently? This cannot be undone.\n\nIf the item has active purchases, deletion will be blocked.')) return;
+  const r = await post('/api/admin/items/'+id+'/delete', {});
+  if(r && r.ok){
+    notify('Item deleted');
+    loadItems();
+  } else {
+    const err = (r && r.detail && r.detail.error) || (r && r.error) || 'unknown';
+    if(err === 'has_active_purchases'){
+      notify('Cannot delete: item has active holders. Mark as sold first.', false);
+    } else {
+      notify('Delete failed: ' + err, false);
+    }
+  }
 }
 
 // ============================================================
@@ -1516,87 +1510,6 @@ function removePhoto() {
 }
 
 // Save item with photo upload
-async function saveItem() {
-  const name = document.getElementById('iName').value.trim();
-  const category = document.getElementById('iCategory').value;
-  const desc = document.getElementById('iDesc').value.trim();
-  const price = parseFloat(document.getElementById('iPrice').value);
-  const slots = parseFloat(document.getElementById('iSlots').value);
-  const guaranteed = parseFloat(document.getElementById('iGuaranteed').value) || 0;
-  const expected = parseFloat(document.getElementById('iExpected').value) || 0;
-  const period = parseInt(document.getElementById('iPeriod').value) || 7;
-  const status = document.getElementById('iStatus').value;
-  
-  // Validation
-  if (!name) {
-    notify('❌ Please enter item name', false);
-    return;
-  }
-  
-  if (!price || price <= 0) {
-    notify('❌ Please enter valid price', false);
-    return;
-  }
-  
-  if (!slots || slots <= 0) {
-    notify('❌ Please enter valid total slots', false);
-    return;
-  }
-  
-  notify('Saving item...', true);
-  
-  let imageUrl = '';
-  
-  // Upload photo if selected
-  if (selectedPhoto) {
-    try {
-      imageUrl = await uploadPhoto(selectedPhoto);
-      notify('📸 Photo uploaded successfully', true);
-    } catch (error) {
-      notify('⚠️ Photo upload failed, saving without image', false);
-      console.error('Photo upload error:', error);
-    }
-  }
-  
-  // Prepare item data
-  const itemData = {
-    name: name,
-    category: category,
-    description: desc,
-    price: price,
-    totalSlots: slots,
-    guaranteedReturn: guaranteed,
-    expectedReturn: expected,
-    periodDays: period,
-    status: status,
-    imageUrl: imageUrl,
-    created: new Date().toISOString()
-  };
-  
-  try {
-    // Try to save to backend (you can implement this endpoint)
-    const result = await post('/api/admin/items', itemData);
-    
-    if (result && !result.error) {
-      notify(`✅ Item "${name}" saved successfully!`, true);
-      
-      // Send Telegram notification
-      await sendTelegramNotification(`🏷️ <b>NEW ITEM ADDED</b>\n\nName: ${name}\nCategory: ${category}\nPrice: $${price.toLocaleString()}\nReturn: ${guaranteed}%-${expected}%\n${imageUrl ? '📸 Photo uploaded' : '📷 No photo'}\nAdded by: Admin Panel`);
-      
-      // Close modal and refresh
-      document.getElementById('addItemModal').classList.remove('show');
-      await loadItems();
-      
-    } else {
-      const errorMsg = result?.error || result?.detail || 'Failed to save item';
-      notify(`❌ ${errorMsg}`, false);
-    }
-    
-  } catch (error) {
-    console.error('Save item error:', error);
-    notify(`❌ Error saving item: ${error.message}`, false);
-  }
-}
 
 // Upload photo to image hosting service
 async function uploadPhoto(photoData) {
@@ -1628,92 +1541,6 @@ async function uploadPhoto(photoData) {
     // Option 2: Fallback to base64 data URL (works but not recommended for production)
     return photoData.dataUrl;
   }
-}
-
-// Load marketplace items
-async function loadItems() {
-  let items = await api('/api/admin/items');
-  
-  if (!items) {
-    // Fallback demo items if no backend
-    items = [
-      { id: 1, name: 'Rolex Submariner', category: 'watches', price: 15000, guaranteedReturn: 25, expectedReturn: 40, status: 'active' },
-      { id: 2, name: 'Hermès Birkin 30', category: 'bags', price: 25000, guaranteedReturn: 30, expectedReturn: 50, status: 'active' },
-      { id: 3, name: 'Nike Dior Jordan 1', category: 'sneakers', price: 8000, guaranteedReturn: 35, expectedReturn: 55, status: 'active' }
-    ];
-  } else {
-    // Маппим snake_case из бэкенда в camelCase которого ожидает renderItems
-    items = items.map(i => ({
-      id: i.id,
-      name: i.name,
-      category: i.category,
-      description: i.description,
-      price: i.purchase_price || i.price || 0,
-      imageUrl: i.image_url || i.imageUrl || '',
-      guaranteedReturn: i.guaranteed_return || i.guaranteedReturn || 0,
-      expectedReturn: i.expected_return || i.expectedReturn || 0,
-      returnPeriodDays: i.return_period_days || 30,
-      status: i.status || 'active',
-      available_fraction: i.available_fraction,
-      total_raised: i.total_raised,
-      sold_mode: i.sold_mode,
-      sold_percent: i.sold_percent,
-    }));
-  }
-  
-  renderItems(items);
-}
-
-// Render items in marketplace
-function renderItems(items) {
-  const container = document.querySelector('#tab-marketplace .grid'); // Assuming there's a grid container
-  if (!container) return;
-  
-  if (!items.length) {
-    container.innerHTML = '<div style="grid-column: 1/-1;text-align:center;color:var(--t3);padding:40px">No items yet. Click "Add Item" to create one.</div>';
-    return;
-  }
-  
-  container.innerHTML = items.map(item => {
-    // Экранируем имя для безопасной вставки в onclick
-    const safeName = String(item.name || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-    const gRet = Number(item.guaranteedReturn) || 0;
-    const eRet = Number(item.expectedReturn) || 0;
-    let actionBtn = '';
-    if (item.status === 'active') {
-      actionBtn = '<button class="btn btn-sm" style="background:var(--green);color:#000" onclick="openSellModal(\'' + item.id + '\',\'' + safeName + '\',' + gRet + ',' + eRet + ')">MARK AS SOLD</button>';
-    } else if (item.status === 'sold') {
-      const modeTxt = item.sold_mode ? ' · ' + String(item.sold_mode).toUpperCase() + ' ' + Number(item.sold_percent || 0).toFixed(0) + '%' : '';
-      actionBtn = '<span style="font-size:10px;color:var(--green);font-weight:700;padding:4px 8px;background:rgba(39,174,96,.12);border-radius:4px">SOLD' + modeTxt + '</span>';
-    }
-    return `
-    <div class="panel">
-      <div style="height:150px;background:var(--bg2);display:flex;align-items:center;justify-content:center;border-radius:8px 8px 0 0;">
-        ${item.imageUrl ? 
-          `<img src="${item.imageUrl}" style="max-width:100%;max-height:100%;object-fit:cover;border-radius:8px 8px 0 0;">` : 
-          `<div style="font-size:48px;">${getCategoryIcon(item.category)}</div>`
-        }
-      </div>
-      <div class="pb">
-        <h4 style="margin-bottom:4px;">${item.name}</h4>
-        <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">${(item.category||'other').toUpperCase()}</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:11px;color:var(--t3);">Price:</span>
-          <span style="font-weight:700;">$${Number(item.price||0).toLocaleString()}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:11px;color:var(--t3);">Return:</span>
-          <span style="color:var(--green);font-weight:700;">${gRet}%-${eRet}%</span>
-        </div>
-        <div style="display:flex;gap:4px;margin-top:12px;flex-wrap:wrap;">
-          <button class="btn btn-b btn-sm" onclick="editItem('${item.id}')">EDIT</button>
-          <button class="btn btn-gold btn-sm" onclick="toggleItemStatus('${item.id}', '${item.status}')">${item.status === 'active' ? 'PAUSE' : 'ACTIVATE'}</button>
-          ${actionBtn}
-          <button class="btn btn-r btn-sm" onclick="deleteItem('${item.id}')">DELETE</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
 }
 
 // Get category icon
