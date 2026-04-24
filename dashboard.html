@@ -714,8 +714,10 @@ let currentView='pools';
 const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
 if(saved)state=saved;
 state.wallet=0;state.balance=0;
-/* Pool positions приходят только с бэка, локальные — мусор */
+/* Pool positions и Items приходят только с бэка, локальные — мусор */
 state.positions=[];
+state.myItems=[];
+state.closedItems=[];
 /* ── ЗАГРУЖАЕМ РЕАЛЬНЫЙ БАЛАНС С БЭКЕНДА ── */
 (async function loadBalanceFromBackend(){
   try{
@@ -733,6 +735,7 @@ state.positions=[];
     }
     // Pool positions — всегда из БД, не из localStorage
     try{await loadPoolPositions()}catch(e){}
+    try{await loadMyItems()}catch(e){}
   }catch(e){console.warn('Balance load error:',e);}
 })();
 
@@ -1165,14 +1168,86 @@ ctx.fillStyle=lineColor;ctx.font='bold 11px monospace';ctx.fillText((isUp?'+':''
 
 function toggleFav(id,btn){const idx=state.favorites.indexOf(id);if(idx>-1){state.favorites.splice(idx,1);btn.classList.remove('on');btn.textContent='♡ Save to favorites'}else{state.favorites.push(id);btn.classList.add('on');btn.textContent='♥ Saved'}saveState();renderFavs()}
 
-function buyFraction(id){const i=ITEMS.find(x=>x.id===id);const amt=parseInt(document.getElementById('lotSlider').value);
-if(amt<i.min){alert('Minimum $'+i.min);return}
-if(state.wallet>=amt){state.wallet-=amt}else if(state.wallet+state.free>=amt){const fromWallet=state.wallet;state.wallet=0;state.free-=amt-fromWallet;state.balance-=amt-fromWallet}else{closeModal();openTopUp();return}
-// Item funding % increases — less capacity for others
-const addPct=Math.min(amt/i.price*100,100-i.funded);i.funded=Math.min(100,i.funded+addPct);i.inv+=1;
-state.myItems.push({id:i.id,name:i.name,ico:i.ico,invested:amt,pct:(amt/i.price*100).toFixed(1),status:'buying',ret:Math.round((i.ret[0]+i.ret[1])/2),retMin:i.ret[0],retMax:i.ret[1],guaranteed:Math.round(i.ret[0]*0.6),daysTotal:Math.round((i.days[0]+i.days[1])/2),daysMin:i.days[0],daysMax:i.days[1],purchaseDate:Date.now(),desc:i.desc});
-state.balance+=amt;state.free+=0;
-closeModal();addTx('Fraction: '+i.name+' $'+amt.toLocaleString(),'done');updateUI();renderMarketplace('all');showConfetti();saveState();setTimeout(()=>showCertificate(i,amt),500)}
+async function buyFraction(id){
+  const i=ITEMS.find(x=>x.id===id);
+  if(!i){alert('Item not found');return}
+  const amt=parseInt(document.getElementById('lotSlider').value);
+  if(amt<i.min){alert('Minimum $'+i.min);return}
+  if(state.wallet<amt){closeModal();openTopUp();return}
+  const userLogin=U.login||sessionStorage.getItem('luxor_login');
+  if(!userLogin){alert('Session expired. Please log in again.');return}
+  // Loader
+  showModal(`<div style="text-align:center;padding:40px 20px"><div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div><div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">PROCESSING PURCHASE</div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+  try{
+    const res=await fetch(API_URL+'/api/items/buy',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_login:userLogin,item_id:id,amount_usd:amt})
+    });
+    const data=await res.json();
+    if(!res.ok||!data||!data.ok){
+      const errCode=(data&&data.detail&&data.detail.error)||(data&&data.error)||'unknown';
+      const map={
+        'item_not_found':'This item is not available for purchase yet. Please try again later.',
+        'item_not_active':'This item is no longer available (already sold).',
+        'insufficient_fraction':'Not enough share available. Try a smaller amount.',
+        'insufficient_balance':'Wallet balance is not enough.',
+        'user_not_found':'Session error. Please log in again.',
+        'item_price_invalid':'Item price misconfigured. Contact support.',
+        'invalid_amount':'Amount must be greater than zero.',
+      };
+      closeModal();
+      setTimeout(()=>alert('Purchase failed: '+(map[errCode]||errCode)),100);
+      return;
+    }
+    // Success
+    state.wallet=data.new_wallet_balance;
+    closeModal();
+    addTx('Fraction: '+(data.item_name||i.name)+' $'+amt.toLocaleString(),'done');
+    await loadMyItems();
+    updateUI();renderMarketplace('all');showConfetti();saveState();
+    setTimeout(()=>showCertificate(i,amt),500);
+  }catch(e){
+    closeModal();
+    setTimeout(()=>alert('Network error. Please try again.'),100);
+  }
+}
+
+/* Load my item purchases from backend (replaces localStorage) */
+async function loadMyItems(){
+  const userLogin=U.login||sessionStorage.getItem('luxor_login');
+  if(!userLogin)return;
+  try{
+    const res=await fetch(API_URL+'/api/items/my/'+encodeURIComponent(userLogin));
+    const data=await res.json();
+    if(data&&data.ok&&Array.isArray(data.purchases)){
+      // Keep only active purchases in myItems to match old UI expectations,
+      // but also store closed ones for history display
+      state.myItems=data.purchases
+        .filter(p=>p.status==='active')
+        .map(p=>({
+          id:p.item_id,
+          purchase_id:p.id,
+          name:p.name,
+          ico:'',
+          invested:p.invested,
+          pct:p.pct,
+          status:'buying',
+          ret:p.ret,
+          retMin:p.retMin,
+          retMax:p.retMax,
+          guaranteed:p.guaranteed_return,
+          daysTotal:p.return_period_days,
+          daysMin:p.return_period_days,
+          daysMax:p.return_period_days,
+          purchaseDate:p.purchaseDate,
+          desc:''
+        }));
+      state.closedItems=data.purchases.filter(p=>p.status!=='active');
+      try{renderMyItems()}catch(e){}
+      try{updateUI()}catch(e){}
+    }
+  }catch(e){console.warn('loadMyItems failed:',e)}
+}
 
 /* ═══ TOP UP / DEPOSIT FLOW (Phase 2) ═══ */
 /* Flow: choose bonus → choose coin+amount → pay screen (QR + address + locked crypto amount + 15min timer) → loader (polling) → success/rejected */
@@ -1728,10 +1803,32 @@ o.innerHTML=`<div class="modal"><button class="modal-close" onclick="closeModal(
 function closeModal(){const o=document.getElementById('mainOverlay');if(o)o.classList.remove('show');document.body.style.overflow=''}
 
 /* ═══ GRAPH ═══ */
-function sellNow(id){const idx=state.myItems.findIndex(x=>x.id===id);if(idx<0)return;const item=state.myItems[idx];const refund=Math.round(item.invested*0.95);
-if(!confirm('Sell your '+item.pct+'% of '+item.name+' now?\n\nYou will receive: $'+refund.toLocaleString()+' (95% of invested)\nLoss: $'+Math.round(item.invested*0.05).toLocaleString()+' (5% early exit fee)'))return;
-state.myItems.splice(idx,1);state.wallet+=refund;state.balance-=item.invested;
-addTx('Early sale: '+item.name+' +$'+refund.toLocaleString(),'done');updateUI();saveState();showGoldRain()}
+async function sellNow(id){
+  const item=state.myItems.find(x=>x.id===id);
+  if(!item){alert('Item not found');return}
+  const purchaseId=item.purchase_id;
+  if(!purchaseId){alert('Cannot sell: purchase record missing. Please refresh the page.');return}
+  const refund=Math.round(item.invested*0.9);
+  const loss=Math.round(item.invested*0.1);
+  if(!confirm('Sell your '+item.pct+'% of '+item.name+' now?\n\nYou will receive: $'+refund.toLocaleString()+' (90% of invested)\nEarly exit fee: $'+loss.toLocaleString()+' (10%)'))return;
+  const userLogin=U.login||sessionStorage.getItem('luxor_login');
+  try{
+    const res=await fetch(API_URL+'/api/items/sell-early/'+purchaseId,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_login:userLogin})
+    });
+    const data=await res.json();
+    if(!res.ok||!data||!data.ok){
+      const errCode=(data&&data.detail&&data.detail.error)||(data&&data.error)||'unknown';
+      alert('Sale failed: '+errCode);
+      return;
+    }
+    state.wallet=data.new_wallet_balance;
+    addTx('Early sale: '+item.name+' +$'+Math.round(data.payout_usd).toLocaleString(),'done');
+    await loadMyItems();
+    updateUI();saveState();showGoldRain();
+  }catch(e){alert('Network error. Please try again.')}
+}
 
 let chartState={zoom:1,offset:0,candles:null};
 function setPeriod(p,el){currentPeriod=p;document.querySelectorAll('.ptab').forEach(t=>{t.classList.remove('active');t.style.background='rgba(255,255,255,.08)';t.style.color='#f0ede6'});el.classList.add('active');el.style.background='var(--gold)';el.style.color='#0a0a0a';drawGraph()}
