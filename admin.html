@@ -530,62 +530,94 @@ textarea.inp{resize:vertical;min-height:60px;}
 // ============================================================
 const API = 'https://luxor-backend-production.up.railway.app';
 let TOKEN = sessionStorage.getItem('luxor_admin_token') || '';
+let AUTH_READY = false;  // пока не true — не даём api()/post() делать автоперезагрузку
 
-// Auth check: проверяем валидность токена через защищённый эндпоинт.
-// Если токена нет / токен истёк — показываем форму логина.
-(async function(){
-  async function checkToken(){
-    if(!TOKEN) return false;
+// Показать форму логина с опциональным сообщением об ошибке.
+function _showAdminLogin(errMsg){
+  document.body.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a0a0a;padding:20px;font-family:system-ui,sans-serif">
+      <div style="background:#141414;border:1px solid #2a2a2a;border-radius:12px;padding:32px;max-width:420px;width:100%">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#c9a84c;text-align:center;margin-bottom:8px">LUXOR ADMIN</div>
+        <div style="color:#888;font-size:13px;text-align:center;margin-bottom:24px">Sign in to manage the platform</div>
+        <input id="al_login" placeholder="Admin login" value="luxor_admin" style="width:100%;padding:12px;margin-bottom:10px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:6px;color:#fff;font-size:14px;box-sizing:border-box">
+        <input id="al_pwd" type="password" placeholder="Admin password" style="width:100%;padding:12px;margin-bottom:16px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:6px;color:#fff;font-size:14px;box-sizing:border-box">
+        <button id="al_btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#c9a84c,#b8943a);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;cursor:pointer;font-weight:700">SIGN IN</button>
+        <div id="al_err" style="color:#ef5350;font-size:12px;margin-top:10px;min-height:16px;text-align:center;word-break:break-word">${errMsg || ''}</div>
+      </div>
+    </div>`;
+  const doLogin = async ()=>{
+    const login = document.getElementById('al_login').value.trim();
+    const password = document.getElementById('al_pwd').value;
+    const errEl = document.getElementById('al_err');
+    const btn = document.getElementById('al_btn');
+    errEl.textContent = '';
+    if(!login || !password){ errEl.textContent = 'Enter login and password'; return; }
+    btn.disabled = true; btn.textContent = 'SIGNING IN...';
     try{
-      const r = await fetch(API+'/api/admin/stats', {
-        headers: { 'Authorization': 'Bearer '+TOKEN }
+      const r = await fetch(API+'/api/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({login, password})
       });
-      return r.status === 200;
-    }catch(e){ return false; }
-  }
-
-  async function loginAdmin(){
-    document.body.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a0a0a;padding:20px">
-        <div style="background:#141414;border:1px solid #2a2a2a;border-radius:12px;padding:32px;max-width:400px;width:100%">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#c9a84c;text-align:center;margin-bottom:8px">LUXOR ADMIN</div>
-          <div style="color:#888;font-size:13px;text-align:center;margin-bottom:24px">Sign in to manage the platform</div>
-          <input id="al_login" placeholder="Admin login" style="width:100%;padding:12px;margin-bottom:10px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:6px;color:#fff;font-size:14px">
-          <input id="al_pwd" type="password" placeholder="Admin password" style="width:100%;padding:12px;margin-bottom:16px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:6px;color:#fff;font-size:14px">
-          <button id="al_btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#c9a84c,#b8943a);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;cursor:pointer;font-weight:700">SIGN IN</button>
-          <div id="al_err" style="color:#ef5350;font-size:12px;margin-top:10px;min-height:16px;text-align:center"></div>
-        </div>
-      </div>`;
-    const doLogin = async ()=>{
-      const login = document.getElementById('al_login').value.trim();
-      const password = document.getElementById('al_pwd').value;
-      const errEl = document.getElementById('al_err');
-      errEl.textContent = '';
-      if(!login || !password){ errEl.textContent = 'Enter login and password'; return; }
-      try{
-        const r = await fetch(API+'/api/login', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({login, password})
-        });
-        const data = await r.json();
-        if(!r.ok || !data.ok){ errEl.textContent = data.detail || 'Incorrect credentials'; return; }
-        if(!data.is_admin){ errEl.textContent = 'Not an admin account'; return; }
-        TOKEN = data.token;
-        sessionStorage.setItem('luxor_admin_token', TOKEN);
-        location.reload();
-      }catch(e){
-        errEl.textContent = 'Network error';
+      let data = null;
+      try { data = await r.json(); } catch(e) {}
+      if(!r.ok){
+        errEl.textContent = 'HTTP '+r.status+': '+(data && (data.detail || data.error) || 'Login failed');
+        btn.disabled = false; btn.textContent = 'SIGN IN';
+        return;
       }
-    };
-    document.getElementById('al_btn').onclick = doLogin;
-    document.getElementById('al_pwd').onkeydown = (e)=>{ if(e.key==='Enter') doLogin(); };
-    throw 0; // останавливаем дальнейшую загрузку страницы
-  }
+      if(!data || !data.ok){
+        errEl.textContent = (data && (data.detail || data.error)) || 'Incorrect credentials';
+        btn.disabled = false; btn.textContent = 'SIGN IN';
+        return;
+      }
+      if(!data.is_admin){
+        errEl.textContent = 'Not an admin account';
+        btn.disabled = false; btn.textContent = 'SIGN IN';
+        return;
+      }
+      TOKEN = data.token;
+      sessionStorage.setItem('luxor_admin_token', TOKEN);
+      location.reload();
+    }catch(e){
+      errEl.textContent = 'Network error: '+(e && e.message || 'unknown');
+      btn.disabled = false; btn.textContent = 'SIGN IN';
+    }
+  };
+  document.getElementById('al_btn').onclick = doLogin;
+  document.getElementById('al_pwd').onkeydown = (e)=>{ if(e.key==='Enter') doLogin(); };
+  document.getElementById('al_login').onkeydown = (e)=>{ if(e.key==='Enter') document.getElementById('al_pwd').focus(); };
+}
 
-  const ok = await checkToken();
-  if(!ok){
-    await loginAdmin();
+// Startup auth check. Работает синхронно (по суть) — показывает форму
+// только если токена нет или он невалидный.
+(async function(){
+  // Если токена нет — сразу показываем форму, не тратим запрос на бэк
+  if(!TOKEN){
+    _showAdminLogin('');
+    return;
+  }
+  // Есть токен — проверяем на бэке
+  try{
+    const r = await fetch(API+'/api/admin/stats', {
+      headers: { 'Authorization': 'Bearer '+TOKEN }
+    });
+    if(r.status === 200){
+      AUTH_READY = true;  // всё ок, дальше можно дёргать api()/post()
+      return;
+    }
+    // Токен не валидный — чистим и показываем форму с понятной ошибкой
+    sessionStorage.removeItem('luxor_admin_token');
+    TOKEN = '';
+    let errText = 'Session expired (HTTP '+r.status+'). Please log in again.';
+    try{
+      const j = await r.json();
+      if(j && (j.detail || j.error)) errText = 'Backend: '+(j.detail||j.error);
+    }catch(e){}
+    _showAdminLogin(errText);
+  }catch(e){
+    // Сеть упала — показываем ошибку, но НЕ крутим цикл reload
+    _showAdminLogin('Cannot reach backend: '+(e && e.message || 'network error'));
   }
 })();
 
@@ -605,10 +637,12 @@ function _authHeaders(){
 async function api(path){
   try{
     const r = await fetch(API+path, { headers: _authHeaders() });
-    if(r.status === 401 || r.status === 403){
-      // Токен протух — форсим релогин
+    // Только после успешного auth-check разрешаем auto-reload на 401
+    if(AUTH_READY && (r.status === 401 || r.status === 403)){
       sessionStorage.removeItem('luxor_admin_token');
-      location.reload();
+      TOKEN = '';
+      AUTH_READY = false;
+      _showAdminLogin('Session expired. Please log in again.');
       return null;
     }
     return await r.json();
@@ -622,9 +656,11 @@ async function post(path, body){
       headers: { 'Content-Type':'application/json', ..._authHeaders() },
       body: JSON.stringify(body || {})
     });
-    if(r.status === 401 || r.status === 403){
+    if(AUTH_READY && (r.status === 401 || r.status === 403)){
       sessionStorage.removeItem('luxor_admin_token');
-      location.reload();
+      TOKEN = '';
+      AUTH_READY = false;
+      _showAdminLogin('Session expired. Please log in again.');
       return null;
     }
     return await r.json();
