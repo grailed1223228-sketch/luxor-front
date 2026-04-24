@@ -714,6 +714,8 @@ let currentView='pools';
 const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
 if(saved)state=saved;
 state.wallet=0;state.balance=0;
+/* Pool positions приходят только с бэка, локальные — мусор */
+state.positions=[];
 /* ── ЗАГРУЖАЕМ РЕАЛЬНЫЙ БАЛАНС С БЭКЕНДА ── */
 (async function loadBalanceFromBackend(){
   try{
@@ -729,6 +731,8 @@ state.wallet=0;state.balance=0;
       try{updateUI()}catch(e){}
       saveState();
     }
+    // Pool positions — всегда из БД, не из localStorage
+    try{await loadPoolPositions()}catch(e){}
   }catch(e){console.warn('Balance load error:',e);}
 })();
 
@@ -980,9 +984,16 @@ function getPlan(a){if(a>=10000)return{name:'Platinum',display:'15%/month',tier:
 
 /* ═══ RENDERS ═══ */
 function renderPositions(){
-const html=state.positions.length?state.positions.map(p=>`<div class="position"><div class="pos-row"><span class="pos-label">Plan</span><span class="pos-value">${p.plan}</span></div><div class="pos-row"><span class="pos-label">Invested</span><span class="pos-value">$${p.amount.toLocaleString()}</span></div><div class="pos-row"><span class="pos-label">Rate</span><span class="pos-gold">${p.rate}</span></div><div class="pos-row"><span class="pos-label">Earned</span><span class="pos-green">+$${Math.round(p.earned).toLocaleString()}</span></div></div>`).join(''):'<div class="empty-state">No pool positions.</div>';
-document.getElementById('dashPositions').innerHTML=html;
-document.getElementById('poolPositions').innerHTML=html}
+const html=state.positions.length?state.positions.map(p=>{
+  const amt=p.amount||p.amount_usd||0;
+  const earned=p.earned||p.earned_usd||0;
+  const rateTxt=p.rate||(p.rate_pct?(p.rate_pct+'%/'+(p.period||'day')):'—');
+  const posId=p.id;
+  const withdrawBtn=posId?`<button style="margin-top:8px;width:100%;padding:7px;background:rgba(192,57,43,.12);border:1px solid var(--red);color:var(--red);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer" onclick="withdrawFromPool(${posId})">WITHDRAW $${Math.round(amt+earned).toLocaleString()}</button>`:'';
+  return `<div class="position"><div class="pos-row"><span class="pos-label">Plan</span><span class="pos-value">${p.plan}</span></div><div class="pos-row"><span class="pos-label">Invested</span><span class="pos-value">$${amt.toLocaleString()}</span></div><div class="pos-row"><span class="pos-label">Rate</span><span class="pos-gold">${rateTxt}</span></div><div class="pos-row"><span class="pos-label">Earned</span><span class="pos-green">+$${Math.round(earned).toLocaleString()}</span></div>${withdrawBtn}</div>`;
+}).join(''):'<div class="empty-state">No pool positions.</div>';
+const d1=document.getElementById('dashPositions');if(d1)d1.innerHTML=html;
+const d2=document.getElementById('poolPositions');if(d2)d2.innerHTML=html}
 
 function getItemEarnings(i){
 // Calculate based on days elapsed since purchase
@@ -1601,14 +1612,90 @@ c.innerHTML=`<div class="calc-row"><span class="calc-label">Weekly profit</span>
 else{const month=v*.15,year=month*12;
 c.innerHTML=`<div class="calc-row"><span class="calc-label">Monthly profit</span><span class="calc-value" style="color:var(--green)">+$${Math.round(month).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label">Quarterly profit</span><span class="calc-value">+$${Math.round(month*3).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label">Yearly profit</span><span class="calc-value" style="color:var(--gold)">+$${Math.round(year).toLocaleString()}</span></div><div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--bd)"><div class="calc-row"><span class="calc-label" style="font-weight:700">Total after 1 year</span><span class="calc-value" style="font-size:14px;color:var(--gold)">$${Math.round(v+year).toLocaleString()}</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Wallet after investment</span><span class="calc-value" style="color:${balColor};font-size:10px">$${afterBal.toLocaleString()}</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Payout frequency</span><span class="calc-value" style="font-size:10px">Every 30 days</span></div><div class="calc-row"><span class="calc-label" style="font-size:9px;color:var(--t3)">Focus assets</span><span class="calc-value" style="font-size:10px">Rolex · Patek · Hermès</span></div></div>`}}
 
-function processPoolInvest(plan,rate,tier){const amt=parseInt(document.getElementById('poolSlider').value);const pl=getPlan(amt);
-if(state.wallet<amt){
-closeModal();
-setTimeout(()=>{showModal(`<div style="text-align:center;padding:8px"><div style="font-size:42px;margin-bottom:8px">💰</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:6px">INSUFFICIENT BALANCE</h3><p style="font-size:12px;color:var(--t2);margin-bottom:6px">You need <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong> to invest in ${plan} Pool</p><p style="font-size:10px;color:var(--t3);margin-bottom:14px">Current wallet balance: <strong>$${Math.round(state.wallet).toLocaleString()}</strong> · Need to top up: <strong style="color:var(--red)">$${Math.round(amt-state.wallet).toLocaleString()}</strong></p><button class="btn-gold" onclick="closeModal();openTopUp()">TOP UP NOW</button><button class="btn-outline" style="margin-top:6px" onclick="closeModal();openPoolInvest('${plan}','${rate}',${tier},${amt})">← Back to Pool</button></div>`)},200);return}
-state.wallet-=amt;
-state.positions.push({plan,rate,tier,amount:amt,earned:amt*pl.rate,date:Date.now()});
-state.balance+=amt+amt*pl.rate;state.free+=amt*pl.rate;
-closeModal();addTx('Pool: '+plan+' +$'+amt.toLocaleString(),'done');updateUI();showConfetti();saveState()}
+async function processPoolInvest(plan,rate,tier){
+  const amt=parseInt(document.getElementById('poolSlider').value);
+  if(state.wallet<amt){
+    closeModal();
+    setTimeout(()=>{showModal(`<div style="text-align:center;padding:8px"><div style="font-size:42px;margin-bottom:8px">💰</div><h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:6px">INSUFFICIENT BALANCE</h3><p style="font-size:12px;color:var(--t2);margin-bottom:6px">You need <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong> to invest in ${plan} Pool</p><p style="font-size:10px;color:var(--t3);margin-bottom:14px">Current wallet balance: <strong>$${Math.round(state.wallet).toLocaleString()}</strong> · Need to top up: <strong style="color:var(--red)">$${Math.round(amt-state.wallet).toLocaleString()}</strong></p><button class="btn-gold" onclick="closeModal();openTopUp()">TOP UP NOW</button><button class="btn-outline" style="margin-top:6px" onclick="closeModal();openPoolInvest('${plan}','${rate}',${tier},${amt})">← Back to Pool</button></div>`)},200);
+    return;
+  }
+  const userLogin=U.login||sessionStorage.getItem('luxor_login');
+  if(!userLogin){alert('Session expired. Please log in again.');return}
+  // Loader
+  showModal(`<div style="text-align:center;padding:40px 20px"><div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div><div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">CREATING POSITION</div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+  try{
+    const res=await fetch(API_URL+'/api/pool/invest',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_login:userLogin,plan,amount_usd:amt})
+    });
+    const data=await res.json();
+    if(!res.ok||!data||!data.ok){
+      const errMsg=(data&&data.detail&&data.detail.error)||(data&&data.error)||'unknown';
+      const map={
+        'insufficient_balance':'Wallet balance is not enough for this investment',
+        'amount_out_of_range':'Amount is outside the allowed range for this plan',
+        'unknown_plan':'Unknown pool plan',
+        'user_not_found':'Session error. Please log in again.',
+      };
+      closeModal();
+      setTimeout(()=>alert('Pool invest failed: '+(map[errMsg]||errMsg)),100);
+      return;
+    }
+    // Success — update local state from server response
+    state.wallet=data.new_wallet_balance;
+    if(!Array.isArray(state.positions))state.positions=[];
+    state.positions.unshift(data.position);
+    closeModal();
+    addTx('Pool: '+plan+' +$'+amt.toLocaleString(),'done');
+    updateUI();showConfetti();saveState();
+    // Reload fresh from server to be sure
+    try{await loadPoolPositions()}catch(e){}
+  }catch(e){
+    closeModal();
+    setTimeout(()=>alert('Network error. Please try again.'),100);
+  }
+}
+
+/* Load active pool positions from backend (replaces localStorage) */
+async function loadPoolPositions(){
+  const userLogin=U.login||sessionStorage.getItem('luxor_login');
+  if(!userLogin)return;
+  try{
+    const res=await fetch(API_URL+'/api/pool/positions/'+encodeURIComponent(userLogin));
+    const data=await res.json();
+    if(data&&data.ok&&Array.isArray(data.positions)){
+      state.positions=data.positions;
+      try{renderPositions()}catch(e){}
+      try{updateUI()}catch(e){}
+    }
+  }catch(e){console.warn('loadPoolPositions failed:',e)}
+}
+
+/* Withdraw a pool position (principal + earned) */
+async function withdrawFromPool(positionId){
+  if(!positionId)return;
+  const pos=state.positions.find(p=>p.id===positionId);
+  if(!pos){alert('Position not found');return}
+  const total=(pos.amount_usd||pos.amount||0)+(pos.earned_usd||pos.earned||0);
+  if(!confirm('Withdraw from '+pos.plan+' Pool?\n\nPrincipal: $'+(pos.amount_usd||pos.amount||0).toLocaleString()+'\nEarned: $'+Math.round(pos.earned_usd||pos.earned||0).toLocaleString()+'\nTotal to wallet: $'+Math.round(total).toLocaleString()))return;
+  const userLogin=U.login||sessionStorage.getItem('luxor_login');
+  try{
+    const res=await fetch(API_URL+'/api/pool/withdraw/'+positionId,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_login:userLogin})
+    });
+    const data=await res.json();
+    if(!res.ok||!data||!data.ok){
+      alert('Withdraw failed: '+((data&&data.detail&&data.detail.error)||(data&&data.error)||'unknown'));
+      return;
+    }
+    state.wallet=data.new_wallet_balance;
+    addTx('Pool withdraw: '+pos.plan+' +$'+Math.round(data.refunded_usd).toLocaleString(),'done');
+    await loadPoolPositions();
+    updateUI();saveState();
+    showGoldRain();
+  }catch(e){alert('Network error')}
+}
 
 /* ═══ WITHDRAW ═══ */
 function openWithdraw(){showModal(`<div style="text-align:center;margin-bottom:12px"><h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">Withdraw Funds</h3></div>
