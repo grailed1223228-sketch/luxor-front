@@ -280,13 +280,26 @@ body{padding-bottom:52px}}
 </div>
 
 <div class="balance-card">
-<div class="bal-label" id="balLabel">POOLS BALANCE</div>
-<!-- КРИТИЧЕСКИЙ ФИКС: Добавляем walletBalance элемент -->
-<div class="bal-amount" id="walletBalance">$0</div>
-<div class="bal-amount" id="balAmount" style="display:none">$0</div>
-<div style="margin-top:14px;padding:12px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:8px">
+<div class="bal-label" id="balLabel">TOTAL PORTFOLIO</div>
+<div class="bal-amount" id="balAmount">$0</div>
+<!-- Breakdown: Wallet / Pools / Items -->
+<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+  <div style="padding:8px;background:rgba(255,255,255,.03);border-radius:6px;text-align:center">
+    <div style="font-size:8px;opacity:.5;letter-spacing:1px;color:#fff">WALLET</div>
+    <div id="walletBalance" style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:#fff;margin-top:2px">$0</div>
+  </div>
+  <div style="padding:8px;background:rgba(201,168,76,.08);border-radius:6px;text-align:center">
+    <div style="font-size:8px;opacity:.5;letter-spacing:1px;color:var(--gold)">IN POOLS</div>
+    <div id="poolsBalance" style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold);margin-top:2px">$0</div>
+  </div>
+  <div style="padding:8px;background:rgba(39,174,96,.08);border-radius:6px;text-align:center">
+    <div style="font-size:8px;opacity:.5;letter-spacing:1px;color:var(--green)">IN ITEMS</div>
+    <div id="itemsBalance" style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--green);margin-top:2px">$0</div>
+  </div>
+</div>
+<div style="margin-top:10px;padding:10px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:8px">
 <div style="font-size:9px;opacity:.5;letter-spacing:2px;font-family:'Space Mono',monospace;margin-bottom:4px;color:#fff">YOUR EXPECTED PROFIT</div>
-<div id="balProfit" style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold);letter-spacing:2px">+$0</div>
+<div id="balProfit" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);letter-spacing:2px">+$0</div>
 <div id="balProfitSub" style="font-size:10px;opacity:.5;color:#fff">Start investing to see projected earnings</div>
 </div>
 <div class="bal-actions">
@@ -774,16 +787,46 @@ function updateBonusBanner(){const b=document.getElementById('firstDepositBanner
 const hasDeposit=state.txs.some(t=>t.desc&&t.desc.includes('deposit'));
 b.style.display=(!hasDeposit&&state.positions.length===0&&state.myItems.length===0)?'block':'none'}
 
-/* Quick Invest */
-function quickInvest(amt){if(state.wallet<amt){if(confirm('Insufficient balance. Top up $'+amt+' now?'))openTopUp();return}
-const sorted=[...ITEMS].sort((a,b)=>b.views-a.views);const hotItem=sorted[Math.floor(Math.random()*3)];
-if(confirm('Invest $'+amt+' in '+hotItem.name+' ('+hotItem.ret[0]+'–'+hotItem.ret[1]+'% expected return)?')){
-state.wallet-=amt;
-const addPct=Math.min(amt/hotItem.price*100,100-hotItem.funded);hotItem.funded=Math.min(100,hotItem.funded+addPct);hotItem.inv+=1;
-state.myItems.push({id:hotItem.id,name:hotItem.name,ico:hotItem.ico,invested:amt,pct:(amt/hotItem.price*100).toFixed(1),status:'buying',ret:Math.round((hotItem.ret[0]+hotItem.ret[1])/2),desc:hotItem.desc});
-state.balance+=amt;
-addTx('Quick Invest: '+hotItem.name+' $'+amt,'done');updateUI();showConfetti();saveState();
-setTimeout(()=>showCertificate(hotItem,amt),500)}}
+/* Quick Invest — теперь шлёт на бэкенд через buyFraction */
+async function quickInvest(amt){
+  if(state.wallet < amt){
+    if(confirm('Insufficient balance. Top up $'+amt+' now?')) openTopUp();
+    return;
+  }
+  const sorted = [...ITEMS].sort((a,b)=>b.views-a.views);
+  const hotItem = sorted[Math.floor(Math.random()*3)];
+  if(!confirm('Invest $'+amt+' in '+hotItem.name+' ('+hotItem.ret[0]+'–'+hotItem.ret[1]+'% expected return)?')) return;
+  // Подставляем amount в слайдер и вызываем стандартный buyFraction (шлёт на бэк)
+  const slider = document.getElementById('lotSlider');
+  if(slider){ slider.value = amt; }
+  else {
+    // Fallback — прямой вызов
+    const userLogin = U.login || sessionStorage.getItem('luxor_login');
+    if(!userLogin){ alert('Session expired'); return; }
+    try{
+      const res = await apiFetch('/api/items/buy', {
+        method:'POST',
+        body: JSON.stringify({user_login:userLogin, item_id:hotItem.id, amount_usd:amt})
+      });
+      const data = await res.json();
+      if(!res.ok || !data || !data.ok){
+        const err = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+        alert('Quick invest failed: ' + err);
+        return;
+      }
+      state.wallet = data.new_wallet_balance;
+      addTx('Quick Invest: ' + hotItem.name + ' $' + amt, 'done');
+      await loadMyItems();
+      updateUI(); showConfetti(); saveState();
+      setTimeout(()=>showCertificate(hotItem, amt), 500);
+    }catch(e){
+      alert('Network error');
+    }
+    return;
+  }
+  // Если есть слайдер — вызываем стандартный buyFraction
+  await buyFraction(hotItem.id);
+}
 
 /* Digital certificate */
 function showCertificate(item,amt){const pct=(amt/item.price*100).toFixed(2);const id='LUX-'+Date.now().toString().slice(-8);
@@ -856,43 +899,97 @@ showModal(`<div style="text-align:center;margin-bottom:12px"><h3 style="font-fam
 function viewTabDetails(){go(currentView==='pools'?'pools':'items')}
 
 function updateUI(){
-let balAmt,lbl,profitAmt,profitSub;
-if(currentView==='pools'){
-const inv=state.positions.reduce((s,p)=>s+p.amount,0);const earn=state.positions.reduce((s,p)=>s+p.earned,0);
-// Projected annual earnings
-const annual=state.positions.reduce((s,p)=>{const pl=getPlan(p.amount);const perYear=pl.period==='day'?365*pl.rate:pl.period==='week'?52*pl.rate:12*pl.rate;return s+p.amount*perYear},0);
-balAmt=inv+earn+state.wallet;profitAmt=annual;
-lbl='POOLS BALANCE';profitSub=inv>0?'Projected earnings per year at current rate':'Invest in pools to earn fixed returns'
-}else{
-const inv=state.myItems.reduce((s,i)=>s+i.invested,0);
-const maxProfit=state.myItems.reduce((s,i)=>s+i.invested*(i.retMax||i.ret)/100,0);
-const minProfit=state.myItems.reduce((s,i)=>s+i.invested*(i.retMin||i.ret*0.7)/100,0);
-balAmt=inv;profitAmt=maxProfit;
-lbl='ITEMS INVESTED';profitSub=inv>0?'Guaranteed minimum: <strong style="color:#c9a84c">+$'+Math.round(minProfit).toLocaleString()+'</strong> · when items are sold':'Buy fractions from Marketplace to see potential earnings'}
-try{document.getElementById('balLabel').textContent=lbl}catch(e){}
-try{document.getElementById('balAmount').textContent='$'+Math.round(balAmt).toLocaleString()}catch(e){}
-try{document.getElementById('walletBalance').textContent='$'+Math.round(state.wallet).toLocaleString()}catch(e){}
-try{document.getElementById('balProfit').textContent='+$'+Math.round(profitAmt).toLocaleString()}catch(e){}
-try{document.getElementById('balProfitSub').innerHTML=profitSub}catch(e){}
-// Render items list in items view
-try{const dc=document.getElementById('dashItemsContainer');const dcn=document.getElementById('dashItemsCount');
-if(dc){if(state.myItems.length===0){dc.innerHTML='<div class="empty-state">No items purchased yet. Browse the Marketplace to buy your first fraction.</div>';if(dcn)dcn.textContent='0 items'}
-else{if(dcn)dcn.textContent=state.myItems.length+' item'+(state.myItems.length>1?'s':'');
-dc.innerHTML=state.myItems.map(i=>{const maxP=i.invested*(i.retMax||i.ret)/100;const minP=i.invested*(i.retMin||i.ret*0.7)/100;
-return`<div onclick="openItemDetail(${i.id})" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--bd)'">
-<div style="width:54px;height:54px;background:var(--card);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${i.ico}</div>
-<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.name}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">${i.pct}% share · invested $${i.invested.toLocaleString()}</div><div style="font-size:9px;color:var(--gold);margin-top:2px">Status: ${i.status==='buying'?'Acquiring':i.status==='selling'?'On sale':'Sold'}</div></div>
-<div style="text-align:right"><div style="font-size:14px;color:var(--green);font-weight:700">+$${Math.round(maxP).toLocaleString()}</div><div style="font-size:8px;color:var(--t3)">max expected</div><div style="font-size:10px;color:var(--gold);margin-top:2px">+$${Math.round(minP).toLocaleString()}</div><div style="font-size:8px;color:var(--t3)">guaranteed</div></div>
-</div>`}).join('')}}}catch(e){}
-// Pool total with items split hint
-if(currentView==='pools'&&state.myItems.length>0){const itemsTotal=state.myItems.reduce((s,i)=>s+i.invested,0);const sub=document.getElementById('balProfitSub');if(sub)sub.innerHTML+=' · <strong style="color:#fff">$'+Math.round(itemsTotal).toLocaleString()+'</strong> locked in Items'}
-try{updateLevel(state.balance+state.wallet)}catch(e){}
-try{updateStats()}catch(e){}
-try{renderPositions()}catch(e){}
-try{renderMyItems()}catch(e){}
-try{renderFavs()}catch(e){}
-try{renderTxs()}catch(e){}
-try{updateROI()}catch(e){}
+  // ═══ УНИФИЦИРОВАННЫЙ РАСЧЁТ ДЕНЕГ ═══
+  // Источники:
+  //   wallet_balance — state.wallet (загружается из /api/user/{login})
+  //   pool_positions — state.positions (загружается из /api/pool/positions/{login})
+  //     у каждой позиции: amount (principal), earned (начислено но не снято)
+  //   item_purchases (active) — state.myItems (загружается из /api/items/my/{login})
+  //     у каждой: invested (сколько заплатил)
+
+  const wallet = Number(state.wallet) || 0;
+  const poolsPrincipal = state.positions.reduce((s,p)=>s+(Number(p.amount||p.amount_usd)||0), 0);
+  const poolsEarned = state.positions.reduce((s,p)=>s+(Number(p.earned||p.earned_usd)||0), 0);
+  const itemsInvested = state.myItems.reduce((s,i)=>s+(Number(i.invested||i.amount_paid_usd)||0), 0);
+
+  // TOTAL = свободные деньги + всё что вложено (по номиналу) + начисленные но не снятые проценты
+  const total = wallet + poolsPrincipal + poolsEarned + itemsInvested;
+
+  // Проектируемая годовая прибыль от пулов (принцип тот же что был)
+  const annualFromPools = state.positions.reduce((s,p)=>{
+    const rate = Number(p.rate_pct||0)/100;
+    const period = p.period || 'day';
+    const perYear = period==='day'?365*rate:period==='week'?52*rate:12*rate;
+    return s + (Number(p.amount||p.amount_usd)||0)*perYear;
+  }, 0);
+
+  // Макс потенциальная прибыль с items (их expected_return%)
+  const itemsMaxProfit = state.myItems.reduce((s,i)=>{
+    const pct = Number(i.retMax||i.expected_return||i.ret||0) / 100;
+    return s + (Number(i.invested||i.amount_paid_usd)||0) * pct;
+  }, 0);
+
+  // Совокупный проектируемый profit (годовой от пулов + expected от items)
+  const projectedProfit = annualFromPools + itemsMaxProfit;
+
+  // ═══ ОТРИСОВКА ═══
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => '$' + Math.round(n).toLocaleString();
+
+  try{ $('balLabel') && ($('balLabel').textContent = 'TOTAL PORTFOLIO'); }catch(e){}
+  try{ $('balAmount') && ($('balAmount').textContent = fmt(total)); }catch(e){}
+  try{ $('walletBalance') && ($('walletBalance').textContent = fmt(wallet)); }catch(e){}
+  try{ $('poolsBalance') && ($('poolsBalance').textContent = fmt(poolsPrincipal + poolsEarned)); }catch(e){}
+  try{ $('itemsBalance') && ($('itemsBalance').textContent = fmt(itemsInvested)); }catch(e){}
+  try{ $('balProfit') && ($('balProfit').textContent = '+' + fmt(projectedProfit)); }catch(e){}
+
+  // Subtitle — что именно считается прибылью
+  let profitSub = '';
+  if(state.positions.length === 0 && state.myItems.length === 0){
+    profitSub = 'Start investing to see projected earnings';
+  } else {
+    const parts = [];
+    if(annualFromPools > 0) parts.push('<strong style="color:#fff">' + fmt(annualFromPools) + '</strong>/year from pools');
+    if(itemsMaxProfit > 0) parts.push('up to <strong style="color:#fff">' + fmt(itemsMaxProfit) + '</strong> from items');
+    profitSub = parts.join(' · ');
+  }
+  try{ $('balProfitSub') && ($('balProfitSub').innerHTML = profitSub); }catch(e){}
+
+  // Items list отрисовка (оставляю как было — в отдельном контейнере)
+  try{
+    const dc = $('dashItemsContainer');
+    const dcn = $('dashItemsCount');
+    if(dc){
+      if(state.myItems.length === 0){
+        dc.innerHTML = '<div class="empty-state">No items purchased yet. Browse the Marketplace to buy your first fraction.</div>';
+        if(dcn) dcn.textContent = '0 items';
+      } else {
+        if(dcn) dcn.textContent = state.myItems.length + ' item' + (state.myItems.length>1?'s':'');
+        dc.innerHTML = state.myItems.map(i => {
+          const inv = Number(i.invested||i.amount_paid_usd)||0;
+          const retMax = Number(i.retMax||i.expected_return||i.ret||0);
+          const retMin = Number(i.retMin||i.guaranteed_return||0);
+          const maxP = inv * retMax / 100;
+          const minP = inv * retMin / 100;
+          const pct = Number(i.pct||i.fraction_pct||0).toFixed(2);
+          const statusTxt = i.status==='active'?'Holding':i.status==='buying'?'Acquiring':i.status==='sold_guaranteed'||i.status==='sold_profit'?'Sold':i.status==='early_exit'?'Exited early':(i.status||'—');
+          return `<div onclick="openItemDetail(${i.id})" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--bd)'">
+<div style="width:54px;height:54px;background:var(--card);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${i.ico || '💎'}</div>
+<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.name||'Item'}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">${pct}% share · invested ${fmt(inv)}</div><div style="font-size:9px;color:var(--gold);margin-top:2px">${statusTxt}</div></div>
+<div style="text-align:right"><div style="font-size:14px;color:var(--green);font-weight:700">+${fmt(maxP)}</div><div style="font-size:8px;color:var(--t3)">max expected</div><div style="font-size:10px;color:var(--gold);margin-top:2px">+${fmt(minP)}</div><div style="font-size:8px;color:var(--t3)">guaranteed</div></div>
+</div>`;
+        }).join('');
+      }
+    }
+  }catch(e){ console.warn('items render:', e); }
+
+  try{ updateLevel(total); }catch(e){}
+  try{ updateStats(); }catch(e){}
+  try{ renderPositions(); }catch(e){}
+  try{ renderMyItems(); }catch(e){}
+  try{ renderFavs(); }catch(e){}
+  try{ renderTxs(); }catch(e){}
+  try{ updateROI(); }catch(e){}
 try{updateGoals()}catch(e){}
 try{renderTrending()}catch(e){}
 try{renderActivity()}catch(e){}
