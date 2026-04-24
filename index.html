@@ -563,14 +563,15 @@ document.getElementById('le').style.display='none';
 try{
   const res=await fetch('https://luxor-backend-production.up.railway.app/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:u,password:p})});
   const data=await res.json();
-  if(!res.ok){document.getElementById('le').style.display='block';return;}
-  if(data.is_admin){closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:'Admin',ln:'',plan:'',amt:0,isAdmin:true,login:'luxor_admin'}));location.href='admin.html';return;}
+  if(!res.ok||!data.ok){document.getElementById('le').style.display='block';return;}
+  // Сохраняем JWT токен (обязательно для всех защищённых запросов)
+  if(data.token){ sessionStorage.setItem('luxor_token', data.token); }
+  if(data.is_admin){closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:'Admin',ln:'',plan:'',amt:0,isAdmin:true,login:'luxor_admin'}));sessionStorage.setItem('luxor_admin_token', data.token || '');location.href='admin.html';return;}
   closeAll();
   sessionStorage.setItem('luxor_user',JSON.stringify({fn:data.user.first_name,ln:data.user.last_name,plan:data.user.plan||'',rate:'',tier:data.user.tier||0,amt:0,login:data.user.login,referral_code:data.user.referral_code||'',has_first_deposit_bonus:data.user.has_first_deposit_bonus||false}));
   sessionStorage.setItem('luxor_login', data.user.login);
   location.href='dashboard.html';
 }catch(err){
-  if(u==='luxor_admin'&&p==='Luxor@2026!'){closeAll();sessionStorage.setItem('luxor_user',JSON.stringify({fn:'Admin',ln:'',plan:'',amt:0,isAdmin:true,login:'luxor_admin'}));location.href='admin.html';return;}
   document.getElementById('le').style.display='block';
 }}
 
@@ -623,6 +624,7 @@ try{
   }
   sessionStorage.setItem('luxor_user',JSON.stringify({fn,ln,plan,rate,tier,amt:0,login,referral_code:data.referral_code||'',has_first_deposit_bonus:true}));
   sessionStorage.setItem('luxor_login', login);
+  if(data.token){ sessionStorage.setItem('luxor_token', data.token); }
   closeAll();location.href='dashboard.html';
 }catch(err){
   alert('Server error. Please try again later.');
