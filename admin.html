@@ -415,7 +415,7 @@ textarea.inp{resize:vertical;min-height:60px;}
     
     <div class="form-grid">
       <div class="inp-row"><label>Purchase Price ($) *</label><input class="inp" id="iPrice" type="number" placeholder="24000"></div>
-      <div class="inp-row"><label>Total Slots ($, optional)</label><input class="inp" id="iSlots" type="number" placeholder="Defaults to price"></div>
+      <div class="inp-row"><label>Total Slots (optional)</label><input class="inp" id="iSlots" type="number" placeholder="20 (default). Each slot = price / slots" min="1" step="1"></div>
     </div>
     
     <div class="form-grid">
@@ -1268,7 +1268,7 @@ async function editItem(id){
 async function saveItem(){
   const name = document.getElementById('iName').value.trim();
   const price = +document.getElementById('iPrice').value;
-  const slots = +document.getElementById('iSlots').value || price;   // дефолт = price
+  const slotsInput = document.getElementById('iSlots').value.trim();
   if(!name){ notify('Fill required field: Name', false); return; }
   if(!price || price <= 0){ notify('Fill required field: Price', false); return; }
   
@@ -1293,15 +1293,22 @@ async function saveItem(){
     category: document.getElementById('iCategory').value,
     description: document.getElementById('iDesc').value,
     purchase_price: price,
-    total_slots: slots,
     guaranteed_return: guaranteed,
     expected_return: expected,
     return_period_days: +document.getElementById('iPeriod').value || 30,
     status: document.getElementById('iStatus').value,
     image_url: document.getElementById('iImageUrl').value || '',
   };
-  
+  // total_slots: при создании — отправляем (0 если пустое → бэк применит 20)
+  // при редактировании — отправляем только если юзер реально вписал значение
   const editId = document.getElementById('editItemId').value;
+  if(slotsInput){
+    const n = parseInt(slotsInput);
+    if(!isNaN(n) && n >= 1) data.total_slots = n;
+  } else if(!editId) {
+    data.total_slots = 0;  // create: бэк подставит 20
+  }
+  
   let r;
   if(editId){ r = await post('/api/admin/items/'+editId, data); }
   else { r = await post('/api/admin/items', data); }
