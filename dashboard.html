@@ -448,61 +448,117 @@ body{padding-bottom:52px}}
 </div>
 
 <div id="pools-plans" class="pool-subpanel">
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:14px">
-<div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:18px;position:relative;overflow:hidden;border-top:3px solid #a0a0a0">
-<div style="display:inline-block;padding:3px 10px;font-family:'Bebas Neue',sans-serif;font-size:10px;background:rgba(160,160,160,.1);color:#a0a0a0;border-radius:3px;margin-bottom:8px">SILVER</div>
-<h3 style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px">DAILY RETURNS</h3>
-<div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:#a0a0a0;margin:2px 0">0.5% / DAY</div>
-<div style="font-size:9px;color:var(--t3);margin-bottom:8px">~180% APY · Payouts every 24h</div>
-<p style="font-size:10px;color:var(--t2);line-height:1.5;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bd)">Highly liquid streetwear, sneakers, trending pieces. Fast turnover, consistent margins.</p>
-<div style="font-size:9px;color:var(--t2);background:var(--bg2);padding:8px;border-radius:5px;margin-bottom:10px"><strong style="color:var(--t)">Focus:</strong> Nike, Supreme, Jordan, Palace — Grailed, StockX</div>
-<div style="font-size:10px;color:var(--t3);margin-bottom:6px">Min $100 · Max $1,000</div>
-<div style="padding:10px;background:var(--bg2);border-radius:6px;margin-bottom:8px">
+<!-- UX 1 FIX: вместо 3 узких карточек — табы + одна большая карточка выбранного тира -->
+<div style="display:flex;gap:6px;margin-bottom:14px;background:var(--bg2);padding:4px;border-radius:8px;border:1px solid var(--bd)">
+  <button class="pool-tier-tab active" data-tier="silver" onclick="switchPoolTier('silver',this)" style="flex:1;padding:10px;background:var(--card);border:1px solid var(--bd2);color:var(--t);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;cursor:pointer;transition:all .2s">
+    <div style="font-size:9px;opacity:.6;margin-bottom:2px">SILVER</div>
+    <div style="color:#a0a0a0;font-weight:700">0.5%/day</div>
+  </button>
+  <button class="pool-tier-tab" data-tier="gold" onclick="switchPoolTier('gold',this)" style="flex:1;padding:10px;background:transparent;border:1px solid transparent;color:var(--t3);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;cursor:pointer;transition:all .2s">
+    <div style="font-size:9px;opacity:.6;margin-bottom:2px">GOLD ★</div>
+    <div style="color:var(--gold);font-weight:700">3%/week</div>
+  </button>
+  <button class="pool-tier-tab" data-tier="platinum" onclick="switchPoolTier('platinum',this)" style="flex:1;padding:10px;background:transparent;border:1px solid transparent;color:var(--t3);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;cursor:pointer;transition:all .2s">
+    <div style="font-size:9px;opacity:.6;margin-bottom:2px">PLATINUM</div>
+    <div style="color:var(--blue);font-weight:700">15%/mo</div>
+  </button>
+</div>
+
+<!-- SILVER carD -->
+<div id="poolTierSilver" class="pool-tier-card" style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:24px;border-top:3px solid #a0a0a0;margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+  <div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px">DAILY RETURNS</h3>
+    <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:#a0a0a0;margin:2px 0">0.5% / DAY</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:10px;color:var(--t3)">~182.5% APY</div>
+    <div style="font-size:10px;color:var(--gold)">Payouts every 24h</div>
+  </div>
+</div>
+<p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bd)">Highly liquid streetwear, sneakers, trending pieces. Fast turnover, consistent margins. Best for short-term steady income.</p>
+<div style="font-size:11px;color:var(--t3);margin-bottom:8px">Min $100 · Max $1,000</div>
+<div style="padding:14px;background:var(--bg2);border-radius:8px;margin-bottom:12px">
 <input type="range" id="slSlider" min="100" max="1000" value="250" step="50" style="width:100%;accent-color:#a0a0a0" oninput="slUpdate(this.value)">
-<div style="display:flex;justify-content:space-between;font-size:10px;margin-top:4px"><span>Invest: <strong id="slAmt">$250</strong></span><span>Daily: <strong style="color:var(--green)" id="slDay">+$1.25</strong></span></div>
-<div style="font-size:9px;color:var(--t3);margin-top:2px">Weekly: <strong style="color:var(--gold)" id="slWeek">$8.75</strong> · Total in 7 days: <strong id="slTotal">$258.75</strong></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:8px"><span>Invest: <strong id="slAmt">$250</strong></span><span>Daily: <strong style="color:var(--green)" id="slDay">+$1.25</strong></span></div>
+<div style="font-size:10px;color:var(--t3);margin-top:4px">Weekly: <strong style="color:var(--gold)" id="slWeek">$8.75</strong> · Total in 7 days: <strong id="slTotal">$258.75</strong></div>
 </div>
-<button class="btn-primary" onclick="openPoolInvest('Silver','0.5%/day',1,parseInt(document.getElementById('slSlider').value))" style="font-size:12px">INVEST IN SILVER</button>
+<button class="btn-primary" onclick="openPoolInvest('Silver','0.5%/day',1,parseInt(document.getElementById('slSlider').value))" style="font-size:13px;width:100%">INVEST IN SILVER</button>
 </div>
-<div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:18px;position:relative;overflow:hidden;border-top:3px solid var(--gold);box-shadow:0 4px 16px rgba(201,168,76,.06)">
-<div style="display:inline-block;padding:3px 10px;font-family:'Bebas Neue',sans-serif;font-size:10px;background:var(--gg);color:var(--gold);border-radius:3px;margin-bottom:8px">GOLD · POPULAR</div>
-<h3 style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px">WEEKLY RETURNS</h3>
-<div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin:2px 0">3% / WEEK</div>
-<div style="font-size:9px;color:var(--t3);margin-bottom:8px">~156% APY · Payouts every 7 days</div>
-<p style="font-size:10px;color:var(--t2);line-height:1.5;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bd)">Premium designer brands, rare drops, mid-range watches. 3–7 day flip cycles.</p>
-<div style="font-size:9px;color:var(--t2);background:var(--bg2);padding:8px;border-radius:5px;margin-bottom:10px"><strong style="color:var(--t)">Focus:</strong> Balenciaga, Rick Owens, Chrome Hearts, Rolex Oyster</div>
-<div style="font-size:10px;color:var(--t3);margin-bottom:6px">Min $1,000 · Max $10,000</div>
-<div style="padding:10px;background:var(--gg);border-radius:6px;margin-bottom:8px">
+
+<!-- GOLD card -->
+<div id="poolTierGold" class="pool-tier-card" style="display:none;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:24px;border-top:3px solid var(--gold);box-shadow:0 4px 16px rgba(201,168,76,.06);margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+  <div>
+    <div style="display:inline-block;padding:3px 10px;font-family:'Bebas Neue',sans-serif;font-size:10px;background:var(--gg);color:var(--gold);border-radius:3px;margin-bottom:6px">★ POPULAR</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px">WEEKLY RETURNS</h3>
+    <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);margin:2px 0">3% / WEEK</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:10px;color:var(--t3)">~156% APY</div>
+    <div style="font-size:10px;color:var(--gold)">Payouts every 7 days</div>
+  </div>
+</div>
+<p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bd)">Premium designer brands, rare drops, mid-range watches. 3–7 day flip cycles. The sweet spot of risk and reward.</p>
+<div style="font-size:11px;color:var(--t3);margin-bottom:8px">Min $1,000 · Max $10,000</div>
+<div style="padding:14px;background:var(--gg);border-radius:8px;margin-bottom:12px">
 <input type="range" id="gdSlider" min="1000" max="10000" value="2500" step="100" style="width:100%;accent-color:#c9a84c" oninput="gdUpdate(this.value)">
-<div style="display:flex;justify-content:space-between;font-size:10px;margin-top:4px"><span>Invest: <strong id="gdAmt">$2,500</strong></span><span>Weekly: <strong style="color:var(--green)" id="gdWeek">+$75</strong></span></div>
-<div style="font-size:9px;color:var(--t3);margin-top:2px">Monthly: <strong style="color:var(--gold)" id="gdMonth">$300</strong> · Total in 30 days: <strong id="gdTotal">$2,800</strong></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:8px"><span>Invest: <strong id="gdAmt">$2,500</strong></span><span>Weekly: <strong style="color:var(--green)" id="gdWeek">+$75</strong></span></div>
+<div style="font-size:10px;color:var(--t3);margin-top:4px">Monthly: <strong style="color:var(--gold)" id="gdMonth">$326</strong> · Total in 30 days: <strong id="gdTotal">$2,821</strong></div>
 </div>
-<button class="btn-gold" onclick="openPoolInvest('Gold','3%/week',2,parseInt(document.getElementById('gdSlider').value))" style="font-size:12px">INVEST IN GOLD</button>
+<button class="btn-gold" onclick="openPoolInvest('Gold','3%/week',2,parseInt(document.getElementById('gdSlider').value))" style="font-size:13px;width:100%">INVEST IN GOLD</button>
 </div>
-<div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:18px;position:relative;overflow:hidden;border-top:3px solid var(--blue)">
-<div style="display:inline-block;padding:3px 10px;font-family:'Bebas Neue',sans-serif;font-size:10px;background:rgba(58,123,213,.1);color:var(--blue);border-radius:3px;margin-bottom:8px">PLATINUM</div>
-<h3 style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px">MONTHLY RETURNS</h3>
-<div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);margin:2px 0">15% / MONTH</div>
-<div style="font-size:9px;color:var(--t3);margin-bottom:8px">~180% APY · Payouts every 30 days</div>
-<p style="font-size:10px;color:var(--t2);line-height:1.5;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bd)">High-value collectibles: Rolex Daytona, Patek, Birkin, fine jewelry.</p>
-<div style="font-size:9px;color:var(--t2);background:var(--bg2);padding:8px;border-radius:5px;margin-bottom:10px"><strong style="color:var(--t)">Focus:</strong> Rolex, Patek, Hermès, Cartier, Van Cleef</div>
-<div style="font-size:10px;color:var(--t3);margin-bottom:6px">Min $10,000 · Max $300,000</div>
-<div style="padding:10px;background:rgba(58,123,213,.08);border-radius:6px;margin-bottom:8px">
+
+<!-- PLATINUM card -->
+<div id="poolTierPlatinum" class="pool-tier-card" style="display:none;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:24px;border-top:3px solid var(--blue);margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+  <div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px">MONTHLY RETURNS</h3>
+    <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--blue);margin:2px 0">15% / MONTH</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:10px;color:var(--t3)">~180% APY</div>
+    <div style="font-size:10px;color:var(--blue)">Payouts every 30 days</div>
+  </div>
+</div>
+<p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bd)">High-value collectibles: Rolex Daytona, Patek, Birkin, fine jewelry. Higher capital, more stable long-term returns.</p>
+<div style="font-size:11px;color:var(--t3);margin-bottom:8px">Min $10,000 · Max $300,000</div>
+<div style="padding:14px;background:rgba(58,123,213,.08);border-radius:8px;margin-bottom:12px">
 <input type="range" id="ptSlider" min="10000" max="100000" value="25000" step="1000" style="width:100%;accent-color:#3a7bd5" oninput="ptUpdate(this.value)">
-<div style="display:flex;justify-content:space-between;font-size:10px;margin-top:4px"><span>Invest: <strong id="ptAmt">$25,000</strong></span><span>Monthly: <strong style="color:var(--green)" id="ptMonth">+$3,750</strong></span></div>
-<div style="font-size:9px;color:var(--t3);margin-top:2px">Per year: <strong style="color:var(--gold)" id="ptYear">$45,000</strong> · Total after 12mo: <strong id="ptTotal">$70,000</strong></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:8px"><span>Invest: <strong id="ptAmt">$25,000</strong></span><span>Monthly: <strong style="color:var(--green)" id="ptMonth">+$3,750</strong></span></div>
+<div style="font-size:10px;color:var(--t3);margin-top:4px">Per year: <strong style="color:var(--gold)" id="ptYear">$45,000</strong> · Total after 12mo: <strong id="ptTotal">$70,000</strong></div>
 </div>
-<button class="btn-primary" onclick="openPoolInvest('Platinum','15%/month',3,parseInt(document.getElementById('ptSlider').value))" style="font-size:12px">INVEST IN PLATINUM</button>
-</div>
+<button class="btn-primary" onclick="openPoolInvest('Platinum','15%/month',3,parseInt(document.getElementById('ptSlider').value))" style="font-size:13px;width:100%">INVEST IN PLATINUM</button>
 </div>
 </div>
 
 <div id="pools-positions" class="pool-subpanel" style="display:none">
+<!-- UX 2 FIX: крупный summary сверху -->
+<div id="poolsPositionsSummary" style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:18px;margin-bottom:14px;display:none">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;font-family:'Space Mono',monospace;margin-bottom:4px">TOTAL IN POOLS</div>
+      <div id="poolsTotalValue" style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold);line-height:1">$0</div>
+      <div id="poolsTotalSub" style="font-size:11px;color:var(--t3);margin-top:4px">0 active positions</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;font-family:'Space Mono',monospace;margin-bottom:4px">TOTAL EARNED</div>
+      <div id="poolsTotalEarned" style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--green);line-height:1">+$0</div>
+      <div id="poolsTotalAPY" style="font-size:11px;color:var(--gold);margin-top:4px">Avg APY 0%</div>
+    </div>
+  </div>
+  <button onclick="(function(){const tab=document.querySelector('.ptab-pool');if(tab&&typeof poolsTab==='function')poolsTab('plans',tab)})()" style="margin-top:14px;width:100%;padding:10px;background:rgba(201,168,76,.1);border:1px solid var(--gold);color:var(--gold);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;cursor:pointer;transition:all .2s" onmouseover="this.style.background='var(--gold)';this.style.color='#0a0a0a'" onmouseout="this.style.background='rgba(201,168,76,.1)';this.style.color='var(--gold)'">+ NEW POSITION</button>
+</div>
 <div id="poolPositions"><div class="empty-state">No pool positions yet. Go to INVEST tab to choose a plan.</div></div>
 </div>
 
+<!-- UX 2: убран пустой History tab (вернём когда будет реальный endpoint) -->
 <div id="pools-history" class="pool-subpanel" style="display:none">
-<div class="empty-state">No pool history yet. Payouts will appear here once you start earning.</div>
+<div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:32px;text-align:center">
+  <div style="font-size:48px;margin-bottom:8px">📊</div>
+  <h3 style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin-bottom:6px">PAYOUT HISTORY</h3>
+  <div style="font-size:12px;color:var(--t3);max-width:340px;margin:0 auto">Detailed history of pool accruals will appear here. Each payout is logged with timestamp and amount.</div>
+</div>
 </div>
 </div>
 
@@ -741,6 +797,11 @@ function _mapServerItem(srv){
   const categoryRaw = (srv.category || 'other').toLowerCase();
   const cat = _CAT_ALIAS[categoryRaw] || categoryRaw;
   const ico = _CAT_ICONS[categoryRaw] || _CAT_ICONS[cat] || '💎';
+  // SLOT info (от бэкенда — или fallback)
+  const slotsTotal = Number(srv.slots_total || srv.total_slots || 20);
+  const pricePerSlot = Number(srv.price_per_slot || (slotsTotal > 0 ? price / slotsTotal : price));
+  const slotsAvailable = srv.slots_available !== undefined ? Number(srv.slots_available) : Math.round(avail / 100 * slotsTotal);
+  const slotsSold = srv.slots_sold !== undefined ? Number(srv.slots_sold) : (slotsTotal - slotsAvailable);
   // badge по эвристике
   let badge = 'PREMIUM';
   if(funded > 70) badge = 'HOT';
@@ -757,10 +818,14 @@ function _mapServerItem(srv){
     funded: funded,
     available_fraction: avail,
     total_raised: raised,
+    slots_total: slotsTotal,
+    price_per_slot: pricePerSlot,
+    slots_available: slotsAvailable,
+    slots_sold: slotsSold,
     ret: [gRet, eRet],
     days: [Math.max(1, Math.floor(periodDays * 0.5)), periodDays],
-    inv: 0,
-    min: Math.max(10, Math.round(price / 100)),
+    inv: slotsSold,   // показываем сколько слотов куплено
+    min: pricePerSlot,   // минимум = 1 слот
     badge: badge,
     likes: 0,
     views: 0,
@@ -818,6 +883,52 @@ async function apiFetch(path, opts){
 
 const saved=JSON.parse(sessionStorage.getItem('luxor_state2')||'null');
 if(saved)state=saved;
+// BUG 12 FIX: favorites переживают закрытие вкладки → localStorage (не sessionStorage)
+// BUG 11 FIX: храним SNAPSHOT данных item (name, ico, image_url, price, ret) на момент добавления.
+// Раньше хранили только id, и если item продан/удалён — рендерилась пустота.
+// Формат: [{id, name, ico, image_url, price, ret}] либо legacy [id, id, ...]
+try{
+  const lf = JSON.parse(localStorage.getItem('luxor_favorites')||'[]');
+  if(Array.isArray(lf)) state.favorites = lf;
+}catch(e){ state.favorites = state.favorites || []; }
+
+/* Helpers для работы с favorites (поддерживают и legacy [id], и новый [{id,...}]) */
+function _favIds(){
+  return (state.favorites || []).map(f => typeof f === 'object' ? f.id : f);
+}
+function _favIncludes(id){
+  return _favIds().includes(Number(id));
+}
+function _favIndexOf(id){
+  return _favIds().indexOf(Number(id));
+}
+/* Возвращает item-данные: свежие из ITEMS, либо snapshot, либо null */
+function _favResolve(favEntry){
+  const id = typeof favEntry === 'object' ? favEntry.id : favEntry;
+  // Сначала пробуем свежие данные
+  const fresh = ITEMS.find(x => x.id === Number(id));
+  if(fresh) return fresh;
+  // Иначе snapshot (если есть)
+  if(typeof favEntry === 'object'){
+    return {
+      id: favEntry.id,
+      name: favEntry.name || 'Unknown item',
+      ico: favEntry.ico || '💎',
+      image_url: favEntry.image_url || '',
+      desc: favEntry.desc || 'Item no longer available',
+      price: favEntry.price || 0,
+      funded: favEntry.funded || 100,
+      ret: favEntry.ret || [0, 0],
+      days: favEntry.days || [1, 1],
+      inv: favEntry.inv || 0,
+      min: favEntry.min || 0,
+      badge: 'CLOSED',
+      closes: 0,
+      _archived: true,
+    };
+  }
+  return null;
+}
 state.wallet=0;state.balance=0;
 /* Pool positions и Items приходят только с бэка, локальные — мусор */
 state.positions=[];
@@ -840,6 +951,16 @@ state.closedItems=[];
       state.wallet  = Number(data.user.wallet_balance) || 0;
       state.balance = Number(data.user.balance) || 0;
       U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
+      // BUG 13: ref_code из бэка
+      if(data.user.ref_code){
+        U.ref_code = data.user.ref_code;
+        try{ sessionStorage.setItem('luxor_user', JSON.stringify(U)); }catch(e){}
+        // Обновляем UI если есть элемент
+        try{
+          const rc = document.getElementById('refCode');
+          if(rc) rc.textContent = U.ref_code;
+        }catch(e){}
+      }
       sessionStorage.setItem('luxor_login', userLogin);
       try{updateUI()}catch(e){ console.warn('updateUI after balance load:', e); }
       saveState();
@@ -850,6 +971,7 @@ state.closedItems=[];
     try{await loadPoolPositions()}catch(e){ console.warn('[balance] loadPoolPositions failed:', e); }
     try{await loadMyItems()}catch(e){ console.warn('[balance] loadMyItems failed:', e); }
     try{await loadMarketplaceItems()}catch(e){ console.warn('[balance] loadMarketplaceItems failed:', e); }
+    try{await loadTransactionsFromBackend()}catch(e){ console.warn('[balance] loadTransactions failed:', e); }
     // После загрузки всех источников — обновляем UI с правильным total
     try{updateUI()}catch(e){}
   }catch(e){
@@ -857,11 +979,58 @@ state.closedItems=[];
   }
 })();
 
+/* AUDIT FIX: загружаем реальные транзакции с бэка (раньше показывались только локальные) */
+async function loadTransactionsFromBackend(){
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin) return;
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/transactions');
+    const txs = await r.json();
+    if(!Array.isArray(txs)) return;
+    // Маппим бэк-формат в фронт-формат для renderTxs
+    const mapped = txs.map(t => {
+      const amount = +(t.amount_usd || t.amount || 0);
+      const sign = t.type === 'withdrawal' ? '-' : t.type === 'deposit' || t.type === 'bonus' || t.type === 'admin_bonus' ? '+' : '';
+      const typeLabels = {
+        deposit: 'Deposit',
+        withdrawal: 'Withdrawal',
+        bonus: 'Bonus',
+        admin_bonus: 'Admin bonus',
+      };
+      const label = typeLabels[t.type] || t.type;
+      const desc = label + ' ' + sign + '$' + Math.round(amount).toLocaleString() +
+                   (t.crypto_currency ? ' (' + t.crypto_currency + ')' : '');
+      const tdate = t.created_at ? new Date(t.created_at) : new Date();
+      const time = isNaN(tdate.getTime()) ? '' : tdate.toLocaleString();
+      const status = t.status === 'completed' ? 'done' : t.status === 'rejected' ? 'rejected' : 'processing';
+      return { desc, time, status, _amount: amount, _type: t.type };
+    });
+    state.txs = mapped;
+    try{ renderTxs(); }catch(e){}
+    try{ updateBonusBanner && updateBonusBanner(); }catch(e){}
+  }catch(e){
+    console.warn('loadTransactions error:', e);
+  }
+}
+
 /* ═══ INIT ═══ */
 try{const un=document.getElementById('userName');if(un)un.textContent=U.fn;
 const ua=document.getElementById('userAvatar');if(ua)ua.textContent=U.fn[0]||'A';
 const sn=document.getElementById('setName');if(sn)sn.value=U.fn+(U.ln?' '+U.ln:'');
-const rc=document.getElementById('refCode');if(rc)rc.textContent='LUXOR-'+U.fn.substring(0,3).toUpperCase()+Math.floor(Math.random()*900+100);
+// BUG 13 FIX: ref_code хранится на бэке (стабильный), а не рандом при каждой загрузке.
+// Берём из U.ref_code (записывается в loadBalanceFromBackend); если ещё не загружен — placeholder.
+const rc=document.getElementById('refCode');
+if(rc){
+  if(U.ref_code){
+    rc.textContent = U.ref_code;
+  } else {
+    rc.textContent = 'Loading...';
+    // Перерисуем после loadBalanceFromBackend (через 1с — обычно к этому моменту U уже есть)
+    setTimeout(() => {
+      if(U.ref_code) rc.textContent = U.ref_code;
+    }, 1500);
+  }
+}
 }catch(e){console.warn('init',e)}
 try{updateUI()}catch(e){console.warn('updateUI',e)}
 /* Загрузка маркетплейса — параллельно с остальной инициализацией */
@@ -872,17 +1041,45 @@ try{if(U.amt>0&&!saved)setTimeout(()=>openPoolInvest(U.plan||'Silver',U.rate||'0
 
 function saveState(){sessionStorage.setItem('luxor_state2',JSON.stringify(state))}
 
+/* UX 1: Переключение между табами Silver/Gold/Platinum */
+function switchPoolTier(tier, btnEl){
+  const tiers = ['silver', 'gold', 'platinum'];
+  // Стилизуем кнопки
+  document.querySelectorAll('.pool-tier-tab').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = 'transparent';
+    b.style.borderColor = 'transparent';
+    b.style.color = 'var(--t3)';
+  });
+  if(btnEl){
+    btnEl.classList.add('active');
+    btnEl.style.background = 'var(--card)';
+    btnEl.style.borderColor = 'var(--bd2)';
+    btnEl.style.color = 'var(--t)';
+  }
+  // Скрываем/показываем карточки
+  tiers.forEach(t => {
+    const card = document.getElementById('poolTier' + t.charAt(0).toUpperCase() + t.slice(1));
+    if(card) card.style.display = (t === tier) ? '' : 'none';
+  });
+}
+
 /* Pool card slider updaters */
 function slUpdate(v){v=parseInt(v);const day=v*0.005;const week=day*7;const total=v+week;
 document.getElementById('slAmt').textContent='$'+v.toLocaleString();
 document.getElementById('slDay').textContent='+$'+day.toFixed(2);
 document.getElementById('slWeek').textContent='$'+week.toFixed(2);
 document.getElementById('slTotal').textContent='$'+total.toFixed(2)}
-function gdUpdate(v){v=parseInt(v);const week=v*0.03;const month=week*4;const total=v+month;
+function gdUpdate(v){v=parseInt(v);const week=v*0.03;
+// BUG 10 FIX: month = week × 4.345 (52 недель / 12 месяцев), не × 4.
+// "Total in 30 days" = invest * (1.03)^(30/7) — сложные проценты по факту начислений каждые 7 дней.
+// Но для UI оставляем простую формулу: 30 дней = ровно 30/7 ≈ 4.286 недели.
+const monthlyEarn = week * 4.345;
+const totalIn30Days = v + (week * (30/7));
 document.getElementById('gdAmt').textContent='$'+v.toLocaleString();
 document.getElementById('gdWeek').textContent='+$'+Math.round(week).toLocaleString();
-document.getElementById('gdMonth').textContent='$'+Math.round(month).toLocaleString();
-document.getElementById('gdTotal').textContent='$'+Math.round(total).toLocaleString()}
+document.getElementById('gdMonth').textContent='$'+Math.round(monthlyEarn).toLocaleString();
+document.getElementById('gdTotal').textContent='$'+Math.round(totalIn30Days).toLocaleString()}
 function ptUpdate(v){v=parseInt(v);const month=v*0.15;const year=month*12;const total=v+year;
 document.getElementById('ptAmt').textContent='$'+v.toLocaleString();
 document.getElementById('ptMonth').textContent='+$'+Math.round(month).toLocaleString();
@@ -890,9 +1087,18 @@ document.getElementById('ptYear').textContent='$'+Math.round(year).toLocaleStrin
 document.getElementById('ptTotal').textContent='$'+Math.round(total).toLocaleString()}
 
 /* First deposit bonus banner */
-function updateBonusBanner(){const b=document.getElementById('firstDepositBanner');if(!b)return;
-const hasDeposit=state.txs.some(t=>t.desc&&t.desc.includes('deposit'));
-b.style.display=(!hasDeposit&&state.positions.length===0&&state.myItems.length===0)?'block':'none'}
+function updateBonusBanner(){
+  const b = document.getElementById('firstDepositBanner');
+  if(!b) return;
+  // Если бэк сказал что бонус уже использован (has_first_deposit_bonus=false) — баннер скрыт.
+  // Если состояние неизвестно — fallback: проверяем txs / pools / items
+  if(U.has_first_deposit_bonus === false){
+    b.style.display = 'none';
+    return;
+  }
+  const hasDeposit = state.txs.some(t => t.desc && /deposit/i.test(t.desc));
+  b.style.display = (!hasDeposit && state.positions.length === 0 && state.myItems.length === 0) ? 'block' : 'none';
+}
 
 /* Quick Invest — теперь шлёт на бэкенд через buyFraction */
 async function quickInvest(amt){
@@ -1016,7 +1222,8 @@ function updateUI(){
 
   const wallet = Number(state.wallet) || 0;
   const poolsPrincipal = state.positions.reduce((s,p)=>s+(Number(p.amount||p.amount_usd)||0), 0);
-  const poolsEarned = state.positions.reduce((s,p)=>s+(Number(p.earned||p.earned_usd)||0), 0);
+  // BUG 1: live earned (с пророрейт интерполяцией) для отображения в breakdown
+  const poolsEarned = state.positions.reduce((s,p)=>s+getLiveEarned(p), 0);
   const itemsInvested = state.myItems.reduce((s,i)=>s+(Number(i.invested||i.amount_paid_usd)||0), 0);
 
   // TOTAL = свободные деньги + всё что вложено (по номиналу) + начисленные но не снятые проценты
@@ -1039,27 +1246,78 @@ function updateUI(){
   // Совокупный проектируемый profit (годовой от пулов + expected от items)
   const projectedProfit = annualFromPools + itemsMaxProfit;
 
-  // ═══ ОТРИСОВКА ═══
+  // ═══ ОТРИСОВКА (контекстный header: Pools view показывает POOLS BALANCE, Items view — ITEMS VALUE) ═══
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => '$' + Math.round(n).toLocaleString();
 
-  try{ $('balLabel') && ($('balLabel').textContent = 'TOTAL PORTFOLIO'); }catch(e){}
-  try{ $('balAmount') && ($('balAmount').textContent = fmt(total)); }catch(e){}
+  let headerLabel, headerAmount, headerSub;
+  if(currentView === 'items'){
+    headerLabel = 'ITEMS VALUE';
+    headerAmount = itemsInvested;
+    const itemCount = state.myItems.filter(x => x.status === 'active').length;
+    headerSub = itemCount > 0
+      ? itemCount + ' active position' + (itemCount>1?'s':'') + ' · Portfolio total: ' + fmt(total)
+      : 'No items yet · Portfolio total: ' + fmt(total);
+  } else {
+    headerLabel = 'POOLS BALANCE';
+    headerAmount = poolsPrincipal + poolsEarned;
+    const poolCount = state.positions.length;
+    headerSub = poolCount > 0
+      ? poolCount + ' active pool' + (poolCount>1?'s':'') + ' · Portfolio total: ' + fmt(total)
+      : 'No pools yet · Portfolio total: ' + fmt(total);
+  }
+
+  try{ $('balLabel') && ($('balLabel').textContent = headerLabel); }catch(e){}
+  try{ $('balAmount') && ($('balAmount').textContent = fmt(headerAmount)); }catch(e){}
+  // Sub-строка с общим портфелем (маленьким текстом)
+  try{
+    const amountEl = $('balAmount');
+    if(amountEl && !$('balSubtitle')){
+      const sub = document.createElement('div');
+      sub.id = 'balSubtitle';
+      sub.style.cssText = 'font-size:10px;color:var(--t3);font-family:\'Space Mono\',monospace;margin-top:2px;letter-spacing:.5px';
+      amountEl.insertAdjacentElement('afterend', sub);
+    }
+    const sub = $('balSubtitle');
+    if(sub) sub.textContent = headerSub;
+  }catch(e){}
   try{ $('walletBalance') && ($('walletBalance').textContent = fmt(wallet)); }catch(e){}
   try{ $('poolsBalance') && ($('poolsBalance').textContent = fmt(poolsPrincipal + poolsEarned)); }catch(e){}
   try{ $('itemsBalance') && ($('itemsBalance').textContent = fmt(itemsInvested)); }catch(e){}
-  try{ $('balProfit') && ($('balProfit').textContent = '+' + fmt(projectedProfit)); }catch(e){}
-
-  // Subtitle — что именно считается прибылью
-  let profitSub = '';
+  // UX 4 FIX: projected earnings контекстно (pools/items/all view), разные единицы
+  let projectedSub = '';
+  let projectedAmount = 0;
   if(state.positions.length === 0 && state.myItems.length === 0){
-    profitSub = 'Start investing to see projected earnings';
+    projectedSub = 'Start investing to see projected earnings';
+  } else if(currentView === 'items'){
+    // ITEMS view — показываем диапазон от guaranteed до expected
+    const itemsActive = state.myItems.filter(i => i.status === 'active');
+    const itemsMin = itemsActive.reduce((s,i) => s + (+i.invested||0) * (Number(i.retMin||i.guaranteed||0)/100), 0);
+    const itemsMax = itemsActive.reduce((s,i) => s + (+i.invested||0) * (Number(i.retMax||i.ret||0)/100), 0);
+    projectedAmount = itemsMax;
+    if(itemsActive.length > 0){
+      projectedSub = '<strong style="color:#fff">$' + Math.round(itemsMin).toLocaleString() + '</strong> guaranteed · up to <strong style="color:#fff">$' + Math.round(itemsMax).toLocaleString() + '</strong> on sale';
+    } else {
+      projectedSub = 'Buy item fractions to see projected earnings';
+    }
   } else {
-    const parts = [];
-    if(annualFromPools > 0) parts.push('<strong style="color:#fff">' + fmt(annualFromPools) + '</strong>/year from pools');
-    if(itemsMaxProfit > 0) parts.push('up to <strong style="color:#fff">' + fmt(itemsMaxProfit) + '</strong> from items');
-    profitSub = parts.join(' · ');
+    // POOLS view (или mixed) — годовая прибыль от пулов
+    projectedAmount = annualFromPools;
+    if(state.positions.length > 0){
+      projectedSub = '<strong style="color:#fff">$' + Math.round(annualFromPools).toLocaleString() + '</strong>/year at current rate';
+      // Добавим items если есть
+      const itemsActive = state.myItems.filter(i => i.status === 'active');
+      if(itemsActive.length > 0){
+        const itemsMax = itemsActive.reduce((s,i) => s + (+i.invested||0) * (Number(i.retMax||i.ret||0)/100), 0);
+        projectedSub += ' · up to <strong style="color:#fff">$' + Math.round(itemsMax).toLocaleString() + '</strong> from items';
+      }
+    } else {
+      projectedSub = 'Invest in a pool to see annual earnings';
+    }
   }
+  try{ $('balProfit') && ($('balProfit').textContent = '+' + fmt(projectedAmount)); }catch(e){}
+
+  let profitSub = projectedSub;
   try{ $('balProfitSub') && ($('balProfitSub').innerHTML = profitSub); }catch(e){}
 
   // Items list отрисовка (оставляю как было — в отдельном контейнере)
@@ -1125,25 +1383,45 @@ function updateROI(){const invested=state.positions.reduce((s,p)=>s+p.amount,0)+
 
 function updateBreakdown(){
 // Pools
-const poolsTotal=state.positions.reduce((s,p)=>s+p.amount,0);
-const poolsDaily=state.positions.reduce((s,p)=>{const pl=getPlan(p.amount);const r=pl.period==='day'?pl.rate:pl.period==='week'?pl.rate/7:pl.rate/30;return s+p.amount*r},0);
-const poolsEarned=state.positions.reduce((s,p)=>s+p.earned,0);
-document.getElementById('bdPools').textContent='$'+Math.round(poolsTotal).toLocaleString();
-document.getElementById('bdPoolsDaily').textContent='$'+poolsDaily.toFixed(2);
-const bpn=document.getElementById('bdPoolsNext');
-if(state.positions.length>0){const firstPool=state.positions[0];const pl=getPlan(firstPool.amount);const nextH=pl.period==='day'?24:pl.period==='week'?168:720;bpn.textContent='Next payout in ~'+(nextH>24?Math.floor(nextH/24)+'d':nextH+'h')}else{bpn.textContent='No active pools'}
-// Items
-const itemsTotal=state.myItems.reduce((s,i)=>s+i.invested,0);
-const itemsExpected=state.myItems.reduce((s,i)=>s+i.invested*i.ret/100,0);
-document.getElementById('bdItems').textContent='$'+Math.round(itemsTotal).toLocaleString();
-document.getElementById('bdItemsExp').textContent='+$'+Math.round(itemsExpected).toLocaleString();
-document.getElementById('bdItemsCount').textContent=state.myItems.length>0?state.myItems.length+' item'+(state.myItems.length>1?'s':'')+' owned':'No items owned';
-// Total
-const totalEarned=poolsEarned+state.myItems.reduce((s,i)=>{try{return s+getItemEarnings(i).currentEarned}catch(e){return s}},0);
-document.getElementById('totalEarned').textContent='+$'+totalEarned.toFixed(2);
-const projected=poolsDaily*30+itemsExpected*0.3;
-document.getElementById('projectedEarn').textContent='+$'+Math.round(projected).toLocaleString();
-const totalInvested=poolsTotal+itemsTotal;
+const poolsTotal = state.positions.reduce((s,p)=>s+(+p.amount||+p.amount_usd||0),0);
+const poolsDaily = state.positions.reduce((s,p)=>{
+  const pl = getPlan(+p.amount||+p.amount_usd||0);
+  const r = pl.period==='day'?pl.rate:pl.period==='week'?pl.rate/7:pl.rate/30;
+  return s + (+p.amount||+p.amount_usd||0) * r;
+}, 0);
+// BUG 1: live earned для total
+const poolsEarned = state.positions.reduce((s,p)=>s+getLiveEarned(p), 0);
+const bdP = document.getElementById('bdPools'); if(bdP) bdP.textContent = '$' + Math.round(poolsTotal).toLocaleString();
+const bdPD = document.getElementById('bdPoolsDaily'); if(bdPD) bdPD.textContent = '$' + poolsDaily.toFixed(2);
+const bpn = document.getElementById('bdPoolsNext');
+if(bpn){
+  if(state.positions.length > 0){
+    // Берём ближайший payout среди всех позиций
+    const minSec = Math.min(...state.positions.map(getSecondsToNextPayout));
+    bpn.textContent = 'Next payout in ' + _fmtTimeLeft(minSec);
+  } else {
+    bpn.textContent = 'No active pools';
+  }
+}
+// Items — только active в total invested; для closed считаем реальную прибыль
+const activeItems = state.myItems.filter(i => i.status === 'active');
+const itemsTotal = activeItems.reduce((s,i)=>s+(+i.invested||0), 0);
+// expected = max(retMax, ret) * invested / 100
+const itemsExpected = activeItems.reduce((s,i)=>s + (+i.invested||0) * (Number(i.retMax||i.ret||0)/100), 0);
+const closedProfit = state.myItems
+  .filter(i => i.status !== 'active' && i.payout_usd !== undefined)
+  .reduce((s,i) => s + (Number(i.payout_usd) - Number(i.invested)), 0);
+const bdI = document.getElementById('bdItems'); if(bdI) bdI.textContent = '$' + Math.round(itemsTotal).toLocaleString();
+const bdIE = document.getElementById('bdItemsExp'); if(bdIE) bdIE.textContent = '+$' + Math.round(itemsExpected).toLocaleString();
+const bdIC = document.getElementById('bdItemsCount');
+if(bdIC) bdIC.textContent = activeItems.length > 0 ? activeItems.length + ' active item' + (activeItems.length > 1 ? 's' : '') : 'No active items';
+// Total earned: pools live + closed items profit (BUG 7: НЕ считаем фейковые currentEarned для active)
+const totalEarned = poolsEarned + closedProfit;
+const tE = document.getElementById('totalEarned'); if(tE) tE.textContent = (totalEarned >= 0 ? '+' : '') + '$' + totalEarned.toFixed(2);
+// projected: 30 дней пулов + ожидаемые items
+const projected = poolsDaily * 30 + itemsExpected;
+const pE = document.getElementById('projectedEarn'); if(pE) pE.textContent = '+$' + Math.round(projected).toLocaleString();
+const totalInvested = poolsTotal + itemsTotal;
 const prog=totalInvested>0?Math.min(100,(totalEarned/Math.max(1,projected))*100):0;
 document.getElementById('earnProgress').style.width=prog+'%';
 const lbl=document.getElementById('earnProgressLabel');
@@ -1151,7 +1429,19 @@ if(totalInvested>0){lbl.textContent=prog>=100?'🎉 Goal reached!':'You are '+Ma
 
 function updateGoals(){try{const sum=state.positions.reduce((s,p)=>s+p.amount,0)+state.myItems.reduce((s,i)=>s+i.invested,0);document.getElementById('goalCur').textContent='$'+Math.round(sum).toLocaleString();document.getElementById('goalFill').style.width=Math.min(100,sum/1000*100)+'%'}catch(e){console.warn('goals',e)}}
 
-function updateAchievements(){const ach={first:state.myItems.length>0||state.positions.length>0,five:state.myItems.length>=5,ref:state.refCount>0,diamond:state.myItems.some(i=>i.status==='sold'),whale:(state.balance+state.wallet)>=10000};
+function updateAchievements(){
+  // Server-side statuses: active | sold_guaranteed | sold_profit | early_exit
+  const isSold = i => ['sold_guaranteed', 'sold_profit'].includes(i.status);
+  const totalPortfolio = (Number(state.wallet)||0)
+    + state.positions.reduce((s,p)=>s+(+p.amount||+p.amount_usd||0),0)
+    + state.myItems.filter(i=>i.status==='active').reduce((s,i)=>s+(+i.invested||0),0);
+  const ach = {
+    first: state.myItems.length > 0 || state.positions.length > 0,
+    five: state.myItems.length >= 5,
+    ref: (state.refCount || 0) > 0,
+    diamond: state.myItems.some(isSold),
+    whale: totalPortfolio >= 10000,
+  };
 document.querySelectorAll('.badge').forEach(b=>{const key=b.dataset.ach;if(ach[key]){b.style.opacity='1';b.style.borderColor='var(--gold)';b.style.background='var(--gg)'}else{b.style.opacity='.35';b.style.borderColor='var(--bd)';b.style.background='var(--bg2)'}})}
 
 function renderTrending(){const sorted=[...ITEMS].sort((a,b)=>b.views-a.views).slice(0,5);
@@ -1160,8 +1450,8 @@ return`<div onclick="openItemDetail(${i.id})" style="min-width:140px;flex-shrink
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div style="font-size:22px">${i.ico}</div><span style="font-size:8px;color:var(--red);font-weight:700">🔥 ${i.views}</span></div>
 <div style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">${i.name}</div>
 <div style="font-size:8px;color:var(--green);font-weight:700">+${i.ret[0]}–${i.ret[1]}%</div>
-<div style="font-size:7px;color:var(--t3)">👥 ${i.inv} · ${d>0?d+'d':h+'h'} left</div>
-<div style="font-size:7px;color:var(--t3);margin-top:2px">📢 ${Math.floor(Math.random()*8+3)} bought today</div>
+<div style="font-size:7px;color:var(--t3)">📊 ${i.funded}% funded · ${d>0?d+'d':h+'h'} left</div>
+<div style="font-size:7px;color:var(--gold);margin-top:2px">$${Math.round(i.price_per_slot||0).toLocaleString()}/slot</div>
 </div>`}).join('')}
 
 function renderActivity(){const events=[];
@@ -1170,9 +1460,22 @@ const platform=[{icon:'📈',text:'Rolex Daytona sold for +38% — investors rec
 events.push(...platform);
 document.getElementById('activityFeed').innerHTML=events.slice(0,8).map(e=>`<div style="display:flex;gap:10px;padding:8px 4px;border-bottom:1px solid var(--bd);font-size:10px"><div style="font-size:16px;flex-shrink:0">${e.icon}</div><div style="flex:1"><div style="color:${e.color};line-height:1.4">${e.text}</div><div style="font-size:8px;color:var(--t3);margin-top:1px">${e.time}</div></div></div>`).join('')||'<div class="empty-state" style="padding:12px">No activity yet.</div>'}
 
-function renderAlerts(){const c=document.getElementById('alertsList');if(!state.favorites.length){c.innerHTML='<div class="empty-state" style="padding:12px">No alerts. Go to Favorites to create alerts.</div>';return}
-c.innerHTML=state.favorites.slice(0,3).map(id=>{const i=ITEMS.find(x=>x.id===id);if(!i)return'';const d=Math.floor(i.closes/24),h=i.closes%24;
-return`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;margin-bottom:4px;font-size:11px"><div style="font-size:20px">${i.ico}</div><div style="flex:1"><div style="font-weight:700">${i.name}</div><div style="font-size:9px;color:var(--t3)">Closes in ${d>0?d+'d '+h+'h':h+'h'} · ${i.funded}% funded</div></div><button onclick="openItemDetail(${i.id})" style="padding:5px 10px;background:var(--gold);color:#0a0a0a;border:none;border-radius:4px;font-family:'Bebas Neue';font-size:9px;letter-spacing:1px;cursor:pointer">VIEW</button></div>`}).join('')}
+function renderAlerts(){
+  const c = document.getElementById('alertsList');
+  if(!state.favorites.length){
+    c.innerHTML = '<div class="empty-state" style="padding:12px">No alerts. Go to Favorites to create alerts.</div>';
+    return;
+  }
+  c.innerHTML = state.favorites.slice(0, 3).map(fav => {
+    const i = _favResolve(fav);
+    if(!i) return '';
+    const d = Math.floor((i.closes||0)/24);
+    const h = (i.closes||0) % 24;
+    const closesTxt = i._archived ? 'Closed' : (d > 0 ? d + 'd ' + h + 'h' : h + 'h');
+    const ico = i.ico || '💎';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;margin-bottom:4px;font-size:11px"><div style="font-size:20px">${ico}</div><div style="flex:1"><div style="font-weight:700">${i.name}</div><div style="font-size:9px;color:var(--t3)">${i._archived?'Item closed':'Sells in '+closesTxt+' · '+i.funded+'% funded'}</div></div>${!i._archived?`<button onclick="openItemDetail(${i.id})" style="padding:5px 10px;background:var(--gold);color:#0a0a0a;border:none;border-radius:4px;font-family:'Bebas Neue';font-size:9px;letter-spacing:1px;cursor:pointer">VIEW</button>`:''}</div>`;
+  }).join('');
+}
 
 function updateStats(){
 const daily=state.positions.reduce((s,p)=>{const pl=getPlan(p.amount);return s+(pl.period==='day'?p.amount*pl.rate:pl.period==='week'?p.amount*pl.rate/7:p.amount*pl.rate/30)},0);
@@ -1189,56 +1492,247 @@ else{el.textContent='STARTER';el.style.cssText='background:rgba(160,160,160,.08)
 
 function getPlan(a){if(a>=10000)return{name:'Platinum',display:'15%/month',tier:3,rate:.15,period:'month'};if(a>=1000)return{name:'Gold',display:'3%/week',tier:2,rate:.03,period:'week'};return{name:'Silver',display:'0.5%/day',tier:1,rate:.005,period:'day'}}
 
+/* BUG 1 FIX: pro-rated live earnings for pools.
+   На бэке earned_usd обновляется только cron'ом (раз в период).
+   В UI показываем непрерывный прогресс: cron-учтённое + (доля_прошедшего_времени * rate * amount).
+   Возвращает live earned в USD. */
+const _PERIOD_SEC = { day: 86400, week: 604800, month: 2592000 };
+function getLiveEarned(pos){
+  const baseEarned = Number(pos.earned || pos.earned_usd) || 0;
+  const amount = Number(pos.amount || pos.amount_usd) || 0;
+  const ratePct = Number(pos.rate_pct) || 0;
+  const period = pos.period || 'day';
+  const periodSec = _PERIOD_SEC[period] || 86400;
+  if(!pos.last_accrual_at) return baseEarned;
+  let last;
+  try{ last = new Date(pos.last_accrual_at).getTime(); }
+  catch(e){ return baseEarned; }
+  if(!last || isNaN(last)) return baseEarned;
+  const elapsedSec = Math.max(0, (Date.now() - last) / 1000);
+  // Сколько долей периода прошло (0..1+)
+  const fraction = elapsedSec / periodSec;
+  // Интерполированная прибыль за неполный период
+  const proRated = amount * (ratePct / 100) * fraction;
+  // Если прошло больше 1 периода — просто показываем "почти готово"
+  // Cap на rate за 2 периода чтобы не было фантастических цифр если cron долго лежал
+  const capped = Math.min(proRated, amount * (ratePct / 100) * 2);
+  return baseEarned + capped;
+}
+
+/* Время до следующего payout в секундах */
+function getSecondsToNextPayout(pos){
+  const period = pos.period || 'day';
+  const periodSec = _PERIOD_SEC[period] || 86400;
+  if(!pos.last_accrual_at) return periodSec;
+  let last;
+  try{ last = new Date(pos.last_accrual_at).getTime(); }
+  catch(e){ return periodSec; }
+  if(!last || isNaN(last)) return periodSec;
+  const elapsed = (Date.now() - last) / 1000;
+  return Math.max(0, periodSec - elapsed);
+}
+
+/* Форматирует секунды как "8h 23m" / "2d 5h" / "45m" */
+function _fmtTimeLeft(sec){
+  if(sec <= 0) return 'soon';
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if(d > 0) return d + 'd ' + h + 'h';
+  if(h > 0) return h + 'h ' + m + 'm';
+  return m + 'm';
+}
+
 /* ═══ RENDERS ═══ */
 function renderPositions(){
 const html=state.positions.length?state.positions.map(p=>{
-  const amt=p.amount||p.amount_usd||0;
-  const earned=p.earned||p.earned_usd||0;
-  const rateTxt=p.rate||(p.rate_pct?(p.rate_pct+'%/'+(p.period||'day')):'—');
-  const posId=p.id;
-  const withdrawBtn=posId?`<button style="margin-top:8px;width:100%;padding:7px;background:rgba(192,57,43,.12);border:1px solid var(--red);color:var(--red);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer" onclick="withdrawFromPool(${posId})">WITHDRAW $${Math.round(amt+earned).toLocaleString()}</button>`:'';
-  return `<div class="position"><div class="pos-row"><span class="pos-label">Plan</span><span class="pos-value">${p.plan}</span></div><div class="pos-row"><span class="pos-label">Invested</span><span class="pos-value">$${amt.toLocaleString()}</span></div><div class="pos-row"><span class="pos-label">Rate</span><span class="pos-gold">${rateTxt}</span></div><div class="pos-row"><span class="pos-label">Earned</span><span class="pos-green">+$${Math.round(earned).toLocaleString()}</span></div>${withdrawBtn}</div>`;
+  const amt = Number(p.amount || p.amount_usd) || 0;
+  // BUG 1: live earned = cron-учтённое + интерполяция за неполный период
+  const liveEarned = getLiveEarned(p);
+  const baseEarned = Number(p.earned || p.earned_usd) || 0;
+  const isAccruing = liveEarned > baseEarned + 0.001;
+  const rateTxt = p.rate || (p.rate_pct ? (p.rate_pct + '%/' + (p.period || 'day')) : '—');
+  const posId = p.id;
+  // Progress bar до следующего payout
+  const period = p.period || 'day';
+  const periodSec = _PERIOD_SEC[period] || 86400;
+  const secLeft = getSecondsToNextPayout(p);
+  const progressPct = Math.max(0, Math.min(100, ((periodSec - secLeft) / periodSec) * 100));
+  const timeLeftTxt = _fmtTimeLeft(secLeft);
+  const withdrawBtn = posId
+    ? `<button style="margin-top:8px;width:100%;padding:7px;background:rgba(192,57,43,.12);border:1px solid var(--red);color:var(--red);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer" onclick="withdrawFromPool(${posId})">WITHDRAW $${Math.round(amt + liveEarned).toLocaleString()}</button>`
+    : '';
+  return `<div class="position">
+    <div class="pos-row"><span class="pos-label">Plan</span><span class="pos-value">${p.plan}</span></div>
+    <div class="pos-row"><span class="pos-label">Invested</span><span class="pos-value">$${amt.toLocaleString()}</span></div>
+    <div class="pos-row"><span class="pos-label">Rate</span><span class="pos-gold">${rateTxt}</span></div>
+    <div class="pos-row"><span class="pos-label">Earned</span><span class="pos-green" id="liveEarned-${posId}">+$${liveEarned.toFixed(2)}${isAccruing ? '<span style="font-size:9px;color:var(--gold);margin-left:4px">⏱ live</span>' : ''}</span></div>
+    <div style="margin-top:6px">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-bottom:3px">
+        <span>Next payout</span><span style="color:var(--gold);font-weight:600" id="nextPayout-${posId}">${timeLeftTxt}</span>
+      </div>
+      <div style="height:3px;background:var(--bg3);border-radius:2px;overflow:hidden">
+        <div style="height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:2px;width:${progressPct}%;transition:width 1s linear" id="payoutBar-${posId}"></div>
+      </div>
+    </div>
+    ${withdrawBtn}
+  </div>`;
 }).join(''):'<div class="empty-state">No pool positions.</div>';
 const d1=document.getElementById('dashPositions');if(d1)d1.innerHTML=html;
-const d2=document.getElementById('poolPositions');if(d2)d2.innerHTML=html}
+const d2=document.getElementById('poolPositions');if(d2)d2.innerHTML=html;
+
+// UX 2: render summary header
+const summary = document.getElementById('poolsPositionsSummary');
+if(summary){
+  if(state.positions.length === 0){
+    summary.style.display = 'none';
+  } else {
+    summary.style.display = '';
+    const totalPrincipal = state.positions.reduce((s,p)=>s + (Number(p.amount||p.amount_usd)||0), 0);
+    const totalEarned = state.positions.reduce((s,p)=>s + getLiveEarned(p), 0);
+    const totalValue = totalPrincipal + totalEarned;
+    // Avg APY = weighted mean of rates × periods/year
+    const totalAnnualEarn = state.positions.reduce((s,p)=>{
+      const amt = Number(p.amount||p.amount_usd)||0;
+      const rate = Number(p.rate_pct)||0;
+      const period = p.period || 'day';
+      const annualMult = period === 'day' ? 365 : period === 'week' ? 52 : 12;
+      return s + amt * (rate/100) * annualMult;
+    }, 0);
+    const avgApy = totalPrincipal > 0 ? (totalAnnualEarn / totalPrincipal * 100) : 0;
+    const tv = document.getElementById('poolsTotalValue'); if(tv) tv.textContent = '$' + Math.round(totalValue).toLocaleString();
+    const ts = document.getElementById('poolsTotalSub'); if(ts) ts.textContent = state.positions.length + ' active position' + (state.positions.length>1?'s':'') + ' · $' + Math.round(totalPrincipal).toLocaleString() + ' principal';
+    const te = document.getElementById('poolsTotalEarned'); if(te) te.textContent = '+$' + totalEarned.toFixed(2);
+    const ta = document.getElementById('poolsTotalAPY'); if(ta) ta.textContent = 'Avg APY ' + avgApy.toFixed(0) + '%';
+  }
+}}
+
+/* Tick: обновляет live-earned и progress bar каждую секунду без re-render */
+function _tickPositions(){
+  if(document.hidden) return;
+  state.positions.forEach(p => {
+    const posId = p.id;
+    if(!posId) return;
+    const liveEl = document.getElementById('liveEarned-' + posId);
+    const nextEl = document.getElementById('nextPayout-' + posId);
+    const barEl = document.getElementById('payoutBar-' + posId);
+    if(liveEl){
+      const live = getLiveEarned(p);
+      const base = Number(p.earned || p.earned_usd) || 0;
+      const isAccruing = live > base + 0.001;
+      liveEl.innerHTML = '+$' + live.toFixed(2) + (isAccruing ? '<span style="font-size:9px;color:var(--gold);margin-left:4px">⏱ live</span>' : '');
+    }
+    if(nextEl){
+      nextEl.textContent = _fmtTimeLeft(getSecondsToNextPayout(p));
+    }
+    if(barEl){
+      const period = p.period || 'day';
+      const periodSec = _PERIOD_SEC[period] || 86400;
+      const secLeft = getSecondsToNextPayout(p);
+      const pct = Math.max(0, Math.min(100, ((periodSec - secLeft) / periodSec) * 100));
+      barEl.style.width = pct + '%';
+    }
+  });
+}
+// Запускаем tick каждую секунду
+if(typeof window !== 'undefined' && !window._positionsTicker){
+  window._positionsTicker = setInterval(_tickPositions, 1000);
+}
 
 function getItemEarnings(i){
-// Calculate based on days elapsed since purchase
-const now=Date.now();const purchaseDate=i.purchaseDate||now;
-const daysElapsed=(now-purchaseDate)/(1000*60*60*24);
-const daysTotal=i.daysTotal||15;
-const progress=Math.min(1,daysElapsed/daysTotal);
-const daysLeft=Math.max(0,daysTotal-daysElapsed);
-const guaranteed=i.guaranteed||Math.round((i.retMin||i.ret*0.7));
-const guaranteedUsd=i.invested*guaranteed/100;
-const expectedUsd=i.invested*i.ret/100;
-const currentEarned=guaranteedUsd*progress;// Linear interpolation to guaranteed min
-return{daysElapsed,daysLeft,daysTotal,progress,guaranteed,guaranteedUsd,expectedUsd,currentEarned,expectedPct:i.ret}}
+  // BUG 7 FIX: items НЕ начисляют ежедневно — они платят только при продаже.
+  // Старое "currentEarned = guaranteedUsd * progress" было показухой.
+  // Теперь: показываем EXPECTED (ожидаемую) прибыль, а не "текущую".
+  // currentEarned оставлено для обратной совместимости (= 0 для активных, payout-invested для закрытых).
+  const now = Date.now();
+  const purchaseDate = i.purchaseDate || now;
+  const daysElapsed = Math.max(0, (now - purchaseDate) / (1000 * 60 * 60 * 24));
+  // BUG 7: правильный daysTotal — бэк отдаёт return_period_days; fallback 30 (не 15)
+  const daysTotal = Math.max(1, i.daysTotal || 30);
+  const progress = Math.min(1, daysElapsed / daysTotal);
+  const daysLeft = Math.max(0, daysTotal - daysElapsed);
+  // guaranteed% — минимум, который админ гарантирует при продаже
+  const guaranteed = Number(i.guaranteed || i.retMin || 0);
+  const expected = Number(i.retMax || i.ret || 0);
+  const guaranteedUsd = i.invested * guaranteed / 100;
+  const expectedUsd = i.invested * expected / 100;
+  // Для закрытых — реальная прибыль из payout_usd
+  // Для активных — 0 (ничего ещё не выплачено)
+  let currentEarned = 0;
+  if(i.status && i.status !== 'active' && i.payout_usd !== undefined && i.payout_usd !== null){
+    currentEarned = Number(i.payout_usd) - Number(i.invested);
+  }
+  return {
+    daysElapsed, daysLeft, daysTotal, progress,
+    guaranteed, guaranteedUsd,
+    expected, expectedUsd,
+    expectedEarned: guaranteedUsd,   // минимальная ожидаемая = guaranteed (у нас это "floor")
+    expectedEarnedMax: expectedUsd,   // максимальная ожидаемая = expected
+    currentEarned,                    // реальная выплата (0 для active, payout-invested для closed)
+    expectedPct: expected,
+  };
+}
 
 function renderMyItems(){
 const c1=document.getElementById('myItemsList'),c2=document.getElementById('dashItems');
 if(!c1)return;
-// Update counters
+// BUG 2 FIX: счётчики по серверным статусам.
+// active | sold_guaranteed | sold_profit | early_exit
 const cntAll=document.getElementById('cntAll'),cntActive=document.getElementById('cntActive'),cntSelling=document.getElementById('cntSelling'),cntSold=document.getElementById('cntSold');
-if(cntAll){cntAll.textContent='('+state.myItems.length+')';cntActive.textContent='('+state.myItems.filter(i=>i.status==='buying').length+')';cntSelling.textContent='('+state.myItems.filter(i=>i.status==='selling').length+')';cntSold.textContent='('+state.myItems.filter(i=>i.status==='sold').length+')'}
+const soldStatuses = ['sold_guaranteed', 'sold_profit'];
+const exitedStatuses = ['early_exit'];
+if(cntAll){
+  cntAll.textContent = '(' + state.myItems.length + ')';
+  cntActive.textContent = '(' + state.myItems.filter(i => i.status === 'active').length + ')';
+  // "SELLING" таб сейчас не имеет соответствия (нет статуса "selling" на бэке) → показываем early_exit
+  if(cntSelling) cntSelling.textContent = '(' + state.myItems.filter(i => exitedStatuses.includes(i.status)).length + ')';
+  cntSold.textContent = '(' + state.myItems.filter(i => soldStatuses.includes(i.status)).length + ')';
+}
 // Filter
-const filter=window._itemsFilter||'all';
-const filtered=filter==='all'?state.myItems:state.myItems.filter(i=>filter==='active'?i.status==='buying':i.status===filter);
+const filter = window._itemsFilter || 'all';
+const filtered = filter === 'all' ? state.myItems :
+  filter === 'active' ? state.myItems.filter(i => i.status === 'active') :
+  filter === 'sold' ? state.myItems.filter(i => soldStatuses.includes(i.status)) :
+  filter === 'selling' ? state.myItems.filter(i => exitedStatuses.includes(i.status)) :
+  state.myItems.filter(i => i.status === filter);
 if(!filtered.length){c1.innerHTML='<div class="empty-state">No items in this category.</div>';if(c2&&!state.myItems.length)c2.innerHTML='<div class="empty-state">No items yet.</div>';return}
-const html=filtered.map(i=>{const e=getItemEarnings(i);const stLabel={buying:'Acquiring',selling:'On Sale',sold:'Sold'};const stClass={buying:'status-acquiring',selling:'status-selling',sold:'status-sold'};const daysLeftTxt=e.daysLeft<1?'Selling soon':Math.ceil(e.daysLeft)+' days left';
-return`<div class="my-item"><div class="my-item-top"><div class="my-item-ico">${i.ico}</div><div class="my-item-info" style="flex:1"><h4>${i.name}</h4><p>${i.desc} · ${i.pct}% share</p><span class="my-item-status ${stClass[i.status]}">${stLabel[i.status]}</span></div></div>
+const html=filtered.map(i=>{
+  const e=getItemEarnings(i);
+  // BUG 2: отображаем серверные статусы
+  const stLabel = {
+    active: 'Active',
+    sold_guaranteed: 'Sold · Guaranteed',
+    sold_profit: 'Sold · Profit',
+    early_exit: 'Exited Early',
+  };
+  const stClass = {
+    active: 'status-acquiring',
+    sold_guaranteed: 'status-sold',
+    sold_profit: 'status-sold',
+    early_exit: 'status-selling',
+  };
+  const daysLeftTxt = e.daysLeft < 1 ? 'Selling soon' : Math.ceil(e.daysLeft) + ' days left';
+  const isClosed = i.status !== 'active';
+  // BUG 7 FIX: для active items показываем EXPECTED (не Current), с пояснением
+  // Для closed — показываем реальный payout
+  const earningsHeader = isClosed ? 'ACTUAL PAYOUT' : 'EXPECTED EARNINGS';
+  const earningsValue = isClosed ? (i.payout_usd ? (+i.payout_usd - +i.invested) : 0) : e.expectedEarned;
+  const earningsSubtext = isClosed ? 'Sold — already credited' : 'When item is sold';
+  const statusClassName = stClass[i.status] || 'status-acquiring';
+  const statusLabel = stLabel[i.status] || i.status;
+return`<div class="my-item"><div class="my-item-top"><div class="my-item-ico">${i.ico || '💎'}</div><div class="my-item-info" style="flex:1"><h4>${i.name}</h4><p>${i.desc || ''} · ${i.pct}% share</p><span class="my-item-status ${statusClassName}">${statusLabel}</span></div></div>
 <div style="padding:12px 14px;background:var(--bg2);border-top:1px solid var(--bd)">
 <div style="background:var(--card);border:1px solid var(--bd2);border-radius:6px;padding:10px;margin-bottom:8px">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:10px;color:var(--t3);letter-spacing:1px">CURRENT EARNINGS</span><span style="font-size:9px;color:var(--gold);font-weight:700">⏱ ${daysLeftTxt}</span></div>
-<div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--green)">+$${e.currentEarned.toFixed(2)}</span><span style="font-size:10px;color:var(--t3)">accumulating</span></div>
-<div style="height:4px;background:var(--bg3);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:2px;width:${e.progress*100}%"></div></div>
-<div style="display:flex;justify-content:space-between;font-size:8px;color:var(--t3);margin-top:3px"><span>Day ${Math.floor(e.daysElapsed)}</span><span>${Math.round(e.progress*100)}%</span><span>Day ${e.daysTotal}</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:10px;color:var(--t3);letter-spacing:1px">${earningsHeader}</span>${!isClosed?`<span style="font-size:9px;color:var(--gold);font-weight:700">⏱ ${daysLeftTxt}</span>`:''}</div>
+<div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:${earningsValue>=0?'var(--green)':'var(--red)'}">${earningsValue>=0?'+':''}$${Math.abs(earningsValue).toFixed(2)}</span><span style="font-size:10px;color:var(--t3)">${earningsSubtext}</span></div>
+${!isClosed?`<div style="height:4px;background:var(--bg3);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:2px;width:${e.progress*100}%"></div></div>
+<div style="display:flex;justify-content:space-between;font-size:8px;color:var(--t3);margin-top:3px"><span>Day ${Math.floor(e.daysElapsed)}</span><span>${Math.round(e.progress*100)}%</span><span>Day ${e.daysTotal}</span></div>`:''}
 </div>
 <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--t3)">You invested</span><span style="font-weight:600">$${i.invested.toLocaleString()}</span></div>
 <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--t3)">Guaranteed min</span><span style="color:var(--gold);font-weight:600">+${e.guaranteed}% · $${e.guaranteedUsd.toFixed(0)}</span></div>
 <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px"><span style="color:var(--t3)">Expected return</span><span style="color:var(--green);font-weight:700">+${e.expectedPct}% · $${e.expectedUsd.toFixed(0)}</span></div>
-<div style="display:flex;gap:6px"><button onclick="sellNow(${i.id})" style="flex:1;padding:8px;background:var(--red);color:#fff;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer">SELL NOW -5%</button><button onclick="openItemDetail(${i.id})" style="flex:1;padding:8px;background:transparent;color:var(--t);border:1px solid var(--bd);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer">VIEW DETAILS</button></div>
-<div style="font-size:9px;color:var(--t3);margin-top:6px;text-align:center">Early exit: receive 95% of invested amount instantly</div>
+<div style="display:flex;gap:6px"><button onclick="sellNow(${i.id})" style="flex:1;padding:8px;background:var(--red);color:#fff;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer">SELL NOW -10%</button><button onclick="openItemDetail(${i.id})" style="flex:1;padding:8px;background:transparent;color:var(--t);border:1px solid var(--bd);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer">VIEW DETAILS</button></div>
+<div style="font-size:9px;color:var(--t3);margin-top:6px;text-align:center">Early exit: receive 90% of invested amount instantly</div>
 </div></div>`}).join('');
 c1.innerHTML=html;
 if(c2)c2.innerHTML=state.myItems.slice(0,3).map(i=>{const e=getItemEarnings(i);const daysLeftTxt=e.daysLeft<1?'soon':Math.ceil(e.daysLeft)+'d';
@@ -1247,10 +1741,22 @@ return`<div onclick="go('items')" style="display:flex;align-items:center;gap:10p
 <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.name}</div><div style="font-size:9px;color:var(--green);font-weight:600">+$${e.currentEarned.toFixed(2)} <span style="color:var(--t3);font-weight:400">earned · ${daysLeftTxt} left</span></div></div>
 <div style="text-align:right"><div style="font-size:11px;color:var(--green);font-weight:700">+${i.ret}%</div><div style="font-size:8px;color:var(--gold)">+${e.guaranteed}% min</div></div></div>`}).join('')+(state.myItems.length>3?`<div onclick="go('items')" style="text-align:center;padding:8px;cursor:pointer;font-size:10px;color:var(--gold);font-weight:600">View all ${state.myItems.length} items →</div>`:'')}
 
-function renderFavs(){const c=document.getElementById('favsList');
-if(!state.favorites.length){c.innerHTML='<div class="empty-state">No favorites yet.</div>';return}
-c.innerHTML=state.favorites.map(id=>{const i=ITEMS.find(x=>x.id===id);if(!i)return'';
-return`<div class="mk-card" onclick="openItemDetail(${i.id})" style="display:inline-block;width:220px;margin-right:8px;margin-bottom:8px"><div class="mk-thumb">${i.ico}</div><div class="mk-info"><h4>${i.name}</h4><div class="mk-meta"><span class="mk-return">+${i.ret[0]}–${i.ret[1]}%</span></div></div></div>`}).join('')}
+function renderFavs(){
+  const c = document.getElementById('favsList');
+  if(!state.favorites.length){
+    c.innerHTML = '<div class="empty-state">No favorites yet.</div>';
+    return;
+  }
+  c.innerHTML = state.favorites.map(fav => {
+    const i = _favResolve(fav);
+    if(!i) return '';
+    const archived = i._archived;
+    const onclick = archived ? '' : `onclick="openItemDetail(${i.id})"`;
+    const opacity = archived ? 'opacity:.5;' : '';
+    const badge = archived ? '<div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;font-size:8px;padding:2px 6px;border-radius:3px;letter-spacing:1px">CLOSED</div>' : '';
+    return `<div class="mk-card" ${onclick} style="display:inline-block;width:220px;margin-right:8px;margin-bottom:8px;${opacity}position:relative"><div class="mk-thumb">${_itemThumbHTML(i)}${badge}</div><div class="mk-info"><h4>${i.name}</h4><div class="mk-meta"><span class="mk-return">+${i.ret[0]}–${i.ret[1]}%</span></div></div></div>`;
+  }).join('');
+}
 
 function renderTxs(){document.getElementById('txBody').innerHTML=state.txs.length?state.txs.map((t,idx)=>`<div class="tx-item" onclick="showReceipt(${idx})" style="cursor:pointer;transition:all .2s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><div class="tx-left"><div class="tx-desc">${t.desc}</div><div class="tx-time">${t.time}</div></div><span class="tx-status ${t.status==='processing'?'tx-pending':'tx-done'}">${t.status==='processing'?'Processing':'Completed'}</span></div>`).join(''):'<div class="empty-state">No transactions.</div>'}
 
@@ -1288,45 +1794,179 @@ LUXOR INVEST LTD · UK Company No. 14582937<br>71-75 Shelton Street, London, WC2
 <button class="btn-outline" style="margin-top:5px" onclick="closeModal()">Close</button>`)}
 
 /* ═══ MARKETPLACE ═══ */
+/* Хелпер: возвращает HTML для thumbnail — картинка если image_url задан, иначе эмоджи */
+function _itemThumbHTML(i){
+  if(i.image_url && typeof i.image_url === 'string' && i.image_url.trim()){
+    return `<img src="${i.image_url}" alt="${(i.name||'').replace(/"/g,'&quot;')}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none';this.parentNode.insertAdjacentHTML('afterbegin','<span style=\\'font-size:40px\\'>${i.ico||'💎'}</span>')">`;
+  }
+  return `<span style="font-size:40px">${i.ico || '💎'}</span>`;
+}
 function renderMarketplace(cat){const grid=document.getElementById('mkGrid');if(!grid)return;const items=cat==='all'?ITEMS:ITEMS.filter(i=>i.cat===cat);
 grid.innerHTML=items.map(i=>{const d=Math.floor(i.closes/24),h=i.closes%24;const cdTxt=d>0?d+'d '+h+'h':h+'h';
-return`<div class="mk-card" onclick="openItemDetail(${i.id})"><div class="mk-thumb">${i.ico}<div class="mk-badge">${i.badge}</div><div class="mk-countdown">Closes in ${cdTxt}</div></div><div class="mk-info"><h4>${i.name}</h4><div class="sub">${i.desc}</div><canvas class="mini-candles" id="mc${i.id}" width="200" height="32"></canvas><div class="mk-progress"><div class="mk-prog-header"><span>${i.funded}% funded</span><span>${i.inv} investors</span></div><div class="mk-prog-bar"><div class="mk-prog-fill" style="width:${i.funded}%"></div></div></div><div class="mk-meta"><span>${i.days[0]}–${i.days[1]} days</span><span class="mk-return">+${i.ret[0]}–${i.ret[1]}%</span></div></div></div>`}).join('');
+return`<div class="mk-card" onclick="openItemDetail(${i.id})"><div class="mk-thumb">${_itemThumbHTML(i)}<div class="mk-badge">${i.badge}</div><div class="mk-countdown">Sells in ${cdTxt}</div></div><div class="mk-info"><h4>${i.name}</h4><div class="sub">${i.desc}</div><canvas class="mini-candles" id="mc${i.id}" width="200" height="32"></canvas><div class="mk-progress"><div class="mk-prog-header"><span>${i.slots_sold||0} of ${i.slots_total||20} slots</span><span>$${Math.round(i.price_per_slot||0).toLocaleString()}/slot</span></div><div class="mk-prog-bar"><div class="mk-prog-fill" style="width:${i.funded}%"></div></div></div><div class="mk-meta"><span>${i.days[0]}–${i.days[1]} days</span><span class="mk-return">+${i.ret[0]}–${i.ret[1]}%</span></div></div></div>`}).join('');
 setTimeout(()=>items.forEach(i=>drawMiniCandles('mc'+i.id)),50)}
 
 function filterMk(cat,el){document.querySelectorAll('.mk-fil').forEach(f=>f.classList.remove('on'));el.classList.add('on');renderMarketplace(cat)}
 
 /* ═══ ITEM DETAIL ═══ */
 function openItemDetail(id){const i=ITEMS.find(x=>x.id===id);if(!i)return;
-const slots=Math.max(1,Math.floor((100-i.funded)/100*20));const isFav=state.favorites.includes(id);
+const isFav=_favIncludes(id);
 const d=Math.floor(i.closes/24),h=i.closes%24;const cdTxt=d>0?d+'d '+h+'h':h+'h';
+const slotsTotal = i.slots_total || 20;
+const slotsAvail = i.slots_available !== undefined ? i.slots_available : slotsTotal;
+const slotsSold = slotsTotal - slotsAvail;
+const pricePerSlot = i.price_per_slot || (i.price / slotsTotal);
+const canBuy = slotsAvail > 0;
 showModal(`<div class="item-modal">
-<div class="item-photo">${i.ico}<div style="position:absolute;bottom:8px;left:8px;font-size:9px;padding:3px 8px;background:rgba(192,57,43,.85);color:#fff;border-radius:4px;font-family:'Space Mono',monospace">Closes in ${cdTxt}</div></div>
+<div class="item-photo" style="overflow:hidden;position:relative">${_itemThumbHTML(i)}<div style="position:absolute;bottom:8px;left:8px;font-size:9px;padding:3px 8px;background:rgba(192,57,43,.85);color:#fff;border-radius:4px;font-family:'Space Mono',monospace">Sells in ${cdTxt}</div></div>
 <div class="item-right">
 <h2>${i.name}</h2>
 <div class="desc">${i.desc}</div>
-<canvas id="itemCandle" width="600" height="180" style="width:100%;height:180px;border-radius:6px;margin-bottom:8px;background:linear-gradient(135deg,#0d0d0d,#1a1a1a);display:block;cursor:crosshair"></canvas>
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:4px 8px;background:var(--bg2);border-radius:4px">
-<span style="font-size:9px;color:var(--t3);font-family:'Space Mono',monospace">Price History · 30 candles</span>
-<div style="display:flex;gap:3px"><span onclick="switchItemPeriod('1H',this)" class="ip-tab active" style="padding:2px 8px;font-size:9px;border-radius:3px;cursor:pointer;background:var(--gold);color:#0a0a0a;font-family:'Space Mono',monospace;font-weight:700">1H</span><span onclick="switchItemPeriod('1D',this)" class="ip-tab" style="padding:2px 8px;font-size:9px;border-radius:3px;cursor:pointer;background:transparent;color:var(--t3);font-family:'Space Mono',monospace">1D</span><span onclick="switchItemPeriod('1W',this)" class="ip-tab" style="padding:2px 8px;font-size:9px;border-radius:3px;cursor:pointer;background:transparent;color:var(--t3);font-family:'Space Mono',monospace">1W</span><span onclick="switchItemPeriod('1M',this)" class="ip-tab" style="padding:2px 8px;font-size:9px;border-radius:3px;cursor:pointer;background:transparent;color:var(--t3);font-family:'Space Mono',monospace">1M</span></div>
+<canvas id="itemCandle" width="600" height="180" style="width:100%;height:180px;border-radius:8px;margin-bottom:8px;background:transparent;display:block"></canvas>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:6px 10px;background:var(--bg2);border-radius:6px">
+<span style="font-size:10px;color:var(--t3);font-family:'Space Mono',monospace">PRICE HISTORY</span>
+<span style="font-size:10px;color:var(--gold);font-family:'Space Mono',monospace">${(i.price_history||[]).length} data points</span>
 </div>
-<div class="item-stat"><span>${i.views} viewing now</span><span>${i.likes} likes</span><span>${i.inv} investors</span></div>
+<div class="item-stat"><span>${slotsSold} slots sold</span><span>${i.likes} likes</span><span>${slotsAvail} slots left</span></div>
 <button class="fav-btn ${isFav?'on':''}" onclick="toggleFav(${id},this)">${isFav?'♥ Saved':'♡ Save to favorites'}</button>
 <div class="lot-info" style="margin-top:12px">
 <div class="lot-row"><span class="lot-label">Item price</span><span class="lot-value">$${i.price.toLocaleString()}</span></div>
 <div class="lot-row"><span class="lot-label">Expected return</span><span class="lot-value" style="color:var(--green)">+${i.ret[0]}% — +${i.ret[1]}%</span></div>
 <div class="lot-row"><span class="lot-label">Sale period</span><span class="lot-value">${i.days[0]} – ${i.days[1]} days</span></div>
-<div class="lot-row"><span class="lot-label">Slots remaining</span><span class="lot-value" style="color:var(--red)">${slots} of 20</span></div>
-<div class="lot-row"><span class="lot-label">Min fraction</span><span class="lot-value">$${i.min}</span></div>
+<div class="lot-row"><span class="lot-label">Price per slot</span><span class="lot-value" style="color:var(--gold)">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
+<div class="lot-row"><span class="lot-label">Slots available</span><span class="lot-value" style="color:${slotsAvail>0?'var(--green)':'var(--red)'}">${slotsAvail} of ${slotsTotal}</span></div>
 </div>
-<div class="lot-slider"><label>Investment amount</label>
-<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><div class="lot-amount" id="lotAmt" style="flex:1">$${i.min}</div><input type="number" id="lotManual" value="${i.min}" min="${i.min}" max="${Math.min(i.price*0.3,10000)}" style="width:100px;padding:8px;border:1px solid var(--bd);border-radius:6px;font-family:'Space Mono',monospace;font-size:13px;background:var(--bg2);color:var(--t);outline:none" oninput="const v=parseInt(this.value)||0;document.getElementById('lotSlider').value=v;document.getElementById('lotAmt').textContent='$'+v.toLocaleString();document.getElementById('lotPct').textContent=(v/${i.price}*100).toFixed(1)+'%'"></div>
-<input type="range" id="lotSlider" min="${i.min}" max="${Math.min(i.price*0.3,10000)}" value="${i.min}" step="${Math.max(25,i.min/4)}" style="margin-bottom:4px" oninput="const v=parseInt(this.value);document.getElementById('lotAmt').textContent='$'+v.toLocaleString();document.getElementById('lotManual').value=v;document.getElementById('lotPct').textContent=(v/${i.price}*100).toFixed(1)+'%'">
-<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3)"><span>Your share: <strong id="lotPct">${(i.min/i.price*100).toFixed(1)}%</strong></span><span>Wallet: <strong style="color:var(--gold)">$${Math.round(state.wallet).toLocaleString()}</strong></span></div></div>
-<button class="btn-gold" style="margin-top:10px" onclick="buyFraction(${i.id})">BUY FRACTION</button>
+${canBuy ? `
+<div class="lot-slider"><label>Slots to buy</label>
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+  <div class="lot-amount" id="lotAmt" style="flex:1">1 slot · $${Math.round(pricePerSlot).toLocaleString()}</div>
+  <input type="number" id="lotManual" value="1" min="1" max="${slotsAvail}" step="1" style="width:80px;padding:8px;border:1px solid var(--bd);border-radius:6px;font-family:'Space Mono',monospace;font-size:13px;background:var(--bg2);color:var(--t);outline:none;text-align:center" oninput="_updateSlotDisplay(${i.id})">
+</div>
+<input type="range" id="lotSlider" min="1" max="${slotsAvail}" value="1" step="1" style="margin-bottom:4px" oninput="_updateSlotDisplay(${i.id})">
+<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3)">
+  <span>Your share: <strong id="lotPct" style="color:var(--gold)">${(100/slotsTotal).toFixed(1)}%</strong></span>
+  <span>Wallet: <strong style="color:var(--gold)">$${Math.round(state.wallet).toLocaleString()}</strong></span>
+</div>
+</div>
+<button class="btn-gold" style="margin-top:10px" onclick="buyFraction(${i.id})">BUY ${slotsTotal === 1 ? '' : 'SLOTS'}</button>
+` : `
+<div style="padding:20px;text-align:center;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-top:12px;color:var(--t3)">
+  All slots sold. Item is fully funded.
+</div>
+`}
 </div></div>`);
-setTimeout(()=>{drawItemChart(i.id)},100)}
+setTimeout(()=>{drawItemAreaChart(i.id)},100)}
 
-function switchItemPeriod(p,el){document.querySelectorAll('.ip-tab').forEach(t=>{t.classList.remove('active');t.style.background='transparent';t.style.color='var(--t3)'});el.classList.add('active');el.style.background='var(--gold)';el.style.color='#0a0a0a';window._itemPeriod=p;drawItemChart(window._lastItemId||1)}
+/* Обновляет цифры при изменении слайдера слотов */
+function _updateSlotDisplay(itemId){
+  const i = ITEMS.find(x=>x.id===itemId); if(!i) return;
+  const slotsTotal = i.slots_total || 20;
+  const pricePerSlot = i.price_per_slot || (i.price / slotsTotal);
+  const slotsAvail = i.slots_available !== undefined ? i.slots_available : slotsTotal;
+  // Берём значение из того элемента который поменялся (slider или manual input)
+  const slider = document.getElementById('lotSlider');
+  const manual = document.getElementById('lotManual');
+  let n = parseInt((event && event.target && event.target.value) || slider.value || 1);
+  if(isNaN(n) || n < 1) n = 1;
+  if(n > slotsAvail) n = slotsAvail;
+  slider.value = n;
+  manual.value = n;
+  const totalUSD = Math.round(n * pricePerSlot);
+  const pct = (n / slotsTotal * 100).toFixed(1);
+  document.getElementById('lotAmt').textContent = n + ' slot' + (n>1?'s':'') + ' · $' + totalUSD.toLocaleString();
+  document.getElementById('lotPct').textContent = pct + '%';
+}
+
+function drawItemAreaChart(itemId){
+  const c = document.getElementById('itemCandle'); if(!c) return;
+  const item = ITEMS.find(x=>x.id===itemId); if(!item) return;
+  const ctx = c.getContext('2d');
+  const w = c.width, hh = c.height;
+  // Используем price_history если есть, иначе генерируем
+  let pts = [];
+  let labels = [];
+  if(Array.isArray(item.price_history) && item.price_history.length >= 2){
+    pts = item.price_history.map(p => Number(p.price || 0));
+    labels = item.price_history.map(p => p.label || '');
+  } else {
+    // Fallback: синтетические данные с трендом к текущей цене
+    const n = 30;
+    let p = item.price * 0.88;
+    for(let j=0; j<n; j++){
+      const trend = 0.004; const noise = (Math.random()-0.5) * item.price * 0.01;
+      p = p * (1 + trend) + noise;
+      pts.push(p);
+    }
+    pts[pts.length-1] = item.price;
+    labels = ['', '', '', '', ''];
+  }
+  const mn = Math.min(...pts) * 0.97;
+  const mx = Math.max(...pts) * 1.03;
+  const rng = Math.max(1, mx - mn);
+  // Clear
+  ctx.clearRect(0, 0, w, hh);
+  // Subtle grid (4 horizontal lines)
+  ctx.strokeStyle = 'rgba(201,168,76,.06)'; ctx.lineWidth = 1;
+  for(let k=1; k<=4; k++){
+    const y = hh * k / 5;
+    ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(w-10, y); ctx.stroke();
+  }
+  // Prepare coordinates
+  const padL = 40, padR = 10, padT = 10, padB = 30;
+  const plotW = w - padL - padR;
+  const plotH = hh - padT - padB;
+  const xOf = j => padL + (j / (pts.length-1)) * plotW;
+  const yOf = v => padT + plotH - ((v - mn) / rng) * plotH;
+  // Area fill — gold gradient
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+  grad.addColorStop(0, 'rgba(201,168,76,0.45)');
+  grad.addColorStop(1, 'rgba(201,168,76,0.02)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), padT + plotH);
+  pts.forEach((v, j) => { ctx.lineTo(xOf(j), yOf(v)); });
+  ctx.lineTo(xOf(pts.length-1), padT + plotH);
+  ctx.closePath();
+  ctx.fill();
+  // Line on top — gold
+  ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  pts.forEach((v, j) => {
+    const x = xOf(j), y = yOf(v);
+    if(j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  // Dots at each data point
+  ctx.fillStyle = '#c9a84c';
+  pts.forEach((v, j) => {
+    ctx.beginPath(); ctx.arc(xOf(j), yOf(v), 3.5, 0, Math.PI*2); ctx.fill();
+  });
+  // Labels under each point (small, diagonal if many)
+  ctx.fillStyle = 'rgba(240,237,230,0.5)';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'center';
+  const labelStep = labels.length > 6 ? Math.ceil(labels.length / 5) : 1;
+  labels.forEach((lb, j) => {
+    if(j % labelStep !== 0 && j !== labels.length - 1) return;
+    if(!lb) return;
+    ctx.fillText(lb, xOf(j), hh - 10);
+  });
+  // Y-axis labels (min / max)
+  ctx.fillStyle = 'rgba(240,237,230,0.55)';
+  ctx.textAlign = 'left';
+  ctx.font = '10px monospace';
+  ctx.fillText('$' + Math.round(mx).toLocaleString(), 4, padT + 10);
+  ctx.fillText('$' + Math.round(mn).toLocaleString(), 4, padT + plotH);
+  // Current price dot + label
+  const lastV = pts[pts.length-1];
+  ctx.fillStyle = '#c9a84c';
+  ctx.beginPath(); ctx.arc(xOf(pts.length-1), yOf(lastV), 5, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = 'rgba(201,168,76,0.8)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(xOf(pts.length-1), yOf(lastV), 8, 0, Math.PI*2); ctx.stroke();
+}
+
+/* OLD chart function kept for backwards compat — delegates to area chart */
+function switchItemPeriod(p,el){ /* no-op with area chart */ }
 
 function drawItemChart(itemId){window._lastItemId=itemId;const c=document.getElementById('itemCandle');if(!c)return;
 const ctx=c.getContext('2d');const w=c.width,hh=c.height;
@@ -1370,14 +2010,45 @@ const pctChange=((endPrice-startPrice)/startPrice*100).toFixed(2);
 ctx.fillStyle=isUp?'rgba(38,166,154,.2)':'rgba(239,83,80,.2)';ctx.fillRect(8,8,70,20);
 ctx.fillStyle=lineColor;ctx.font='bold 11px monospace';ctx.fillText((isUp?'+':'')+pctChange+'%',14,22)}
 
-function toggleFav(id,btn){const idx=state.favorites.indexOf(id);if(idx>-1){state.favorites.splice(idx,1);btn.classList.remove('on');btn.textContent='♡ Save to favorites'}else{state.favorites.push(id);btn.classList.add('on');btn.textContent='♥ Saved'}saveState();renderFavs()}
+function toggleFav(id, btn){
+  id = Number(id);
+  const idx = _favIndexOf(id);
+  if(idx > -1){
+    state.favorites.splice(idx, 1);
+    if(btn){ btn.classList.remove('on'); btn.textContent = '♡ Save to favorites'; }
+  } else {
+    // Сохраняем snapshot чтобы переживал закрытие/продажу item
+    const i = ITEMS.find(x => x.id === id);
+    if(i){
+      state.favorites.push({
+        id: i.id, name: i.name, ico: i.ico, image_url: i.image_url || '',
+        desc: i.desc, price: i.price, funded: i.funded,
+        ret: i.ret, days: i.days, inv: i.inv, min: i.min,
+      });
+    } else {
+      state.favorites.push(id);   // fallback
+    }
+    if(btn){ btn.classList.add('on'); btn.textContent = '♥ Saved'; }
+  }
+  // BUG 12 FIX: persist в localStorage
+  try{ localStorage.setItem('luxor_favorites', JSON.stringify(state.favorites)); }catch(e){}
+  saveState();
+  renderFavs();
+}
 
 async function buyFraction(id){
   const i=ITEMS.find(x=>x.id===id);
   if(!i){alert('Item not found');return}
-  const amt=parseInt(document.getElementById('lotSlider').value);
-  if(amt<i.min){alert('Minimum $'+i.min);return}
-  if(state.wallet<amt){closeModal();openTopUp();return}
+  // Теперь slider хранит количество СЛОТОВ, не USD
+  const slotsN = parseInt(document.getElementById('lotSlider').value) || 1;
+  if(slotsN < 1){alert('Minimum 1 slot');return}
+  const pricePerSlot = i.price_per_slot || (i.price / (i.slots_total || 20));
+  const totalUSD = Math.round(slotsN * pricePerSlot);
+  if(state.wallet < totalUSD){
+    closeModal();
+    if(confirm('Not enough balance. Need $'+totalUSD.toLocaleString()+' — Top up now?')) openTopUp();
+    return;
+  }
   const userLogin=U.login||sessionStorage.getItem('luxor_login');
   if(!userLogin){alert('Session expired. Please log in again.');return}
   // Loader
@@ -1385,7 +2056,8 @@ async function buyFraction(id){
   try{
     const res=await apiFetch('/api/items/buy',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({user_login:userLogin,item_id:id,amount_usd:amt})
+      // NEW: шлём slots_count (не amount_usd)
+      body:JSON.stringify({user_login:userLogin, item_id:id, slots_count:slotsN})
     });
     const data=await res.json();
     if(!res.ok||!data||!data.ok){
@@ -1394,24 +2066,27 @@ async function buyFraction(id){
         'item_not_found':'This item is not available for purchase yet. Please try again later.',
         'item_not_active':'This item is no longer available (already sold).',
         'insufficient_fraction':'Not enough share available. Try a smaller amount.',
+        'insufficient_slots':'Not enough slots available. Try fewer slots.',
         'insufficient_balance':'Wallet balance is not enough.',
         'user_not_found':'Session error. Please log in again.',
         'item_price_invalid':'Item price misconfigured. Contact support.',
         'invalid_amount':'Amount must be greater than zero.',
+        'invalid_slots_count':'Must buy at least 1 slot.',
       };
       closeModal();
       setTimeout(()=>alert('Purchase failed: '+(map[errCode]||errCode)),100);
       return;
     }
     // Success
-    state.wallet=data.new_wallet_balance;
+    state.wallet = data.new_wallet_balance;
     closeModal();
-    addTx('Fraction: '+(data.item_name||i.name)+' $'+amt.toLocaleString(),'done');
+    const paidUSD = data.amount_paid_usd || totalUSD;
+    addTx('Purchased '+slotsN+' slot'+(slotsN>1?'s':'')+' of '+(data.item_name||i.name)+' · $'+Math.round(paidUSD).toLocaleString(),'done');
     await loadMyItems();
-    // Перезагружаем маркетплейс — обновить available_fraction и funded%
+    // Перезагружаем маркетплейс — обновить slots_available и funded%
     try{ await loadMarketplaceItems(); }catch(e){}
-    updateUI();showConfetti();saveState();
-    setTimeout(()=>showCertificate(i,amt),500);
+    updateUI(); showConfetti(); saveState();
+    setTimeout(()=>showCertificate(i, paidUSD), 500);
   }catch(e){
     closeModal();
     setTimeout(()=>alert('Network error. Please try again.'),100);
@@ -1426,29 +2101,37 @@ async function loadMyItems(){
     const res=await apiFetch('/api/items/my/'+encodeURIComponent(userLogin));
     const data=await res.json();
     if(data&&data.ok&&Array.isArray(data.purchases)){
-      // Keep only active purchases in myItems to match old UI expectations,
-      // but also store closed ones for history display
-      state.myItems=data.purchases
-        .filter(p=>p.status==='active')
-        .map(p=>({
-          id:p.item_id,
-          purchase_id:p.id,
-          name:p.name,
-          ico:'',
-          invested:p.invested,
-          pct:p.pct,
-          status:'buying',
-          ret:p.ret,
-          retMin:p.retMin,
-          retMax:p.retMax,
-          guaranteed:p.guaranteed_return,
-          daysTotal:p.return_period_days,
-          daysMin:p.return_period_days,
-          daysMax:p.return_period_days,
-          purchaseDate:p.purchaseDate,
-          desc:''
-        }));
-      state.closedItems=data.purchases.filter(p=>p.status!=='active');
+      // BUG 2 FIX: храним ВСЕ покупки (active + closed) с серверными статусами.
+      // Было: переименовывали status: 'active'→'buying', фильтры ломались.
+      state.myItems = data.purchases.map(p => ({
+        id: p.item_id,
+        purchase_id: p.id,
+        name: p.name,
+        ico: '',
+        image_url: p.image_url || '',
+        invested: p.invested,
+        pct: p.pct,
+        // Сохраняем ОРИГИНАЛЬНЫЙ серверный статус: active | sold_guaranteed | sold_profit | early_exit
+        status: p.status,
+        ret: p.ret,
+        retMin: p.retMin,
+        retMax: p.retMax,
+        guaranteed: p.guaranteed_return,
+        daysTotal: p.return_period_days,
+        daysMin: p.return_period_days,
+        daysMax: p.return_period_days,
+        purchaseDate: p.purchaseDate,
+        sold_at: p.sold_at,
+        sold_mode: p.sold_mode,
+        sold_percent: p.sold_percent,
+        payout_usd: p.payout_usd,
+        return_percent: p.return_percent,
+        days_held: p.days_held,
+        sale_tag: p.sale_tag,
+        desc: ''
+      }));
+      // closedItems — deprecated, всё в myItems теперь (оставлен для старых вызовов)
+      state.closedItems = state.myItems.filter(p => p.status !== 'active');
       try{renderMyItems()}catch(e){}
       try{updateUI()}catch(e){}
     }
@@ -1952,28 +2635,44 @@ async function loadPoolPositions(){
 
 /* Withdraw a pool position (principal + earned) */
 async function withdrawFromPool(positionId){
-  if(!positionId)return;
-  const pos=state.positions.find(p=>p.id===positionId);
-  if(!pos){alert('Position not found');return}
-  const total=(pos.amount_usd||pos.amount||0)+(pos.earned_usd||pos.earned||0);
-  if(!confirm('Withdraw from '+pos.plan+' Pool?\n\nPrincipal: $'+(pos.amount_usd||pos.amount||0).toLocaleString()+'\nEarned: $'+Math.round(pos.earned_usd||pos.earned||0).toLocaleString()+'\nTotal to wallet: $'+Math.round(total).toLocaleString()))return;
-  const userLogin=U.login||sessionStorage.getItem('luxor_login');
+  if(!positionId) return;
+  const pos = state.positions.find(p => p.id === positionId);
+  if(!pos){ alert('Position not found'); return; }
+  const principal = Number(pos.amount_usd || pos.amount) || 0;
+  // BUG 1: earned на бэке (что реально начислено) vs live earned (с интерполяцией).
+  // При withdraw отдаются ТОЛЬКО реально начисленные (cron-учтённые).
+  const earnedLocked = Number(pos.earned_usd || pos.earned) || 0;
+  const earnedLive = getLiveEarned(pos);
+  const pendingDiff = earnedLive - earnedLocked;
+  const total = principal + earnedLocked;
+  let confirmMsg = 'Withdraw from ' + pos.plan + ' Pool?\n\n' +
+                   'Principal: $' + principal.toLocaleString() + '\n' +
+                   'Earned (locked): $' + earnedLocked.toFixed(2) + '\n' +
+                   'Total to wallet: $' + Math.round(total).toLocaleString();
+  if(pendingDiff > 0.5){
+    confirmMsg += '\n\nNote: $' + pendingDiff.toFixed(2) + ' will be lost (next payout in ' +
+                  _fmtTimeLeft(getSecondsToNextPayout(pos)) + '). Wait for the payout to get it.';
+  }
+  if(!confirm(confirmMsg)) return;
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
   try{
-    const res=await apiFetch('/api/pool/withdraw/'+positionId,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({user_login:userLogin})
+    const res = await apiFetch('/api/pool/withdraw/' + positionId, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({user_login: userLogin})
     });
-    const data=await res.json();
-    if(!res.ok||!data||!data.ok){
-      alert('Withdraw failed: '+((data&&data.detail&&data.detail.error)||(data&&data.error)||'unknown'));
+    const data = await res.json();
+    if(!res.ok || !data || !data.ok){
+      alert('Withdraw failed: ' + ((data && data.detail && data.detail.error) || (data && data.error) || 'unknown'));
       return;
     }
-    state.wallet=data.new_wallet_balance;
-    addTx('Pool withdraw: '+pos.plan+' +$'+Math.round(data.refunded_usd).toLocaleString(),'done');
+    state.wallet = data.new_wallet_balance;
+    addTx('Pool withdraw: ' + pos.plan + ' +$' + Math.round(data.refunded_usd).toLocaleString(), 'done');
     await loadPoolPositions();
-    updateUI();saveState();
+    updateUI(); saveState();
     showGoldRain();
-  }catch(e){alert('Network error')}
+  }catch(e){
+    alert('Network error');
+  }
 }
 
 /* ═══ WITHDRAW ═══ */
@@ -2188,65 +2887,187 @@ function closeModal(){const o=document.getElementById('mainOverlay');if(o)o.clas
 
 /* ═══ GRAPH ═══ */
 async function sellNow(id){
-  const item=state.myItems.find(x=>x.id===id);
-  if(!item){alert('Item not found');return}
-  const purchaseId=item.purchase_id;
-  if(!purchaseId){alert('Cannot sell: purchase record missing. Please refresh the page.');return}
-  const refund=Math.round(item.invested*0.9);
-  const loss=Math.round(item.invested*0.1);
-  if(!confirm('Sell your '+item.pct+'% of '+item.name+' now?\n\nYou will receive: $'+refund.toLocaleString()+' (90% of invested)\nEarly exit fee: $'+loss.toLocaleString()+' (10%)'))return;
-  const userLogin=U.login||sessionStorage.getItem('luxor_login');
-  try{
-    const res=await apiFetch('/api/items/sell-early/'+purchaseId,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({user_login:userLogin})
-    });
-    const data=await res.json();
-    if(!res.ok||!data||!data.ok){
-      const errCode=(data&&data.detail&&data.detail.error)||(data&&data.error)||'unknown';
-      alert('Sale failed: '+errCode);
+  let item = state.myItems.find(x => x.id === id && x.status === 'active');
+  if(!item){alert('Item not found or already closed');return}
+  if(!item.purchase_id){
+    console.warn('[sellNow] purchase_id missing, reloading myItems');
+    await loadMyItems();
+    item = state.myItems.find(x => x.id === id && x.status === 'active');
+    if(!item || !item.purchase_id){
+      alert('Cannot sell this item right now. Please try again in a moment.');
       return;
     }
-    state.wallet=data.new_wallet_balance;
-    addTx('Early sale: '+item.name+' +$'+Math.round(data.payout_usd).toLocaleString(),'done');
+  }
+  const purchaseId = item.purchase_id;
+  const refund = Math.round(item.invested * 0.9);
+  const loss = Math.round(item.invested * 0.1);
+  // UX 6 FIX: красивая модалка вместо confirm()
+  const safeName = String(item.name || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  showModal(`<div style="padding:8px 4px">
+    <div style="text-align:center;margin-bottom:14px">
+      <div style="width:56px;height:56px;background:rgba(192,57,43,.12);border:2px solid var(--red);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:28px">⚠</div>
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:4px">SELL EARLY?</h3>
+      <div style="font-size:11px;color:var(--t3)">${safeName} · ${item.pct}% share</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--bd)">
+        <span style="color:var(--t3)">Originally invested</span>
+        <span style="font-weight:700">$${item.invested.toLocaleString()}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--bd)">
+        <span style="color:var(--t3)">Early exit fee (10%)</span>
+        <span style="color:var(--red);font-weight:700">−$${loss.toLocaleString()}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:8px 0 0">
+        <span style="color:var(--t)">You receive (90%)</span>
+        <span style="color:var(--green);font-weight:800;font-family:'Bebas Neue',sans-serif;font-size:20px">$${refund.toLocaleString()}</span>
+      </div>
+    </div>
+    <div style="background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.3);border-radius:6px;padding:10px;font-size:11px;color:var(--t2);margin-bottom:14px;line-height:1.5">
+      <strong style="color:var(--red)">Why the fee?</strong> Early exit means we resell your share to other investors — there's a small operational cost.
+      You'd earn more by waiting for the actual sale.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeModal()" style="flex:1;padding:11px;background:transparent;color:var(--t);border:1px solid var(--bd);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;cursor:pointer">CANCEL</button>
+      <button onclick="_confirmSellNow(${purchaseId}, ${id})" style="flex:1;padding:11px;background:var(--red);color:#fff;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;cursor:pointer">CONFIRM SALE</button>
+    </div>
+  </div>`);
+}
+
+async function _confirmSellNow(purchaseId, itemId){
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  closeModal();
+  // Loader
+  showModal(`<div style="text-align:center;padding:40px 20px">
+    <div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">PROCESSING SALE</div>
+  </div>`);
+  try{
+    const res = await apiFetch('/api/items/sell-early/' + purchaseId, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({user_login: userLogin})
+    });
+    const data = await res.json();
+    closeModal();
+    if(!res.ok || !data || !data.ok){
+      const errCode = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      alert('Sale failed: ' + errCode);
+      return;
+    }
+    state.wallet = data.new_wallet_balance;
+    const item = state.myItems.find(x => x.id === itemId);
+    addTx('Early sale: ' + (item ? item.name : 'item') + ' +$' + Math.round(data.payout_usd).toLocaleString(), 'done');
     await loadMyItems();
-    updateUI();saveState();showGoldRain();
-  }catch(e){alert('Network error. Please try again.')}
+    try{ await loadMarketplaceItems(); }catch(e){}
+    updateUI(); saveState(); showGoldRain();
+    // Success toast
+    showModal(`<div style="text-align:center;padding:24px 12px">
+      <div style="width:64px;height:64px;background:rgba(45,143,62,.15);border:2px solid var(--green);border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--green)">✓</div>
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">SOLD</h3>
+      <div style="font-size:14px;color:var(--t2);margin-bottom:14px">Funds added to your wallet</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);margin-bottom:16px">+$${Math.round(data.payout_usd).toLocaleString()}</div>
+      <button onclick="closeModal()" style="width:100%;padding:11px;background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;cursor:pointer">CONTINUE</button>
+    </div>`);
+  }catch(e){
+    closeModal();
+    alert('Network error. Please try again.');
+  }
 }
 
 let chartState={zoom:1,offset:0,candles:null};
 function setPeriod(p,el){currentPeriod=p;document.querySelectorAll('.ptab').forEach(t=>{t.classList.remove('active');t.style.background='rgba(255,255,255,.08)';t.style.color='#f0ede6'});el.classList.add('active');el.style.background='var(--gold)';el.style.color='#0a0a0a';drawGraph()}
 
-function drawGraph(){const c=document.getElementById('portCanvas');if(!c)return;const ctx=c.getContext('2d');const w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
-// Graph reflects current view: pools shows pool earnings growth, items shows items value growth
-const counts={'1W':7,'1M':30,'3M':90,'ALL':180};const n=counts[currentPeriod]||30;
-const pts=[];let v=100;
-const poolVal=state.positions.reduce((s,p)=>s+p.amount+p.earned,0);
-const itemVal=state.myItems.reduce((s,i)=>s+i.invested,0);
-const target=currentView==='pools'?poolVal:itemVal;
-for(let i=0;i<n;i++){const trend=target>0?0.6:0;v+=Math.random()*4-1.8+trend;pts.push(v)}
-// Ensure last point reflects current value
-if(target>0){const lastVal=100+(target/100*(Math.random()*0.2+0.05));pts[pts.length-1]=lastVal}
-const mn=Math.min(...pts)-3,mx=Math.max(...pts)+3;const rng=mx-mn;
-// Grid lines
-ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;for(let i=1;i<4;i++){const y=i*h/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
-// Gradient fill
-const grad=ctx.createLinearGradient(0,0,0,h);grad.addColorStop(0,'rgba(201,168,76,0.25)');grad.addColorStop(1,'rgba(201,168,76,0.0)');
-ctx.beginPath();ctx.moveTo(0,h);pts.forEach((p,i)=>{const x=i/(pts.length-1)*w;const y=h-(p-mn)/rng*h;if(i===0)ctx.lineTo(x,y);else{const px=(i-1)/(pts.length-1)*w;const py=h-(pts[i-1]-mn)/rng*h;const cx=(px+x)/2;ctx.quadraticCurveTo(cx,py,x,y)}});ctx.lineTo(w,h);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-// Line
-ctx.beginPath();pts.forEach((p,i)=>{const x=i/(pts.length-1)*w;const y=h-(p-mn)/rng*h;if(i===0)ctx.moveTo(x,y);else{const px=(i-1)/(pts.length-1)*w;const py=h-(pts[i-1]-mn)/rng*h;const cx=(px+x)/2;ctx.quadraticCurveTo(cx,py,x,y)}});
-ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.5;ctx.shadowColor='rgba(201,168,76,0.4)';ctx.shadowBlur=8;ctx.stroke();ctx.shadowBlur=0;
-// Last point glow
-const lx=w,ly=h-(pts[pts.length-1]-mn)/rng*h;ctx.beginPath();ctx.arc(lx-4,ly,4,0,Math.PI*2);ctx.fillStyle='#c9a84c';ctx.fill();ctx.beginPath();ctx.arc(lx-4,ly,8,0,Math.PI*2);ctx.fillStyle='rgba(201,168,76,0.2)';ctx.fill();
-// Update portfolio stats
-const invested=state.positions.reduce((s,p)=>s+p.amount,0)+state.myItems.reduce((s,i)=>s+i.invested,0);const earned=state.positions.reduce((s,p)=>s+p.earned,0);const total=state.balance+state.wallet;const pct=invested>0?(earned/invested*100):0;
-const pv=document.getElementById('portVal');if(pv)pv.textContent='$'+Math.round(total).toLocaleString();
-const pc=document.getElementById('portChange');if(pc){pc.textContent=(earned>=0?'+':'')+'$'+Math.round(earned).toLocaleString();pc.style.color=earned>=0?'var(--green)':'var(--red)'}
-const pp=document.getElementById('portPct');if(pp){pp.textContent=(pct>=0?'+':'')+pct.toFixed(1)+'%';pp.style.color=pct>=0?'var(--green)':'var(--red)';pp.style.background=pct>=0?'rgba(45,143,62,.15)':'rgba(192,57,43,.15)'}
-const pi=document.getElementById('portInvested');if(pi)pi.textContent='$'+Math.round(invested).toLocaleString();
-const pe=document.getElementById('portEarned');if(pe)pe.textContent=(earned>=0?'+':'')+'$'+Math.round(earned).toLocaleString();
-const pos=document.getElementById('portPositions');if(pos)pos.textContent=state.positions.length;
-const pit=document.getElementById('portItems');if(pit)pit.textContent=state.myItems.length}
+function drawGraph(){
+  const c = document.getElementById('portCanvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const w = c.width, h = c.height;
+  ctx.clearRect(0, 0, w, h);
+
+  // ═══ AUDIT FIX (UX 5): убрали фейковый график.
+  // Раньше: random шум маскировался под "историю портфеля".
+  // Теперь: если нет инвестиций — пустое состояние; если есть — простая baseline без подделки.
+
+  const poolsInvested = state.positions.reduce((s,p)=>s+(+p.amount||+p.amount_usd||0),0);
+  const poolsEarned = state.positions.reduce((s,p)=>s+getLiveEarned(p), 0);
+  const itemsActiveInvested = state.myItems.filter(i=>i.status==='active').reduce((s,i)=>s+(+i.invested||0),0);
+  const itemsClosedProfit = state.myItems
+    .filter(i => i.status !== 'active' && i.payout_usd !== undefined && i.payout_usd !== null)
+    .reduce((s,i) => s + (Number(i.payout_usd) - Number(i.invested)), 0);
+  const invested = poolsInvested + itemsActiveInvested;
+  const earned = poolsEarned + itemsClosedProfit;
+  const total = (+state.wallet || 0) + poolsInvested + poolsEarned + itemsActiveInvested;
+  const pct = invested > 0 ? (earned / invested * 100) : 0;
+
+  // Если совсем нет инвестиций и нет earned — показываем плашку
+  if(invested <= 0 && Math.abs(earned) < 0.01){
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(240,237,230,0.4)';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Portfolio history will appear after your first investment', w/2, h/2 - 8);
+    ctx.fillStyle = 'rgba(201,168,76,0.5)';
+    ctx.font = '9px monospace';
+    ctx.fillText('Start with Silver pool ($100 min) or buy item fraction', w/2, h/2 + 12);
+  } else {
+    // Простая визуализация: baseline на 0, рост к текущему earned.
+    // Это НЕ исторические данные, а индикатор "сейчас в плюсе/минусе".
+    // Точки: 0% → ((earned/invested)*100) — линейный рост (показуха минимальная, чисто визуальный feedback)
+    const grad = ctx.createLinearGradient(0,0,0,h);
+    if(earned >= 0){
+      grad.addColorStop(0, 'rgba(45,143,62,0.35)');
+      grad.addColorStop(1, 'rgba(45,143,62,0.0)');
+      ctx.strokeStyle = '#2d8f3e';
+    } else {
+      grad.addColorStop(0, 'rgba(192,57,43,0.35)');
+      grad.addColorStop(1, 'rgba(192,57,43,0.0)');
+      ctx.strokeStyle = '#c0392b';
+    }
+    // Простая 30-точечная линия от baseline к текущему значению
+    const n = 30;
+    const padT = 10;
+    const baseY = h - 10;
+    const targetY = padT + (1 - Math.min(0.9, Math.abs(pct)/30)) * (baseY - padT);
+    // Заливка
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(0, baseY);
+    for(let i = 0; i < n; i++){
+      const x = i / (n-1) * w;
+      const t = i / (n-1);
+      const y = baseY - (baseY - targetY) * (1 - Math.pow(1 - t, 2));   // ease-out curve
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, baseY);
+    ctx.closePath();
+    ctx.fill();
+    // Линия
+    ctx.beginPath();
+    ctx.lineWidth = 2.5;
+    for(let i = 0; i < n; i++){
+      const x = i / (n-1) * w;
+      const t = i / (n-1);
+      const y = baseY - (baseY - targetY) * (1 - Math.pow(1 - t, 2));
+      if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // Last point dot
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.beginPath();
+    ctx.arc(w - 6, targetY, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ═══ Update stats below graph ═══
+  const pv=document.getElementById('portVal');if(pv)pv.textContent='$'+Math.round(total).toLocaleString();
+  const pc=document.getElementById('portChange');if(pc){pc.textContent=(earned>=0?'+':'')+'$'+Math.round(earned).toLocaleString();pc.style.color=earned>=0?'var(--green)':'var(--red)'}
+  const pp=document.getElementById('portPct');if(pp){pp.textContent=(pct>=0?'+':'')+pct.toFixed(1)+'%';pp.style.color=pct>=0?'var(--green)':'var(--red)';pp.style.background=pct>=0?'rgba(45,143,62,.15)':'rgba(192,57,43,.15)'}
+  const pi=document.getElementById('portInvested');if(pi)pi.textContent='$'+Math.round(invested).toLocaleString();
+  const pe=document.getElementById('portEarned');if(pe)pe.textContent=(earned>=0?'+':'')+'$'+Math.round(earned).toLocaleString();
+  const pos=document.getElementById('portPositions');if(pos)pos.textContent=state.positions.length;
+  const pit=document.getElementById('portItems');if(pit)pit.textContent=state.myItems.filter(i=>i.status==='active').length;
+}
 
 function resetChartZoom(){drawGraph()}
 
