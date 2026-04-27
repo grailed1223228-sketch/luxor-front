@@ -598,6 +598,7 @@ function startInv(plan,rate,tier,amt){cM('rm',`<div class="center" style="margin
 <div class="fg"><label>EMAIL</label><input type="email" id="iem" required placeholder="john@email.com"></div>
 <div class="fr"><div class="fg"><label>LOGIN</label><input type="text" id="ilg" required placeholder="Login"></div><div class="fg"><label>PASSWORD</label><input type="password" id="ips" required minlength="6" placeholder="Min 6 chars"></div></div>
 <div class="fg"><label>INVESTMENT EXPERIENCE</label><select id="iex" required><option value="">Select level</option><option>Beginner — new to investing</option><option>Intermediate — some experience</option><option>Advanced — experienced investor</option><option>Professional — full-time trader</option></select></div>
+<div class="fg"><label>REFERRAL CODE <span style="color:var(--t3);font-weight:400;font-size:10px">(optional)</span></label><input type="text" id="iref" placeholder="LUXOR-XXX123" style="text-transform:uppercase" maxlength="20"></div>
 <div style="display:flex;align-items:center;gap:6px;margin:10px 0;font-size:11px;color:var(--t2)"><input type="checkbox" required style="accent-color:var(--gold)"><label>I agree to the <a href="luxin-terms.html" style="color:var(--gold)">Terms & Conditions</a></label></div>
 <button type="submit" class="btn-m">CREATE ACCOUNT →</button></form>
 <div class="center" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)"><p style="font-size:11px;color:var(--t3);margin-bottom:6px">Already have an account?</p><button class="btn-m" onclick="closeAll();openLogin()" style="background:transparent;color:var(--gold);border:1px solid var(--gold)">LOG IN</button></div>`)}
@@ -613,10 +614,11 @@ const birth_month=document.getElementById('ibm').value;
 const birth_year=parseInt(document.getElementById('iby').value);
 const address=document.getElementById('iad').value.trim();
 const investment_experience=document.getElementById('iex').value;
+const ref_code=(document.getElementById('iref')?.value||'').trim().toUpperCase();
 const btn=e.target.querySelector('button[type=submit]');
 if(btn){btn.textContent='CREATING...';btn.disabled=true;}
 try{
-  const res=await fetch('https://luxor-backend-production.up.railway.app/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login,password:pass,first_name:fn,last_name:ln,email,birth_day,birth_month,birth_year,address,investment_experience})});
+  const res=await fetch('https://luxor-backend-production.up.railway.app/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login,password:pass,first_name:fn,last_name:ln,email,birth_day,birth_month,birth_year,address,investment_experience,ref_code})});
   const data=await res.json();
   if(!res.ok){
     const msg=Array.isArray(data.detail)?data.detail.map(e=>e.msg).join('\n'):(data.detail||data.error||'Login already taken');
@@ -636,6 +638,27 @@ if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}}
 // Reviews
 function rr(c){document.getElementById('rg').innerHTML=RV.slice(0,c).map(r=>`<div class="rev"><div class="rs">${'★'.repeat(r.s)+'☆'.repeat(5-r.s)}</div><div class="rt">${r.t}</div><div class="ra">${r.a}</div><div class="rm">${r.m}</div></div>`).join('')}
 rr(9);function showMore(){rr(29);document.getElementById('mrb').style.display='none'}
+
+// Реферальная ссылка: если в URL ?ref=LUXOR-XYZ123 — сохраняем
+(function(){
+  try{
+    const params = new URLSearchParams(location.search);
+    const refFromUrl = params.get('ref');
+    if(refFromUrl && /^LUXOR-/i.test(refFromUrl)){
+      sessionStorage.setItem('luxor_pending_ref', refFromUrl.toUpperCase());
+    }
+  }catch(e){}
+})();
+// Подставляем в поле iref когда форма открыта
+(function(){
+  const apply = () => {
+    const el = document.getElementById('iref');
+    const pending = sessionStorage.getItem('luxor_pending_ref');
+    if(el && pending && !el.value){ el.value = pending; }
+  };
+  // На каждом DOM-update (форма создаётся при клике)
+  document.addEventListener('click', () => setTimeout(apply, 50));
+})();
 
 // Leaderboard
 function rlb(c){document.getElementById('lbb').innerHTML=LD.slice(0,c).map(d=>`<tr><td class="rk">${d.r}</td><td>${d.n}</td><td>${d.p}</td><td class="pr">$${d.e.toLocaleString()}</td></tr>`).join('')}
