@@ -751,39 +751,109 @@ body{padding-bottom:52px}}
 <!-- SETTINGS -->
 <div class="panel" id="p-settings">
 <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:14px">Settings</h2>
+
+<!-- ═══ Profile ═══ -->
 <div class="card">
 <div class="card-header">Profile</div>
-<div class="input-group"><label>Full Name</label><input type="text" id="setName" onchange="updateName(this.value)"></div>
-<div class="input-group"><label>Email</label>
-<!-- КРИТИЧЕСКИЙ ФИКС: Добавляем userEmail элемент -->
-<input type="email" id="userEmail" value="beta@luxorinvest.com" readonly>
-<input type="email" id="setEmail" value="user@example.com" style="display:none"></div>
-<div class="input-group"><label>Phone</label><input type="tel" id="setPhone" placeholder="+1 (000) 000-0000"></div>
+<div class="input-group"><label>Login</label>
+<input type="text" id="setLogin" readonly style="background:var(--bg2);color:var(--t3)"></div>
+<div class="input-group"><label>Email <span id="setEmailVerifiedBadge" style="font-size:9px;padding:2px 6px;border-radius:3px;margin-left:6px;display:none"></span></label>
+<input type="email" id="setEmail" readonly>
+<button onclick="openChangeEmail()" style="margin-top:6px;padding:8px 14px;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px">CHANGE EMAIL</button>
 </div>
+</div>
+
+<!-- ═══ Security ═══ -->
 <div class="card">
 <div class="card-header">Security</div>
-<div class="input-group"><label>Current Password</label><input type="password" placeholder="Enter current password"></div>
-<div class="input-group"><label>New Password</label><input type="password" placeholder="Enter new password"></div>
-<div class="input-group"><label>Confirm Password</label><input type="password" placeholder="Confirm new password"></div>
-<div style="display:flex;align-items:center;gap:6px;margin:8px 0;font-size:11px;color:var(--t2)"><input type="checkbox" style="accent-color:var(--gold)"><label>Enable Two-Factor Authentication (2FA)</label></div>
+<button onclick="openChangePassword()" style="width:100%;padding:10px;background:transparent;color:var(--t);border:1px solid var(--bd2);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px;margin-bottom:10px">🔒 CHANGE PASSWORD</button>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bd)">
+  <div>
+    <div style="font-size:12px;font-weight:600">Withdraw 2FA</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">Email confirmation for every withdrawal</div>
+  </div>
+  <label class="switch">
+    <input type="checkbox" id="setWithdraw2FA" checked onchange="toggleWithdraw2FA(this.checked)">
+    <span class="slider"></span>
+  </label>
 </div>
+</div>
+
+<!-- ═══ Notifications ═══ -->
 <div class="card">
-<div class="card-header">Wallet</div>
-<div class="input-group"><label>Default USDT Wallet (TRC20)</label><input type="text" id="setWallet" placeholder="Your wallet address"></div>
+<div class="card-header">Notifications</div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">
+  <div>
+    <div style="font-size:12px;font-weight:600">Account notifications</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">Password changes, security alerts, payouts</div>
+  </div>
+  <label class="switch">
+    <input type="checkbox" id="setNotifEmail" checked onchange="updateSettingField('notif_email', this.checked)">
+    <span class="slider"></span>
+  </label>
 </div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--bd)">
+  <div>
+    <div style="font-size:12px;font-weight:600">Marketing emails</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">New items, promotions, market updates</div>
+  </div>
+  <label class="switch">
+    <input type="checkbox" id="setNotifMarketing" onchange="updateSettingField('notif_marketing', this.checked)">
+    <span class="slider"></span>
+  </label>
+</div>
+</div>
+
+<!-- ═══ Preferences ═══ -->
 <div class="card">
 <div class="card-header">Preferences</div>
-<div class="input-group"><label>Language</label><select><option>English</option><option>Russian</option><option>Spanish</option></select></div>
-<div style="display:flex;align-items:center;gap:6px;margin:6px 0;font-size:11px;color:var(--t2)"><input type="checkbox" checked style="accent-color:var(--gold)"><label>Email notifications for payouts</label></div>
-<div style="display:flex;align-items:center;gap:6px;margin:6px 0;font-size:11px;color:var(--t2)"><input type="checkbox" checked style="accent-color:var(--gold)"><label>Email notifications for marketplace updates</label></div>
+<div class="input-group"><label>Display Currency</label>
+<select id="setCurrency" onchange="updateSettingField('display_currency', this.value)" style="width:100%">
+  <option value="USD">USD — US Dollar</option>
+  <option value="EUR">EUR — Euro</option>
+  <option value="GBP">GBP — British Pound</option>
+  <option value="RUB">RUB — Russian Ruble</option>
+  <option value="JPY">JPY — Japanese Yen</option>
+  <option value="CNY">CNY — Chinese Yuan</option>
+</select></div>
+<div class="input-group"><label>Language</label>
+<select id="setLanguage" onchange="updateSettingField('language', this.value)" style="width:100%">
+  <option value="en">English</option>
+  <option value="ru">Русский</option>
+  <option value="es">Español</option>
+  <option value="fr">Français</option>
+  <option value="de">Deutsch</option>
+  <option value="it">Italiano</option>
+  <option value="pt">Português</option>
+  <option value="zh">中文</option>
+  <option value="ja">日本語</option>
+  <option value="ko">한국어</option>
+  <option value="ar">العربية</option>
+</select></div>
+<div class="input-group"><label>Timezone</label>
+<input type="text" id="setTimezone" placeholder="UTC" onblur="updateSettingField('timezone', this.value)"
+  style="width:100%"></div>
 </div>
+
+<div id="settingsStatus" style="font-size:11px;color:var(--green);text-align:center;min-height:14px;margin:12px 0"></div>
+
+<!-- ═══ Danger Zone ═══ -->
 <div class="card">
-<div class="card-header" style="color:var(--red)">Danger Zone</div>
-<p style="font-size:11px;color:var(--t3);margin-bottom:8px">Permanently delete your account and all data.</p>
-<button class="btn-outline" style="color:var(--red);border-color:var(--red)">DELETE ACCOUNT</button>
+<div class="card-header" style="color:var(--red)">Account</div>
+<p style="font-size:11px;color:var(--t3);margin-bottom:8px">Sign out from this device. Your data is preserved.</p>
+<button onclick="logoutUser()" class="btn-outline" style="color:var(--t);border-color:var(--bd2);width:100%;padding:10px">SIGN OUT</button>
 </div>
-<button class="btn-gold" style="margin-top:8px" onclick="go('dash')">SAVE CHANGES</button>
 </div>
+
+<style>
+/* Switch toggle */
+.switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg3);border-radius:24px;transition:.3s;border:1px solid var(--bd)}
+.switch .slider:before{position:absolute;content:"";height:18px;width:18px;left:2px;bottom:2px;background:var(--t3);border-radius:50%;transition:.3s}
+.switch input:checked + .slider{background:rgba(201,168,76,.2);border-color:var(--gold)}
+.switch input:checked + .slider:before{transform:translateX(20px);background:var(--gold)}
+</style>
 
 </div><!-- /content -->
 </div><!-- /layout -->
@@ -1237,7 +1307,8 @@ function switchInvTab(){} // removed
 function updateInvTabs(){} // removed
 function go(panel,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));const target=document.getElementById('p-'+panel);if(!target){console.error('Panel not found:',panel);return}target.classList.add('show');document.querySelectorAll('.side-item').forEach(s=>s.classList.remove('active'));if(el){el.classList.add('active')}else{document.querySelectorAll('.side-item').forEach(s=>{const oc=s.getAttribute('onclick')||'';if(oc.indexOf("'"+panel+"'")>-1)s.classList.add('active')})}window.scrollTo(0,0);
 // Подгрузить свежие данные рефералов при переходе на вкладку
-if(panel === 'referral'){ try{ loadReferrals(); }catch(e){} }}
+if(panel === 'referral'){ try{ loadReferrals(); }catch(e){} }
+if(panel === 'settings'){ try{ loadSettings(); }catch(e){} }}
 
 function poolsTab(t,el){document.querySelectorAll('.pool-subpanel').forEach(p=>p.style.display='none');document.getElementById('pools-'+t).style.display='';document.querySelectorAll('.ptab-pool').forEach(tab=>{tab.style.color='var(--t3)';tab.style.borderBottomColor='transparent'});el.style.color='var(--gold)';el.style.borderBottomColor='var(--gold)'}
 
@@ -2854,6 +2925,7 @@ async function processWithdraw(){
         'unknown_currency':'Unsupported network.',
         'invalid_amount':'Invalid amount.',
         'user_not_found':'Session error. Please log in again.',
+        'email_not_verified':'Please verify your email before withdrawing.',
       };
       closeModal();
       setTimeout(()=>openWithdraw(),100);
@@ -2863,7 +2935,12 @@ async function processWithdraw(){
       },200);
       return;
     }
-    // Success — moved to waiting screen
+    // ═══ 2FA flow: показываем модалку с вводом кода из email ═══
+    if(data.requires_2fa){
+      show2FAWithdraw(data, amt);
+      return;
+    }
+    // No-2FA: старый flow
     state.wallet=data.new_wallet_balance;
     addTx('Withdrawal -$'+amt.toFixed(2),'processing');
     updateUI();saveState();
@@ -2874,6 +2951,143 @@ async function processWithdraw(){
     closeModal();
     setTimeout(()=>alert('Network error. Please try again.'),100);
   }
+}
+
+// ═══ 2FA модалка withdraw — юзер вводит код из email ═══
+function show2FAWithdraw(pendingData, amt){
+  const shortAddr = pendingData.wallet_address.length > 14
+    ? pendingData.wallet_address.slice(0,6) + '...' + pendingData.wallet_address.slice(-6)
+    : pendingData.wallet_address;
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="width:56px;height:56px;background:rgba(201,168,76,.1);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px">📧</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">EMAIL CONFIRMATION</div>
+      <p style="color:var(--t3);font-size:11px;line-height:1.5;margin:8px 0 0">
+        We sent a 6-digit code to your email.<br>
+        Enter it to confirm the withdrawal.
+      </p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid var(--bd)">
+        <span style="color:var(--t3)">Amount</span><span style="font-weight:600">$${Number(amt).toFixed(2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid var(--bd)">
+        <span style="color:var(--t3)">Currency</span><span style="font-weight:600">${pendingData.crypto_currency}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0">
+        <span style="color:var(--t3)">Address</span><span style="font-family:'Space Mono',monospace;font-size:10px">${shortAddr}</span>
+      </div>
+    </div>
+    <div style="margin-bottom:8px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px;font-family:'Space Mono',monospace">CODE FROM EMAIL</label>
+      <input id="wd2fa_code" type="text" inputmode="numeric" pattern="\\d{6}" maxlength="6" 
+        autocomplete="one-time-code" placeholder="123456"
+        style="width:100%;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);font-size:24px;text-align:center;letter-spacing:10px;font-family:'Space Mono',monospace;margin-top:6px">
+    </div>
+    <div id="wd2fa_err" style="color:#c0392b;font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="wd2fa_btn" onclick="confirmWithdraw2FA(${pendingData.pending_id}, ${amt})"
+      style="width:100%;padding:14px;background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;font-weight:700;cursor:pointer">
+      CONFIRM WITHDRAWAL →
+    </button>
+    <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:11px">
+      <a href="#" onclick="cancelWithdraw2FA(${pendingData.pending_id});return false" style="color:var(--t3);text-decoration:none">← Cancel</a>
+      <span style="color:var(--t3)">Expires in <span id="wd2fa_timer">10:00</span></span>
+    </div>
+    <p style="font-size:10px;color:var(--t3);text-align:center;margin-top:14px;line-height:1.5">
+      Wallet not debited until confirmed.<br>Code expires in 10 minutes.
+    </p>
+  </div>`);
+  setTimeout(() => document.getElementById('wd2fa_code')?.focus(), 100);
+  // Auto-submit
+  const inp = document.getElementById('wd2fa_code');
+  if(inp){
+    inp.addEventListener('input', e => {
+      const v = e.target.value.replace(/\D/g, '');
+      e.target.value = v;
+      if(v.length === 6){ confirmWithdraw2FA(pendingData.pending_id, amt); }
+    });
+  }
+  // Timer
+  let secs = pendingData.expires_in_seconds || 600;
+  const tEl = document.getElementById('wd2fa_timer');
+  const iv = setInterval(() => {
+    secs -= 1;
+    if(!document.getElementById('wd2fa_timer')){ clearInterval(iv); return; }
+    if(secs <= 0){
+      clearInterval(iv);
+      const errEl = document.getElementById('wd2fa_err');
+      if(errEl) errEl.textContent = 'Code expired. Please start a new withdrawal.';
+      const btn = document.getElementById('wd2fa_btn');
+      if(btn){ btn.disabled = true; btn.style.opacity = '.5'; }
+      return;
+    }
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    if(tEl) tEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  }, 1000);
+}
+
+async function confirmWithdraw2FA(pendingId, amt){
+  const code = (document.getElementById('wd2fa_code')?.value || '').trim();
+  const errEl = document.getElementById('wd2fa_err');
+  const btn = document.getElementById('wd2fa_btn');
+  if(errEl) errEl.textContent = '';
+  if(code.length !== 6 || !/^\d{6}$/.test(code)){
+    if(errEl) errEl.textContent = 'Enter 6-digit code';
+    return;
+  }
+  if(btn){ btn.textContent = 'CONFIRMING...'; btn.disabled = true; }
+  try{
+    const res = await apiFetch('/api/withdraw/confirm-2fa', {
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pending_id: pendingId, code})
+    });
+    const data = await res.json();
+    if(!res.ok || !data.ok){
+      const err = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const reason = (data.detail && data.detail.reason) || '';
+      const msg = ({
+        'invalid_code':'Wrong code. Try again.',
+        'wrong_code':'Wrong code. Try again.',
+        'expired':'Code expired. Start a new withdrawal.',
+        'no_code':'No active code. Start a new withdrawal.',
+        'too_many_attempts':'Too many attempts. Cancel and try again.',
+        'pending_not_found':'Withdrawal request not found or expired.',
+        'code_mismatch':'Code does not match this withdrawal.',
+        'insufficient_balance':'Not enough balance.',
+      })[err === 'invalid_code' ? reason || err : err] || err;
+      if(errEl) errEl.textContent = msg;
+      if(btn){ btn.textContent = 'CONFIRM WITHDRAWAL →'; btn.disabled = false; }
+      // Чистим поле на ошибочном коде
+      if(['wrong_code','too_many_attempts'].includes(err) ||
+         ['wrong_code','too_many_attempts'].includes(reason)){
+        const inp = document.getElementById('wd2fa_code');
+        if(inp) inp.value = '';
+      }
+      return;
+    }
+    // Успех — деньги списаны, withdrawal создан, идём в waiting screen
+    state.wallet = data.new_wallet_balance;
+    addTx('Withdrawal -$'+amt.toFixed(2), 'processing');
+    updateUI(); saveState();
+    _wd.withdrawalId = data.withdrawal_id;
+    showWithdrawWaiting(data);
+    startWithdrawPolling(data.withdrawal_id);
+  }catch(e){
+    if(errEl) errEl.textContent = 'Network error. Please try again.';
+    if(btn){ btn.textContent = 'CONFIRM WITHDRAWAL →'; btn.disabled = false; }
+  }
+}
+
+async function cancelWithdraw2FA(pendingId){
+  if(!confirm('Cancel withdrawal? You can start a new one anytime.')) return;
+  try{
+    await apiFetch('/api/withdraw/cancel-pending', {
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pending_id: pendingId})
+    });
+  }catch(e){}
+  closeModal();
 }
 
 function showWithdrawWaiting(data){
@@ -3391,6 +3605,314 @@ async function loadReferrals(){
 window.addEventListener('load', () => {
   setTimeout(loadReferrals, 1500);   // первоначальная загрузка после auth
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SETTINGS — День 11
+// ═══════════════════════════════════════════════════════════════════════════
+
+let _settingsLoaded = false;
+let _settingsSaveTimer = null;
+
+async function loadSettings(){
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin) return;
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/settings');
+    if(!r.ok) return;
+    const data = await r.json();
+    if(!data || !data.ok) return;
+    
+    // Заполняем UI
+    const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+    const setChk = (id, val) => { const el = document.getElementById(id); if(el) el.checked = !!val; };
+    
+    setVal('setLogin', data.login || '');
+    setVal('setEmail', data.email || '');
+    setVal('setCurrency', data.display_currency || 'USD');
+    setVal('setLanguage', data.language || 'en');
+    setVal('setTimezone', data.timezone || 'UTC');
+    setChk('setNotifEmail', data.notif_email);
+    setChk('setNotifMarketing', data.notif_marketing);
+    setChk('setWithdraw2FA', data.withdraw_2fa_enabled);
+    
+    // Email verified badge
+    const badge = document.getElementById('setEmailVerifiedBadge');
+    if(badge){
+      if(data.email_verified){
+        badge.textContent = '✓ VERIFIED';
+        badge.style.color = 'var(--green)';
+        badge.style.background = 'rgba(45,143,62,.12)';
+      } else {
+        badge.textContent = '⚠ NOT VERIFIED';
+        badge.style.color = 'var(--red, #c0392b)';
+        badge.style.background = 'rgba(192,57,43,.12)';
+      }
+      badge.style.display = '';
+    }
+    _settingsLoaded = true;
+  }catch(e){
+    console.warn('loadSettings failed:', e);
+  }
+}
+
+async function updateSettingField(field, value){
+  if(!_settingsLoaded) return;   // ещё не загрузили — игнорим события
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin) return;
+  // Дебаунс — не дёргаем бэк на каждое нажатие клавиши
+  clearTimeout(_settingsSaveTimer);
+  _settingsSaveTimer = setTimeout(async () => {
+    try{
+      const body = {};
+      body[field] = value;
+      const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/settings', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+      });
+      const data = await r.json();
+      const status = document.getElementById('settingsStatus');
+      if(!r.ok || !data.ok){
+        const err = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+        if(status){ status.style.color = 'var(--red, #c0392b)'; status.textContent = `Error: ${err}`;
+                    setTimeout(() => status.textContent = '', 3000); }
+        // Reload чтобы откатить визуально
+        loadSettings();
+        return;
+      }
+      if(status){ status.style.color = 'var(--green)'; status.textContent = '✓ Saved';
+                  setTimeout(() => status.textContent = '', 2000); }
+    }catch(e){
+      console.warn('updateSettingField failed:', e);
+    }
+  }, 300);
+}
+
+async function toggleWithdraw2FA(enabled){
+  if(!enabled){
+    if(!confirm('⚠ Disabling 2FA makes withdrawals less secure.\n\nAnyone with access to your account can withdraw funds without email confirmation.\n\nAre you sure?')){
+      document.getElementById('setWithdraw2FA').checked = true;
+      return;
+    }
+  }
+  await updateSettingField('withdraw_2fa_enabled', enabled);
+}
+
+// ═══ Change password ═══
+function openChangePassword(){
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">CHANGE PASSWORD</div>
+      <p style="color:var(--t3);font-size:11px;margin-top:6px">Enter your current password and choose a new one</p>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CURRENT PASSWORD</label>
+      <input type="password" id="cp_old" autocomplete="current-password"
+        style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">NEW PASSWORD</label>
+      <input type="password" id="cp_new" autocomplete="new-password"
+        style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px">
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">Min 6 characters</div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CONFIRM NEW PASSWORD</label>
+      <input type="password" id="cp_new2" autocomplete="new-password"
+        style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px">
+    </div>
+    <div id="cp_err" style="color:var(--red, #c0392b);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="cp_btn" onclick="submitChangePassword()"
+      style="width:100%;padding:14px;background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;font-weight:700;cursor:pointer;margin-top:8px">
+      UPDATE PASSWORD
+    </button>
+  </div>`);
+  setTimeout(() => document.getElementById('cp_old')?.focus(), 100);
+}
+
+async function submitChangePassword(){
+  const old = document.getElementById('cp_old')?.value || '';
+  const newp = document.getElementById('cp_new')?.value || '';
+  const newp2 = document.getElementById('cp_new2')?.value || '';
+  const err = document.getElementById('cp_err');
+  const btn = document.getElementById('cp_btn');
+  if(err) err.textContent = '';
+  if(!old || !newp){ if(err) err.textContent = 'Fill in all fields'; return; }
+  if(newp.length < 6){ if(err) err.textContent = 'New password too short (min 6)'; return; }
+  if(newp !== newp2){ if(err) err.textContent = 'New passwords do not match'; return; }
+  if(old === newp){ if(err) err.textContent = 'New password must differ from old'; return; }
+  
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(btn){ btn.textContent = 'UPDATING...'; btn.disabled = true; }
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/change-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({old_password: old, new_password: newp})
+    });
+    const data = await r.json();
+    if(!r.ok || !data.ok){
+      const e = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'wrong_old_password':'Current password is incorrect',
+        'password_too_short':'New password too short (min 6)',
+        'same_password':'New password must differ from old',
+      };
+      if(err) err.textContent = map[e] || e;
+      if(btn){ btn.textContent = 'UPDATE PASSWORD'; btn.disabled = false; }
+      return;
+    }
+    closeModal();
+    setTimeout(() => alert('✓ Password updated successfully'), 100);
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent = 'UPDATE PASSWORD'; btn.disabled = false; }
+  }
+}
+
+// ═══ Change email ═══
+function openChangeEmail(){
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">CHANGE EMAIL</div>
+      <p style="color:var(--t3);font-size:11px;margin-top:6px">A confirmation code will be sent to the NEW email</p>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">NEW EMAIL</label>
+      <input type="email" id="ce_email" autocomplete="email" placeholder="newmail@example.com"
+        style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CURRENT PASSWORD</label>
+      <input type="password" id="ce_pw" autocomplete="current-password"
+        style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px">
+    </div>
+    <div id="ce_err" style="color:var(--red, #c0392b);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="ce_btn" onclick="submitChangeEmailRequest()"
+      style="width:100%;padding:14px;background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;font-weight:700;cursor:pointer;margin-top:8px">
+      SEND CONFIRMATION CODE
+    </button>
+  </div>`);
+  setTimeout(() => document.getElementById('ce_email')?.focus(), 100);
+}
+
+async function submitChangeEmailRequest(){
+  const newEmail = (document.getElementById('ce_email')?.value || '').trim();
+  const pw = document.getElementById('ce_pw')?.value || '';
+  const err = document.getElementById('ce_err');
+  const btn = document.getElementById('ce_btn');
+  if(err) err.textContent = '';
+  if(!newEmail || !newEmail.includes('@')){ if(err) err.textContent = 'Invalid email'; return; }
+  if(!pw){ if(err) err.textContent = 'Enter your password'; return; }
+  
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(btn){ btn.textContent = 'SENDING...'; btn.disabled = true; }
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/request-email-change', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({new_email: newEmail, password: pw})
+    });
+    const data = await r.json();
+    if(!r.ok || !data.ok){
+      const e = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'wrong_password':'Wrong password',
+        'invalid_email':'Invalid email format',
+        'same_email':'New email must differ from current',
+        'email_taken':'This email is already registered',
+      };
+      if(err) err.textContent = map[e] || e;
+      if(btn){ btn.textContent = 'SEND CONFIRMATION CODE'; btn.disabled = false; }
+      return;
+    }
+    // Показываем экран ввода кода
+    closeModal();
+    setTimeout(() => openConfirmEmailChange(newEmail), 100);
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent = 'SEND CONFIRMATION CODE'; btn.disabled = false; }
+  }
+}
+
+function openConfirmEmailChange(newEmail){
+  const masked = newEmail.replace(/(.{2}).*(@.*)/, '$1***$2');
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">CONFIRM NEW EMAIL</div>
+      <p style="color:var(--t3);font-size:11px;line-height:1.5;margin-top:8px">
+        We sent a 6-digit code to<br><strong style="color:var(--t)">${masked}</strong>
+      </p>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CODE FROM NEW EMAIL</label>
+      <input type="text" id="cec_code" inputmode="numeric" pattern="\\d{6}" maxlength="6" 
+        autocomplete="one-time-code"
+        style="width:100%;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);text-align:center;font-size:22px;letter-spacing:8px;font-family:'Space Mono',monospace;margin-top:4px">
+    </div>
+    <div id="cec_err" style="color:var(--red, #c0392b);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="cec_btn" onclick="submitConfirmEmailChange()"
+      style="width:100%;padding:14px;background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;font-weight:700;cursor:pointer;margin-top:8px">
+      CONFIRM CHANGE
+    </button>
+  </div>`);
+  setTimeout(() => document.getElementById('cec_code')?.focus(), 100);
+  // Auto-submit
+  const inp = document.getElementById('cec_code');
+  if(inp){
+    inp.addEventListener('input', e => {
+      const v = e.target.value.replace(/\D/g, '');
+      e.target.value = v;
+      if(v.length === 6) submitConfirmEmailChange();
+    });
+  }
+}
+
+async function submitConfirmEmailChange(){
+  const code = (document.getElementById('cec_code')?.value || '').trim();
+  const err = document.getElementById('cec_err');
+  const btn = document.getElementById('cec_btn');
+  if(err) err.textContent = '';
+  if(code.length !== 6){ if(err) err.textContent = 'Enter 6-digit code'; return; }
+  
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(btn){ btn.textContent = 'CONFIRMING...'; btn.disabled = true; }
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/confirm-email-change', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({code})
+    });
+    const data = await r.json();
+    if(!r.ok || !data.ok){
+      const e = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'wrong_code':'Wrong code. Try again.',
+        'expired':'Code expired',
+        'no_code':'No active code. Request again.',
+        'too_many_attempts':'Too many attempts. Cancel and try again.',
+        'email_taken':'Email already registered',
+      };
+      if(err) err.textContent = map[e] || e;
+      if(btn){ btn.textContent = 'CONFIRM CHANGE'; btn.disabled = false; }
+      const inp = document.getElementById('cec_code');
+      if(inp) inp.value = '';
+      return;
+    }
+    closeModal();
+    setTimeout(() => {
+      alert('✓ Email changed successfully');
+      loadSettings();   // обновить UI
+    }, 100);
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent = 'CONFIRM CHANGE'; btn.disabled = false; }
+  }
+}
+
+function logoutUser(){
+  if(!confirm('Sign out?')) return;
+  sessionStorage.removeItem('luxor_token');
+  sessionStorage.removeItem('luxor_user');
+  sessionStorage.removeItem('luxor_login');
+  location.href = 'index.html';
+}
 function toggleChat(){document.getElementById('chatPanel').classList.toggle('show')}
 function sendChat(){const inp=document.getElementById('chatInput'),msg=inp.value.trim();if(!msg)return;
 document.getElementById('chatMessages').innerHTML+=`<div class="chat-msg user">${msg}</div>`;inp.value='';
