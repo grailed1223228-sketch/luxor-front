@@ -595,25 +595,86 @@ body{padding-bottom:52px}}
 <!-- REFERRAL -->
 <div class="panel" id="p-referral">
 <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:4px">Referral Program</h2>
-<p style="font-size:11px;color:var(--t3);margin-bottom:14px">Earn 3% of every friend's first investment. No limits.</p>
+<p style="font-size:11px;color:var(--t3);margin-bottom:14px">Earn <strong style="color:var(--gold)">5–10% of all profit</strong> your friends generate on Luxor — pool accruals and item sales. Lifetime. The more active referrals you have, the higher your rate.</p>
+
+<!-- ═══ Code + share link ═══ -->
 <div class="ref-code">
 <div style="font-size:10px;opacity:.4;letter-spacing:2px;margin-bottom:4px">YOUR REFERRAL CODE</div>
-<div class="code" id="refCode">LUXOR-XXXXX</div>
-<button style="padding:8px 20px;background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;cursor:pointer" onclick="copyRefCode()">COPY CODE</button>
+<div class="code" id="refCode">Loading...</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px">
+  <button style="padding:8px 18px;background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;cursor:pointer" onclick="copyRefCode()">COPY CODE</button>
+  <button style="padding:8px 18px;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;cursor:pointer" onclick="copyRefLink()">COPY LINK</button>
 </div>
+</div>
+
+<!-- ═══ TIER STATUS — крупный блок текущего tier + прогресс к следующему ═══ -->
+<div id="refTierBlock" style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:18px;margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+    <div>
+      <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;font-family:'Space Mono',monospace;margin-bottom:4px">CURRENT TIER</div>
+      <div id="refTierName" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1">Bronze</div>
+      <div id="refTierPct" style="font-family:'Space Mono',monospace;font-size:14px;color:var(--green);margin-top:2px;font-weight:700">5% from each profit</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;font-family:'Space Mono',monospace;margin-bottom:4px">EARNED</div>
+      <div id="refStatEarned" style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--green);line-height:1">$0</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">all-time referral bonuses</div>
+    </div>
+  </div>
+  <!-- Прогресс к следующему тиру -->
+  <div id="refTierProgress" style="display:none">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px">
+      <span id="refTierProgressLabel">Next tier: Silver (6%)</span>
+      <span id="refTierProgressCount" style="color:var(--gold);font-weight:600">0 / 5</span>
+    </div>
+    <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+      <div id="refTierProgressBar" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:3px;width:0%;transition:width .3s"></div>
+    </div>
+    <div id="refTierProgressHint" style="font-size:10px;color:var(--t3);margin-top:4px">Invite 5 more active referrals to reach Silver tier</div>
+  </div>
+  <div id="refTierMax" style="display:none;padding:10px;background:rgba(201,168,76,.08);border:1px solid var(--gold);border-radius:6px;text-align:center;font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px">★ MAXIMUM TIER REACHED ★</div>
+</div>
+
+<!-- ═══ Stats summary ═══ -->
 <div class="ref-stats">
-<div class="ref-stat"><div class="rv">0</div><div class="rl">Friends invited</div></div>
-<div class="ref-stat"><div class="rv">$0</div><div class="rl">Total earned</div></div>
-<div class="ref-stat"><div class="rv">3%</div><div class="rl">Commission rate</div></div>
+<div class="ref-stat"><div class="rv" id="refStatTotal">0</div><div class="rl">Friends invited</div></div>
+<div class="ref-stat"><div class="rv" id="refStatActive">0</div><div class="rl">Active (deposited $100+)</div></div>
+<div class="ref-stat"><div class="rv" id="refStatPct">5%</div><div class="rl">Your current rate</div></div>
 </div>
+
+<!-- ═══ TIERS TABLE — все 6 тиров с подсветкой текущего ═══ -->
+<div class="card" style="margin-bottom:14px"><div class="card-header">All tiers</div>
+<div id="refTiersTable" style="padding:0">
+  <!-- наполнится в loadReferralData -->
+</div>
+</div>
+
+<!-- ═══ Referrals list ═══ -->
+<div class="card" style="margin-bottom:14px"><div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+  <span>Your referrals</span>
+  <span id="refListInfo" style="font-size:10px;color:var(--t3);font-weight:400"></span>
+</div>
+<div id="refListContainer" style="max-height:320px;overflow-y:auto">
+  <div class="empty-state" style="padding:24px 12px">No referrals yet. Share your code to start earning.</div>
+</div>
+</div>
+
+<!-- ═══ Recent bonuses ═══ -->
+<div class="card" style="margin-bottom:14px"><div class="card-header">Recent referral bonuses</div>
+<div id="refBonusesContainer" style="max-height:200px;overflow-y:auto">
+  <div class="empty-state" style="padding:18px 12px;font-size:11px">No bonuses yet.</div>
+</div>
+</div>
+
+<!-- ═══ How it works ═══ -->
 <div class="card"><div class="card-header">How it works</div>
 <div style="font-size:11px;color:var(--t2);line-height:1.7">
-<p style="margin-bottom:6px"><strong>1.</strong> Share your unique referral code with friends</p>
-<p style="margin-bottom:6px"><strong>2.</strong> They register using your code</p>
-<p style="margin-bottom:6px"><strong>3.</strong> When they make their first investment, you earn 3% of that amount</p>
-<p><strong>4.</strong> Earnings are added to your referral balance</p>
+<p style="margin-bottom:6px"><strong>1.</strong> Share your code or referral link with friends</p>
+<p style="margin-bottom:6px"><strong>2.</strong> They register using your code (or click the link)</p>
+<p style="margin-bottom:6px"><strong>3.</strong> Friend makes a deposit of <strong style="color:var(--gold)">$100 or more</strong> — they become an active referral</p>
+<p style="margin-bottom:6px"><strong>4.</strong> You earn <strong style="color:var(--gold)">5–10%</strong> of every profit they generate (pool accruals, item sales) — the more active referrals you have, the higher your rate</p>
+<p><strong>5.</strong> Bonuses are credited to your wallet automatically — no withdrawal needed</p>
 </div></div>
-<button class="btn-gold" style="margin-top:10px" onclick="withdrawRefToBalance()">TRANSFER REFERRAL EARNINGS TO MAIN BALANCE</button>
 </div>
 
 <!-- SECONDARY MARKET -->
@@ -843,12 +904,14 @@ async function loadMarketplaceItems(){
       ITEMS = data.items.map(_mapServerItem);
       console.log('[marketplace] loaded', ITEMS.length, 'items from backend');
     } else {
-      console.warn('[marketplace] backend returned no items, using fallback');
-      ITEMS = ITEMS_FALLBACK.slice();
+      console.warn('[marketplace] backend returned no items');
+      ITEMS = [];
     }
   }catch(e){
-    console.warn('[marketplace] load failed, using fallback:', e);
-    ITEMS = ITEMS_FALLBACK.slice();
+    console.warn('[marketplace] load failed:', e);
+    // Если совсем нечего показать — оставляем пусто.
+    // Показывать фейковые items опасно: юзер попробует купить → ошибка → недоверие.
+    ITEMS = [];
   }
   // Перерисовываем если маркетплейс уже открыт
   try{ renderMarketplace('all'); }catch(e){}
@@ -1172,7 +1235,9 @@ tip.innerHTML=pct>60?`Your portfolio is <strong>${pct}% in ${names[max[0]]}</str
 
 function switchInvTab(){} // removed
 function updateInvTabs(){} // removed
-function go(panel,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));const target=document.getElementById('p-'+panel);if(!target){console.error('Panel not found:',panel);return}target.classList.add('show');document.querySelectorAll('.side-item').forEach(s=>s.classList.remove('active'));if(el){el.classList.add('active')}else{document.querySelectorAll('.side-item').forEach(s=>{const oc=s.getAttribute('onclick')||'';if(oc.indexOf("'"+panel+"'")>-1)s.classList.add('active')})}window.scrollTo(0,0)}
+function go(panel,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));const target=document.getElementById('p-'+panel);if(!target){console.error('Panel not found:',panel);return}target.classList.add('show');document.querySelectorAll('.side-item').forEach(s=>s.classList.remove('active'));if(el){el.classList.add('active')}else{document.querySelectorAll('.side-item').forEach(s=>{const oc=s.getAttribute('onclick')||'';if(oc.indexOf("'"+panel+"'")>-1)s.classList.add('active')})}window.scrollTo(0,0);
+// Подгрузить свежие данные рефералов при переходе на вкладку
+if(panel === 'referral'){ try{ loadReferrals(); }catch(e){} }}
 
 function poolsTab(t,el){document.querySelectorAll('.pool-subpanel').forEach(p=>p.style.display='none');document.getElementById('pools-'+t).style.display='';document.querySelectorAll('.ptab-pool').forEach(tab=>{tab.style.color='var(--t3)';tab.style.borderBottomColor='transparent'});el.style.color='var(--gold)';el.style.borderBottomColor='var(--gold)'}
 
@@ -1801,10 +1866,26 @@ function _itemThumbHTML(i){
   }
   return `<span style="font-size:40px">${i.ico || '💎'}</span>`;
 }
-function renderMarketplace(cat){const grid=document.getElementById('mkGrid');if(!grid)return;const items=cat==='all'?ITEMS:ITEMS.filter(i=>i.cat===cat);
-grid.innerHTML=items.map(i=>{const d=Math.floor(i.closes/24),h=i.closes%24;const cdTxt=d>0?d+'d '+h+'h':h+'h';
-return`<div class="mk-card" onclick="openItemDetail(${i.id})"><div class="mk-thumb">${_itemThumbHTML(i)}<div class="mk-badge">${i.badge}</div><div class="mk-countdown">Sells in ${cdTxt}</div></div><div class="mk-info"><h4>${i.name}</h4><div class="sub">${i.desc}</div><canvas class="mini-candles" id="mc${i.id}" width="200" height="32"></canvas><div class="mk-progress"><div class="mk-prog-header"><span>${i.slots_sold||0} of ${i.slots_total||20} slots</span><span>$${Math.round(i.price_per_slot||0).toLocaleString()}/slot</span></div><div class="mk-prog-bar"><div class="mk-prog-fill" style="width:${i.funded}%"></div></div></div><div class="mk-meta"><span>${i.days[0]}–${i.days[1]} days</span><span class="mk-return">+${i.ret[0]}–${i.ret[1]}%</span></div></div></div>`}).join('');
-setTimeout(()=>items.forEach(i=>drawMiniCandles('mc'+i.id)),50)}
+function renderMarketplace(cat){
+  const grid = document.getElementById('mkGrid');
+  if(!grid) return;
+  const items = cat === 'all' ? ITEMS : ITEMS.filter(i => i.cat === cat);
+  if(!items || items.length === 0){
+    const isEmpty = !ITEMS || ITEMS.length === 0;
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:40px 20px;text-align:center;background:var(--bg2);border:1px dashed var(--bd);border-radius:10px">
+      <div style="font-size:36px;margin-bottom:8px;opacity:.4">${isEmpty ? '📭' : '🔍'}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin-bottom:6px">${isEmpty ? 'No items available right now' : 'No items in this category'}</div>
+      <div style="font-size:11px;color:var(--t3)">${isEmpty ? 'Check back soon — new items are added regularly.' : 'Try a different category or check back later.'}</div>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = items.map(i => {
+    const d = Math.floor(i.closes/24), h = i.closes%24;
+    const cdTxt = d > 0 ? d + 'd ' + h + 'h' : h + 'h';
+    return `<div class="mk-card" onclick="openItemDetail(${i.id})"><div class="mk-thumb">${_itemThumbHTML(i)}<div class="mk-badge">${i.badge}</div><div class="mk-countdown">Sells in ${cdTxt}</div></div><div class="mk-info"><h4>${i.name}</h4><div class="sub">${i.desc}</div><canvas class="mini-candles" id="mc${i.id}" width="200" height="32"></canvas><div class="mk-progress"><div class="mk-prog-header"><span>${i.slots_sold||0} of ${i.slots_total||20} slots</span><span>$${Math.round(i.price_per_slot||0).toLocaleString()}/slot</span></div><div class="mk-prog-bar"><div class="mk-prog-fill" style="width:${i.funded}%"></div></div></div><div class="mk-meta"><span>${i.days[0]}–${i.days[1]} days</span><span class="mk-return">+${i.ret[0]}–${i.ret[1]}%</span></div></div></div>`;
+  }).join('');
+  setTimeout(() => items.forEach(i => drawMiniCandles('mc'+i.id)), 50);
+}
 
 function filterMk(cat,el){document.querySelectorAll('.mk-fil').forEach(f=>f.classList.remove('on'));el.classList.add('on');renderMarketplace(cat)}
 
@@ -3071,13 +3152,62 @@ function drawGraph(){
 
 function resetChartZoom(){drawGraph()}
 
-function drawMiniCandles(id){const c=document.getElementById(id);if(!c)return;const ctx=c.getContext('2d');const w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
-const candles=[];let p=50;for(let i=0;i<15;i++){const o=p;const cl=o+Math.random()*6-2;const hi=Math.max(o,cl)+Math.random()*3;const lo=Math.min(o,cl)-Math.random()*3;candles.push({o,c:cl,h:hi,l:lo});p=cl}
-const all=candles.flatMap(c=>[c.h,c.l]);const mn=Math.min(...all)-1,mx=Math.max(...all)+1;const rng=mx-mn;const bw=w/candles.length*.6;
-candles.forEach((cd,i)=>{const x=i/candles.length*w+bw/2;const bull=cd.c>=cd.o;const color=bull?'#2d8f3e':'#c0392b';
-const wickX=x+bw/2;ctx.beginPath();ctx.moveTo(wickX,h-(cd.h-mn)/rng*h);ctx.lineTo(wickX,h-(cd.l-mn)/rng*h);ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();
-const bodyTop=h-(Math.max(cd.o,cd.c)-mn)/rng*h;const bodyBot=h-(Math.min(cd.o,cd.c)-mn)/rng*h;
-ctx.fillStyle=color;ctx.fillRect(x,bodyTop,bw,Math.max(bodyBot-bodyTop,1))})}
+function drawMiniCandles(id){
+  // Перерисовано: вместо случайных свечей — мини area chart по real price_history.
+  // Если истории нет — рисуем плоскую линию на текущей цене (без обмана).
+  const c = document.getElementById(id);
+  if(!c) return;
+  // id = "mc" + item.id
+  const itemId = parseInt(id.replace('mc',''));
+  const item = ITEMS.find(x => x.id === itemId);
+  if(!item) return;
+  const ctx = c.getContext('2d');
+  const w = c.width, h = c.height;
+  ctx.clearRect(0, 0, w, h);
+  const ph = Array.isArray(item.price_history) ? item.price_history : [];
+  // Берём только цены > 0
+  const points = ph.map(p => +p.price).filter(p => p > 0);
+  if(points.length < 2){
+    // Нет данных → плоская тонкая линия на середине, серая
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, h/2);
+    ctx.lineTo(w, h/2);
+    ctx.stroke();
+    return;
+  }
+  const mn = Math.min(...points), mx = Math.max(...points);
+  const rng = Math.max(1, mx - mn);
+  const isPositive = points[points.length-1] >= points[0];
+  const lineColor = isPositive ? '#2d8f3e' : '#c0392b';
+  const fillStart = isPositive ? 'rgba(45,143,62,0.25)' : 'rgba(192,57,43,0.25)';
+  // Area fill
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, fillStart);
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(0, h);
+  points.forEach((v, i) => {
+    const x = (i / (points.length - 1)) * w;
+    const y = h - ((v - mn) / rng) * (h - 4) - 2;
+    ctx.lineTo(x, y);
+  });
+  ctx.lineTo(w, h);
+  ctx.closePath();
+  ctx.fill();
+  // Line
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  points.forEach((v, i) => {
+    const x = (i / (points.length - 1)) * w;
+    const y = h - ((v - mn) / rng) * (h - 4) - 2;
+    if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
 
 function withdrawRefToBalance(){state.wallet+=0;closeModal();showModal('<div style="text-align:center"><div style="font-size:36px;margin-bottom:8px;opacity:.5">✓</div><h3 style="font-family:Bebas Neue,sans-serif;font-size:20px">Referral earnings transferred</h3><p style="font-size:11px;color:var(--t3);margin-top:6px">$0 transferred to your main balance.</p><button class="btn-primary" style="margin-top:12px" onclick="closeModal()">Done</button></div>')}
 
@@ -3093,7 +3223,174 @@ setTimeout(()=>r.classList.remove('show'),4000)}
 
 /* ═══ MISC ═══ */
 function updateName(v){U.fn=v.split(' ')[0];U.ln=v.split(' ')[1]||'';document.getElementById('userName').textContent=U.fn;document.getElementById('userAvatar').textContent=U.fn[0]}
-function copyRefCode(){const code=document.getElementById('refCode').textContent;navigator.clipboard?.writeText(code);alert('Copied: '+code)}
+function copyRefCode(){
+  const code = document.getElementById('refCode').textContent.trim();
+  if(!code || code.startsWith('Loading')){ alert('Code not ready yet'); return; }
+  navigator.clipboard?.writeText(code);
+  alert('Copied: ' + code);
+}
+
+function copyRefLink(){
+  const code = document.getElementById('refCode').textContent.trim();
+  if(!code || code.startsWith('Loading')){ alert('Code not ready yet'); return; }
+  // Реферальная ссылка ведёт на index с параметром ?ref=CODE
+  const link = 'https://grailed1223228-sketch.github.io/luxor-front/?ref=' + encodeURIComponent(code);
+  navigator.clipboard?.writeText(link);
+  alert('Referral link copied:\n\n' + link);
+}
+
+/* Загрузка статистики и списка рефералов с бэка */
+async function loadReferrals(){
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin) return;
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/referrals');
+    if(!r.ok) return;
+    const data = await r.json();
+    if(!data || !data.ok) return;
+    
+    // Код
+    const rc = document.getElementById('refCode');
+    if(rc && data.ref_code){
+      rc.textContent = data.ref_code;
+      U.ref_code = data.ref_code;
+    }
+    
+    // Статы
+    const elTotal = document.getElementById('refStatTotal');
+    const elActive = document.getElementById('refStatActive');
+    const elEarned = document.getElementById('refStatEarned');
+    const elPct = document.getElementById('refStatPct');
+    if(elTotal) elTotal.textContent = data.referrals_total || 0;
+    if(elActive) elActive.textContent = data.referrals_qualified || 0;
+    if(elEarned) elEarned.textContent = '$' + Number(data.earned_total || 0).toFixed(2);
+    if(elPct) elPct.textContent = (data.current_pct || 5) + '%';
+    
+    // ═══ TIER блок: текущий tier + прогресс к следующему ═══
+    const tierName = document.getElementById('refTierName');
+    const tierPct = document.getElementById('refTierPct');
+    const tierProgress = document.getElementById('refTierProgress');
+    const tierMax = document.getElementById('refTierMax');
+    const tierBar = document.getElementById('refTierProgressBar');
+    const tierLabel = document.getElementById('refTierProgressLabel');
+    const tierCount = document.getElementById('refTierProgressCount');
+    const tierHint = document.getElementById('refTierProgressHint');
+    
+    const currentName = data.current_tier || 'Bronze';
+    const currentPct = data.current_pct || 5;
+    const qualified = data.referrals_qualified || 0;
+    
+    if(tierName) tierName.textContent = currentName;
+    if(tierPct) tierPct.textContent = currentPct + '% from each profit';
+    
+    // Цвет тира
+    const tierColors = {
+      Bronze: '#cd7f32', Silver: '#c0c0c0', Gold: '#c9a84c',
+      Platinum: '#e5e4e2', Sapphire: '#0f52ba', Diamond: '#b9f2ff'
+    };
+    if(tierName) tierName.style.color = tierColors[currentName] || 'var(--gold)';
+    
+    if(data.next_tier){
+      // Есть следующий tier — показываем прогресс
+      if(tierProgress) tierProgress.style.display = '';
+      if(tierMax) tierMax.style.display = 'none';
+      const need = data.next_tier.need_total;
+      const more = data.next_tier.need_more;
+      const progress = need > 0 ? Math.min(100, (qualified / need) * 100) : 0;
+      if(tierBar) tierBar.style.width = progress + '%';
+      if(tierLabel) tierLabel.textContent = 'Next tier: ' + data.next_tier.name + ' (' + data.next_tier.pct + '%)';
+      if(tierCount) tierCount.textContent = qualified + ' / ' + need;
+      if(tierHint) tierHint.textContent = 'Invite ' + more + ' more active referral' + (more === 1 ? '' : 's') + ' to reach ' + data.next_tier.name + ' tier';
+    } else {
+      // Diamond — максимум
+      if(tierProgress) tierProgress.style.display = 'none';
+      if(tierMax) tierMax.style.display = '';
+    }
+    
+    // ═══ Таблица всех тиров ═══
+    const tiersTable = document.getElementById('refTiersTable');
+    if(tiersTable && Array.isArray(data.all_tiers)){
+      tiersTable.innerHTML = data.all_tiers.map(t => {
+        const isCurrent = t.name === currentName;
+        const isPassed = qualified >= t.min_count;
+        const bg = isCurrent ? 'rgba(201,168,76,.10)' : 'transparent';
+        const border = isCurrent ? 'var(--gold)' : 'var(--bd)';
+        const checkOrCurrent = isCurrent ? '★' : (isPassed ? '✓' : '');
+        const checkColor = isCurrent ? 'var(--gold)' : (isPassed ? 'var(--green)' : 'var(--t3)');
+        const minCountText = t.min_count + (t.min_count === 1 ? ' active referral' : ' active referrals');
+        return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:${bg};border-bottom:1px solid var(--bd);${isCurrent?'border-left:3px solid var(--gold)':''}">
+          <div style="width:24px;text-align:center;color:${checkColor};font-weight:700;font-size:16px">${checkOrCurrent}</div>
+          <div style="flex:1">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;color:${tierColors[t.name] || 'var(--t)'}">${t.name.toUpperCase()}</div>
+            <div style="font-size:10px;color:var(--t3);margin-top:1px">${minCountText}</div>
+          </div>
+          <div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:${isCurrent ? 'var(--gold)' : 'var(--t)'}">${t.pct}%</div>
+        </div>`;
+      }).join('');
+      // Убираем нижний border на последнем
+      const lastChild = tiersTable.lastElementChild;
+      if(lastChild) lastChild.style.borderBottom = 'none';
+    }
+    
+    // ═══ Список рефералов ═══
+    const list = document.getElementById('refListContainer');
+    const info = document.getElementById('refListInfo');
+    if(list){
+      const refs = data.referrals || [];
+      if(refs.length === 0){
+        list.innerHTML = '<div class="empty-state" style="padding:24px 12px">No referrals yet. Share your code to start earning.</div>';
+        if(info) info.textContent = '';
+      } else {
+        if(info) info.textContent = data.referrals_qualified + ' / ' + data.referrals_total + ' active';
+        list.innerHTML = refs.map(r => {
+          const name = (r.name || '').trim() || r.login;
+          const joinDate = r.joined_at ? new Date(r.joined_at).toLocaleDateString() : '—';
+          const isActive = r.qualified;
+          const statusClr = isActive ? 'var(--green)' : 'var(--t3)';
+          const statusBg = isActive ? 'rgba(45,143,62,.12)' : 'rgba(255,255,255,.04)';
+          const statusTxt = isActive ? '✓ ACTIVE' : 'PENDING';
+          const depositTxt = r.total_deposited > 0 ? ('$' + Math.round(r.total_deposited).toLocaleString() + ' deposited') : 'No deposits yet';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;margin-bottom:6px">
+            <div style="width:36px;height:36px;background:var(--card);border:1px solid var(--bd2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold)">${(name[0]||'?').toUpperCase()}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name}</div>
+              <div style="font-size:10px;color:var(--t3);margin-top:1px">${depositTxt} · ${joinDate}</div>
+            </div>
+            <span style="font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:3px;color:${statusClr};background:${statusBg};white-space:nowrap">${statusTxt}</span>
+          </div>`;
+        }).join('');
+      }
+    }
+    
+    // ═══ Последние реферальные бонусы ═══
+    const bonusList = document.getElementById('refBonusesContainer');
+    if(bonusList){
+      const bonuses = data.recent_bonuses || [];
+      if(bonuses.length === 0){
+        bonusList.innerHTML = '<div class="empty-state" style="padding:18px 12px;font-size:11px">No bonuses yet. They\'ll appear here when your referrals start earning.</div>';
+      } else {
+        bonusList.innerHTML = bonuses.map(b => {
+          const at = b.at ? new Date(b.at).toLocaleString() : '—';
+          const note = b.note || '';
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;margin-bottom:4px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;color:var(--t);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${note || 'Referral bonus'}</div>
+              <div style="font-size:9px;color:var(--t3);margin-top:1px">${at}</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--green);white-space:nowrap;margin-left:8px">+$${Number(b.amount||0).toFixed(2)}</div>
+          </div>`;
+        }).join('');
+      }
+    }
+  }catch(e){
+    console.warn('loadReferrals failed:', e);
+  }
+}
+
+// Подключаем загрузку рефералов в общий цикл загрузки балансов
+window.addEventListener('load', () => {
+  setTimeout(loadReferrals, 1500);   // первоначальная загрузка после auth
+});
 function toggleChat(){document.getElementById('chatPanel').classList.toggle('show')}
 function sendChat(){const inp=document.getElementById('chatInput'),msg=inp.value.trim();if(!msg)return;
 document.getElementById('chatMessages').innerHTML+=`<div class="chat-msg user">${msg}</div>`;inp.value='';
