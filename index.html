@@ -624,8 +624,20 @@ try{
     const msg=Array.isArray(data.detail)?data.detail.map(e=>e.msg).join('\n'):(data.detail||data.error||'Login already taken');
     alert(msg);if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}return;
   }
-  sessionStorage.setItem('luxor_user',JSON.stringify({fn,ln,plan,rate,tier,amt:0,login,referral_code:data.referral_code||'',has_first_deposit_bonus:true}));
+  if(!data.ok){
+    alert(data.error||'Registration failed');
+    if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}return;
+  }
+  // Сохраняем всё что нам понадобится после email-верификации
+  sessionStorage.setItem('luxor_user',JSON.stringify({fn,ln,plan,rate,tier,amt:0,login,referral_code:data.ref_code||'',has_first_deposit_bonus:true}));
   sessionStorage.setItem('luxor_login', login);
+  // ═══ Email верификация: бэк требует код из письма ═══
+  if(data.requires_email_verification){
+    closeAll();
+    openVerifyEmail(login, email);
+    return;
+  }
+  // Backwards compat: если бэк всё-таки сразу выдал токен
   if(data.token){ sessionStorage.setItem('luxor_token', data.token); }
   closeAll();location.href='dashboard.html';
 }catch(err){
@@ -634,6 +646,131 @@ try{
   return;
 }
 if(btn){btn.textContent='CREATE ACCOUNT →';btn.disabled=false;}}
+
+// ═══ Email верификация ═══
+function openVerifyEmail(login, email){
+  const maskedEmail = email.replace(/(.{2}).*(@.*)/, '$1***$2');
+  cM('vm', `<div class="center" style="margin-bottom:16px">
+    <div class="stag">VERIFY EMAIL</div>
+    <h3 style="font-family:'Bebas Neue';font-size:22px;margin:8px 0">CHECK YOUR INBOX</h3>
+    <p style="color:var(--t3);font-size:12px;line-height:1.6;margin:8px 0 0">
+      We sent a 6-digit code to<br><strong style="color:var(--t)">${maskedEmail}</strong>
+    </p>
+  </div>
+  <div class="fg"><label>VERIFICATION CODE</label>
+    <input id="vmcode" type="text" inputmode="numeric" pattern="\\d{6}" maxlength="6" 
+      placeholder="123456" autocomplete="one-time-code"
+      style="text-align:center;font-size:22px;letter-spacing:8px;font-family:'Space Mono',monospace">
+  </div>
+  <div id="vmerr" style="color:#c0392b;font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+  <button class="cta" id="vmsubmit" style="width:100%;margin-top:8px" onclick="submitVerifyCode('${login}')">VERIFY →</button>
+  <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--t3)">
+    Didn't receive the code?
+    <a href="#" onclick="resendVerifyCode('${login}');return false" id="vmresend" style="color:var(--gold);text-decoration:none;font-weight:600">Resend</a>
+    <span id="vmresendwait" style="display:none;color:var(--t3)"></span>
+  </div>
+  <p style="font-size:10px;color:var(--t3);text-align:center;margin-top:14px;line-height:1.5">
+    Code expires in 15 minutes. Check spam folder if you don't see it.
+  </p>`);
+  setTimeout(() => document.getElementById('vmcode')?.focus(), 100);
+  // Auto-submit при 6 цифрах
+  const inp = document.getElementById('vmcode');
+  if(inp){
+    inp.addEventListener('input', e => {
+      const v = e.target.value.replace(/\D/g, '');
+      e.target.value = v;
+      if(v.length === 6){ submitVerifyCode(login); }
+    });
+  }
+}
+
+async function submitVerifyCode(login){
+  const code = (document.getElementById('vmcode')?.value || '').trim();
+  const err = document.getElementById('vmerr');
+  const btn = document.getElementById('vmsubmit');
+  if(err) err.textContent = '';
+  if(code.length !== 6 || !/^\d{6}$/.test(code)){
+    if(err) err.textContent = 'Enter 6-digit code';
+    return;
+  }
+  if(btn){ btn.textContent='VERIFYING...'; btn.disabled=true; }
+  try{
+    const res = await fetch('https://luxor-backend-production.up.railway.app/api/verify-email',
+      {method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({login, code})});
+    const data = await res.json();
+    if(!res.ok || !data.ok){
+      const reason = data.error || 'Verification failed';
+      const msg = ({
+        'wrong_code':'Wrong code. Try again.',
+        'expired':'Code expired. Request a new one.',
+        'no_code':'No active code. Request a new one.',
+        'too_many_attempts':'Too many attempts. Request a new code.',
+        'invalid_format':'Code must be 6 digits.',
+      })[reason] || reason;
+      if(err) err.textContent = msg;
+      if(btn){ btn.textContent='VERIFY →'; btn.disabled=false; }
+      // На определённых ошибках чистим поле
+      if(['wrong_code','too_many_attempts','expired','no_code'].includes(reason)){
+        const inp = document.getElementById('vmcode');
+        if(inp) inp.value = '';
+      }
+      return;
+    }
+    // Успех — сохраняем токен, идём в dashboard
+    if(data.token){ sessionStorage.setItem('luxor_token', data.token); }
+    closeAll();
+    location.href='dashboard.html';
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent='VERIFY →'; btn.disabled=false; }
+  }
+}
+
+async function resendVerifyCode(login){
+  const link = document.getElementById('vmresend');
+  const wait = document.getElementById('vmresendwait');
+  const err = document.getElementById('vmerr');
+  if(err) err.textContent = '';
+  try{
+    const res = await fetch('https://luxor-backend-production.up.railway.app/api/email/resend-code',
+      {method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({login, purpose:'email_verify'})});
+    const data = await res.json();
+    if(!res.ok || !data.ok){
+      const reason = data.error || 'Failed to resend';
+      if(reason === 'too_soon'){
+        if(err) err.textContent = 'Wait 60 seconds before requesting again.';
+      } else if(reason === 'already_verified'){
+        if(err) err.textContent = 'Already verified. Try logging in.';
+      } else {
+        if(err) err.textContent = reason;
+      }
+      return;
+    }
+    // Успех — блокируем кнопку на 60 сек
+    if(link) link.style.display = 'none';
+    if(wait){
+      let left = 60;
+      wait.style.display = '';
+      wait.textContent = `Resend available in ${left}s`;
+      const iv = setInterval(() => {
+        left -= 1;
+        if(left <= 0){
+          clearInterval(iv);
+          wait.style.display = 'none';
+          if(link) link.style.display = '';
+        } else {
+          wait.textContent = `Resend available in ${left}s`;
+        }
+      }, 1000);
+    }
+    if(err){ err.style.color = '#2d8f3e'; err.textContent = 'New code sent. Check your inbox.'; 
+      setTimeout(() => { err.style.color = '#c0392b'; err.textContent = ''; }, 4000); }
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+  }
+}
 
 // Reviews
 function rr(c){document.getElementById('rg').innerHTML=RV.slice(0,c).map(r=>`<div class="rev"><div class="rs">${'★'.repeat(r.s)+'☆'.repeat(5-r.s)}</div><div class="rt">${r.t}</div><div class="ra">${r.a}</div><div class="rm">${r.m}</div></div>`).join('')}
