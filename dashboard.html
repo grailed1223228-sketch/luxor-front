@@ -168,6 +168,20 @@ button{font-family:inherit}
 .m-summary .b .v.green{color:var(--green)}
 .m-summary .b .v.gold{color:var(--gold)}
 
+/* Profit Calculator CTA button */
+.profit-calc-btn{display:flex;align-items:center;gap:14px;width:100%;padding:14px 18px;margin-top:14px;background:linear-gradient(135deg,var(--gold-d) 0%,rgba(201,168,76,.05) 100%);border:1px solid var(--gold);border-radius:10px;color:var(--t);cursor:pointer;font-family:inherit;text-align:left;transition:all .2s}
+.profit-calc-btn:hover{background:linear-gradient(135deg,rgba(201,168,76,.18) 0%,rgba(201,168,76,.08) 100%);transform:translateY(-1px);box-shadow:0 6px 18px rgba(201,168,76,.15)}
+.profit-calc-btn .ico{font-size:24px;flex-shrink:0}
+.profit-calc-btn .txts{flex:1;display:flex;flex-direction:column;min-width:0}
+.profit-calc-btn .txt-main{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--gold);font-weight:600;line-height:1.2}
+.profit-calc-btn .txt-sub{font-size:11px;color:var(--t3);margin-top:3px}
+.profit-calc-btn .arrow{color:var(--gold);font-size:20px;font-weight:700;flex-shrink:0;transition:transform .2s}
+.profit-calc-btn:hover .arrow{transform:translateX(4px)}
+@media (min-width:769px){
+  .profit-calc-btn{padding:18px 22px}
+  .profit-calc-btn .txt-main{font-size:18px}
+}
+
 .m-sec{margin-bottom:16px}
 .m-sec .head{display:flex;justify-content:space-between;align-items:center;padding:0 4px 8px;border-bottom:1px solid var(--bd);margin-bottom:8px}
 .m-sec .head .ttl{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;display:flex;align-items:center;gap:8px}
@@ -812,11 +826,14 @@ button{font-family:inherit}
 <div class="l">PORTFOLIO BALANCE</div>
 <div class="a" id="dBalAmount">$0</div>
 <div class="delta" id="dBalDelta">▲ +$0.00 (+0.00%) all time</div>
-<div class="summ">
-<div class="b"><div class="l2">EARNED</div><div class="v2 green" id="dStatEarned">+$0</div></div>
-<div class="b"><div class="l2">EXPECTED</div><div class="v2 gold" id="dStatExpected">+$0</div></div>
-<div class="b"><div class="l2">AVG APY</div><div class="v2" id="dStatAPY">0%</div></div>
-</div>
+<button class="profit-calc-btn" onclick="openProfitCalculator()">
+  <span class="ico">📊</span>
+  <span class="txts">
+    <span class="txt-main">PROFIT CALCULATOR</span>
+    <span class="txt-sub">See how much you'll earn over time</span>
+  </span>
+  <span class="arrow">→</span>
+</button>
 </div>
 <div class="right">
 <div class="head">
@@ -1037,6 +1054,12 @@ button{font-family:inherit}
 <div class="d-screen" id="ds-detail">
 <div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <a onclick="navTo('market')">MARKETPLACE</a> · <b id="dDetailBC">ITEM</b></div>
 <div id="dDetailContent"></div>
+</div>
+
+<!-- ──────── DESKTOP: POOL POSITION DETAIL ──────── -->
+<div class="d-screen" id="ds-poolDetail">
+<div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <a onclick="navTo('pools')">POOLS</a> · <b id="dPoolDetailBC">POSITION</b></div>
+<div id="dPoolDetailContent"></div>
 </div>
 
 <!-- ──────── DESKTOP: MY ITEMS ──────── -->
@@ -1333,11 +1356,14 @@ button{font-family:inherit}
 <button class="btn-out" onclick="openWithdraw()"><svg class="lx"><use href="#i-withdraw"/></svg>WITHDRAW</button>
 </div>
 
-<div class="m-summary">
-<div class="b"><div class="l">EARNED</div><div class="v green" id="mStatEarned">+$0</div></div>
-<div class="b"><div class="l">EXPECTED</div><div class="v gold" id="mStatExpected">+$0</div></div>
-<div class="b"><div class="l">APY</div><div class="v" id="mStatAPY">0%</div></div>
-</div>
+<button class="profit-calc-btn" onclick="openProfitCalculator()">
+  <span class="ico">📊</span>
+  <span class="txts">
+    <span class="txt-main">PROFIT CALCULATOR</span>
+    <span class="txt-sub">See how much you'll earn over time</span>
+  </span>
+  <span class="arrow">→</span>
+</button>
 
 <div class="m-sec">
 <div class="head">
@@ -1511,6 +1537,14 @@ button{font-family:inherit}
 <div class="m-content">
 <div class="m-back" onclick="navTo('market')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl" id="mDetailBC">PRODUCT</span><span style="width:18px"></span></div>
 <div id="mDetailContent"></div>
+</div>
+</div>
+
+<!-- ──────── MOBILE: POOL POSITION DETAIL ──────── -->
+<div class="m-screen" id="ms-poolDetail">
+<div class="m-content">
+<div class="m-back" onclick="navTo('pools')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl" id="mPoolDetailBC">POSITION</span><span style="width:18px"></span></div>
+<div id="mPoolDetailContent"></div>
 </div>
 </div>
 
@@ -2189,7 +2223,10 @@ function navTo(target){
   const dEl = document.getElementById('ds-' + target);
   if(dEl) dEl.classList.add('show');
   document.querySelectorAll('.d-side .nav-item').forEach(n => n.classList.remove('active'));
-  const dNav = document.querySelector('.d-side .nav-item[data-target="' + target + '"]');
+  // Map pseudo-targets (detail, poolDetail) to their parent sidebar item
+  const sidebarMap = { detail:'market', poolDetail:'pools' };
+  const sidebarKey = sidebarMap[target] || target;
+  const dNav = document.querySelector('.d-side .nav-item[data-target="' + sidebarKey + '"]');
   if(dNav){
     dNav.classList.add('active');
     const sub = dNav.closest('.nav-submenu');
@@ -2202,7 +2239,7 @@ function navTo(target){
   document.querySelectorAll('.m-bottom .nv').forEach(n => n.classList.remove('active'));
   const navMap = {dash:'dash', pools:'pools', market:'market', items:'items', more:'more',
                   detail:'market', favs:'more', referral:'more', settings:'more',
-                  trade:'more', insights:'more', manager:'more'};
+                  trade:'more', insights:'more', manager:'more', poolDetail:'pools'};
   const nKey = navMap[target] || 'more';
   const mNav = document.querySelector('.m-bottom .nv[data-nav-target="' + nKey + '"]');
   if(mNav) mNav.classList.add('active');
@@ -2355,7 +2392,7 @@ function _positionRowHTML(p){
   const progressPct = Math.max(0, Math.min(100, ((periodSec - secLeft) / periodSec) * 100));
   const timeLeftTxt = _fmtTimeLeft(secLeft);
   const live = '+$' + liveEarned.toFixed(2) + (isAccruing ? '<span class="live-tag">⏱ live</span>' : '');
-  return `<div class="position-card" onclick="openPoolPositionDetail(${posId})">
+  return `<div class="position-card" data-pool-row-plan="${p.plan}" onclick="openPoolPositionDetail(${posId})">
     <div class="pos-row"><span class="pos-label">Plan</span><span class="pos-value">${p.plan}</span></div>
     <div class="pos-row"><span class="pos-label">Invested</span><span class="pos-value">$${amt.toLocaleString()}</span></div>
     <div class="pos-row"><span class="pos-label">Rate</span><span class="pos-gold">${rateTxt}</span></div>
@@ -2378,16 +2415,30 @@ function renderPositions(){
   ['poolPositionsList', 'poolPositionsListM'].forEach(id => {
     const el = document.getElementById(id); if(el) el.innerHTML = html;
   });
-  // Compact rows on dashboard
-  const dashHtml = state.positions.length
-    ? state.positions.slice(0, 4).map(p => {
-        const amt = Number(p.amount||p.amount_usd)||0;
-        const live = getLiveEarned(p);
-        const rateTxt = p.rate || (p.rate_pct ? (p.rate_pct + '%/' + (p.period||'day')) : '');
-        return `<div class="row" onclick="navTo('pools');setTimeout(()=>openPoolPositionDetail(${p.id}),200)">
-          <div class="ic">${p.plan === 'Platinum' ? '◆' : p.plan === 'Gold' ? '★' : '●'}</div>
-          <div class="info"><div class="n">${p.plan} Pool</div><div class="s">${rateTxt}</div></div>
-          <div class="v"><div class="a">$${Math.round(amt).toLocaleString()}</div><div class="d">+$${live.toFixed(2)}</div></div>
+
+  // Aggregated rows on dashboard — group by plan
+  const grouped = {};
+  state.positions.forEach(p => {
+    const key = p.plan || 'Unknown';
+    if(!grouped[key]) grouped[key] = { plan:key, count:0, principal:0, live:0, positions:[] };
+    grouped[key].count += 1;
+    grouped[key].principal += Number(p.amount||p.amount_usd)||0;
+    grouped[key].live += getLiveEarned(p);
+    grouped[key].positions.push(p);
+  });
+  const groups = Object.values(grouped);
+  // Order: Platinum > Gold > Silver
+  const order = { 'Platinum':0, 'Gold':1, 'Silver':2 };
+  groups.sort((a,b) => (order[a.plan] ?? 99) - (order[b.plan] ?? 99));
+
+  const dashHtml = groups.length
+    ? groups.map(g => {
+        const ic = g.plan === 'Platinum' ? '◆' : g.plan === 'Gold' ? '★' : '●';
+        const countTxt = g.count > 1 ? `${g.count} positions` : '1 position';
+        return `<div class="row" onclick="goToPoolPositions('${g.plan}')">
+          <div class="ic">${ic}</div>
+          <div class="info"><div class="n">${g.plan} Pool</div><div class="s">${countTxt}</div></div>
+          <div class="v"><div class="a">$${Math.round(g.principal).toLocaleString()}</div><div class="d">+$${g.live.toFixed(2)}</div></div>
         </div>`;
       }).join('')
     : '<div class="empty-state">No active pools yet.<br><a onclick="navTo(\'pools\')" style="color:var(--gold);cursor:pointer">→ Browse pools</a></div>';
@@ -2423,6 +2474,34 @@ function renderPositions(){
     setText('poolsTotalAPY', 'Avg APY ' + avgApy.toFixed(0) + '%');
     setText('poolsTotalAPYM', 'Avg ' + avgApy.toFixed(0) + '%');
   }
+}
+
+/* Navigate from dashboard pool aggregate row → Pools → POSITIONS tab,
+   with optional pre-filter highlight on the chosen tier */
+function goToPoolPositions(planFilter){
+  navTo('pools');
+  // Switch to POSITIONS tab on both desktop & mobile
+  setTimeout(() => {
+    document.querySelectorAll('[data-pool-tab]').forEach(t => t.classList.toggle('active', t.dataset.poolTab === 'positions'));
+    document.querySelectorAll('[data-pool-sub]').forEach(s => s.classList.toggle('hidden', s.dataset.poolSub !== 'positions'));
+    document.querySelectorAll('[data-pool-tab-m]').forEach(t => t.classList.toggle('active', t.dataset.poolTabM === 'positions'));
+    document.querySelectorAll('[data-pool-sub-m]').forEach(s => s.classList.toggle('hidden', s.dataset.poolSubM !== 'positions'));
+    // Save filter for renderPositions to apply
+    window._poolFilter = planFilter || null;
+    renderPositions();
+    // Scroll to first row matching filter
+    if(planFilter){
+      setTimeout(() => {
+        const firstMatch = document.querySelector(`[data-pool-row-plan="${planFilter}"]`);
+        if(firstMatch){
+          firstMatch.scrollIntoView({ behavior:'smooth', block:'center' });
+          firstMatch.style.transition = 'box-shadow .35s';
+          firstMatch.style.boxShadow = '0 0 0 2px var(--gold)';
+          setTimeout(() => { firstMatch.style.boxShadow = ''; }, 1500);
+        }
+      }, 100);
+    }
+  }, 150);
 }
 
 /* Live tick — update earned & progress without re-render */
@@ -2464,13 +2543,25 @@ async function withdrawFromPool(positionId){
   const earnedLive = getLiveEarned(pos);
   const pendingDiff = earnedLive - earnedLocked;
   const total = principal + earnedLocked;
-  let confirmMsg = 'Withdraw from ' + pos.plan + ' Pool?\n\n' +
-                   'Principal: $' + principal.toLocaleString() + '\n' +
-                   'Earned (locked): $' + earnedLocked.toFixed(2) + '\n' +
-                   'Total to wallet: $' + Math.round(total).toLocaleString();
+  const period = pos.period || 'day';
+  const timeLeft = _fmtTimeLeft(getSecondsToNextPayout(pos));
+
+  let confirmMsg = '⚠ EXIT ' + pos.plan.toUpperCase() + ' POOL POSITION?\n\n' +
+                   '── BREAKDOWN ──\n' +
+                   'Principal returned:  $' + principal.toLocaleString() + '\n' +
+                   'Earned (locked):     +$' + earnedLocked.toFixed(2) + '\n' +
+                   '────────────────\n' +
+                   'TO YOUR WALLET:      $' + Math.round(total).toLocaleString() + '\n';
+
   if(pendingDiff > 0.5){
-    confirmMsg += '\n\nNote: $' + pendingDiff.toFixed(2) + ' will be lost (next payout in ' + _fmtTimeLeft(getSecondsToNextPayout(pos)) + '). Wait for the payout to get it.';
+    confirmMsg += '\n⚠ EARLY EXIT PENALTY\n' +
+                  'You will lose $' + pendingDiff.toFixed(2) + ' of pending interest\n' +
+                  '(unpaid portion of current ' + period + ', ' + timeLeft + ' remaining).\n\n' +
+                  '💡 Wait ' + timeLeft + ' to get this payout, then exit without losing.';
+  } else {
+    confirmMsg += '\n✓ Good timing — no pending interest will be lost.';
   }
+
   if(!confirm(confirmMsg)) return;
   const userLogin = U.login || sessionStorage.getItem('luxor_login');
   try{
@@ -2487,6 +2578,15 @@ async function withdrawFromPool(positionId){
     await loadPoolPositions();
     updateUI(); saveState();
     showGoldRain();
+    // If currently on poolDetail screen → navigate back to Pools
+    const onDetailScreen = document.getElementById('ds-poolDetail')?.classList.contains('show')
+                        || document.getElementById('ms-poolDetail')?.classList.contains('show');
+    if(onDetailScreen){
+      // Stop live tick before navigating
+      if(window._popLiveTimer){ clearInterval(window._popLiveTimer); window._popLiveTimer = null; }
+      window._currentPoolPosId = null;
+      setTimeout(() => navTo('pools'), 800);
+    }
   }catch(e){ alert('Network error'); }
 }
 
@@ -3646,6 +3746,57 @@ function closeModal(){
 }
 
 /* ═══════════════════════════════════════════════════════════
+   PROFIT CALCULATOR — placeholder (full version coming in next sprint)
+═══════════════════════════════════════════════════════════ */
+function openProfitCalculator(){
+  // Compute current portfolio quick stats to show in placeholder
+  const totalPrincipal = state.positions.reduce((s,p) => s + (Number(p.amount||p.amount_usd)||0), 0);
+  const totalEarned = state.positions.reduce((s,p) => s + getLiveEarned(p), 0);
+  const itemsActive = (state.myItems||[]).filter(i => i.status === 'active').length;
+  const hasPositions = totalPrincipal > 0 || itemsActive > 0;
+
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:48px;margin-bottom:10px">📊</div>
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:8px">PROFIT CALCULATOR</h3>
+      <p style="font-size:12px;color:var(--t3);line-height:1.5">Coming soon. Calculate your earnings over time across pools and items, with smart reinvestment scenarios.</p>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:10px">YOUR CURRENT PORTFOLIO</div>
+      ${hasPositions ? `
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--bd)">
+          <span style="color:var(--t3)">Pool positions</span>
+          <span style="font-weight:700">${state.positions.length} · $${Math.round(totalPrincipal).toLocaleString()}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--bd)">
+          <span style="color:var(--t3)">Active item investments</span>
+          <span style="font-weight:700">${itemsActive}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px">
+          <span style="color:var(--t3)">Live earned (pools)</span>
+          <span style="color:var(--green);font-weight:700">+$${totalEarned.toFixed(2)}</span>
+        </div>
+      ` : `
+        <div style="text-align:center;padding:14px 0;color:var(--t3);font-size:12px">
+          No active investments yet.<br>Make your first deposit to unlock the calculator.
+        </div>
+      `}
+    </div>
+
+    <div style="background:linear-gradient(135deg,var(--gold-d),rgba(201,168,76,.05));border:1px solid var(--gold);border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.6;color:var(--t2)">
+      <div style="color:var(--gold);font-weight:700;margin-bottom:6px">🚀 What's coming in the next update</div>
+      • Slider 1–12 months — see total profit projection<br>
+      • Reinvestment scenarios — what if you reinvest item profits<br>
+      • Suggested marketplace items based on your goals<br>
+      • Pool tier comparison side-by-side
+    </div>
+
+    <button class="btn-out" onclick="closeModal()">Close</button>
+  </div>`);
+}
+
+/* ═══════════════════════════════════════════════════════════
    DEPOSIT FLOW (Phase 2): bonus → amount+coin → QR+timer → polling
 ═══════════════════════════════════════════════════════════ */
 window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
@@ -4491,6 +4642,9 @@ function openPoolPositionDetail(positionId){
   const pos = state.positions.find(p => p.id === positionId);
   if(!pos){ alert('Position not found'); return; }
 
+  // Save current position ID for live tick & exit handler
+  window._currentPoolPosId = pos.id;
+
   const principal = Number(pos.amount || pos.amount_usd) || 0;
   const liveEarned = getLiveEarned(pos);
   const baseEarned = Number(pos.earned || pos.earned_usd) || 0;
@@ -4514,88 +4668,111 @@ function openPoolPositionDetail(positionId){
     ? Math.floor((Date.now() - opened.getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
-  // Tier color
   const tierColor = pos.plan === 'Platinum' ? 'var(--blue)' : pos.plan === 'Gold' ? 'var(--gold)' : '#a0a0a0';
 
-  showModal(`<div style="padding:4px">
-    <div style="text-align:center;margin-bottom:14px">
+  // Build the content HTML (used in both desktop and mobile screens)
+  const html = `<div style="max-width:760px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:18px">
       <div style="display:inline-block;padding:4px 14px;background:var(--gold-d);color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;border-radius:4px;margin-bottom:8px">POSITION #${pos.id}</div>
-      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:${tierColor}">${pos.plan} POOL</h3>
-      <p style="font-size:12px;color:var(--gold);margin-top:4px;font-weight:600">${ratePct}% / ${period}</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:${tierColor}">${pos.plan} POOL</h2>
+      <p style="font-size:13px;color:var(--gold);margin-top:4px;font-weight:600">${ratePct}% / ${period}</p>
     </div>
 
     <!-- Live earnings card -->
-    <div style="background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:16px;margin-bottom:12px;text-align:center">
-      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:4px">LIVE EARNINGS</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--green);line-height:1;margin-bottom:6px" id="popDetail-live-${pos.id}">+$${liveEarned.toFixed(2)}</div>
-      <div style="font-size:10px;color:var(--t3)">on principal of <strong style="color:var(--t)">$${principal.toLocaleString()}</strong></div>
+    <div style="background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:18px;margin-bottom:14px;text-align:center">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:6px">LIVE EARNINGS</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--green);line-height:1;margin-bottom:8px" id="popDetail-live">+$${liveEarned.toFixed(2)}</div>
+      <div style="font-size:11px;color:var(--t3)">on principal of <strong style="color:var(--t)">$${principal.toLocaleString()}</strong></div>
     </div>
 
     <!-- Next payout countdown -->
-    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px">
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:6px">
         <span>NEXT PAYOUT</span>
-        <span style="color:var(--gold);font-weight:700" id="popDetail-time-${pos.id}">${timeLeftTxt}</span>
+        <span style="color:var(--gold);font-weight:700" id="popDetail-time">${timeLeftTxt}</span>
       </div>
       <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
-        <div id="popDetail-bar-${pos.id}" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:3px;width:${progressPct}%;transition:width 1s linear"></div>
+        <div id="popDetail-bar" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:3px;width:${progressPct}%;transition:width 1s linear"></div>
       </div>
     </div>
 
     <!-- Position details table -->
-    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px;font-size:12px">
-      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Principal</span><span style="font-weight:600">$${principal.toLocaleString()}</span></div>
-      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Earned (locked)</span><span style="color:var(--green);font-weight:700">+$${baseEarned.toFixed(2)}</span></div>
-      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Live earned (incl. pending)</span><span style="color:var(--green);font-weight:700">+$${liveEarned.toFixed(2)}</span></div>
-      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Effective APY</span><span style="color:var(--gold);font-weight:700">${apy.toFixed(0)}%</span></div>
-      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Annual projection</span><span style="font-weight:600">+$${Math.round(annualEarn).toLocaleString()}</span></div>
-      ${daysActive !== null ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Active for</span><span style="font-weight:600">${daysActive} day${daysActive!==1?'s':''}</span></div>` : ''}
-      <div style="display:flex;justify-content:space-between;padding:5px 0"><span style="color:var(--t3)">Lock-up</span><span style="color:var(--green);font-weight:600">None — exit anytime</span></div>
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px;font-size:13px">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Principal</span><span style="font-weight:600">$${principal.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Earned (locked)</span><span style="color:var(--green);font-weight:700">+$${baseEarned.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Live earned (incl. pending)</span><span style="color:var(--green);font-weight:700">+$${liveEarned.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Effective APY</span><span style="color:var(--gold);font-weight:700">${apy.toFixed(0)}%</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Annual projection</span><span style="font-weight:600">+$${Math.round(annualEarn).toLocaleString()}</span></div>
+      ${daysActive !== null ? `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Active for</span><span style="font-weight:600">${daysActive} day${daysActive!==1?'s':''}</span></div>` : ''}
+      <div style="display:flex;justify-content:space-between;padding:6px 0"><span style="color:var(--t3)">Lock-up</span><span style="color:var(--green);font-weight:600">None — exit anytime</span></div>
     </div>
 
     <!-- Payout chart -->
-    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:8px">
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:10px">
         <span style="letter-spacing:1.5px;font-family:'Space Mono',monospace">PAYOUT PROJECTION (12 ${period}s)</span>
       </div>
-      <canvas id="popPayChart-${pos.id}" width="400" height="120" style="width:100%;height:120px;display:block"></canvas>
+      <canvas id="popPayChart" width="600" height="160" style="width:100%;height:160px;display:block"></canvas>
     </div>
 
     <!-- Exit warning -->
     ${penaltyAmt > 0.5 ? `
-    <div style="padding:10px 12px;background:var(--gold-d);border:1px solid var(--gold);border-radius:8px;margin-bottom:12px;font-size:11px;color:var(--t2);line-height:1.5">
-      <strong style="color:var(--gold)">⏱ Wait for next payout to maximize</strong><br>
-      If you exit now, $${penaltyAmt.toFixed(2)} pending interest (next payout in ${timeLeftTxt}) will be lost.
+    <div style="padding:12px 14px;background:var(--gold-d);border:1px solid var(--gold);border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.5">
+      <strong style="color:var(--gold)">⏱ Wait for next payout to maximize earnings</strong><br>
+      If you exit now, <strong>$${penaltyAmt.toFixed(2)} pending interest</strong> (the unpaid portion of the current ${period}, ${timeLeftTxt} remaining until payout) will be lost.
     </div>` : ''}
 
     <!-- Action buttons -->
-    <button class="btn-red" onclick="withdrawFromPool(${pos.id})">EXIT POSITION — $${Math.round(exitTotal).toLocaleString()}</button>
-    <button class="btn-out" style="margin-top:6px" onclick="closeModal()">Close</button>
-  </div>`);
+    <button class="btn-red" onclick="withdrawFromPool(${pos.id})" style="margin-bottom:8px">EXIT POSITION — $${Math.round(exitTotal).toLocaleString()}</button>
+    <button class="btn-out" onclick="navTo('pools')">← Back to Pools</button>
+  </div>`;
 
-  // Draw payout projection chart
-  setTimeout(() => _drawPayoutProjection(pos), 80);
+  // Render into both desktop and mobile detail screens
+  const dCt = document.getElementById('dPoolDetailContent');
+  const mCt = document.getElementById('mPoolDetailContent');
+  if(dCt) dCt.innerHTML = html;
+  if(mCt) mCt.innerHTML = html.replace(/id="popDetail-/g, 'id="popDetail-m-').replace(/id="popPayChart"/g, 'id="popPayChart-m"');
 
-  // Live tick inside detail modal
+  // Update breadcrumbs
+  const dBc = document.getElementById('dPoolDetailBC');
+  const mBc = document.getElementById('mPoolDetailBC');
+  if(dBc) dBc.textContent = `${pos.plan.toUpperCase()} POOL · #${pos.id}`;
+  if(mBc) mBc.textContent = `${pos.plan.toUpperCase()} #${pos.id}`;
+
+  // Navigate to detail screen
+  navTo('poolDetail');
+
+  // Draw payout projection charts (both versions)
+  setTimeout(() => {
+    _drawPayoutProjection(pos, 'popPayChart');
+    _drawPayoutProjection(pos, 'popPayChart-m');
+  }, 80);
+
+  // Live tick — single timer updates whichever screen is currently visible
   if(window._popLiveTimer) clearInterval(window._popLiveTimer);
   window._popLiveTimer = setInterval(() => {
-    const liveEl = document.getElementById('popDetail-live-' + pos.id);
-    const timeEl = document.getElementById('popDetail-time-' + pos.id);
-    const barEl = document.getElementById('popDetail-bar-' + pos.id);
-    if(!liveEl){ clearInterval(window._popLiveTimer); return; }
+    if(window._currentPoolPosId !== pos.id){ clearInterval(window._popLiveTimer); return; }
     const live = getLiveEarned(pos);
-    if(liveEl) liveEl.textContent = '+$' + live.toFixed(2);
     const sLeft = getSecondsToNextPayout(pos);
-    if(timeEl) timeEl.textContent = _fmtTimeLeft(sLeft);
-    if(barEl){
-      const pct = Math.max(0, Math.min(100, ((periodSec - sLeft) / periodSec) * 100));
-      barEl.style.width = pct + '%';
-    }
+    const pct = Math.max(0, Math.min(100, ((periodSec - sLeft) / periodSec) * 100));
+    const timeTxt = _fmtTimeLeft(sLeft);
+    ['popDetail-live', 'popDetail-m-live'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = '+$' + live.toFixed(2);
+    });
+    ['popDetail-time', 'popDetail-m-time'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = timeTxt;
+    });
+    ['popDetail-bar', 'popDetail-m-bar'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.width = pct + '%';
+    });
   }, 1000);
 }
 
-function _drawPayoutProjection(pos){
-  const c = document.getElementById('popPayChart-' + pos.id);
+function _drawPayoutProjection(pos, canvasId){
+  const c = document.getElementById(canvasId || ('popPayChart-' + pos.id));
   if(!c) return;
   const ctx = c.getContext('2d');
   const w = c.width, h = c.height;
