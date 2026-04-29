@@ -2663,7 +2663,7 @@ function renderMyItems(){
     const vNumCls = earningsValue >= 0 ? '' : 'red';
     const safeIco = i.ico || '💎';
     const thumbInner = (i.image_url && i.image_url.trim()) ? `<img src="${i.image_url}" alt="">` : safeIco;
-    return `<div class="my-item-card">
+    return `<div class="my-item-card" data-item-row-id="${i.item_id || i.id}">
       <div class="top-row">
         <div class="pic">${thumbInner}</div>
         <div class="info">
@@ -2683,7 +2683,7 @@ function renderMyItems(){
         <div class="meta-row"><span class="l">Expected return</span><span class="v green">+${e.expectedPct}% · $${e.expectedUsd.toFixed(0)}</span></div>
         ${!isClosed?`<div class="actions-row">
           <button class="sell-btn" onclick="sellNow(${i.id})">SELL NOW −10%</button>
-          <button class="view-btn" onclick="openItemDetail(${i.id})">VIEW DETAILS</button>
+          <button class="view-btn" onclick="openItemDetail(${i.item_id || i.id})">VIEW DETAILS</button>
         </div>
         <div class="footnote">Early exit: receive 90% of invested amount instantly</div>`:''}
       </div>
@@ -2694,20 +2694,64 @@ function renderMyItems(){
     const el = document.getElementById(id); if(el) el.innerHTML = html;
   });
 
-  // Compact rows on dashboard
-  const dashHtml = cActive > 0 ? state.myItems.filter(i => i.status === 'active').slice(0, 4).map(i => {
+  // Aggregated rows on dashboard — group active items by item_id
+  // (like pool aggregation: 2 purchases of same Rolex → 1 row showing total)
+  const activeItems = state.myItems.filter(i => i.status === 'active');
+  const grouped = {};
+  activeItems.forEach(i => {
+    const key = i.item_id || i.id;
+    if(!grouped[key]){
+      grouped[key] = {
+        item_id: key, name: i.name || 'Item', ico: i.ico || '💎',
+        image_url: i.image_url || '',
+        count: 0, totalInvested: 0, totalExpected: 0, totalGuaranteed: 0,
+        guaranteedPct: 0, sample: i,
+      };
+    }
     const e = getItemEarnings(i);
-    const safeIco = i.ico || '💎';
-    const thumbInner = (i.image_url && i.image_url.trim()) ? `<img src="${i.image_url}" alt="">` : safeIco;
-    return `<div class="row" onclick="openItemDetail(${i.id})">
+    grouped[key].count += 1;
+    grouped[key].totalInvested += +i.invested || 0;
+    grouped[key].totalExpected += e.expectedEarnedMax || 0;
+    grouped[key].totalGuaranteed += e.guaranteedUsd || 0;
+    grouped[key].guaranteedPct = e.guaranteed;
+  });
+  const groups = Object.values(grouped);
+
+  const dashHtml = groups.length ? groups.map(g => {
+    const thumbInner = (g.image_url && g.image_url.trim()) ? `<img src="${g.image_url}" alt="">` : g.ico;
+    const subTxt = g.count > 1 ? `${g.count} positions · $${Math.round(g.totalInvested).toLocaleString()}` : `1 position · $${Math.round(g.totalInvested).toLocaleString()}`;
+    return `<div class="row" onclick="goToMyItem(${g.item_id})">
       <div class="ic">${thumbInner}</div>
-      <div class="info"><div class="n">${i.name || 'Item'}</div><div class="s">${i.pct}% · $${(+i.invested).toLocaleString()}</div></div>
-      <div class="v"><div class="a">+$${e.expectedEarnedMax.toFixed(0)}</div><div class="d gold">+${e.guaranteed}% min</div></div>
+      <div class="info"><div class="n">${g.name}</div><div class="s">${subTxt}</div></div>
+      <div class="v"><div class="a">+$${Math.round(g.totalExpected).toLocaleString()}</div><div class="d gold">+${g.guaranteedPct}% min</div></div>
     </div>`;
   }).join('') : '<div class="empty-state">No items yet.<br><a onclick="navTo(\'market\')" style="color:var(--gold);cursor:pointer">→ Browse marketplace</a></div>';
   ['dItemsList', 'mItemsList'].forEach(id => {
     const el = document.getElementById(id); if(el) el.innerHTML = dashHtml;
   });
+}
+
+/* Navigate from dashboard items aggregate row → My Items screen,
+   switch to ALL tab, scroll to first row matching item_id with gold flash */
+function goToMyItem(itemId){
+  navTo('items');
+  // Switch to ALL tab
+  setTimeout(() => {
+    window._itemsFilter = 'all';
+    document.querySelectorAll('[data-items-tab]').forEach(t => t.classList.toggle('active', t.dataset.itemsTab === 'all'));
+    document.querySelectorAll('[data-items-tab-m]').forEach(t => t.classList.toggle('active', t.dataset.itemsTabM === 'all'));
+    renderMyItems();
+    // Scroll to first matching purchase card
+    setTimeout(() => {
+      const target = document.querySelector(`[data-item-row-id="${itemId}"]`);
+      if(target){
+        target.scrollIntoView({ behavior:'smooth', block:'center' });
+        target.style.transition = 'box-shadow .35s';
+        target.style.boxShadow = '0 0 0 2px var(--gold)';
+        setTimeout(() => { target.style.boxShadow = ''; }, 1500);
+      }
+    }, 100);
+  }, 150);
 }
 
 /* ═══ FAVORITES ═══ */
