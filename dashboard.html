@@ -194,6 +194,86 @@ button{font-family:inherit}
   .smart-banner-d{font-size:13px}
 }
 
+/* Twin banners — Profit Calc (dark) + Smart Invest (gold) side-by-side */
+.dual-banners{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media (max-width:768px){
+  .dual-banners{grid-template-columns:1fr;gap:10px}
+}
+.calc-banner{display:flex;align-items:center;gap:14px;width:100%;padding:18px 22px;background:linear-gradient(135deg,#1a1a1a 0%,#222 100%);border:1px solid var(--bd2);border-radius:12px;color:var(--t);cursor:pointer;font-family:inherit;text-align:left;transition:all .2s;position:relative;overflow:hidden}
+.calc-banner:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+.calc-banner-ic{width:44px;height:44px;border-radius:10px;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold)}
+.calc-banner-txt{flex:1;min-width:0}
+.calc-banner-h{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--t);font-weight:700;line-height:1.1;margin-bottom:4px}
+.calc-banner-d{font-size:12px;color:var(--t3);line-height:1.4}
+.calc-banner-arrow{color:var(--gold);font-size:20px;font-weight:700;flex-shrink:0;transition:transform .2s}
+.calc-banner:hover .calc-banner-arrow{transform:translateX(4px)}
+@media (min-width:769px){
+  .calc-banner{padding:22px 26px}
+  .calc-banner-h{font-size:17px}
+  .calc-banner-d{font-size:13px}
+}
+/* When inside dual-banners, smart-banner gets margin-top:0 (handled by grid gap) */
+.dual-banners .smart-banner,.dual-banners .calc-banner{margin-top:0}
+
+/* ═══════════ PROFIT CALCULATOR (simple) ═══════════ */
+.pc-wrap{max-width:920px;margin:0 auto;padding-bottom:60px}
+.pc-head{margin-bottom:24px}
+.pc-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(201,168,76,.12);color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:3px;border-radius:4px;font-weight:700;margin-bottom:10px;border:1px solid var(--gold)}
+.pc-title{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;line-height:1.1;margin-bottom:6px}
+.pc-title em{color:var(--gold);font-style:italic}
+.pc-sub{font-size:13px;color:var(--t3);max-width:560px}
+@media (max-width:768px){.pc-title{font-size:26px}}
+
+.pc-empty{padding:40px 24px;background:var(--bg2);border:1px dashed var(--bd2);border-radius:12px;text-align:center}
+.pc-empty-ic{font-size:48px;color:var(--t3);margin-bottom:14px}
+.pc-empty-h{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--t);margin-bottom:8px}
+.pc-empty-d{font-size:13px;color:var(--t3);max-width:420px;margin:0 auto 18px;line-height:1.6}
+.pc-empty-cta{display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pc-empty-btn{padding:10px 18px;background:var(--gold);color:#0a0a0a;border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;font-weight:700;cursor:pointer;font-family:inherit}
+.pc-empty-btn-out{background:transparent;border:1px solid var(--bd2);color:var(--t)}
+.pc-empty-btn-out:hover{border-color:var(--gold);color:var(--gold)}
+
+.pc-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:22px 24px;margin-bottom:14px}
+.pc-card-h{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.pc-card-h svg{width:16px;height:16px}
+
+.pc-slider-row{display:flex;align-items:center;gap:18px}
+.pc-slider-val{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--gold);line-height:1;flex-shrink:0;min-width:160px}
+.pc-slider{flex:1;height:6px;background:var(--bd2);border-radius:3px;outline:none;-webkit-appearance:none;appearance:none}
+.pc-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--gold);border:3px solid var(--bg);border-radius:50%;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.pc-slider-marks{display:flex;justify-content:space-between;margin-top:8px;font-family:'Space Mono',monospace;font-size:10px;color:var(--t3)}
+@media (max-width:768px){
+  .pc-slider-row{flex-direction:column;align-items:stretch;gap:10px}
+  .pc-slider-val{font-size:30px;min-width:0;text-align:center}
+}
+
+.pc-pool-list{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
+.pc-pool-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 14px;background:var(--bg);border:1px solid var(--bd);border-radius:8px}
+.pc-pool-ic{width:36px;height:36px;border-radius:50%;background:var(--gold-d,rgba(201,168,76,.12));color:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;flex-shrink:0}
+.pc-pool-info .n{font-size:13px;font-weight:700;margin-bottom:2px}
+.pc-pool-info .d{font-size:11px;color:var(--t3)}
+.pc-pool-amt{text-align:right;flex-shrink:0}
+.pc-pool-amt .a{font-family:'Bebas Neue',sans-serif;font-size:18px}
+.pc-pool-amt .e{font-size:11px;color:var(--green);margin-top:3px;font-weight:600}
+
+.pc-summary{padding:18px 22px;background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:#0a0a0a;border-radius:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;text-align:center}
+.pc-summary > div{padding:0 6px;border-right:1px solid rgba(0,0,0,.12)}
+.pc-summary > div:last-child{border-right:none}
+.pc-summary .l{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;font-weight:700;margin-bottom:4px;opacity:.75}
+.pc-summary .v{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;font-weight:700}
+@media (max-width:768px){
+  .pc-summary{grid-template-columns:1fr;gap:8px}
+  .pc-summary > div{border-right:none;border-bottom:1px solid rgba(0,0,0,.12);padding-bottom:8px}
+  .pc-summary > div:last-child{border-bottom:none;padding-bottom:0}
+  .pc-summary .v{font-size:22px}
+}
+
+.pc-items-note{margin-top:14px;padding:14px 16px;background:rgba(45,143,62,.06);border:1px solid rgba(45,143,62,.3);border-radius:10px;display:flex;gap:10px;align-items:flex-start}
+.pc-items-note svg{width:22px;height:22px;color:var(--green);flex-shrink:0;margin-top:1px}
+.pc-items-note .t{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:var(--green);margin-bottom:4px}
+.pc-items-note .d{font-size:12px;color:var(--t2);line-height:1.6}
+.pc-items-note .d b{color:var(--t)}
+
 .m-sec{margin-bottom:16px}
 .m-sec .head{display:flex;justify-content:space-between;align-items:center;padding:0 4px 8px;border-bottom:1px solid var(--bd);margin-bottom:8px}
 .m-sec .head .ttl{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;display:flex;align-items:center;gap:8px}
@@ -977,12 +1057,88 @@ button{font-family:inherit}
 }
 
 /* Basket items (rendered inside .sm-strategy-items-list) */
+.sm-deposit-ok{margin-top:18px;padding:20px 18px;background:linear-gradient(135deg,rgba(45,143,62,.08) 0%,rgba(45,143,62,.04) 100%);border:1px solid rgba(45,143,62,.4);border-radius:12px;text-align:center}
+.sm-dep-ok-ic{display:flex;justify-content:center;color:var(--green);margin-bottom:8px}
+.sm-dep-ok-t{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--green);margin-bottom:6px}
+.sm-dep-ok-d{font-size:12px;color:var(--t2);line-height:1.6;max-width:480px;margin:0 auto}
+.sm-dep-ok-d strong{color:var(--t)}
+
+.sm-deposit-need{margin-top:18px}
+.sm-dep-need-h{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.3);border-radius:10px;margin-bottom:12px;color:var(--gold)}
+.sm-dep-need-t{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--gold);margin-bottom:3px}
+.sm-dep-need-d{font-size:12px;color:var(--t2);line-height:1.5}
+.sm-dep-need-d strong{color:var(--t);font-weight:700}
+.sm-dep-topup-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:var(--gold);border:none;border-radius:10px;color:#0a0a0a;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2.5px;font-weight:700;cursor:pointer;transition:all .15s}
+.sm-dep-topup-btn:hover{background:var(--goldL);transform:translateY(-1px);box-shadow:0 6px 18px rgba(201,168,76,.3)}
+.sm-dep-topup-hint{font-size:11px;color:var(--t3);text-align:center;margin-top:8px;font-style:italic}
+
 .sm-basket-item{display:grid;grid-template-columns:24px 1fr auto auto;gap:8px;align-items:center;padding:8px 10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:11px}
 .sm-basket-ic{font-size:14px;text-align:center}
 .sm-basket-name{color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
 .sm-basket-amt{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;font-weight:700}
 .sm-basket-pct{color:var(--t3);font-family:'Space Mono',monospace;font-size:10px;background:var(--bg3);padding:2px 6px;border-radius:4px}
 .sm-empty-items{padding:14px;text-align:center;color:var(--t3);font-size:11px;font-style:italic}
+/* Balance split (Invested / Available) */
+.bal-split{margin:14px 0 16px;padding:12px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px}
+.bal-split-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bal-split-col{position:relative;padding-right:14px}
+.bal-split-col + .bal-split-col{border-left:1px solid var(--bd);padding-left:14px;padding-right:0}
+.bal-split-l{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.8px;color:var(--t3);margin-bottom:3px}
+.bal-split-v{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);line-height:1;letter-spacing:.5px;margin-bottom:2px}
+.bal-split-d{font-size:10px;color:var(--t3);font-style:italic}
+.tx-toggle{padding:12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);cursor:pointer;border-top:1px solid var(--bd);margin-top:8px;transition:all .15s;font-weight:700}
+.tx-toggle:hover{background:var(--gold-d);color:var(--goldL)}
+@media (max-width:720px){
+  .bal-split-row{gap:10px}
+  .bal-split-v{font-size:18px}
+  .bal-split-d{display:none}
+}
+
+/* ═══════════ TOAST NOTIFICATIONS ═══════════ */
+.toast-stack{position:fixed;top:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:10px;width:380px;max-width:calc(100vw - 40px);pointer-events:none}
+@media (max-width:720px){
+  .toast-stack{top:10px;left:10px;right:10px;max-width:none}
+}
+.toast{pointer-events:auto;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--bd);box-shadow:0 8px 28px rgba(0,0,0,.4);animation:toast-in .3s ease;transform-origin:right center}
+.toast.toast-out{animation:toast-out .25s ease forwards}
+@keyframes toast-in{from{opacity:0;transform:translateX(20px) scale(.98)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes toast-out{to{opacity:0;transform:translateX(20px) scale(.96)}}
+.toast-ic{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.toast-success .toast-ic{background:rgba(45,143,62,.15);color:var(--green)}
+.toast-warn .toast-ic{background:rgba(201,168,76,.15);color:var(--gold)}
+.toast-error .toast-ic{background:rgba(192,57,43,.15);color:var(--red)}
+.toast-info .toast-ic{background:rgba(58,123,213,.15);color:var(--blue)}
+.toast-success{border-color:rgba(45,143,62,.4)}
+.toast-warn{border-color:rgba(201,168,76,.4)}
+.toast-error{border-color:rgba(192,57,43,.4)}
+.toast-info{border-color:rgba(58,123,213,.4)}
+.toast-body{min-width:0}
+.toast-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;margin-bottom:2px;color:var(--t)}
+.toast-msg{font-size:12px;color:var(--t2);line-height:1.45}
+.toast-close{background:transparent;border:none;color:var(--t3);cursor:pointer;font-size:18px;line-height:1;padding:0;margin-top:1px;transition:color .15s}
+.toast-close:hover{color:var(--t)}
+
+/* ═══════════ CONFIRM MODAL ═══════════ */
+.confirm-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;animation:fade-in .2s ease}
+.confirm-overlay.show{display:flex}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.confirm-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:28px;max-width:420px;width:100%;animation:confirm-pop .25s ease}
+@keyframes confirm-pop{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:none}}
+.confirm-ic{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.confirm-ic-warn{background:rgba(201,168,76,.15);color:var(--gold)}
+.confirm-ic-danger{background:rgba(192,57,43,.15);color:var(--red)}
+.confirm-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;text-align:center;margin-bottom:8px;line-height:1.2}
+.confirm-msg{font-size:13px;color:var(--t2);text-align:center;line-height:1.55;margin-bottom:22px}
+.confirm-msg b{color:var(--t)}
+.confirm-msg .warn-amt{color:var(--red);font-weight:700}
+.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.confirm-btn{padding:13px 18px;border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;font-weight:700;cursor:pointer;transition:all .15s}
+.confirm-btn-cancel{background:transparent;border:1px solid var(--bd2);color:var(--t2)}
+.confirm-btn-cancel:hover{border-color:var(--gold);color:var(--gold)}
+.confirm-btn-ok{background:var(--gold);color:#0a0a0a}
+.confirm-btn-ok:hover{background:var(--goldL)}
+.confirm-btn-danger{background:var(--red);color:#fff}
+.confirm-btn-danger:hover{background:#a93226}
 
 </style>
 </head>
@@ -1035,6 +1191,7 @@ button{font-family:inherit}
 <div class="nav-section">
 <a class="nav-item active" data-target="dash"><svg class="lx"><use href="#i-home"/></svg>Dashboard</a>
 <a class="nav-item" data-target="pools"><svg class="lx"><use href="#i-pool"/></svg>Investment Pools</a>
+<a class="nav-item" data-target="calc"><svg class="lx"><use href="#i-calc"/></svg>Profit Calculator</a>
 <a class="nav-item" data-target="smart"><svg class="lx"><use href="#i-smart"/></svg>Smart Invest <span class="nav-new">NEW</span></a>
 <a class="nav-item" data-target="market"><svg class="lx"><use href="#i-market"/></svg>Marketplace</a>
 <a class="nav-item" data-target="items"><svg class="lx"><use href="#i-items"/></svg>My Items</a>
@@ -1082,6 +1239,31 @@ button{font-family:inherit}
 <div class="l">PORTFOLIO BALANCE</div>
 <div class="a" id="dBalAmount">$0</div>
 <div class="delta" id="dBalDelta">▲ +$0.00 (+0.00%) all time</div>
+<div class="bal-split" id="dBalSplit">
+  <div class="bal-split-row">
+    <div class="bal-split-col">
+      <div class="bal-split-l">INVESTED</div>
+      <div class="bal-split-v" id="dInvAmt">$0</div>
+      <div class="bal-split-d">in pools &amp; items</div>
+    </div>
+    <div class="bal-split-col">
+      <div class="bal-split-l">AVAILABLE</div>
+      <div class="bal-split-v" id="dAvailAmt">$0</div>
+      <div class="bal-split-d">ready to invest or withdraw</div>
+    </div>
+  </div>
+</div>
+<div class="dual-banners">
+<button class="calc-banner" onclick="navTo('calc')">
+  <div class="calc-banner-ic">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-calc"/></svg>
+  </div>
+  <div class="calc-banner-txt">
+    <div class="calc-banner-h">PROFIT CALCULATOR</div>
+    <div class="calc-banner-d">See how much your portfolio will earn</div>
+  </div>
+  <div class="calc-banner-arrow">→</div>
+</button>
 <button class="smart-banner" onclick="openProfitCalculator()">
   <div class="smart-banner-sparkles">
     <span class="sp s1"></span><span class="sp s2"></span><span class="sp s3"></span><span class="sp s4"></span>
@@ -1095,6 +1277,7 @@ button{font-family:inherit}
   </div>
   <div class="smart-banner-arrow">→</div>
 </button>
+</div>
 </div>
 <div class="right">
 <div class="head">
@@ -1148,8 +1331,9 @@ button{font-family:inherit}
 
 <!-- Transactions block (expanded, not list) -->
 <div class="tx-block">
-<div class="head">
+<div class="head" style="display:flex;justify-content:space-between;align-items:center">
 <h5><svg class="lx"><use href="#i-tx"/></svg>RECENT TRANSACTIONS</h5>
+<a id="dTxViewAll" onclick="navTo('txs')" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1.5px;color:var(--gold);cursor:pointer;display:none">VIEW ALL →</a>
 </div>
 <div id="dTxList"><div class="empty-state">No transactions yet.</div></div>
 </div>
@@ -1323,6 +1507,22 @@ button{font-family:inherit}
 <div id="dPoolDetailContent"></div>
 </div>
 
+<!-- ──────── DESKTOP: ALL TRANSACTIONS ──────── -->
+<div class="d-screen" id="ds-txs">
+<div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>ALL TRANSACTIONS</b></div>
+<h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:6px">All Transactions</h2>
+<p style="font-size:13px;color:var(--t3);margin-bottom:18px">Complete history of your activity.</p>
+<div class="tx-block">
+<div id="dTxAllList"><div class="empty-state">No transactions yet.</div></div>
+</div>
+</div>
+
+<!-- ──────── DESKTOP: PROFIT CALCULATOR ──────── -->
+<div class="d-screen" id="ds-calc">
+<div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>PROFIT CALCULATOR</b></div>
+<div id="dCalcContent"></div>
+</div>
+
 <!-- ──────── DESKTOP: SMART INVEST ──────── -->
 <div class="d-screen" id="ds-smart">
 <div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>SMART INVEST</b></div>
@@ -1470,14 +1670,12 @@ button{font-family:inherit}
 <div class="set-card">
 <div class="h"><svg class="lx"><use href="#i-settings"/></svg>PREFERENCES</div>
 <div class="input-group"><label>Display Currency</label>
-<select id="setCurrency" onchange="updateSettingField('display_currency',this.value)">
+<select id="setCurrency" onchange="setDisplayCurrency(this.value)">
 <option value="USD">USD — US Dollar</option>
 <option value="EUR">EUR — Euro</option>
 <option value="GBP">GBP — British Pound</option>
-<option value="RUB">RUB — Russian Ruble</option>
-<option value="JPY">JPY — Japanese Yen</option>
-<option value="CNY">CNY — Chinese Yuan</option>
 </select>
+<div style="font-size:11px;color:var(--t3);margin-top:6px;line-height:1.5">All amounts on the dashboard will be displayed in this currency. Deposits remain in crypto.</div>
 </div>
 <div class="input-group"><label>Language</label>
 <select id="setLanguage" onchange="updateSettingField('language',this.value)">
@@ -1493,6 +1691,7 @@ button{font-family:inherit}
 <option value="ko">한국어</option>
 <option value="ar">العربية</option>
 </select>
+<div style="font-size:11px;color:var(--t3);margin-top:6px;line-height:1.5">Translation coming soon. For now, the platform is in English.</div>
 </div>
 <div class="input-group"><label>Timezone</label><input type="text" id="setTimezone" placeholder="UTC" onblur="updateSettingField('timezone',this.value)"></div>
 </div>
@@ -1597,6 +1796,18 @@ button{font-family:inherit}
 <div class="l">PORTFOLIO BALANCE</div>
 <div class="a" id="mBalAmount">$0</div>
 <div class="delta" id="mBalDelta">▲ +$0.00 (+0.00%) all time</div>
+<div class="bal-split" id="mBalSplit">
+  <div class="bal-split-row">
+    <div class="bal-split-col">
+      <div class="bal-split-l">INVESTED</div>
+      <div class="bal-split-v" id="mInvAmt">$0</div>
+    </div>
+    <div class="bal-split-col">
+      <div class="bal-split-l">AVAILABLE</div>
+      <div class="bal-split-v" id="mAvailAmt">$0</div>
+    </div>
+  </div>
+</div>
 <div class="ch"><canvas id="mPortCanvas" width="380" height="100"></canvas></div>
 <div class="pp" id="mGraphTabs">
 <span class="p" data-period="1D">D</span>
@@ -1623,6 +1834,17 @@ button{font-family:inherit}
 <button class="btn-out" onclick="openWithdraw()"><svg class="lx"><use href="#i-withdraw"/></svg>WITHDRAW</button>
 </div>
 
+<div class="dual-banners">
+<button class="calc-banner" onclick="navTo('calc')">
+  <div class="calc-banner-ic">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-calc"/></svg>
+  </div>
+  <div class="calc-banner-txt">
+    <div class="calc-banner-h">PROFIT CALCULATOR</div>
+    <div class="calc-banner-d">See your earnings forecast</div>
+  </div>
+  <div class="calc-banner-arrow">→</div>
+</button>
 <button class="smart-banner" onclick="openProfitCalculator()">
   <div class="smart-banner-sparkles">
     <span class="sp s1"></span><span class="sp s2"></span><span class="sp s3"></span><span class="sp s4"></span>
@@ -1636,6 +1858,7 @@ button{font-family:inherit}
   </div>
   <div class="smart-banner-arrow">→</div>
 </button>
+</div>
 
 <div class="m-sec">
 <div class="head">
@@ -1657,6 +1880,7 @@ button{font-family:inherit}
 <div class="m-sec">
 <div class="head">
 <div class="ttl"><svg class="lx"><use href="#i-tx"/></svg>RECENT TRANSACTIONS</div>
+<a id="mTxViewAll" onclick="navTo('txs')" style="display:none">VIEW ALL →</a>
 </div>
 <div id="mTxList"><div class="empty-state">No transactions yet.</div></div>
 </div>
@@ -1820,6 +2044,22 @@ button{font-family:inherit}
 </div>
 </div>
 
+<!-- ──────── MOBILE: ALL TRANSACTIONS ──────── -->
+<div class="m-screen" id="ms-txs">
+<div class="m-content">
+<div class="m-back" onclick="navTo('dash')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl">ALL TRANSACTIONS</span><span style="width:18px"></span></div>
+<div id="mTxAllList"><div class="empty-state">No transactions yet.</div></div>
+</div>
+</div>
+
+<!-- ──────── MOBILE: PROFIT CALCULATOR ──────── -->
+<div class="m-screen" id="ms-calc">
+<div class="m-content">
+<div class="m-back" onclick="navTo('dash')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl">PROFIT CALCULATOR</span><span style="width:18px"></span></div>
+<div id="mCalcContent"></div>
+</div>
+</div>
+
 <!-- ──────── MOBILE: SMART INVEST ──────── -->
 <div class="m-screen" id="ms-smart">
 <div class="m-content">
@@ -1942,13 +2182,17 @@ button{font-family:inherit}
 <div class="h">PREFERENCES</div>
 <div class="input-group"><label>Theme</label><div style="display:flex;gap:6px"><button class="btn-action" style="flex:1" onclick="setTheme('dark')">🌙 Dark</button><button class="btn-action" style="flex:1" onclick="setTheme('light')">☀ Light</button></div></div>
 <div class="input-group"><label>Display Currency</label>
-<select id="mSetCurrency" onchange="updateSettingField('display_currency',this.value)">
-<option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="RUB">RUB</option><option value="JPY">JPY</option><option value="CNY">CNY</option>
-</select></div>
+<select id="mSetCurrency" onchange="setDisplayCurrency(this.value)">
+<option value="USD">USD — US Dollar</option><option value="EUR">EUR — Euro</option><option value="GBP">GBP — British Pound</option>
+</select>
+<div style="font-size:11px;color:var(--t3);margin-top:6px;line-height:1.5">All amounts displayed in this currency.</div>
+</div>
 <div class="input-group"><label>Language</label>
 <select id="mSetLanguage" onchange="updateSettingField('language',this.value)">
 <option value="en">English</option><option value="ru">Русский</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="it">Italiano</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="ar">العربية</option>
-</select></div>
+</select>
+<div style="font-size:11px;color:var(--t3);margin-top:6px;line-height:1.5">Translation coming soon.</div>
+</div>
 <div class="input-group"><label>Timezone</label><input type="text" id="mSetTimezone" placeholder="UTC" onblur="updateSettingField('timezone',this.value)"></div>
 </div>
 
@@ -2532,6 +2776,8 @@ function navTo(target){
   if(target === 'referral'){ try{ loadReferrals(); }catch(e){} }
   if(target === 'settings'){ try{ loadSettings(); }catch(e){} }
   if(target === 'smart'){ try{ renderSmartInvest(); }catch(e){ console.error('Smart Invest render failed:', e); } }
+  if(target === 'calc'){ try{ renderCalculator(); }catch(e){ console.error('Profit Calculator render failed:', e); } }
+  if(target === 'txs'){ try{ renderTxs(); }catch(e){} }
   // Scroll top
   const c = document.querySelector('.d-content'); if(c) c.scrollTop = 0;
   window.scrollTo(0, 0);
@@ -2568,7 +2814,15 @@ function updateUI(){
     .reduce((s,i) => s + (Number(i.payout_usd) - Number(i.invested)), 0);
   const realEarned = poolsEarned + itemsClosedProfit;
 
-  const fmt = n => '$' + Math.round(n).toLocaleString();
+  const fmt = (typeof fmtMoney === 'function')
+    ? fmtMoney
+    : (n, opts) => {
+        opts = opts || {};
+        const v = Math.round(Number(n) || 0);
+        if(opts.sign && v > 0) return '+$' + v.toLocaleString();
+        if(v < 0) return '-$' + Math.abs(v).toLocaleString();
+        return '$' + v.toLocaleString();
+      };
 
   // Update banner amounts (mobile + desktop)
   const $ = id => document.getElementById(id);
@@ -2580,8 +2834,8 @@ function updateUI(){
   // Delta line — earned all-time
   const pct = poolsPrincipal + itemsInvested > 0 ? (realEarned / (poolsPrincipal + itemsInvested) * 100) : 0;
   const arrow = realEarned >= 0 ? '▲' : '▼';
-  const sign = realEarned >= 0 ? '+' : '';
-  const deltaTxt = arrow + ' ' + sign + '$' + Math.round(realEarned).toLocaleString() + ' (' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%) all time';
+  const earnedFormatted = fmt(realEarned, { sign: true });
+  const deltaTxt = arrow + ' ' + earnedFormatted + ' (' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%) all time';
   if($('dBalDelta')){
     $('dBalDelta').textContent = deltaTxt;
     $('dBalDelta').className = 'delta' + (realEarned < 0 ? ' neg' : '');
@@ -2592,10 +2846,10 @@ function updateUI(){
   }
 
   // Summary tiles: EARNED / EXPECTED / APY
-  $('dStatEarned') && ($('dStatEarned').textContent = '+' + fmt(realEarned));
-  $('mStatEarned') && ($('mStatEarned').textContent = '+' + fmt(realEarned));
-  $('dStatExpected') && ($('dStatExpected').textContent = '+' + fmt(annualFromPools + itemsMaxProfit));
-  $('mStatExpected') && ($('mStatExpected').textContent = '+' + fmt(annualFromPools + itemsMaxProfit));
+  $('dStatEarned') && ($('dStatEarned').textContent = fmt(realEarned, { sign: true }));
+  $('mStatEarned') && ($('mStatEarned').textContent = fmt(realEarned, { sign: true }));
+  $('dStatExpected') && ($('dStatExpected').textContent = fmt(annualFromPools + itemsMaxProfit, { sign: true }));
+  $('mStatExpected') && ($('mStatExpected').textContent = fmt(annualFromPools + itemsMaxProfit, { sign: true }));
   // APY weighted across pool positions
   const principalSum = poolsPrincipal;
   const annualEarn = state.positions.reduce((s,p)=>{
@@ -2823,7 +3077,7 @@ if(typeof window !== 'undefined' && !window._positionsTicker){
 async function withdrawFromPool(positionId){
   if(!positionId) return;
   const pos = state.positions.find(p => p.id === positionId);
-  if(!pos){ alert('Position not found'); return; }
+  if(!pos){ showToast('error', 'Not found', 'Position not found.'); return; }
   const principal = Number(pos.amount_usd || pos.amount) || 0;
   const earnedLocked = Number(pos.earned_usd || pos.earned) || 0;
   const earnedLive = getLiveEarned(pos);
@@ -2832,23 +3086,39 @@ async function withdrawFromPool(positionId){
   const period = pos.period || 'day';
   const timeLeft = _fmtTimeLeft(getSecondsToNextPayout(pos));
 
-  let confirmMsg = '⚠ EXIT ' + pos.plan.toUpperCase() + ' POOL POSITION?\n\n' +
-                   '── BREAKDOWN ──\n' +
-                   'Principal returned:  $' + principal.toLocaleString() + '\n' +
-                   'Earned (locked):     +$' + earnedLocked.toFixed(2) + '\n' +
-                   '────────────────\n' +
-                   'TO YOUR WALLET:      $' + Math.round(total).toLocaleString() + '\n';
+  let body = '<div style="text-align:left;font-family:\'Space Mono\',monospace;font-size:11px;background:var(--bg);padding:12px;border-radius:8px;margin-bottom:10px;line-height:1.7">' +
+             '<div style="color:var(--t3)">Principal returned:</div>' +
+             '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:18px;color:var(--t)">$' + principal.toLocaleString() + '</div>' +
+             '<div style="color:var(--t3);margin-top:6px">Earned (locked):</div>' +
+             '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:18px;color:var(--green)">+$' + earnedLocked.toFixed(2) + '</div>' +
+             '<div style="border-top:1px solid var(--bd);margin:8px 0 6px"></div>' +
+             '<div style="color:var(--t3)">To your wallet:</div>' +
+             '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;color:var(--gold)">$' + Math.round(total).toLocaleString() + '</div>' +
+             '</div>';
 
+  let isDanger = false;
   if(pendingDiff > 0.5){
-    confirmMsg += '\n⚠ EARLY EXIT PENALTY\n' +
-                  'You will lose $' + pendingDiff.toFixed(2) + ' of pending interest\n' +
-                  '(unpaid portion of current ' + period + ', ' + timeLeft + ' remaining).\n\n' +
-                  '💡 Wait ' + timeLeft + ' to get this payout, then exit without losing.';
+    isDanger = true;
+    body += '<div style="background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.3);padding:10px;border-radius:6px;font-size:11px;line-height:1.55">' +
+            '<b style="color:var(--red)">⚠ Early exit penalty</b><br>' +
+            'You will lose <span class="warn-amt">$' + pendingDiff.toFixed(2) + '</span> of pending interest ' +
+            '(unpaid portion of current ' + period + ', <b>' + timeLeft + '</b> remaining).<br><br>' +
+            '<b>Tip:</b> wait ' + timeLeft + ' to receive this payout, then exit without losing.' +
+            '</div>';
   } else {
-    confirmMsg += '\n✓ Good timing — no pending interest will be lost.';
+    body += '<div style="background:rgba(45,143,62,.08);border:1px solid rgba(45,143,62,.3);padding:10px;border-radius:6px;font-size:11px;color:var(--green)">' +
+            '✓ Good timing — no pending interest will be lost.' +
+            '</div>';
   }
 
-  if(!confirm(confirmMsg)) return;
+  const ok = await confirmAction({
+    title: 'Exit ' + pos.plan + ' Pool position?',
+    msg: body,
+    okText: 'EXIT POOL',
+    cancelText: 'KEEP POSITION',
+    danger: isDanger,
+  });
+  if(!ok) return;
   const userLogin = U.login || sessionStorage.getItem('luxor_login');
   try{
     const res = await apiFetch('/api/pool/withdraw/' + positionId, {
@@ -2856,7 +3126,7 @@ async function withdrawFromPool(positionId){
     });
     const data = await res.json();
     if(!res.ok || !data || !data.ok){
-      alert('Withdraw failed: ' + ((data && data.detail && data.detail.error) || (data && data.error) || 'unknown'));
+      showToast('error', 'Withdraw failed', (data && data.detail && data.detail.error) || (data && data.error) || 'Please try again.');
       return;
     }
     state.wallet = data.new_wallet_balance;
@@ -2864,6 +3134,7 @@ async function withdrawFromPool(positionId){
     await loadPoolPositions();
     updateUI(); saveState();
     showGoldRain();
+    showToast('success', 'Exited ' + pos.plan + ' Pool', '<b>+$' + Math.round(data.refunded_usd).toLocaleString() + '</b> added to your wallet.');
     // If currently on poolDetail screen → navigate back to Pools
     const onDetailScreen = document.getElementById('ds-poolDetail')?.classList.contains('show')
                         || document.getElementById('ms-poolDetail')?.classList.contains('show');
@@ -2873,7 +3144,7 @@ async function withdrawFromPool(positionId){
       window._currentPoolPosId = null;
       setTimeout(() => navTo('pools'), 800);
     }
-  }catch(e){ alert('Network error'); }
+  }catch(e){ showToast('error', 'Network error', 'Please check your connection and try again.'); }
 }
 
 /* ═══ MY ITEMS ═══ */
@@ -3051,27 +3322,48 @@ function renderFavs(){
 }
 
 /* ═══ TRANSACTIONS ═══ */
+function _renderTxRow(t, idx){
+  const isPos = (t.desc && (/deposit/i.test(t.desc) || /\+\$/.test(t.desc))) && !/withdraw/i.test(t.desc);
+  const isNeg = /withdraw/i.test(t.desc);
+  const icCls = isPos ? 'green' : isNeg ? 'red' : '';
+  const icSym = isPos ? '↓' : isNeg ? '↑' : '•';
+  const stCls = t.status === 'processing' ? 'pending' : t.status === 'rejected' ? 'rejected' : 'done';
+  const stTxt = t.status === 'processing' ? 'Processing' : t.status === 'rejected' ? 'Rejected' : 'Completed';
+  const amtMatch = (t.desc || '').match(/[+\-]?\$[\d,.]+/);
+  const amtStr = amtMatch ? amtMatch[0] : '';
+  const amtCls = amtStr.startsWith('+') ? 'green' : amtStr.startsWith('-') ? 'red' : 'gold';
+  const cleanDesc = (t.desc || '').replace(/[+\-]?\$[\d,.]+/, '').trim();
+  return `<div class="row" onclick="showReceipt(${idx})">
+    <div class="ic ${icCls}">${icSym}</div>
+    <div class="info"><div class="n">${cleanDesc || t.desc}</div><div class="s">${t.time || ''}</div></div>
+    <div class="v ${amtCls}">${amtStr}</div>
+    <div class="st ${stCls}">${stTxt}</div>
+  </div>`;
+}
+
 function renderTxs(){
-  const html = state.txs.length ? state.txs.slice(0, 12).map((t, idx) => {
-    const isPos = (t.desc && (/deposit/i.test(t.desc) || /\+\$/.test(t.desc))) && !/withdraw/i.test(t.desc);
-    const isNeg = /withdraw/i.test(t.desc);
-    const icCls = isPos ? 'green' : isNeg ? 'red' : '';
-    const icSym = isPos ? '↓' : isNeg ? '↑' : '•';
-    const stCls = t.status === 'processing' ? 'pending' : t.status === 'rejected' ? 'rejected' : 'done';
-    const stTxt = t.status === 'processing' ? 'Processing' : t.status === 'rejected' ? 'Rejected' : 'Completed';
-    const amtMatch = (t.desc || '').match(/[+\-]?\$[\d,.]+/);
-    const amtStr = amtMatch ? amtMatch[0] : '';
-    const amtCls = amtStr.startsWith('+') ? 'green' : amtStr.startsWith('-') ? 'red' : 'gold';
-    const cleanDesc = (t.desc || '').replace(/[+\-]?\$[\d,.]+/, '').trim();
-    return `<div class="row" onclick="showReceipt(${idx})">
-      <div class="ic ${icCls}">${icSym}</div>
-      <div class="info"><div class="n">${cleanDesc || t.desc}</div><div class="s">${t.time || ''}</div></div>
-      <div class="v ${amtCls}">${amtStr}</div>
-      <div class="st ${stCls}">${stTxt}</div>
-    </div>`;
-  }).join('') : '<div class="empty-state">No transactions yet.</div>';
+  const total = state.txs.length;
+  const empty = '<div class="empty-state">No transactions yet.</div>';
+
+  // Recent: 5 на dashboard
+  const recent = state.txs.slice(0, 5);
+  const recentHtml = recent.length ? recent.map((t, idx) => _renderTxRow(t, idx)).join('') : empty;
   ['dTxList', 'mTxList'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.innerHTML = html;
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = recentHtml;
+  });
+
+  // VIEW ALL link
+  ['dTxViewAll', 'mTxViewAll'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = total > 5 ? '' : 'none';
+  });
+
+  // Полный список — на отдельном screen
+  const fullHtml = state.txs.length ? state.txs.map((t, idx) => _renderTxRow(t, idx)).join('') : empty;
+  ['dTxAllList', 'mTxAllList'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = fullHtml;
   });
 }
 
@@ -3431,20 +3723,26 @@ function _updateItemSlots(n, mode, i){
 /* ═══ BUY FRACTION (item) ═══ */
 async function buyFraction(id){
   const i = ITEMS.find(x => x.id === Number(id));
-  if(!i){ alert('Item not found'); return; }
+  if(!i){ showToast('error', 'Not found', 'Item not available.'); return; }
   // Get slots count from either mobile or desktop input
   const mSlots = parseInt(document.getElementById('mV5Slots')?.value || '0');
   const dSlots = parseInt(document.getElementById('dV5Slots')?.value || '0');
   const slotsN = Math.max(mSlots, dSlots) || 1;
-  if(slotsN < 1){ alert('Minimum 1 slot'); return; }
+  if(slotsN < 1){ showToast('warn', 'Invalid amount', 'Minimum 1 slot.'); return; }
   const pricePerSlot = i.price_per_slot || (i.price / (i.slots_total || 20));
   const totalUSD = Math.round(slotsN * pricePerSlot);
   if(state.wallet < totalUSD){
-    if(confirm('Not enough balance. Need $' + totalUSD.toLocaleString() + ' — Top up now?')) openTopUp();
+    const ok = await confirmAction({
+      title: 'Not enough balance',
+      msg: 'You need <b>$' + totalUSD.toLocaleString() + '</b> for this purchase, but your wallet has only <b>$' + Math.round(state.wallet).toLocaleString() + '</b>.<br><br>Top up now?',
+      okText: 'TOP UP',
+      cancelText: 'CANCEL',
+    });
+    if(ok) openTopUp();
     return;
   }
   const userLogin = U.login || sessionStorage.getItem('luxor_login');
-  if(!userLogin){ alert('Session expired. Please log in again.'); return; }
+  if(!userLogin){ showToast('error', 'Session expired', 'Please log in again.'); return; }
   // Loader (replace with proper modal in Snap 3)
   const loaderHtml = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center" id="_buyLoader"><div style="background:var(--card);padding:30px 40px;border-radius:12px;text-align:center"><div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div><div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px">PROCESSING PURCHASE</div></div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
   document.body.insertAdjacentHTML('beforeend', loaderHtml);
@@ -3468,7 +3766,7 @@ async function buyFraction(id){
         'invalid_amount': 'Amount must be greater than zero.',
         'invalid_slots_count': 'Must buy at least 1 slot.',
       };
-      alert('Purchase failed: ' + (map[errCode] || errCode));
+      showToast('error', 'Purchase failed', map[errCode] || errCode);
       return;
     }
     state.wallet = data.new_wallet_balance;
@@ -3477,31 +3775,36 @@ async function buyFraction(id){
     await loadMyItems();
     try{ await loadMarketplaceItems(); }catch(e){}
     updateUI(); showConfetti(); saveState();
-    setTimeout(() => alert('✓ Purchase complete!\n\nYou now own ' + slotsN + ' slot(s) of ' + i.name + '.\n\nProfit on sale: ' + i.ret[0] + '–' + i.ret[1] + '%'), 200);
+    showToast('success', 'Purchase complete!', 'You now own <b>' + slotsN + ' slot' + (slotsN>1?'s':'') + '</b> of <b>' + i.name + '</b>. Expected profit: <b>+' + i.ret[0] + '–' + i.ret[1] + '%</b>', 5000);
   }catch(e){
     document.getElementById('_buyLoader')?.remove();
-    alert('Network error. Please try again.');
+    showToast('error', 'Network error', 'Please check your connection and try again.');
   }
 }
 
 /* ═══ SELL NOW (item early exit) ═══ */
 async function sellNow(id){
   let item = state.myItems.find(x => x.id === id && x.status === 'active');
-  if(!item){ alert('Item not found or already closed'); return; }
+  if(!item){ showToast('error', 'Not found', 'Item not found or already closed.'); return; }
   if(!item.purchase_id){
     await loadMyItems();
     item = state.myItems.find(x => x.id === id && x.status === 'active');
-    if(!item || !item.purchase_id){ alert('Cannot sell this item right now.'); return; }
+    if(!item || !item.purchase_id){ showToast('error', 'Cannot sell', 'Item is not eligible for early sale.'); return; }
   }
   const purchaseId = item.purchase_id;
   const refund = Math.round(item.invested * 0.9);
   const loss = Math.round(item.invested * 0.1);
-  const msg = 'SELL EARLY?\n\n' +
-              item.name + ' · ' + item.pct + '% share\n\n' +
-              'Originally invested: $' + item.invested.toLocaleString() + '\n' +
-              'Early exit fee (10%): −$' + loss.toLocaleString() + '\n' +
-              'You receive (90%): $' + refund.toLocaleString();
-  if(!confirm(msg)) return;
+  const ok = await confirmAction({
+    title: 'Sell early?',
+    msg: 'You are selling <b>' + item.name + '</b> (' + item.pct + '% share).<br><br>' +
+         'Originally invested: <b>$' + item.invested.toLocaleString() + '</b><br>' +
+         'Early exit fee (10%): <span class="warn-amt">−$' + loss.toLocaleString() + '</span><br>' +
+         'You receive (90%): <b>$' + refund.toLocaleString() + '</b>',
+    okText: 'SELL NOW',
+    cancelText: 'KEEP IT',
+    danger: true,
+  });
+  if(!ok) return;
   await _confirmSellNow(purchaseId, id);
 }
 
@@ -3514,7 +3817,7 @@ async function _confirmSellNow(purchaseId, itemId){
     });
     const data = await res.json();
     if(!res.ok || !data || !data.ok){
-      alert('Sale failed: ' + ((data && data.detail && data.detail.error) || (data && data.error) || 'unknown'));
+      showToast('error', 'Sale failed', (data && data.detail && data.detail.error) || (data && data.error) || 'Please try again.');
       return;
     }
     state.wallet = data.new_wallet_balance;
@@ -3523,8 +3826,8 @@ async function _confirmSellNow(purchaseId, itemId){
     await loadMyItems();
     try{ await loadMarketplaceItems(); }catch(e){}
     updateUI(); saveState(); showGoldRain();
-    setTimeout(() => alert('✓ Sold!\n\nFunds added to your wallet:\n+$' + Math.round(data.payout_usd).toLocaleString()), 200);
-  }catch(e){ alert('Network error.'); }
+    showToast('success', 'Sold!', 'Funds added to your wallet: <b>+$' + Math.round(data.payout_usd).toLocaleString() + '</b>');
+  }catch(e){ showToast('error', 'Network error', 'Please check your connection and try again.'); }
 }
 
 /* ═══ DRAW PORTFOLIO GRAPH ═══ */
@@ -3870,16 +4173,22 @@ async function loadReferrals(){
 
 function copyRefCode(){
   const code = (document.getElementById('refCode')?.textContent || document.getElementById('mRefCode')?.textContent || '').trim();
-  if(!code || code.startsWith('Loading')){ alert('Code not ready yet'); return; }
-  navigator.clipboard?.writeText(code);
-  alert('Copied: ' + code);
+  if(!code || code.startsWith('Loading')){ showToast('warn', 'Not ready', 'Referral code is still loading.'); return; }
+  navigator.clipboard?.writeText(code).then(() => {
+    showToast('success', 'Copied!', 'Referral code <b>' + code + '</b> copied to clipboard.');
+  }).catch(() => {
+    showToast('error', 'Copy failed', 'Please copy manually: ' + code);
+  });
 }
 function copyRefLink(){
   const code = (document.getElementById('refCode')?.textContent || document.getElementById('mRefCode')?.textContent || '').trim();
-  if(!code || code.startsWith('Loading')){ alert('Code not ready yet'); return; }
+  if(!code || code.startsWith('Loading')){ showToast('warn', 'Not ready', 'Referral code is still loading.'); return; }
   const link = 'https://grailed1223228-sketch.github.io/luxor-front/?ref=' + encodeURIComponent(code);
-  navigator.clipboard?.writeText(link);
-  alert('Referral link copied:\n\n' + link);
+  navigator.clipboard?.writeText(link).then(() => {
+    showToast('success', 'Link copied!', 'Share it with friends to earn rewards.');
+  }).catch(() => {
+    showToast('error', 'Copy failed', 'Please copy manually.');
+  });
 }
 
 /* ═══ SETTINGS ═══ */
@@ -3944,22 +4253,37 @@ async function updateSettingField(field, value){
 
 async function toggleWithdraw2FA(enabled){
   if(!enabled){
-    if(!confirm('⚠ Disabling 2FA makes withdrawals less secure.\n\nAre you sure?')){
+    const ok = await confirmAction({
+      title: 'Disable 2FA?',
+      msg: 'Disabling 2FA makes withdrawals <b>less secure</b>. Anyone with access to your account could withdraw funds without additional verification.<br><br>Are you sure?',
+      okText: 'DISABLE',
+      cancelText: 'KEEP ENABLED',
+      danger: true,
+    });
+    if(!ok){
       const el1 = document.getElementById('setWithdraw2FA'); if(el1) el1.checked = true;
       const el2 = document.getElementById('mSetWithdraw2FA'); if(el2) el2.checked = true;
       return;
     }
   }
   await updateSettingField('withdraw_2fa_enabled', enabled);
+  showToast('success', '2FA ' + (enabled ? 'enabled' : 'disabled'), enabled
+    ? 'Your withdrawals are now protected by 2FA.'
+    : 'Withdrawals will not require 2FA verification.');
 }
 
 /* (Snap-3 modals appended below) */
 
-function logoutUser(){
-  if(confirm('Sign out?')){
-    try{ sessionStorage.clear(); }catch(e){}
-    location.href = 'index.html';
-  }
+async function logoutUser(){
+  const ok = await confirmAction({
+    title: 'Sign out?',
+    msg: 'You will be signed out from this device. Your data is preserved and you can sign in again anytime.',
+    okText: 'SIGN OUT',
+    cancelText: 'CANCEL',
+  });
+  if(!ok) return;
+  try{ sessionStorage.clear(); }catch(e){}
+  location.href = 'index.html';
 }
 
 /* ═══ Pool sub-tabs (already wired in Snap 1) ═══ */
@@ -6318,8 +6642,8 @@ function _smartStep6HTML(){
     <div class="sm-recap" id="smRecap6"></div>
 
     <div class="sm-step-h">
-      <div class="sm-step-q">Fund your <em>strategy</em></div>
-      <div class="sm-step-hint">Top up your account to activate the chosen strategy. We'll auto-purchase positions after confirmation.</div>
+      <div class="sm-step-q">Review &amp; <em>confirm</em></div>
+      <div class="sm-step-hint">We'll check your balance and request only what's missing.</div>
     </div>
 
     <div class="sm-deposit-card">
@@ -6329,7 +6653,7 @@ function _smartStep6HTML(){
           <span id="smDepAmount">$0</span>
         </div>
         <div class="sm-deposit-row" id="smDepFromBalanceRow" style="display:none">
-          <span>Using from balance</span>
+          <span>Available balance</span>
           <span id="smDepFromBalance" style="color:var(--green)">-$0</span>
         </div>
         <div class="sm-deposit-row" id="smDepBonusRow" style="display:none">
@@ -6337,38 +6661,34 @@ function _smartStep6HTML(){
           <span id="smDepBonus" style="color:var(--gold)">+$0</span>
         </div>
         <div class="sm-deposit-row sm-deposit-row-total">
-          <span>To deposit</span>
+          <span id="smDepTotalLabel">To pay</span>
           <span id="smDepTotal">$0</span>
         </div>
       </div>
 
-      <div class="sm-coin-pick">
-        <div class="sm-coin-pick-h">CHOOSE PAYMENT METHOD</div>
-        <div class="sm-coin-grid">
-          <div class="sm-coin" data-coin="USDT-TRC20" onclick="_smartSetCoin('USDT-TRC20')">
-            <div class="sm-coin-name">USDT</div>
-            <div class="sm-coin-net">TRC-20</div>
-          </div>
-          <div class="sm-coin" data-coin="USDT-ERC20" onclick="_smartSetCoin('USDT-ERC20')">
-            <div class="sm-coin-name">USDT</div>
-            <div class="sm-coin-net">ERC-20</div>
-          </div>
-          <div class="sm-coin" data-coin="BTC" onclick="_smartSetCoin('BTC')">
-            <div class="sm-coin-name">BTC</div>
-            <div class="sm-coin-net">Bitcoin</div>
-          </div>
-          <div class="sm-coin" data-coin="ETH" onclick="_smartSetCoin('ETH')">
-            <div class="sm-coin-name">ETH</div>
-            <div class="sm-coin-net">Ethereum</div>
-          </div>
+      <!-- CASE 1: Enough balance — show success, no payment needed -->
+      <div class="sm-deposit-ok" id="smDepOk" style="display:none">
+        <div class="sm-dep-ok-ic">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
         </div>
+        <div class="sm-dep-ok-t">You have enough balance!</div>
+        <div class="sm-dep-ok-d">Click <strong>CONFIRM PURCHASE</strong> to apply your strategy. Funds will be deducted from your wallet automatically.</div>
       </div>
 
-      <div class="sm-deposit-info" id="smDepInfo" style="display:none">
-        <!-- QR + wallet address will be filled here in Stage 5 (deposit API integration) -->
-        <div class="sm-deposit-info-placeholder">
-          Wallet address &amp; QR will appear here after Stage 5 (API integration).
+      <!-- CASE 2: Not enough — show top-up panel -->
+      <div class="sm-deposit-need" id="smDepNeed" style="display:none">
+        <div class="sm-dep-need-h">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <div>
+            <div class="sm-dep-need-t">Top-up required</div>
+            <div class="sm-dep-need-d">You need <strong id="smDepNeedAmt">$0</strong> more to fund this strategy.</div>
+          </div>
         </div>
+        <button class="sm-dep-topup-btn" onclick="_smartStartTopup()">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          DEPOSIT <span id="smDepTopupAmt">$0</span>
+        </button>
+        <div class="sm-dep-topup-hint">Opens secure deposit flow. After payment, your strategy activates automatically.</div>
       </div>
     </div>
   </div>
@@ -6527,10 +6847,17 @@ function _smartGoToStep(n){
 }
 
 function _smartSelfChoice(){
-  if(confirm('Are you sure?\n\nOur calculator picks the optimal strategy for you — it\'s safer and faster. You can always buy items manually later — new lots arrive daily.\n\nClick OK to choose items yourself, Cancel to stay.')){
-    _smartResetState();
-    navTo('market');
-  }
+  confirmAction({
+    title: 'Skip the strategy?',
+    msg: 'Our calculator picks the optimal strategy for you — it\'s safer and faster. You can always buy items manually later — new lots arrive daily.',
+    okText: 'CHOOSE MYSELF',
+    cancelText: 'STAY HERE',
+  }).then(ok => {
+    if(ok){
+      _smartResetState();
+      navTo('market');
+    }
+  });
 }
 
 /* ═════════════ STEP 1 HANDLERS ═════════════ */
@@ -7279,7 +7606,17 @@ async function _smartConfirmPurchase(){
   const s = window._smart;
   const allocations = window._smartAllocations;
   if(!allocations || !s.chosenStrategy){
-    alert('Strategy not selected. Please go back to step 5.');
+    showToast('error', 'Strategy missing', 'Please go back to step 5 and select a strategy.');
+    return;
+  }
+
+  // Validate balance one more time before going through with the purchase.
+  // If user used 'balance' payment method, ensure their wallet still covers it.
+  const split = _smartGetBalanceSplit();
+  const totalNeeded = s.totalNeeded || s.amount || 0;
+  const fromBalance = s.fromBalance || 0;
+  if(s.paymentMethod === 'balance' && split.available < fromBalance){
+    showToast('error', 'Insufficient balance', 'Your wallet balance changed. Please refresh and try again.');
     return;
   }
 
@@ -7339,7 +7676,7 @@ async function _smartConfirmPurchase(){
         strategy: s.chosenStrategy,
         positions_count: (strategy.pools || []).length + basket.length,
       }),
-    }).catch(()=>{});  // fire-and-forget
+    }).catch(()=>{});
   }catch(e){}
 
   // Reset wizard state
@@ -7347,9 +7684,9 @@ async function _smartConfirmPurchase(){
 
   // Notify user
   if(errors.length === 0){
-    alert('✓ Strategy applied successfully!\n\nYour positions are now active. Check My Pools and My Items in the dashboard.');
+    showToast('success', 'Strategy applied!', 'Your positions are now active. Check My Pools and My Items.', 5000);
   } else {
-    alert('Strategy partially applied.\n\n' + errors.length + ' position(s) had issues:\n\n' + errors.slice(0,5).join('\n') + '\n\nPlease check My Pools / My Items and retry failed ones manually.');
+    showToast('warn', 'Partially applied', errors.length + ' position(s) had issues. Check My Pools / My Items and retry manually.', 6000);
   }
 
   // Refresh dashboard data and navigate home
@@ -7389,7 +7726,7 @@ function _smartGetBalanceSplit(){
   return { invested, available };
 }
 
-/* Override the placeholder _smartRenderDeposit to handle bonus */
+/* Override the placeholder _smartRenderDeposit to handle bonus + auto-balance */
 function _smartRenderDeposit(){
   const s = window._smart;
   const fmt = v => '$' + Math.round(v).toLocaleString();
@@ -7398,32 +7735,82 @@ function _smartRenderDeposit(){
 
   setText('smDepAmount', fmt(s.amount || 0));
 
-  // From available balance
+  // Auto-use available balance — always when user has any
   const split = _smartGetBalanceSplit();
-  const fromBalance = s.useExistingBalance && split.available > 0 ? Math.min(s.amount, split.available) : 0;
+  const totalNeeded = s.amount || 0;
+  const fromBalance = Math.min(totalNeeded, split.available || 0);
+  const toDeposit = totalNeeded - fromBalance;
+
+  // Save into state for confirm step
+  window._smart.fromBalance = fromBalance;
+  window._smart.toDeposit = toDeposit;
+  window._smart.totalNeeded = totalNeeded;
+
   setShow('smDepFromBalanceRow', fromBalance > 0);
   setText('smDepFromBalance', '-' + fmt(fromBalance));
 
-  // To deposit (after balance applied)
-  const toDeposit = (s.amount || 0) - fromBalance;
-  setText('smDepTotal', fmt(toDeposit));
-
-  // First-deposit bonus
+  // First-deposit bonus (on the deposit-required portion only)
   const eligible = _smartIsBonusEligible(toDeposit);
   const bonus = eligible ? toDeposit * 0.05 : 0;
   setShow('smDepBonusRow', eligible);
   setText('smDepBonus', '+' + fmt(bonus));
 
-  // Show "use balance" checkbox if user has available funds
-  const balOpt = document.getElementById('smBalanceOpt');
-  if(balOpt){
-    if(split.available >= 100){
-      balOpt.style.display = '';
-      const balAmt = document.getElementById('smBalanceAmount');
-      if(balAmt) balAmt.textContent = fmt(split.available);
-    } else {
-      balOpt.style.display = 'none';
+  // Total label depends on case
+  const totalLabel = document.getElementById('smDepTotalLabel');
+  if(toDeposit <= 0){
+    // CASE 1: Fully covered — show success state, no payment needed
+    if(totalLabel) totalLabel.textContent = 'To allocate';
+    setText('smDepTotal', fmt(totalNeeded));
+    setShow('smDepOk', true);
+    setShow('smDepNeed', false);
+    s.paymentMethod = 'balance';
+    _smartSaveState();
+    const next = document.getElementById('smBtnNext');
+    if(next){
+      next.disabled = false;
+      next.innerHTML = 'CONFIRM PURCHASE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
     }
+  } else {
+    // CASE 2: Top-up needed — show top-up panel
+    if(totalLabel) totalLabel.textContent = 'To pay';
+    setText('smDepTotal', fmt(toDeposit));
+    setShow('smDepOk', false);
+    setShow('smDepNeed', true);
+    setText('smDepNeedAmt', fmt(toDeposit));
+    setText('smDepTopupAmt', fmt(toDeposit));
+    if(s.paymentMethod === 'balance'){
+      s.paymentMethod = null;
+      _smartSaveState();
+    }
+    const next = document.getElementById('smBtnNext');
+    if(next){
+      next.disabled = !s.paymentMethod;
+      next.innerHTML = 'I\'VE PAID <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    }
+  }
+
+  // Hide old "use balance" checkbox (now auto)
+  const balOpt = document.getElementById('smBalanceOpt');
+  if(balOpt) balOpt.style.display = 'none';
+}
+
+/* Trigger existing deposit flow with pre-filled top-up amount */
+function _smartStartTopup(){
+  const s = window._smart;
+  const need = s.toDeposit || 0;
+  if(need <= 0){
+    showToast('info', 'No top-up needed', 'Your balance covers the strategy.');
+    return;
+  }
+  // Mark that after deposit completes, we should resume Smart Invest
+  sessionStorage.setItem('luxor_smart_resume', '1');
+  // Use existing deposit flow — opens its modal
+  if(typeof openTopUp === 'function'){
+    openTopUp(need);
+  } else if(typeof openDeposit === 'function'){
+    openDeposit(need);
+  } else {
+    showToast('error', 'Deposit unavailable', 'Please use Deposit Funds button on the dashboard.');
   }
 }
 
@@ -7481,6 +7868,531 @@ console.log('[stage3-6] Smart Invest engine + items + API + bonus loaded');
 
 
 console.log('[stage2] Smart Invest wizard UI loaded (no calculations yet — Stage 3)');
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS — replaces alert() across the app
+═══════════════════════════════════════════════════════════ */
+
+(function initToasts(){
+  if(document.getElementById('toastStack')) return;
+  const stack = document.createElement('div');
+  stack.id = 'toastStack';
+  stack.className = 'toast-stack';
+  document.body.appendChild(stack);
+})();
+
+const TOAST_ICONS = {
+  success: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+  warn:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+  error:   '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+  info:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+};
+
+/* Show a toast.
+   type: 'success' | 'warn' | 'error' | 'info'
+   title: short title (e.g. "Copied!")
+   msg: optional longer description
+   duration: ms before auto-dismiss (default 3500, 0 = no auto-dismiss) */
+function showToast(type, title, msg, duration){
+  type = type || 'info';
+  duration = duration === undefined ? 3500 : duration;
+  const stack = document.getElementById('toastStack');
+  if(!stack){
+    // Fallback if stack doesn't exist for some reason
+    return;
+  }
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + type;
+  t.innerHTML = `
+    <div class="toast-ic">${TOAST_ICONS[type] || TOAST_ICONS.info}</div>
+    <div class="toast-body">
+      <div class="toast-title">${title || ''}</div>
+      ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
+    </div>
+    <button class="toast-close" aria-label="Close">×</button>
+  `;
+  stack.appendChild(t);
+  const close = () => {
+    if(!t.parentNode) return;
+    t.classList.add('toast-out');
+    setTimeout(() => t.remove(), 250);
+  };
+  t.querySelector('.toast-close').addEventListener('click', close);
+  if(duration > 0) setTimeout(close, duration);
+  return close;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONFIRM MODAL — replaces window.confirm()
+   Usage:  const ok = await confirmAction({title, msg, okText, danger:true})
+═══════════════════════════════════════════════════════════ */
+
+(function initConfirmModal(){
+  if(document.getElementById('confirmOverlay')) return;
+  const o = document.createElement('div');
+  o.id = 'confirmOverlay';
+  o.className = 'confirm-overlay';
+  o.innerHTML = `
+    <div class="confirm-card">
+      <div class="confirm-ic confirm-ic-warn" id="confirmIc">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+      <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+      <div class="confirm-msg" id="confirmMsg"></div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-btn-cancel" id="confirmCancel">CANCEL</button>
+        <button class="confirm-btn confirm-btn-ok" id="confirmOk">CONFIRM</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(o);
+})();
+
+function confirmAction(opts){
+  opts = opts || {};
+  return new Promise(resolve => {
+    const o = document.getElementById('confirmOverlay');
+    const titleEl = document.getElementById('confirmTitle');
+    const msgEl = document.getElementById('confirmMsg');
+    const okBtn = document.getElementById('confirmOk');
+    const cancelBtn = document.getElementById('confirmCancel');
+    const icEl = document.getElementById('confirmIc');
+    if(!o){ resolve(window.confirm(opts.msg || 'Are you sure?')); return; }
+
+    titleEl.textContent = opts.title || 'Are you sure?';
+    msgEl.innerHTML = opts.msg || '';
+    okBtn.textContent = opts.okText || 'CONFIRM';
+    cancelBtn.textContent = opts.cancelText || 'CANCEL';
+
+    okBtn.classList.toggle('confirm-btn-danger', !!opts.danger);
+    okBtn.classList.toggle('confirm-btn-ok', !opts.danger);
+    icEl.classList.toggle('confirm-ic-danger', !!opts.danger);
+    icEl.classList.toggle('confirm-ic-warn', !opts.danger);
+
+    o.classList.add('show');
+    const cleanup = (val) => {
+      o.classList.remove('show');
+      okBtn.onclick = null;
+      cancelBtn.onclick = null;
+      o.onclick = null;
+      resolve(val);
+    };
+    okBtn.onclick = () => cleanup(true);
+    cancelBtn.onclick = () => cleanup(false);
+    o.onclick = (e) => { if(e.target === o) cleanup(false); };
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AVAILABLE BALANCE update on dashboard
+═══════════════════════════════════════════════════════════ */
+
+function _luxorUpdateBalanceSplit(){
+  // Compute invested = sum of pool positions + sum of active item shares
+  let invested = 0;
+  if(typeof state !== 'undefined'){
+    if(Array.isArray(state.positions)){
+      invested += state.positions.reduce((s,p) => s + (Number(p.amount || p.amount_usd) || 0), 0);
+    }
+    if(Array.isArray(state.myItems)){
+      invested += state.myItems
+        .filter(i => i.status === 'active')
+        .reduce((s,i) => s + (Number(i.invested) || 0), 0);
+    }
+  }
+  const wallet = (typeof state !== 'undefined' && state.wallet) ? Number(state.wallet) : 0;
+  // Use fmtMoney (currency-aware) if available, else fallback to USD
+  const fmt = (typeof fmtMoney === 'function') ? fmtMoney : v => '$' + Math.round(v).toLocaleString();
+  ['dInvAmt','mInvAmt'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = fmt(invested);
+  });
+  ['dAvailAmt','mAvailAmt'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = fmt(wallet);
+  });
+}
+
+// Hook into existing updateUI by wrapping (if it exists)
+if(typeof updateUI === 'function'){
+  const _origUpdateUI = updateUI;
+  window.updateUI = function(){
+    _origUpdateUI.apply(this, arguments);
+    try{ _luxorUpdateBalanceSplit(); }catch(e){}
+  };
+}
+// Also call on load
+setTimeout(() => { try{ _luxorUpdateBalanceSplit(); }catch(e){} }, 1500);
+
+console.log('[stage7] Toast + confirm modal + balance split loaded');
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 8: PROFIT CALCULATOR (simple — current portfolio only)
+═══════════════════════════════════════════════════════════ */
+
+const PC_POOL_RATES = {
+  Silver:   { monthlyPct: 15.0, label: 'Silver Pool',   icon: '●' },
+  Gold:     { monthlyPct: 13.04, label: 'Gold Pool',    icon: '★' },
+  Platinum: { monthlyPct: 15.0, label: 'Platinum Pool', icon: '◆' },
+};
+
+function renderCalculator(){
+  const html = _pcShellHTML();
+  const dCt = document.getElementById('dCalcContent');
+  const mCt = document.getElementById('mCalcContent');
+  const isMobile = window.innerWidth <= 768;
+  if(dCt) dCt.innerHTML = isMobile ? '' : html;
+  if(mCt) mCt.innerHTML = isMobile ? html : '';
+
+  // Initial render
+  _pcUpdate(3); // default 3 months
+
+  // Wire slider
+  const slider = document.getElementById('pcMonthsSlider');
+  if(slider){
+    slider.addEventListener('input', e => _pcUpdate(parseInt(e.target.value)));
+  }
+}
+
+function _pcGetPortfolio(){
+  const pools = [];
+  let itemsInvested = 0;
+  let itemsCount = 0;
+
+  if(typeof state !== 'undefined'){
+    if(Array.isArray(state.positions)){
+      state.positions.forEach(p => {
+        if(p.status === 'active' || !p.status){
+          const plan = p.plan || p.pool_plan || 'Silver';
+          const amount = Number(p.amount || p.amount_usd) || 0;
+          if(amount > 0){
+            pools.push({plan, amount});
+          }
+        }
+      });
+    }
+    if(Array.isArray(state.myItems)){
+      state.myItems.filter(i => i.status === 'active').forEach(i => {
+        itemsInvested += Number(i.invested) || 0;
+        itemsCount++;
+      });
+    }
+  }
+
+  return { pools, itemsInvested, itemsCount };
+}
+
+function _pcShellHTML(){
+  const portfolio = _pcGetPortfolio();
+  const totalPools = portfolio.pools.reduce((s,p) => s + p.amount, 0);
+  const hasPortfolio = totalPools > 0 || portfolio.itemsInvested > 0;
+
+  if(!hasPortfolio){
+    return `
+    <div class="pc-wrap">
+      <div class="pc-head">
+        <div class="pc-tag">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-calc"/></svg>
+          PROFIT CALCULATOR
+        </div>
+        <div class="pc-title">See your <em>earnings</em> forecast</div>
+        <p class="pc-sub">This calculator shows projected profits based on your existing investments.</p>
+      </div>
+
+      <div class="pc-empty">
+        <div class="pc-empty-ic">📊</div>
+        <div class="pc-empty-h">NO ACTIVE INVESTMENTS</div>
+        <div class="pc-empty-d">You don't have any active pool positions or items yet. Once you invest, this calculator will show you projected earnings over any time horizon.</div>
+        <div class="pc-empty-cta">
+          <button class="pc-empty-btn" onclick="navTo('smart')">TRY SMART INVEST →</button>
+          <button class="pc-empty-btn pc-empty-btn-out" onclick="navTo('pools')">BROWSE POOLS</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Has investments — show calculator
+  return `
+  <div class="pc-wrap">
+    <div class="pc-head">
+      <div class="pc-tag">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-calc"/></svg>
+        PROFIT CALCULATOR
+      </div>
+      <div class="pc-title">Your <em>earnings</em> forecast</div>
+      <p class="pc-sub">Pick a time horizon to see how much your existing investments will earn at fixed pool rates.</p>
+    </div>
+
+    <div class="pc-card">
+      <div class="pc-card-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        TIME HORIZON
+      </div>
+      <div class="pc-slider-row">
+        <div class="pc-slider-val" id="pcMonthsVal">3 months</div>
+        <input type="range" id="pcMonthsSlider" class="pc-slider" min="1" max="12" step="1" value="3">
+      </div>
+      <div class="pc-slider-marks">
+        <span>1 mo</span><span>3 mo</span><span>6 mo</span><span>12 mo</span>
+      </div>
+    </div>
+
+    <div class="pc-card">
+      <div class="pc-card-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L4 6 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V6 Z"/></svg>
+        YOUR ACTIVE POOLS
+      </div>
+      <div class="pc-pool-list" id="pcPoolList"></div>
+    </div>
+
+    <div class="pc-summary">
+      <div>
+        <div class="l">PERIOD</div>
+        <div class="v" id="pcPeriod">3 months</div>
+      </div>
+      <div>
+        <div class="l">PROFIT</div>
+        <div class="v" id="pcProfit">+$0</div>
+      </div>
+      <div>
+        <div class="l">END BALANCE</div>
+        <div class="v" id="pcEndBal">$0</div>
+      </div>
+    </div>
+
+    <div id="pcItemsNote"></div>
+  </div>`;
+}
+
+function _pcUpdate(months){
+  const portfolio = _pcGetPortfolio();
+  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  const fmt = v => '$' + Math.round(v).toLocaleString();
+  const monthsTxt = months + (months === 1 ? ' month' : ' months');
+
+  setText('pcMonthsVal', monthsTxt);
+  setText('pcPeriod', monthsTxt);
+
+  // Render pool list
+  let totalInvested = 0;
+  let totalProfit = 0;
+  const list = document.getElementById('pcPoolList');
+  if(list){
+    list.innerHTML = portfolio.pools.map(p => {
+      const meta = PC_POOL_RATES[p.plan] || PC_POOL_RATES.Silver;
+      const profit = p.amount * (meta.monthlyPct / 100) * months;
+      totalInvested += p.amount;
+      totalProfit += profit;
+      return `
+        <div class="pc-pool-row">
+          <div class="pc-pool-ic">${meta.icon}</div>
+          <div class="pc-pool-info">
+            <div class="n">${meta.label}</div>
+            <div class="d">${fmt(p.amount)} invested · ${meta.monthlyPct.toFixed(1)}%/month fixed</div>
+          </div>
+          <div class="pc-pool-amt">
+            <div class="a">+${fmt(profit)}</div>
+            <div class="e">over ${monthsTxt}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  setText('pcProfit', '+' + fmt(totalProfit));
+  setText('pcEndBal', fmt(totalInvested + totalProfit));
+
+  // Items note
+  const noteEl = document.getElementById('pcItemsNote');
+  if(noteEl){
+    if(portfolio.itemsInvested > 0){
+      const itemsCount = portfolio.itemsCount;
+      // Items expected ~10%/month minimum guarantee per spec
+      const itemsMinProfit = portfolio.itemsInvested * 0.10 * months;
+      noteEl.innerHTML = `
+        <div class="pc-items-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H18 L22 9 L12 22 L2 9 Z"/></svg>
+          <div>
+            <div class="t">PLUS YOUR ITEMS</div>
+            <div class="d">You also have <b>${itemsCount} active item${itemsCount > 1 ? 's' : ''}</b> totaling <b>${fmt(portfolio.itemsInvested)}</b>. Items are not included in pool calculations above — they earn separately based on individual sale outcomes (10%/month minimum guarantee, ~15%/week expected average). Conservative estimate over ${monthsTxt}: <b>+${fmt(itemsMinProfit)} more</b>.</div>
+          </div>
+        </div>
+      `;
+    } else {
+      noteEl.innerHTML = '';
+    }
+  }
+}
+
+console.log('[stage8] Profit Calculator (simple) loaded');
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 9: CURRENCY SWITCHER (USD / EUR / GBP)
+   - Stores user preference in localStorage
+   - Fetches rates from Binance public API (no auth needed)
+   - Caches rates 5 min, fallback to hardcoded approx if API down
+   - Provides global fmtMoney() that all UI code can use
+═══════════════════════════════════════════════════════════ */
+
+const FX_FALLBACK = { USD: 1.0, EUR: 0.92, GBP: 0.79 };
+const FX_SYMBOL   = { USD: '$',  EUR: '€',  GBP: '£' };
+const FX_CACHE_KEY = 'luxor_fx_cache';
+const FX_PREF_KEY  = 'luxor_currency';
+const FX_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+window._fxRates = { USD: 1.0, EUR: 0.92, GBP: 0.79 };
+window._fxLoaded = false;
+
+function getDisplayCurrency(){
+  // Priority: explicit user setting > U.preferred_currency > USD
+  let c = null;
+  try{ c = localStorage.getItem(FX_PREF_KEY); }catch(e){}
+  if(c && FX_FALLBACK[c]) return c;
+  if(typeof U !== 'undefined' && U.preferred_currency && FX_FALLBACK[U.preferred_currency]){
+    return U.preferred_currency;
+  }
+  return 'USD';
+}
+
+function setDisplayCurrency(code){
+  if(!FX_FALLBACK[code]){ console.warn('Unknown currency', code); return; }
+  try{ localStorage.setItem(FX_PREF_KEY, code); }catch(e){}
+  if(typeof U !== 'undefined') U.preferred_currency = code;
+
+  // Sync the dropdowns
+  ['setCurrency', 'mSetCurrency'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el && el.value !== code) el.value = code;
+  });
+
+  // Also send to backend
+  try{ updateSettingField('display_currency', code); }catch(e){}
+
+  // Reload rates and rerender everything
+  _fxLoadRates().then(() => {
+    _fxApplyToUI();
+    try{ showToast('success', 'Currency updated', 'All amounts now in <b>' + code + '</b>.'); }catch(e){}
+  });
+}
+
+async function _fxLoadRates(force){
+  // Try cache first
+  if(!force){
+    try{
+      const raw = localStorage.getItem(FX_CACHE_KEY);
+      if(raw){
+        const cached = JSON.parse(raw);
+        if(cached && cached.ts && (Date.now() - cached.ts) < FX_CACHE_TTL_MS && cached.rates){
+          window._fxRates = cached.rates;
+          window._fxLoaded = true;
+          return cached.rates;
+        }
+      }
+    }catch(e){}
+  }
+
+  // Fetch from Binance — public API, USD-pegged via USDT
+  // Note: Binance returns USDT/EUR price, so 1 USD ~= 1 USDT, rate is "EUR per USD"
+  try{
+    const [eurRes, gbpRes] = await Promise.all([
+      fetch('https://api.binance.com/api/v3/ticker/price?symbol=EURUSDT').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('https://api.binance.com/api/v3/ticker/price?symbol=GBPUSDT').then(r => r.ok ? r.json() : null).catch(() => null),
+    ]);
+    // EURUSDT means: 1 EUR = X USDT. So USD->EUR = 1/X
+    let eurPrice = eurRes && parseFloat(eurRes.price);
+    let gbpPrice = gbpRes && parseFloat(gbpRes.price);
+
+    const rates = {
+      USD: 1.0,
+      EUR: (eurPrice && eurPrice > 0) ? (1 / eurPrice) : FX_FALLBACK.EUR,
+      GBP: (gbpPrice && gbpPrice > 0) ? (1 / gbpPrice) : FX_FALLBACK.GBP,
+    };
+    window._fxRates = rates;
+    window._fxLoaded = true;
+    try{ localStorage.setItem(FX_CACHE_KEY, JSON.stringify({ ts: Date.now(), rates })); }catch(e){}
+    return rates;
+  }catch(e){
+    console.warn('FX rates fetch failed, using fallback', e);
+    window._fxRates = { ...FX_FALLBACK };
+    window._fxLoaded = true;
+    return window._fxRates;
+  }
+}
+
+/**
+ * Format money amount.
+ * @param {number} usdAmount — amount in USD (canonical storage)
+ * @param {object} opts — { decimals?: 0, sign?: false, currency?: 'USD' }
+ * @returns {string} — e.g. "£1,234" or "+€123.45"
+ */
+function fmtMoney(usdAmount, opts){
+  opts = opts || {};
+  const code = opts.currency || getDisplayCurrency();
+  const rate = (window._fxRates && window._fxRates[code]) || FX_FALLBACK[code] || 1;
+  const sym = FX_SYMBOL[code] || '$';
+  const decimals = opts.decimals !== undefined ? opts.decimals : 0;
+
+  const amount = (Number(usdAmount) || 0) * rate;
+  const sign = (opts.sign && amount > 0) ? '+' : (amount < 0 ? '-' : '');
+  const abs = Math.abs(amount);
+  const formatted = decimals > 0
+    ? abs.toLocaleString(undefined, {minimumFractionDigits: decimals, maximumFractionDigits: decimals})
+    : Math.round(abs).toLocaleString();
+  return sign + sym + formatted;
+}
+
+/**
+ * Convert input by user (in display currency) to USD for backend.
+ * E.g. user typed 5000 GBP → returns ~6322 USD.
+ */
+function toUSD(amountInDisplayCurrency){
+  const code = getDisplayCurrency();
+  const rate = (window._fxRates && window._fxRates[code]) || FX_FALLBACK[code] || 1;
+  return (Number(amountInDisplayCurrency) || 0) / rate;
+}
+
+/**
+ * Re-render parts of UI that show money. Lightweight — only updates
+ * elements with [data-money-usd] attribute. For the rest, the next
+ * updateUI() call will use fmtMoney().
+ */
+function _fxApplyToUI(){
+  // Update standard balance/labels
+  try{ updateUI(); }catch(e){}
+  try{ _luxorUpdateBalanceSplit(); }catch(e){}
+  try{ renderTxs(); }catch(e){}
+
+  // Generic [data-money-usd] elements
+  document.querySelectorAll('[data-money-usd]').forEach(el => {
+    const usd = parseFloat(el.getAttribute('data-money-usd'));
+    if(isFinite(usd)){
+      const decimals = parseInt(el.getAttribute('data-money-decimals') || '0');
+      const sign = el.getAttribute('data-money-sign') === 'true';
+      el.textContent = fmtMoney(usd, { decimals, sign });
+    }
+  });
+
+  // Re-render dashboard widgets
+  try{ if(typeof drawGraph === 'function') drawGraph(); }catch(e){}
+}
+
+// Initial load — pull rates, set dropdown to user's preference
+async function _fxInit(){
+  await _fxLoadRates();
+  const cur = getDisplayCurrency();
+  ['setCurrency', 'mSetCurrency'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = cur;
+  });
+  // First apply so any currency-aware widget rendered before init catches up
+  _fxApplyToUI();
+}
+
+// Run on load + refresh every 5 min
+setTimeout(() => { try{ _fxInit(); }catch(e){ console.warn('FX init failed', e); } }, 1000);
+setInterval(() => { try{ _fxLoadRates(true).then(_fxApplyToUI); }catch(e){} }, FX_CACHE_TTL_MS);
+
+console.log('[stage9] Currency switcher (USD/EUR/GBP) loaded');
 
 </script>
 </body>
