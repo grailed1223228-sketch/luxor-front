@@ -6208,4 +6208,447 @@ function _onDetailItemChanged(change){
     parseInt(dSlotsInput?.value || '0')
   ) || 1;
 
-  const ne
+  const newAvail = change.newAvail;
+
+  if(newAvail <= 0){
+    _showDetailBanner('SOLD OUT — All slots have been sold while you were viewing.', 'red');
+    const buyBtns = ['mBuyBtn', 'dBuyBtn'].map(id => document.getElementById(id)).filter(Boolean);
+    buyBtns.forEach(b => { b.disabled = true; b.style.opacity = '.5'; b.textContent = 'SOLD OUT'; });
+    const bars = ['mV5Bar', 'dV5Bar'].map(id => document.getElementById(id)).filter(Boolean);
+    bars.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '.5'; });
+    return;
+  }
+
+  if(currentSlots > newAvail){
+    const soldDelta = change.soldDelta;
+    _showDetailBanner(`${soldDelta} slot${soldDelta>1?'s':''} sold while you were viewing — your selection adjusted to max ${newAvail}.`, 'gold');
+    if(mSlotsInput){ try{ _updateItemSlots(newAvail, 'mobile', item); }catch(e){} }
+    if(dSlotsInput){ try{ _updateItemSlots(newAvail, 'desktop', item); }catch(e){} }
+    const mManual = document.getElementById('mV5Manual');
+    const dManual = document.getElementById('dV5Manual');
+    if(mManual) mManual.max = newAvail;
+    if(dManual) dManual.max = newAvail;
+  } else {
+    const soldDelta = change.soldDelta;
+    _showDetailBanner(`${soldDelta} slot${soldDelta>1?'s':''} just sold · ${newAvail} remaining`, 'gold');
+  }
+}
+
+function _showDetailBanner(text, color){
+  document.querySelectorAll('.detail-poll-banner').forEach(b => b.remove());
+  const colorVar = color === 'red' ? 'var(--red)' : 'var(--gold)';
+  const bgVar = color === 'red' ? 'var(--red-l)' : 'var(--gold-d)';
+  const banner = document.createElement('div');
+  banner.className = 'detail-poll-banner';
+  banner.style.cssText = `position:fixed;top:20px;left:50%;transform:translateX(-50%);background:${bgVar};border:1px solid ${colorVar};color:${colorVar};padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:slideDown .25s ease-out;max-width:90vw;text-align:center`;
+  banner.textContent = text;
+  document.body.appendChild(banner);
+  if(!document.getElementById('_pollBannerStyles')){
+    const st = document.createElement('style');
+    st.id = '_pollBannerStyles';
+    st.textContent = '@keyframes slideDown{from{opacity:0;transform:translate(-50%,-20px)}to{opacity:1;transform:translate(-50%,0)}}';
+    document.head.appendChild(st);
+  }
+  setTimeout(() => {
+    banner.style.transition = 'opacity .3s';
+    banner.style.opacity = '0';
+    setTimeout(() => banner.remove(), 300);
+  }, 4000);
+}
+
+function startMarketPolling(){
+  if(window._poll.marketInt) return;
+  window._poll.lastSnapshot = _itemsSnapshot();
+  console.log('[poll] Marketplace polling started (15s)');
+  window._poll.marketInt = setInterval(_softLoadMarketplace, 15000);
+}
+
+function stopMarketPolling(){
+  if(window._poll.marketInt){
+    clearInterval(window._poll.marketInt);
+    window._poll.marketInt = null;
+    console.log('[poll] Marketplace polling stopped');
+  }
+}
+
+function startDetailPolling(itemId){
+  stopDetailPolling();
+  window._poll.detailItemId = Number(itemId);
+  window._poll.lastSnapshot = _itemsSnapshot();
+  console.log(`[poll] Detail polling started for item #${itemId} (5s)`);
+  window._poll.detailInt = setInterval(_softLoadMarketplace, 5000);
+}
+
+function stopDetailPolling(){
+  if(window._poll.detailInt){
+    clearInterval(window._poll.detailInt);
+    window._poll.detailInt = null;
+  }
+  window._poll.detailItemId = null;
+}
+
+/* Wrap navTo to manage pollers */
+const _origNavTo_snap5 = window.navTo;
+window.navTo = function(target){
+  if(target !== 'market'){ stopMarketPolling(); }
+  if(target !== 'detail'){ stopDetailPolling(); }
+  _origNavTo_snap5(target);
+  if(target === 'market'){ startMarketPolling(); }
+};
+
+/* Wrap openItemDetail to start fast polling */
+const _origOpenItemDetail_snap5 = window.openItemDetail;
+window.openItemDetail = function(id){
+  _origOpenItemDetail_snap5(id);
+  startDetailPolling(id);
+  stopMarketPolling();
+};
+
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden && (window._poll.marketInt || window._poll.detailInt)){
+    console.log('[poll] Tab visible — immediate sync');
+    _softLoadMarketplace();
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  stopMarketPolling();
+  stopDetailPolling();
+});
+
+console.log('[snap5] real-time polling loaded');
+
+
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   SMART INVEST — 7-step wizard
+   Stage 2: UI skeleton + navigation + sessionStorage
+   (Stage 3 will add calculation engine, Stage 4 — marketplace items)
+═══════════════════════════════════════════════════════════ */
+
+const SMART_STATE_KEY = 'luxor_calc_state';
+
+function _smartLoadState(){
+  try{
+    const raw = sessionStorage.getItem(SMART_STATE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+
+function _smartSaveState(s){
+  const data = s || window._smart;
+  if(!data) return;
+  try{ sessionStorage.setItem(SMART_STATE_KEY, JSON.stringify(data)); }catch(e){}
+}
+
+function _smartResetState(){
+  try{ sessionStorage.removeItem(SMART_STATE_KEY); }catch(e){}
+  window._smart = null;
+}
+
+function _smartInitState(){
+  const saved = _smartLoadState();
+  window._smart = saved || {
+    step: 1,             // 1..7
+    frequency: null,     // 'daily' | 'weekly' | 'monthly'
+    amount: null,        // number
+    portfolioType: null, // 'pools' | 'items' | 'mixed'
+    chosenStrategy: null,// 'A' | 'B'
+    useExistingBalance: false,
+    paymentMethod: null, // 'USDT-TRC20' | 'BTC' | 'ETH' etc
+  };
+}
+
+/* ═════════════ MAIN RENDER ═════════════ */
+
+function renderSmartInvest(){
+  _smartInitState();
+  const html = _smartShellHTML();
+  const dCt = document.getElementById('dSmartContent');
+  const mCt = document.getElementById('mSmartContent');
+  // Render only in the visible container to avoid duplicate IDs
+  // (desktop/mobile screens share the same ID namespace).
+  const isMobile = window.innerWidth <= 768;
+  if(dCt) dCt.innerHTML = isMobile ? '' : html;
+  if(mCt) mCt.innerHTML = isMobile ? html : '';
+  _smartShowStep(window._smart.step);
+}
+
+/* Shell with all 7 step containers; only one visible at a time */
+function _smartShellHTML(){
+  return `
+  <div class="sm-wrap">
+
+    <!-- Header -->
+    <div class="sm-head">
+      <div class="sm-tag">
+        <svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-smart"/></svg>
+        SMART INVEST
+      </div>
+      <h2 class="sm-title">Find your <em>perfect</em> strategy</h2>
+      <p class="sm-sub">Answer 3 quick questions and our calculator will build a personalized investment plan for you.</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="sm-progress">
+      <div class="sm-prog-bar"><div class="sm-prog-fill" id="smProgFill"></div></div>
+      <div class="sm-prog-txt" id="smProgText">STEP 1 OF 7</div>
+    </div>
+
+    <!-- All step panes -->
+    ${_smartStep1HTML()}
+    ${_smartStep2HTML()}
+    ${_smartStep3HTML()}
+    ${_smartStep4HTML()}
+    ${_smartStep5HTML()}
+    ${_smartStep6HTML()}
+    ${_smartStep7HTML()}
+
+    <!-- Sticky nav footer -->
+    <div class="sm-foot">
+      <button class="sm-btn sm-btn-back" id="smBtnBack" onclick="_smartBack()" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        BACK
+      </button>
+      <button class="sm-btn sm-btn-next" id="smBtnNext" onclick="_smartNext()" disabled>
+        NEXT
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- "I want to choose myself" subtle link -->
+    <div class="sm-self-link">
+      <a onclick="_smartSelfChoice()">I want to choose items myself</a>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 1: FREQUENCY ═════════════ */
+function _smartStep1HTML(){
+  return `
+  <div class="sm-pane" data-step="1">
+    <div class="sm-step-h">
+      <div class="sm-step-q">How often do you want <em>payouts</em>?</div>
+      <div class="sm-step-hint">This determines which pools are available and what types of items we'll suggest.</div>
+    </div>
+
+    <div class="sm-choices">
+      <div class="sm-choice" data-freq="daily" onclick="_smartSetFreq('daily')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">EVERY DAY</div>
+          <div class="sm-choice-d">Fast cashflow. Daily payouts via Silver Pool. Best for emergency funds and short-term parking.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice" data-freq="weekly" onclick="_smartSetFreq('weekly')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">EVERY WEEK</div>
+          <div class="sm-choice-d">Balanced option. Gold Pool weekly returns + items that complete cycles in 1-2 weeks. Optimal yield.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice" data-freq="monthly" onclick="_smartSetFreq('monthly')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">EVERY MONTH</div>
+          <div class="sm-choice-d">Maximum returns. Platinum Pool 15%/month (from $10K) + premium items. Best for serious capital.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 2: AMOUNT ═════════════ */
+function _smartStep2HTML(){
+  return `
+  <div class="sm-pane" data-step="2">
+    <div class="sm-recap" id="smRecap2"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">How much do you want to <em>invest</em>?</div>
+      <div class="sm-step-hint">Pick a preset or enter a custom amount. Minimum $300, maximum $300,000.</div>
+    </div>
+
+    <div class="sm-amount-card">
+      <div class="sm-amount-row">
+        <div class="sm-amount-prefix">$</div>
+        <input type="number" id="smAmountInput" class="sm-amount-input" placeholder="0" min="300" max="300000" step="100" oninput="_smartOnAmountInput(this.value)">
+      </div>
+
+      <div class="sm-presets">
+        <button class="sm-preset" data-amt="500" onclick="_smartSetAmount(500)">$500</button>
+        <button class="sm-preset" data-amt="1000" onclick="_smartSetAmount(1000)">$1,000</button>
+        <button class="sm-preset" data-amt="5000" onclick="_smartSetAmount(5000)">$5,000</button>
+        <button class="sm-preset" data-amt="10000" onclick="_smartSetAmount(10000)">$10,000</button>
+        <button class="sm-preset" data-amt="25000" onclick="_smartSetAmount(25000)">$25,000</button>
+      </div>
+
+      <div class="sm-balance-opt" id="smBalanceOpt" style="display:none">
+        <label class="sm-checkbox">
+          <input type="checkbox" id="smUseBalanceCb" onchange="_smartToggleBalance()">
+          <span class="sm-checkbox-mark"></span>
+          <span class="sm-checkbox-text">Use <strong id="smBalanceAmount">$0</strong> from my available balance</span>
+        </label>
+      </div>
+
+      <div class="sm-amount-error" id="smAmountError" style="display:none"></div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 3: PORTFOLIO TYPE ═════════════ */
+function _smartStep3HTML(){
+  return `
+  <div class="sm-pane" data-step="3">
+    <div class="sm-recap" id="smRecap3"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">What's your <em>risk profile</em>?</div>
+      <div class="sm-step-hint">Three approaches — each balances risk and return differently.</div>
+    </div>
+
+    <div class="sm-choices">
+      <div class="sm-choice" data-pt="pools" onclick="_smartSetPortfolio('pools')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 6 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V6 Z"/><path d="M9 12 L11 14 L15 10"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">POOLS ONLY <span class="sm-tag-mini">STABLE</span></div>
+          <div class="sm-choice-d">We allocate your funds across luxury items — watches, bags, sneakers — through guaranteed-rate pools. Lowest risk, fixed returns.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice" data-pt="items" onclick="_smartSetPortfolio('items')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H18 L22 9 L12 22 L2 9 Z"/><path d="M6 3 L9 9 L2 9 M18 3 L15 9 L22 9 M9 9 L12 22 L15 9 M9 9 H15"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">ITEMS ONLY <span class="sm-tag-mini sm-tag-mini-red">AGGRESSIVE</span></div>
+          <div class="sm-choice-d">Higher upside (~15%/week expected). If items sell below expectations (rare), 10%/month minimum is guaranteed. Higher risk, higher ceiling.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice sm-choice-rec" data-pt="mixed" onclick="_smartSetPortfolio('mixed')">
+        <div class="sm-choice-rec-tag">RECOMMENDED</div>
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><path d="M9 12h6"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">MIXED <span class="sm-tag-mini sm-tag-mini-green">BALANCED</span></div>
+          <div class="sm-choice-d">Part in stable pools with fixed returns, part in items with growth potential. Best risk/reward ratio.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 4: LOADER ═════════════ */
+function _smartStep4HTML(){
+  return `
+  <div class="sm-pane" data-step="4">
+    <div class="sm-loader-wrap">
+      <div class="sm-loader-ring">
+        <div class="sm-loader-core">
+          <svg viewBox="0 0 24 24" width="32" height="32" style="color:var(--gold)"><use href="#i-smart"/></svg>
+        </div>
+      </div>
+
+      <div class="sm-loader-title">Analyzing your strategy</div>
+
+      <div class="sm-loader-list" id="smLoaderList">
+        <div class="sm-loader-item" data-l="1">
+          <div class="sm-loader-dot"></div>
+          <span>Scanning luxury market data</span>
+        </div>
+        <div class="sm-loader-item" data-l="2">
+          <div class="sm-loader-dot"></div>
+          <span>Matching optimal allocation for your amount</span>
+        </div>
+        <div class="sm-loader-item" data-l="3">
+          <div class="sm-loader-dot"></div>
+          <span>Calculating risk-adjusted projections</span>
+        </div>
+        <div class="sm-loader-item" data-l="4">
+          <div class="sm-loader-dot"></div>
+          <span>Building your strategy</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 5: TWO STRATEGIES ═════════════ */
+function _smartStep5HTML(){
+  return `
+  <div class="sm-pane" data-step="5">
+    <div class="sm-recap" id="smRecap5"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">Choose your <em>strategy</em></div>
+      <div class="sm-step-hint">Two personalized options. Pick the one that matches your style.</div>
+    </div>
+
+    <div class="sm-strategies">
+      <!-- STRATEGY A: CONSERVATIVE -->
+      <div class="sm-strategy" data-strat="A" onclick="_smartSetStrategy('A')">
+        <div class="sm-strategy-h">
+          <div class="sm-strategy-tag">STRATEGY A</div>
+          <div class="sm-strategy-name">Conservative</div>
+          <div class="sm-strategy-sub">Lower risk · Steady returns</div>
+        </div>
+
+        <div class="sm-strategy-bars" id="smStratABars">
+          <!-- filled by Stage 3 — placeholder for now -->
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Pool</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:70%;background:var(--gold)"></div></div>
+            <div class="sm-bar-val">70%</div>
+          </div>
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Items</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:30%;background:var(--green)"></div></div>
+            <div class="sm-bar-val">30%</div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-items" id="smStratAItems">
+          <div class="sm-strategy-items-h">
+            <span>Suggested items</span>
+            <button class="sm-shuffle-btn" onclick="event.stopPropagation();_smartShuffleItems('A')" title="Pick different items">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+              Shuffle
+            </button>
+          </div>
+          <div class="sm-strategy-items-list">
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-projection">
+          <div class="sm-proj-row">
+            <span>Per period</span>
+            <span class="sm-proj-v" id="smStratAPer">+$0</span>
+          </div>
+          <div class="sm-proj-row">
+            <span>Over <span id="smStratAMonthsLabel">3 months</span></span>
+            <span class="sm-proj-v sm-proj-v-big" id="smStratATotal">+$0</span>
+          </div>
+          <div class="sm-proj-row sm-proj-row-bonus">
+            <span>With reinvest</span>
+            <span class="sm-proj-v sm-proj-v-bonus" id="smStratACompound">+$0</span>
+          </div>
+        </div>
+
+        <div class="sm-strategy-pi
