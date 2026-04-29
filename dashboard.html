@@ -4431,7 +4431,9 @@ function openTopUp(){
   if(window._dep.pollInt) clearInterval(window._dep.pollInt);
   window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
 
-  const eligible = !!(U.has_first_deposit_bonus);
+  // Eligible for bonus = user has NOT received first-deposit bonus yet
+  // has_first_deposit_bonus === true means "already received" → not eligible
+  const eligible = U && U.has_first_deposit_bonus === false;
   if(eligible){
     showModal(`<div style="text-align:center;margin-bottom:14px">
       <div class="stag">STEP 1 OF 3</div>
@@ -4464,7 +4466,9 @@ function depSetBonus(useBonus){
 async function depStepAmount(){
   const useBonus = window._dep.useBonus;
   const minHint = useBonus ? '500' : '100';
-  const stepLabel = U.has_first_deposit_bonus ? 'STEP 2 OF 3' : 'STEP 1 OF 2';
+  // Step label depends on whether bonus is offered (has_first_deposit_bonus === false)
+  const eligibleForBonus = U && U.has_first_deposit_bonus === false;
+  const stepLabel = eligibleForBonus ? 'STEP 2 OF 3' : 'STEP 1 OF 2';
 
   showModal(`<div style="text-align:center;margin-bottom:14px">
     <div class="stag">${stepLabel}</div>
@@ -5297,4 +5301,3211 @@ function openPoolPositionDetail(positionId){
 
     <!-- Live earnings card -->
     <div style="background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:18px;margin-bottom:14px;text-align:center">
-      <div style="
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:6px">LIVE EARNINGS</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--green);line-height:1;margin-bottom:8px" id="popDetail-live">+$${liveEarned.toFixed(2)}</div>
+      <div style="font-size:11px;color:var(--t3)">on principal of <strong style="color:var(--t)">$${principal.toLocaleString()}</strong></div>
+    </div>
+
+    <!-- Next payout countdown -->
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:6px">
+        <span>NEXT PAYOUT</span>
+        <span style="color:var(--gold);font-weight:700" id="popDetail-time">${timeLeftTxt}</span>
+      </div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+        <div id="popDetail-bar" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:3px;width:${progressPct}%;transition:width 1s linear"></div>
+      </div>
+    </div>
+
+    <!-- Position details table -->
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px;font-size:13px">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Principal</span><span style="font-weight:600">$${principal.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Earned (locked)</span><span style="color:var(--green);font-weight:700">+$${baseEarned.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Live earned (incl. pending)</span><span style="color:var(--green);font-weight:700">+$${liveEarned.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Effective APY</span><span style="color:var(--gold);font-weight:700">${apy.toFixed(0)}%</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Annual projection</span><span style="font-weight:600">+$${Math.round(annualEarn).toLocaleString()}</span></div>
+      ${daysActive !== null ? `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Active for</span><span style="font-weight:600">${daysActive} day${daysActive!==1?'s':''}</span></div>` : ''}
+      <div style="display:flex;justify-content:space-between;padding:6px 0"><span style="color:var(--t3)">Lock-up</span><span style="color:var(--green);font-weight:600">None — exit anytime</span></div>
+    </div>
+
+    <!-- Payout chart -->
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:10px">
+        <span style="letter-spacing:1.5px;font-family:'Space Mono',monospace">PAYOUT PROJECTION (12 ${period}s)</span>
+      </div>
+      <canvas id="popPayChart" width="600" height="160" style="width:100%;height:160px;display:block"></canvas>
+    </div>
+
+    <!-- Exit warning -->
+    ${penaltyAmt > 0.5 ? `
+    <div style="padding:12px 14px;background:var(--gold-d);border:1px solid var(--gold);border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.5">
+      <strong style="color:var(--gold)">⏱ Wait for next payout to maximize earnings</strong><br>
+      If you exit now, <strong>$${penaltyAmt.toFixed(2)} pending interest</strong> (the unpaid portion of the current ${period}, ${timeLeftTxt} remaining until payout) will be lost.
+    </div>` : ''}
+
+    <!-- Action buttons -->
+    <button class="btn-red" onclick="withdrawFromPool(${pos.id})" style="margin-bottom:8px">EXIT POSITION — $${Math.round(exitTotal).toLocaleString()}</button>
+    <button class="btn-out" onclick="navTo('pools')">← Back to Pools</button>
+  </div>`;
+
+  // Render into both desktop and mobile detail screens
+  const dCt = document.getElementById('dPoolDetailContent');
+  const mCt = document.getElementById('mPoolDetailContent');
+  if(dCt) dCt.innerHTML = html;
+  if(mCt) mCt.innerHTML = html.replace(/id="popDetail-/g, 'id="popDetail-m-').replace(/id="popPayChart"/g, 'id="popPayChart-m"');
+
+  // Update breadcrumbs
+  const dBc = document.getElementById('dPoolDetailBC');
+  const mBc = document.getElementById('mPoolDetailBC');
+  if(dBc) dBc.textContent = `${pos.plan.toUpperCase()} POOL · #${pos.id}`;
+  if(mBc) mBc.textContent = `${pos.plan.toUpperCase()} #${pos.id}`;
+
+  // Navigate to detail screen
+  navTo('poolDetail');
+
+  // Draw payout projection charts (both versions)
+  setTimeout(() => {
+    _drawPayoutProjection(pos, 'popPayChart');
+    _drawPayoutProjection(pos, 'popPayChart-m');
+  }, 80);
+
+  // Live tick — single timer updates whichever screen is currently visible
+  if(window._popLiveTimer) clearInterval(window._popLiveTimer);
+  window._popLiveTimer = setInterval(() => {
+    if(window._currentPoolPosId !== pos.id){ clearInterval(window._popLiveTimer); return; }
+    const live = getLiveEarned(pos);
+    const sLeft = getSecondsToNextPayout(pos);
+    const pct = Math.max(0, Math.min(100, ((periodSec - sLeft) / periodSec) * 100));
+    const timeTxt = _fmtTimeLeft(sLeft);
+    ['popDetail-live', 'popDetail-m-live'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = '+$' + live.toFixed(2);
+    });
+    ['popDetail-time', 'popDetail-m-time'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = timeTxt;
+    });
+    ['popDetail-bar', 'popDetail-m-bar'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.width = pct + '%';
+    });
+  }, 1000);
+}
+
+function _drawPayoutProjection(pos, canvasId){
+  const c = document.getElementById(canvasId || ('popPayChart-' + pos.id));
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const w = c.width, h = c.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const principal = Number(pos.amount || pos.amount_usd) || 0;
+  const ratePct = Number(pos.rate_pct) || 0;
+  const period = pos.period || 'day';
+  // Project compound 12 periods ahead
+  const n = 12;
+  const pts = [];
+  let cumulative = principal;
+  for(let i = 0; i <= n; i++){
+    pts.push(cumulative);
+    cumulative += principal * (ratePct / 100);
+  }
+
+  const padL = 36, padR = 6, padT = 8, padB = 22;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const mn = Math.min(...pts);
+  const mx = Math.max(...pts);
+  const rng = Math.max(1, mx - mn);
+  const xOf = i => padL + (i / n) * plotW;
+  const yOf = v => padT + plotH - ((v - mn) / rng) * plotH;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(201,168,76,.06)';
+  ctx.lineWidth = 1;
+  for(let k = 1; k <= 3; k++){
+    const y = padT + (plotH * k / 4);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+  }
+
+  // Area
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+  grad.addColorStop(0, 'rgba(201,168,76,0.4)');
+  grad.addColorStop(1, 'rgba(201,168,76,0.02)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), padT + plotH);
+  pts.forEach((v, i) => ctx.lineTo(xOf(i), yOf(v)));
+  ctx.lineTo(xOf(n), padT + plotH);
+  ctx.closePath();
+  ctx.fill();
+
+  // Line
+  ctx.strokeStyle = '#c9a84c';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  pts.forEach((v, i) => {
+    const x = xOf(i), y = yOf(v);
+    if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Dots
+  ctx.fillStyle = '#c9a84c';
+  pts.forEach((v, i) => {
+    ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 2.5, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Y labels
+  ctx.fillStyle = 'rgba(240,237,230,0.55)';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('$' + Math.round(mx).toLocaleString(), 2, padT + 8);
+  ctx.fillText('$' + Math.round(mn).toLocaleString(), 2, padT + plotH);
+
+  // X label
+  ctx.textAlign = 'center';
+  ctx.fillText('Now', xOf(0), h - 6);
+  ctx.fillText('In ' + n + ' ' + period + 's', xOf(n), h - 6);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STYLED RECEIPT MODAL
+═══════════════════════════════════════════════════════════ */
+function showReceipt(idx){
+  const t = state.txs[idx];
+  if(!t) return;
+  const isDeposit = /deposit/i.test(t.desc) || (/\+\$/.test(t.desc) && !/Pool:/.test(t.desc) && !/Fraction|slot/i.test(t.desc));
+  const isWithdraw = /withdraw/i.test(t.desc);
+  const amtMatch = t.desc.match(/[+\-]?\$[\d,.]+/);
+  const amt = amtMatch ? amtMatch[0] : '$0';
+  const id = 'RCP-' + (Date.now() + idx).toString().slice(-10);
+  const type = /Pool:/.test(t.desc) ? 'POOL INVESTMENT'
+    : /Pool withdraw/i.test(t.desc) ? 'POOL EXIT'
+    : /Fraction|slot/i.test(t.desc) || /Quick Invest/i.test(t.desc) ? 'ITEM PURCHASE'
+    : /Early sale/i.test(t.desc) ? 'EARLY EXIT'
+    : isWithdraw ? 'WITHDRAWAL'
+    : isDeposit ? 'DEPOSIT'
+    : 'TRANSACTION';
+  const statusColor = t.status === 'processing' ? 'var(--gold)' : t.status === 'rejected' ? 'var(--red)' : 'var(--green)';
+  const statusTxt = t.status === 'processing' ? 'PROCESSING' : t.status === 'rejected' ? 'REJECTED' : 'COMPLETED ✓';
+
+  showModal(`<div style="border:2px dashed var(--bd);padding:20px;background:var(--bg2);border-radius:8px;font-family:'Space Mono',monospace">
+    <div style="text-align:center;border-bottom:1px dashed var(--bd);padding-bottom:12px;margin-bottom:12px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold)">LUXOR INVEST</div>
+      <div style="font-size:9px;color:var(--t3);margin-top:2px">OFFICIAL RECEIPT</div>
+    </div>
+    <div style="font-size:11px;line-height:2">
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Receipt #</span><strong>${id}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Date</span><strong>${new Date().toLocaleDateString('en-GB')}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Time</span><strong>${t.time || '—'}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Type</span><strong>${type}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Status</span><strong style="color:${statusColor}">${statusTxt}</strong></div>
+    </div>
+    <div style="border-top:1px dashed var(--bd);margin-top:12px;padding-top:12px">
+      <div style="font-size:10px;color:var(--t3);margin-bottom:2px">Description</div>
+      <div style="font-size:12px;font-weight:700">${t.desc}</div>
+    </div>
+    <div style="border-top:1px dashed var(--bd);margin-top:12px;padding-top:12px;text-align:center">
+      <div style="font-size:10px;color:var(--t3);letter-spacing:2px;margin-bottom:4px">AMOUNT</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);letter-spacing:1px">${amt}</div>
+    </div>
+    <div style="border-top:1px dashed var(--bd);margin-top:12px;padding-top:10px;font-size:8px;color:var(--t3);text-align:center;line-height:1.5">
+      LUXOR INVEST LTD · UK Company No. 14582937<br>
+      71-75 Shelton Street, London, WC2H 9JQ<br>
+      This is an official transaction record. Keep for your records.
+    </div>
+  </div>
+  <button class="btn-out" style="margin-top:10px" onclick="closeModal()">Close</button>`);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHANGE PASSWORD MODAL
+═══════════════════════════════════════════════════════════ */
+function openChangePassword(){
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">CHANGE PASSWORD</div>
+      <p style="color:var(--t3);font-size:11px;margin-top:6px">Enter your current password and choose a new one</p>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CURRENT PASSWORD</label>
+      <input type="password" id="cp_old" autocomplete="current-password" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">NEW PASSWORD</label>
+      <input type="password" id="cp_new" autocomplete="new-password" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">Min 6 characters</div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CONFIRM NEW PASSWORD</label>
+      <input type="password" id="cp_new2" autocomplete="new-password" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+    </div>
+    <div id="cp_err" style="color:var(--red);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="cp_btn" class="btn-primary" onclick="submitChangePassword()">UPDATE PASSWORD</button>
+    <button class="btn-out" style="margin-top:6px" onclick="closeModal()">Cancel</button>
+  </div>`);
+  setTimeout(() => document.getElementById('cp_old')?.focus(), 100);
+}
+
+async function submitChangePassword(){
+  const old = document.getElementById('cp_old')?.value || '';
+  const newp = document.getElementById('cp_new')?.value || '';
+  const newp2 = document.getElementById('cp_new2')?.value || '';
+  const err = document.getElementById('cp_err');
+  const btn = document.getElementById('cp_btn');
+  if(err) err.textContent = '';
+  if(!old || !newp){ if(err) err.textContent = 'Fill in all fields'; return; }
+  if(newp.length < 6){ if(err) err.textContent = 'New password too short (min 6)'; return; }
+  if(newp !== newp2){ if(err) err.textContent = 'New passwords do not match'; return; }
+  if(old === newp){ if(err) err.textContent = 'New password must differ from old'; return; }
+
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(btn){ btn.textContent = 'UPDATING...'; btn.disabled = true; }
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ old_password: old, new_password: newp })
+    });
+    const data = await r.json();
+    if(!r.ok || !data.ok){
+      const e = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'wrong_old_password':'Current password is incorrect',
+        'password_too_short':'New password too short (min 6)',
+        'same_password':'New password must differ from old',
+      };
+      if(err) err.textContent = map[e] || e;
+      if(btn){ btn.textContent = 'UPDATE PASSWORD'; btn.disabled = false; }
+      return;
+    }
+    closeModal();
+    setTimeout(() => alert('✓ Password updated successfully'), 100);
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent = 'UPDATE PASSWORD'; btn.disabled = false; }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHANGE EMAIL MODAL (request → confirm with code)
+═══════════════════════════════════════════════════════════ */
+function openChangeEmail(){
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">CHANGE EMAIL</div>
+      <p style="color:var(--t3);font-size:11px;margin-top:6px">A confirmation code will be sent to the NEW email</p>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">NEW EMAIL</label>
+      <input type="email" id="ce_email" autocomplete="email" placeholder="newmail@example.com" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CURRENT PASSWORD</label>
+      <input type="password" id="ce_pw" autocomplete="current-password" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+    </div>
+    <div id="ce_err" style="color:var(--red);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="ce_btn" class="btn-primary" onclick="submitChangeEmailRequest()">SEND CONFIRMATION CODE</button>
+    <button class="btn-out" style="margin-top:6px" onclick="closeModal()">Cancel</button>
+  </div>`);
+  setTimeout(() => document.getElementById('ce_email')?.focus(), 100);
+}
+
+async function submitChangeEmailRequest(){
+  const newEmail = (document.getElementById('ce_email')?.value || '').trim();
+  const pw = document.getElementById('ce_pw')?.value || '';
+  const err = document.getElementById('ce_err');
+  const btn = document.getElementById('ce_btn');
+  if(err) err.textContent = '';
+  if(!newEmail || !newEmail.includes('@')){ if(err) err.textContent = 'Invalid email'; return; }
+  if(!pw){ if(err) err.textContent = 'Enter your password'; return; }
+
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(btn){ btn.textContent = 'SENDING...'; btn.disabled = true; }
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/request-email-change', {
+      method: 'POST',
+      body: JSON.stringify({ new_email: newEmail, password: pw })
+    });
+    const data = await r.json();
+    if(!r.ok || !data.ok){
+      const e = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'wrong_password':'Wrong password',
+        'invalid_email':'Invalid email format',
+        'same_email':'New email must differ from current',
+        'email_taken':'This email is already registered',
+      };
+      if(err) err.textContent = map[e] || e;
+      if(btn){ btn.textContent = 'SEND CONFIRMATION CODE'; btn.disabled = false; }
+      return;
+    }
+    closeModal();
+    setTimeout(() => openConfirmEmailChange(newEmail), 100);
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent = 'SEND CONFIRMATION CODE'; btn.disabled = false; }
+  }
+}
+
+function openConfirmEmailChange(newEmail){
+  const masked = newEmail.replace(/(.{2}).*(@.*)/, '$1***$2');
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">CONFIRM NEW EMAIL</div>
+      <p style="color:var(--t3);font-size:11px;line-height:1.5;margin-top:8px">
+        We sent a 6-digit code to<br><strong style="color:var(--t)">${masked}</strong>
+      </p>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CODE FROM NEW EMAIL</label>
+      <input type="text" id="cec_code" inputmode="numeric" pattern="\\d{6}" maxlength="6" autocomplete="one-time-code" style="width:100%;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);text-align:center;font-size:22px;letter-spacing:8px;font-family:'Space Mono',monospace;margin-top:4px;outline:none">
+    </div>
+    <div id="cec_err" style="color:var(--red);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="cec_btn" class="btn-primary" onclick="submitConfirmEmailChange()">CONFIRM CHANGE</button>
+    <button class="btn-out" style="margin-top:6px" onclick="closeModal()">Cancel</button>
+  </div>`);
+  setTimeout(() => document.getElementById('cec_code')?.focus(), 100);
+  const inp = document.getElementById('cec_code');
+  if(inp){
+    inp.addEventListener('input', e => {
+      const v = e.target.value.replace(/\D/g, '');
+      e.target.value = v;
+      if(v.length === 6) submitConfirmEmailChange();
+    });
+  }
+}
+
+async function submitConfirmEmailChange(){
+  const code = (document.getElementById('cec_code')?.value || '').trim();
+  const err = document.getElementById('cec_err');
+  const btn = document.getElementById('cec_btn');
+  if(err) err.textContent = '';
+  if(code.length !== 6){ if(err) err.textContent = 'Enter 6-digit code'; return; }
+
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(btn){ btn.textContent = 'CONFIRMING...'; btn.disabled = true; }
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/confirm-email-change', {
+      method: 'POST',
+      body: JSON.stringify({ code })
+    });
+    const data = await r.json();
+    if(!r.ok || !data.ok){
+      const e = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'wrong_code':'Wrong code. Try again.',
+        'expired':'Code expired',
+        'no_code':'No active code. Request again.',
+        'too_many_attempts':'Too many attempts. Cancel and try again.',
+        'email_taken':'Email already registered',
+      };
+      if(err) err.textContent = map[e] || e;
+      if(btn){ btn.textContent = 'CONFIRM CHANGE'; btn.disabled = false; }
+      const inp = document.getElementById('cec_code');
+      if(inp) inp.value = '';
+      return;
+    }
+    closeModal();
+    setTimeout(() => {
+      alert('✓ Email changed successfully');
+      loadSettings();
+    }, 100);
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent = 'CONFIRM CHANGE'; btn.disabled = false; }
+  }
+}
+
+console.log('[snap3] modals loaded');
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   SNAP 5 — Real-time updates: smart polling marketplace + item detail
+   Заменяет full reload на точечное обновление, не дёргает бэк когда вкладка неактивна
+═══════════════════════════════════════════════════════════ */
+
+window._poll = {
+  marketInt: null,
+  marketIntervalMs: 15000,   // 15s when on Market screen
+  detailIntervalMs: 5000,    // 5s when item detail open
+  inFlight: false,
+  lastSnapshot: null,        // {id: {slots_available, slots_sold, funded, available_fraction}}
+  silentMode: true,          // если true — не показываем визуальные toast'ы
+};
+
+/**
+ * Какой экран активен сейчас? (для решения: дёргать polling или нет)
+ * Поллим только если открыт market / detail / favs / dashboard.
+ * НЕ поллим на settings / referrals / pools и пр. — там данные не меняются от других юзеров.
+ */
+function _shouldPollMarket(){
+  if(document.hidden) return false;
+  // Какой screen активен — берём show на mobile или desktop
+  const dShown = document.querySelector('.d-screen.show');
+  const mShown = document.querySelector('.m-screen.show');
+  const activeId = (dShown?.id || mShown?.id || '').replace(/^(ds|ms)-/, '');
+  return ['dash', 'market', 'detail', 'favs'].includes(activeId);
+}
+
+/**
+ * Делаем snapshot текущих slot-счётчиков чтобы потом сравнивать.
+ */
+function _marketSnapshot(){
+  const snap = {};
+  ITEMS.forEach(i => {
+    snap[i.id] = {
+      slots_available: i.slots_available,
+      slots_sold: i.slots_sold,
+      funded: i.funded,
+      available_fraction: i.available_fraction,
+    };
+  });
+  return snap;
+}
+
+/**
+ * Точечное обновление UI marketplace на основе diff'а старого и нового состояния.
+ * Меняет ТОЛЬКО slot-счётчики и progress bar — без полного re-render (избегаем мерцания).
+ * Если какая-то карточка стала sold-out — добавляем оверлей.
+ * @param changedIds — массив ID товаров у которых что-то изменилось
+ */
+function _diffAndUpdateMarketCards(changedIds){
+  changedIds.forEach(id => {
+    const it = ITEMS.find(x => x.id === id);
+    if(!it) return;
+
+    // Карточки рендерятся в .dmp-card (desktop) и .vc-m-card (mobile)
+    // Используем data-attribute? Нет — у нас onclick="openItemDetail(ID)" — найдём через :has?
+    // Проще: пробежимся по всем карточкам и найдём те что ссылаются на этот id
+    document.querySelectorAll('.dmp-card, .vc-m-card').forEach(card => {
+      const onclickAttr = card.getAttribute('onclick') || '';
+      if(!onclickAttr.includes('openItemDetail(' + id + ')')) return;
+
+      // Update slot counter & progress bar
+      const slotsTxt = (it.slots_sold || 0) + '/' + (it.slots_total || 20);
+      const slotsEl = card.querySelector('.slots span');
+      if(slotsEl && slotsEl.textContent !== slotsTxt){
+        // Highlight briefly
+        slotsEl.style.transition = 'color .3s';
+        slotsEl.style.color = 'var(--gold)';
+        slotsEl.textContent = slotsTxt;
+        setTimeout(() => { slotsEl.style.color = ''; }, 1200);
+      }
+      const fillEl = card.querySelector('.slots .pb .f');
+      if(fillEl){
+        fillEl.style.transition = 'width .5s';
+        fillEl.style.width = (it.funded || 0) + '%';
+      }
+
+      // Sold out badge
+      const soldOut = (it.slots_available !== undefined && it.slots_available <= 0);
+      const existingBadge = card.querySelector('.soldout-badge');
+      if(soldOut && !existingBadge){
+        const img = card.querySelector('.img, .pic');
+        if(img){
+          const badge = document.createElement('div');
+          badge.className = 'soldout-badge';
+          badge.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;color:#fff;z-index:3';
+          badge.textContent = 'SOLD OUT';
+          img.appendChild(badge);
+        }
+      } else if(!soldOut && existingBadge){
+        existingBadge.remove();
+      }
+    });
+  });
+}
+
+/**
+ * Если открыт item detail — обновить его (slot counter, slider max, кнопку BUY).
+ * Если юзер выбрал больше слотов чем теперь доступно — корректируем + показываем уведомление.
+ */
+function _updateOpenItemDetail(){
+  const detailId = window._currentDetailId;
+  if(!detailId) return;
+
+  // Проверяем что detail-экран активен
+  const dActive = document.getElementById('ds-detail')?.classList.contains('show');
+  const mActive = document.getElementById('ms-detail')?.classList.contains('show');
+  if(!dActive && !mActive) return;
+
+  const it = ITEMS.find(x => x.id === Number(detailId));
+  if(!it) return;
+
+  const slotsTotal = it.slots_total || 20;
+  const slotsAvail = it.slots_available !== undefined ? it.slots_available : slotsTotal;
+  const slotsSold = slotsTotal - slotsAvail;
+  const pricePerSlot = it.price_per_slot || (it.price / slotsTotal);
+
+  // Sold out — отрубаем покупку
+  if(slotsAvail <= 0){
+    ['mBuyBtn', 'dBuyBtn'].forEach(id => {
+      const btn = document.getElementById(id);
+      if(btn){
+        btn.disabled = true;
+        btn.style.opacity = '.5';
+        btn.style.cursor = 'not-allowed';
+        btn.textContent = 'SOLD OUT';
+      }
+    });
+    // Toast
+    _showLiveToast('All slots have been sold while you were viewing.', 'red');
+    return;
+  }
+
+  // Обновляем тексты в DETAILS табе если он сейчас открыт
+  ['dIdContent', 'mIdContent'].forEach(id => {
+    const c = document.getElementById(id); if(!c) return;
+    const rows = c.querySelectorAll('.row');
+    rows.forEach(r => {
+      const lbl = r.querySelector('.l')?.textContent || '';
+      if(lbl === 'Slots'){
+        const v = r.querySelector('.v');
+        const newTxt = slotsSold + ' of ' + slotsTotal + ' sold';
+        if(v && v.textContent !== newTxt){
+          v.style.transition = 'color .3s';
+          v.style.color = 'var(--gold)';
+          v.textContent = newTxt;
+          setTimeout(() => v.style.color = '', 1200);
+        }
+      }
+      if(lbl === 'Slots available'){
+        const v = r.querySelector('.v');
+        if(v && v.textContent !== String(slotsAvail)){
+          v.textContent = slotsAvail;
+          v.className = 'v ' + (slotsAvail > 0 ? 'green' : '');
+        }
+      }
+    });
+  });
+
+  // Обновляем slider max + если выбранное количество стало больше доступного — корректируем
+  ['m', 'd'].forEach(prefix => {
+    const slotsField = document.getElementById(prefix + 'V5Slots');
+    const manualField = document.getElementById(prefix + 'V5Manual');
+    if(!slotsField || !manualField) return;
+
+    // Update max attribute on slider/manual
+    manualField.setAttribute('max', slotsAvail);
+
+    let currentSelected = parseInt(slotsField.value) || 1;
+    if(currentSelected > slotsAvail){
+      // Юзер выбрал больше чем теперь есть — корректируем
+      _updateItemSlots(slotsAvail, prefix === 'm' ? 'mobile' : 'desktop', it);
+      _showLiveToast(`${currentSelected - slotsAvail} slot${currentSelected-slotsAvail>1?'s':''} were sold while you were viewing — adjusted to max available (${slotsAvail})`, 'gold');
+    } else {
+      // Просто обновляем визуал — fill bar чтобы соответствовал новому max
+      const fillPct = (currentSelected / slotsAvail) * 100;
+      const fillEl = document.getElementById(prefix + 'V5Fill');
+      if(fillEl) fillEl.style.width = fillPct + '%';
+    }
+  });
+}
+
+/**
+ * Toast в правом верхнем углу — короткое уведомление о live-изменении.
+ * Не использует основную модалку чтобы не мешать.
+ */
+function _showLiveToast(msg, color){
+  const colorVar = color === 'red' ? 'var(--red)' : color === 'gold' ? 'var(--gold)' : 'var(--green)';
+  const bgVar = color === 'red' ? 'var(--red-l)' : color === 'gold' ? 'var(--gold-d)' : 'var(--green-l)';
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;top:20px;right:20px;max-width:340px;background:var(--card);border:1px solid ${colorVar};border-left:4px solid ${colorVar};border-radius:8px;padding:12px 16px;font-size:12px;color:var(--t);box-shadow:var(--shadow);z-index:500;animation:toastIn .25s ease-out;line-height:1.5`;
+  t.textContent = msg;
+  // Вставим стили анимации один раз
+  if(!document.getElementById('_liveToastStyle')){
+    const st = document.createElement('style');
+    st.id = '_liveToastStyle';
+    st.textContent = '@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}@keyframes toastOut{to{opacity:0;transform:translateX(20px)}}';
+    document.head.appendChild(st);
+  }
+  document.body.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'toastOut .25s ease-in forwards';
+    setTimeout(() => t.remove(), 280);
+  }, 5000);
+}
+
+/**
+ * Главная функция polling'а. Дёргает /api/items, сравнивает с текущим snapshot, обновляет точечно.
+ */
+async function _pollMarket(){
+  if(window._poll.inFlight) return;
+  if(!_shouldPollMarket()) return;
+  window._poll.inFlight = true;
+
+  try{
+    const r = await fetch(API_URL + '/api/items');
+    const data = await r.json();
+    if(!data || !data.ok || !Array.isArray(data.items)){
+      window._poll.inFlight = false;
+      return;
+    }
+
+    const newItems = data.items.map(_mapServerItem);
+    const oldSnap = _marketSnapshot();
+
+    // Сравниваем поштучно — что изменилось?
+    const changedIds = [];
+    const newSnap = {};
+    newItems.forEach(it => {
+      newSnap[it.id] = {
+        slots_available: it.slots_available,
+        slots_sold: it.slots_sold,
+        funded: it.funded,
+        available_fraction: it.available_fraction,
+      };
+      const old = oldSnap[it.id];
+      if(!old){ changedIds.push(it.id); return; } // новый item
+      if(old.slots_available !== it.slots_available ||
+         old.slots_sold !== it.slots_sold){
+        changedIds.push(it.id);
+      }
+    });
+
+    // Items которые исчезли (удалены админом или проданы и сняты с публикации)
+    const removedIds = Object.keys(oldSnap).filter(id => !newSnap[id]).map(Number);
+
+    // Обновляем глобальный массив ITEMS
+    ITEMS = newItems;
+
+    // Если ничего не изменилось — выходим
+    if(changedIds.length === 0 && removedIds.length === 0){
+      window._poll.inFlight = false;
+      return;
+    }
+
+    // Точечно обновляем marketplace карточки
+    _diffAndUpdateMarketCards(changedIds);
+
+    // Если открыт item detail — обновим его
+    _updateOpenItemDetail();
+
+    // Если изменился favorite item — пере-рендерим favorites с актуальной инфой
+    if(changedIds.some(id => _favIncludes(id))){
+      try{ renderFavs(); }catch(e){}
+    }
+
+    // Если открыт favs — мягкий refresh (там нет slot-счётчиков, но цены могут поменяться)
+    const favsActive = document.getElementById('ds-favs')?.classList.contains('show')
+                    || document.getElementById('ms-favs')?.classList.contains('show');
+    if(favsActive){ try{ renderFavs(); }catch(e){} }
+
+    console.log('[poll] updated', changedIds.length, 'items, removed', removedIds.length);
+  }catch(e){
+    console.warn('[poll] failed:', e);
+  }finally{
+    window._poll.inFlight = false;
+  }
+}
+
+/**
+ * Запускаем/останавливаем polling. Адаптивный интервал: чаще при открытом detail.
+ */
+function _startMarketPolling(){
+  if(window._poll.marketInt) clearInterval(window._poll.marketInt);
+  // Динамический интервал: 5с если открыт detail, 15с иначе
+  let lastInterval = null;
+  const tick = () => {
+    const detailOpen = document.getElementById('ds-detail')?.classList.contains('show')
+                    || document.getElementById('ms-detail')?.classList.contains('show');
+    const wantInterval = detailOpen ? window._poll.detailIntervalMs : window._poll.marketIntervalMs;
+    if(wantInterval !== lastInterval){
+      // Reschedule
+      if(window._poll.marketInt) clearInterval(window._poll.marketInt);
+      lastInterval = wantInterval;
+      window._poll.marketInt = setInterval(_pollMarket, wantInterval);
+    }
+  };
+  // Re-evaluate every 1s — если юзер открыл/закрыл detail, переключаем частоту poll'а
+  setInterval(tick, 1000);
+  // Первый запуск
+  window._poll.marketInt = setInterval(_pollMarket, window._poll.marketIntervalMs);
+  lastInterval = window._poll.marketIntervalMs;
+}
+
+/* Pause polling when tab hidden — не дёргаем бэк впустую */
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden){
+    // Юзер вернулся на вкладку — сразу делаем catch-up poll
+    setTimeout(_pollMarket, 200);
+  }
+});
+
+/* Запускаем polling после загрузки страницы (даём время первичному loadMarketplaceItems) */
+window.addEventListener('load', () => {
+  setTimeout(_startMarketPolling, 3000);
+});
+
+console.log('[snap5] real-time polling enabled (15s market / 5s detail)');
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   SNAP 5 — Real-time marketplace updates (smart polling)
+═══════════════════════════════════════════════════════════ */
+
+window._poll = {
+  marketInt: null,
+  detailInt: null,
+  detailItemId: null,
+  lastSnapshot: {},
+};
+
+function _itemsSnapshot(){
+  const snap = {};
+  ITEMS.forEach(i => { snap[i.id] = { slots_available: i.slots_available, funded: i.funded, slots_sold: i.slots_sold }; });
+  return snap;
+}
+
+async function _softLoadMarketplace(){
+  if(document.hidden) return;
+  try{
+    const r = await fetch(API_URL + '/api/items');
+    const data = await r.json();
+    if(!data || !data.ok || !Array.isArray(data.items)) return;
+
+    const prevById = window._poll.lastSnapshot;
+    const newItems = data.items.map(_mapServerItem);
+
+    const changes = [];
+    newItems.forEach(n => {
+      const prev = prevById[n.id];
+      if(!prev) return;
+      if(prev.slots_available !== n.slots_available){
+        changes.push({
+          id: n.id,
+          oldAvail: prev.slots_available,
+          newAvail: n.slots_available,
+          soldDelta: prev.slots_available - n.slots_available,
+          newFunded: n.funded,
+          newSlotsSold: n.slots_sold,
+        });
+      }
+    });
+
+    ITEMS = newItems;
+    const newSnap = {};
+    newItems.forEach(i => { newSnap[i.id] = { slots_available: i.slots_available, funded: i.funded, slots_sold: i.slots_sold }; });
+    window._poll.lastSnapshot = newSnap;
+
+    if(changes.length > 0){
+      try{ renderMarketplace(window._currentCat || 'all'); }catch(e){}
+      try{ renderFavs(); }catch(e){}
+      setTimeout(() => _flashChangedCards(changes), 80);
+
+      const detailId = window._poll.detailItemId;
+      if(detailId){
+        const change = changes.find(c => c.id === detailId);
+        if(change){ _onDetailItemChanged(change); }
+      }
+    }
+  }catch(e){
+    /* transient errors fine */
+  }
+}
+
+function _flashChangedCards(changes){
+  changes.forEach(ch => {
+    const cards = document.querySelectorAll(`[data-mk-id="${ch.id}"]`);
+    cards.forEach(card => {
+      card.style.transition = 'box-shadow .35s ease-out, transform .35s ease-out';
+      card.style.boxShadow = '0 0 0 2px var(--gold), 0 8px 24px rgba(201,168,76,.3)';
+      card.style.transform = 'translateY(-2px)';
+      setTimeout(() => {
+        card.style.boxShadow = '';
+        card.style.transform = '';
+      }, 1200);
+    });
+    console.log(`[poll] Item #${ch.id}: ${ch.soldDelta} slot(s) sold (${ch.oldAvail} → ${ch.newAvail})`);
+  });
+}
+
+function _onDetailItemChanged(change){
+  const item = ITEMS.find(x => x.id === change.id);
+  if(!item) return;
+
+  const mSlotsInput = document.getElementById('mV5Slots');
+  const dSlotsInput = document.getElementById('dV5Slots');
+  const currentSlots = Math.max(
+    parseInt(mSlotsInput?.value || '0'),
+    parseInt(dSlotsInput?.value || '0')
+  ) || 1;
+
+  const newAvail = change.newAvail;
+
+  if(newAvail <= 0){
+    _showDetailBanner('SOLD OUT — All slots have been sold while you were viewing.', 'red');
+    const buyBtns = ['mBuyBtn', 'dBuyBtn'].map(id => document.getElementById(id)).filter(Boolean);
+    buyBtns.forEach(b => { b.disabled = true; b.style.opacity = '.5'; b.textContent = 'SOLD OUT'; });
+    const bars = ['mV5Bar', 'dV5Bar'].map(id => document.getElementById(id)).filter(Boolean);
+    bars.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '.5'; });
+    return;
+  }
+
+  if(currentSlots > newAvail){
+    const soldDelta = change.soldDelta;
+    _showDetailBanner(`${soldDelta} slot${soldDelta>1?'s':''} sold while you were viewing — your selection adjusted to max ${newAvail}.`, 'gold');
+    if(mSlotsInput){ try{ _updateItemSlots(newAvail, 'mobile', item); }catch(e){} }
+    if(dSlotsInput){ try{ _updateItemSlots(newAvail, 'desktop', item); }catch(e){} }
+    const mManual = document.getElementById('mV5Manual');
+    const dManual = document.getElementById('dV5Manual');
+    if(mManual) mManual.max = newAvail;
+    if(dManual) dManual.max = newAvail;
+  } else {
+    const soldDelta = change.soldDelta;
+    _showDetailBanner(`${soldDelta} slot${soldDelta>1?'s':''} just sold · ${newAvail} remaining`, 'gold');
+  }
+}
+
+function _showDetailBanner(text, color){
+  document.querySelectorAll('.detail-poll-banner').forEach(b => b.remove());
+  const colorVar = color === 'red' ? 'var(--red)' : 'var(--gold)';
+  const bgVar = color === 'red' ? 'var(--red-l)' : 'var(--gold-d)';
+  const banner = document.createElement('div');
+  banner.className = 'detail-poll-banner';
+  banner.style.cssText = `position:fixed;top:20px;left:50%;transform:translateX(-50%);background:${bgVar};border:1px solid ${colorVar};color:${colorVar};padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:slideDown .25s ease-out;max-width:90vw;text-align:center`;
+  banner.textContent = text;
+  document.body.appendChild(banner);
+  if(!document.getElementById('_pollBannerStyles')){
+    const st = document.createElement('style');
+    st.id = '_pollBannerStyles';
+    st.textContent = '@keyframes slideDown{from{opacity:0;transform:translate(-50%,-20px)}to{opacity:1;transform:translate(-50%,0)}}';
+    document.head.appendChild(st);
+  }
+  setTimeout(() => {
+    banner.style.transition = 'opacity .3s';
+    banner.style.opacity = '0';
+    setTimeout(() => banner.remove(), 300);
+  }, 4000);
+}
+
+function startMarketPolling(){
+  if(window._poll.marketInt) return;
+  window._poll.lastSnapshot = _itemsSnapshot();
+  console.log('[poll] Marketplace polling started (15s)');
+  window._poll.marketInt = setInterval(_softLoadMarketplace, 15000);
+}
+
+function stopMarketPolling(){
+  if(window._poll.marketInt){
+    clearInterval(window._poll.marketInt);
+    window._poll.marketInt = null;
+    console.log('[poll] Marketplace polling stopped');
+  }
+}
+
+function startDetailPolling(itemId){
+  stopDetailPolling();
+  window._poll.detailItemId = Number(itemId);
+  window._poll.lastSnapshot = _itemsSnapshot();
+  console.log(`[poll] Detail polling started for item #${itemId} (5s)`);
+  window._poll.detailInt = setInterval(_softLoadMarketplace, 5000);
+}
+
+function stopDetailPolling(){
+  if(window._poll.detailInt){
+    clearInterval(window._poll.detailInt);
+    window._poll.detailInt = null;
+  }
+  window._poll.detailItemId = null;
+}
+
+/* Wrap navTo to manage pollers */
+const _origNavTo_snap5 = window.navTo;
+window.navTo = function(target){
+  if(target !== 'market'){ stopMarketPolling(); }
+  if(target !== 'detail'){ stopDetailPolling(); }
+  _origNavTo_snap5(target);
+  if(target === 'market'){ startMarketPolling(); }
+};
+
+/* Wrap openItemDetail to start fast polling */
+const _origOpenItemDetail_snap5 = window.openItemDetail;
+window.openItemDetail = function(id){
+  _origOpenItemDetail_snap5(id);
+  startDetailPolling(id);
+  stopMarketPolling();
+};
+
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden && (window._poll.marketInt || window._poll.detailInt)){
+    console.log('[poll] Tab visible — immediate sync');
+    _softLoadMarketplace();
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  stopMarketPolling();
+  stopDetailPolling();
+});
+
+console.log('[snap5] real-time polling loaded');
+
+
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   SMART INVEST — 7-step wizard
+   Stage 2: UI skeleton + navigation + sessionStorage
+   (Stage 3 will add calculation engine, Stage 4 — marketplace items)
+═══════════════════════════════════════════════════════════ */
+
+const SMART_STATE_KEY = 'luxor_calc_state';
+
+function _smartLoadState(){
+  try{
+    const raw = sessionStorage.getItem(SMART_STATE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+
+function _smartSaveState(s){
+  const data = s || window._smart;
+  if(!data) return;
+  try{ sessionStorage.setItem(SMART_STATE_KEY, JSON.stringify(data)); }catch(e){}
+}
+
+function _smartResetState(){
+  try{ sessionStorage.removeItem(SMART_STATE_KEY); }catch(e){}
+  window._smart = null;
+}
+
+function _smartInitState(){
+  const saved = _smartLoadState();
+  window._smart = saved || {
+    step: 1,             // 1..7
+    frequency: null,     // 'daily' | 'weekly' | 'monthly'
+    amount: null,        // number
+    portfolioType: null, // 'pools' | 'items' | 'mixed'
+    chosenStrategy: null,// 'A' | 'B'
+    useExistingBalance: false,
+    paymentMethod: null, // 'USDT-TRC20' | 'BTC' | 'ETH' etc
+  };
+}
+
+/* ═════════════ MAIN RENDER ═════════════ */
+
+function renderSmartInvest(){
+  _smartInitState();
+  const html = _smartShellHTML();
+  const dCt = document.getElementById('dSmartContent');
+  const mCt = document.getElementById('mSmartContent');
+  // Render only in the visible container to avoid duplicate IDs
+  // (desktop/mobile screens share the same ID namespace).
+  const isMobile = window.innerWidth <= 768;
+  if(dCt) dCt.innerHTML = isMobile ? '' : html;
+  if(mCt) mCt.innerHTML = isMobile ? html : '';
+  _smartShowStep(window._smart.step);
+}
+
+/* Shell with all 7 step containers; only one visible at a time */
+function _smartShellHTML(){
+  return `
+  <div class="sm-wrap">
+
+    <!-- Header -->
+    <div class="sm-head">
+      <div class="sm-tag">
+        <svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-smart"/></svg>
+        SMART INVEST
+      </div>
+      <h2 class="sm-title">Find your <em>perfect</em> strategy</h2>
+      <p class="sm-sub">Answer 3 quick questions and our calculator will build a personalized investment plan for you.</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="sm-progress">
+      <div class="sm-prog-bar"><div class="sm-prog-fill" id="smProgFill"></div></div>
+      <div class="sm-prog-txt" id="smProgText">STEP 1 OF 7</div>
+    </div>
+
+    <!-- All step panes -->
+    ${_smartStep1HTML()}
+    ${_smartStep2HTML()}
+    ${_smartStep3HTML()}
+    ${_smartStep4HTML()}
+    ${_smartStep5HTML()}
+    ${_smartStep6HTML()}
+    ${_smartStep7HTML()}
+
+    <!-- Sticky nav footer -->
+    <div class="sm-foot">
+      <button class="sm-btn sm-btn-back" id="smBtnBack" onclick="_smartBack()" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        BACK
+      </button>
+      <button class="sm-btn sm-btn-next" id="smBtnNext" onclick="_smartNext()" disabled>
+        NEXT
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- "I want to choose myself" subtle link -->
+    <div class="sm-self-link">
+      <a onclick="_smartSelfChoice()">I want to choose items myself</a>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 1: FREQUENCY ═════════════ */
+function _smartStep1HTML(){
+  return `
+  <div class="sm-pane" data-step="1">
+    <div class="sm-step-h">
+      <div class="sm-step-q">How often do you want <em>payouts</em>?</div>
+      <div class="sm-step-hint">This determines which pools are available and what types of items we'll suggest.</div>
+    </div>
+
+    <div class="sm-choices">
+      <div class="sm-choice" data-freq="daily" onclick="_smartSetFreq('daily')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">EVERY DAY</div>
+          <div class="sm-choice-d">Fast cashflow. Daily payouts via Silver Pool. Best for emergency funds and short-term parking.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice" data-freq="weekly" onclick="_smartSetFreq('weekly')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">EVERY WEEK</div>
+          <div class="sm-choice-d">Balanced option. Gold Pool weekly returns + items that complete cycles in 1-2 weeks. Optimal yield.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice" data-freq="monthly" onclick="_smartSetFreq('monthly')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">EVERY MONTH</div>
+          <div class="sm-choice-d">Maximum returns. Platinum Pool 15%/month (from $10K) + premium items. Best for serious capital.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 2: AMOUNT ═════════════ */
+function _smartStep2HTML(){
+  return `
+  <div class="sm-pane" data-step="2">
+    <div class="sm-recap" id="smRecap2"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">How much do you want to <em>invest</em>?</div>
+      <div class="sm-step-hint">Pick a preset or enter a custom amount. Minimum $300, maximum $300,000.</div>
+    </div>
+
+    <div class="sm-amount-card">
+      <div class="sm-amount-row">
+        <div class="sm-amount-prefix">$</div>
+        <input type="number" id="smAmountInput" class="sm-amount-input" placeholder="0" min="300" max="300000" step="100" oninput="_smartOnAmountInput(this.value)">
+      </div>
+
+      <div class="sm-presets">
+        <button class="sm-preset" data-amt="500" onclick="_smartSetAmount(500)">$500</button>
+        <button class="sm-preset" data-amt="1000" onclick="_smartSetAmount(1000)">$1,000</button>
+        <button class="sm-preset" data-amt="5000" onclick="_smartSetAmount(5000)">$5,000</button>
+        <button class="sm-preset" data-amt="10000" onclick="_smartSetAmount(10000)">$10,000</button>
+        <button class="sm-preset" data-amt="25000" onclick="_smartSetAmount(25000)">$25,000</button>
+      </div>
+
+      <div class="sm-balance-opt" id="smBalanceOpt" style="display:none">
+        <label class="sm-checkbox">
+          <input type="checkbox" id="smUseBalanceCb" onchange="_smartToggleBalance()">
+          <span class="sm-checkbox-mark"></span>
+          <span class="sm-checkbox-text">Use <strong id="smBalanceAmount">$0</strong> from my available balance</span>
+        </label>
+      </div>
+
+      <div class="sm-amount-error" id="smAmountError" style="display:none"></div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 3: PORTFOLIO TYPE ═════════════ */
+function _smartStep3HTML(){
+  return `
+  <div class="sm-pane" data-step="3">
+    <div class="sm-recap" id="smRecap3"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">What's your <em>risk profile</em>?</div>
+      <div class="sm-step-hint">Three approaches — each balances risk and return differently.</div>
+    </div>
+
+    <div class="sm-choices">
+      <div class="sm-choice" data-pt="pools" onclick="_smartSetPortfolio('pools')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 6 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V6 Z"/><path d="M9 12 L11 14 L15 10"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">POOLS ONLY <span class="sm-tag-mini">STABLE</span></div>
+          <div class="sm-choice-d">We allocate your funds across luxury items — watches, bags, sneakers — through guaranteed-rate pools. Lowest risk, fixed returns.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice" data-pt="items" onclick="_smartSetPortfolio('items')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H18 L22 9 L12 22 L2 9 Z"/><path d="M6 3 L9 9 L2 9 M18 3 L15 9 L22 9 M9 9 L12 22 L15 9 M9 9 H15"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">ITEMS ONLY <span class="sm-tag-mini sm-tag-mini-red">AGGRESSIVE</span></div>
+          <div class="sm-choice-d">Higher upside (~15%/week expected). If items sell below expectations (rare), 10%/month minimum is guaranteed. Higher risk, higher ceiling.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice sm-choice-rec" data-pt="mixed" onclick="_smartSetPortfolio('mixed')">
+        <div class="sm-choice-rec-tag">RECOMMENDED</div>
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><path d="M9 12h6"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">MIXED <span class="sm-tag-mini sm-tag-mini-green">BALANCED</span></div>
+          <div class="sm-choice-d">Part in stable pools with fixed returns, part in items with growth potential. Best risk/reward ratio.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 4: LOADER ═════════════ */
+function _smartStep4HTML(){
+  return `
+  <div class="sm-pane" data-step="4">
+    <div class="sm-loader-wrap">
+      <div class="sm-loader-ring">
+        <div class="sm-loader-core">
+          <svg viewBox="0 0 24 24" width="32" height="32" style="color:var(--gold)"><use href="#i-smart"/></svg>
+        </div>
+      </div>
+
+      <div class="sm-loader-title">Analyzing your strategy</div>
+
+      <div class="sm-loader-list" id="smLoaderList">
+        <div class="sm-loader-item" data-l="1">
+          <div class="sm-loader-dot"></div>
+          <span>Scanning luxury market data</span>
+        </div>
+        <div class="sm-loader-item" data-l="2">
+          <div class="sm-loader-dot"></div>
+          <span>Matching optimal allocation for your amount</span>
+        </div>
+        <div class="sm-loader-item" data-l="3">
+          <div class="sm-loader-dot"></div>
+          <span>Calculating risk-adjusted projections</span>
+        </div>
+        <div class="sm-loader-item" data-l="4">
+          <div class="sm-loader-dot"></div>
+          <span>Building your strategy</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 5: TWO STRATEGIES ═════════════ */
+function _smartStep5HTML(){
+  return `
+  <div class="sm-pane" data-step="5">
+    <div class="sm-recap" id="smRecap5"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">Choose your <em>strategy</em></div>
+      <div class="sm-step-hint">Two personalized options. Pick the one that matches your style.</div>
+    </div>
+
+    <div class="sm-strategies">
+      <!-- STRATEGY A: CONSERVATIVE -->
+      <div class="sm-strategy" data-strat="A" onclick="_smartSetStrategy('A')">
+        <div class="sm-strategy-h">
+          <div class="sm-strategy-tag">STRATEGY A</div>
+          <div class="sm-strategy-name">Conservative</div>
+          <div class="sm-strategy-sub">Lower risk · Steady returns</div>
+        </div>
+
+        <div class="sm-strategy-bars" id="smStratABars">
+          <!-- filled by Stage 3 — placeholder for now -->
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Pool</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:70%;background:var(--gold)"></div></div>
+            <div class="sm-bar-val">70%</div>
+          </div>
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Items</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:30%;background:var(--green)"></div></div>
+            <div class="sm-bar-val">30%</div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-items" id="smStratAItems">
+          <div class="sm-strategy-items-h">
+            <span>Suggested items</span>
+            <button class="sm-shuffle-btn" onclick="event.stopPropagation();_smartShuffleItems('A')" title="Pick different items">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+              Shuffle
+            </button>
+          </div>
+          <div class="sm-strategy-items-list">
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-projection">
+          <div class="sm-proj-row">
+            <span>Per period</span>
+            <span class="sm-proj-v" id="smStratAPer">+$0</span>
+          </div>
+          <div class="sm-proj-row">
+            <span>Over <span id="smStratAMonthsLabel">3 months</span></span>
+            <span class="sm-proj-v sm-proj-v-big" id="smStratATotal">+$0</span>
+          </div>
+          <div class="sm-proj-row sm-proj-row-bonus">
+            <span>With reinvest</span>
+            <span class="sm-proj-v sm-proj-v-bonus" id="smStratACompound">+$0</span>
+          </div>
+        </div>
+
+        <div class="sm-strategy-pick" id="smStratAPickBtn">
+          <span class="sm-strategy-pick-txt">SELECT THIS STRATEGY</span>
+          <span class="sm-strategy-pick-check">✓</span>
+        </div>
+      </div>
+
+      <!-- STRATEGY B: AGGRESSIVE -->
+      <div class="sm-strategy" data-strat="B" onclick="_smartSetStrategy('B')">
+        <div class="sm-strategy-h">
+          <div class="sm-strategy-tag sm-strategy-tag-b">STRATEGY B</div>
+          <div class="sm-strategy-name">Aggressive</div>
+          <div class="sm-strategy-sub">Higher upside · Higher risk</div>
+        </div>
+
+        <div class="sm-strategy-bars" id="smStratBBars">
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Pool</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:40%;background:var(--gold)"></div></div>
+            <div class="sm-bar-val">40%</div>
+          </div>
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Items</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:60%;background:var(--green)"></div></div>
+            <div class="sm-bar-val">60%</div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-items" id="smStratBItems">
+          <div class="sm-strategy-items-h">
+            <span>Suggested items</span>
+            <button class="sm-shuffle-btn" onclick="event.stopPropagation();_smartShuffleItems('B')" title="Pick different items">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+              Shuffle
+            </button>
+          </div>
+          <div class="sm-strategy-items-list">
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-projection">
+          <div class="sm-proj-row">
+            <span>Per period</span>
+            <span class="sm-proj-v" id="smStratBPer">+$0</span>
+          </div>
+          <div class="sm-proj-row">
+            <span>Over <span id="smStratBMonthsLabel">3 months</span></span>
+            <span class="sm-proj-v sm-proj-v-big" id="smStratBTotal">+$0</span>
+          </div>
+          <div class="sm-proj-row sm-proj-row-bonus">
+            <span>With reinvest</span>
+            <span class="sm-proj-v sm-proj-v-bonus" id="smStratBCompound">+$0</span>
+          </div>
+        </div>
+
+        <div class="sm-strategy-pick" id="smStratBPickBtn">
+          <span class="sm-strategy-pick-txt">SELECT THIS STRATEGY</span>
+          <span class="sm-strategy-pick-check">✓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sm-disclaimer">
+      Projections are based on historical returns over the last 12 months. The 10%/month minimum guarantee for items applies only when all items in the portfolio sell below expectation — a scenario that hasn't occurred in 2 years. Not financial advice.
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 6: DEPOSIT ═════════════ */
+function _smartStep6HTML(){
+  return `
+  <div class="sm-pane" data-step="6">
+    <div class="sm-recap" id="smRecap6"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">Review &amp; <em>confirm</em></div>
+      <div class="sm-step-hint">We'll check your balance and request only what's missing.</div>
+    </div>
+
+    <div class="sm-deposit-card">
+      <div class="sm-deposit-summary">
+        <div class="sm-deposit-row">
+          <span>Strategy amount</span>
+          <span id="smDepAmount">$0</span>
+        </div>
+        <div class="sm-deposit-row" id="smDepFromBalanceRow" style="display:none">
+          <span>Available balance</span>
+          <span id="smDepFromBalance" style="color:var(--green)">-$0</span>
+        </div>
+        <div class="sm-deposit-row" id="smDepBonusRow" style="display:none">
+          <span>+5% first deposit bonus</span>
+          <span id="smDepBonus" style="color:var(--gold)">+$0</span>
+        </div>
+        <div class="sm-deposit-row sm-deposit-row-total">
+          <span id="smDepTotalLabel">To pay</span>
+          <span id="smDepTotal">$0</span>
+        </div>
+      </div>
+
+      <!-- CASE 1: Enough balance — show success, no payment needed -->
+      <div class="sm-deposit-ok" id="smDepOk" style="display:none">
+        <div class="sm-dep-ok-ic">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div class="sm-dep-ok-t">You have enough balance!</div>
+        <div class="sm-dep-ok-d">Click <strong>CONFIRM PURCHASE</strong> to apply your strategy. Funds will be deducted from your wallet automatically.</div>
+      </div>
+
+      <!-- CASE 2: Not enough — show top-up panel -->
+      <div class="sm-deposit-need" id="smDepNeed" style="display:none">
+        <div class="sm-dep-need-h">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <div>
+            <div class="sm-dep-need-t">Top-up required</div>
+            <div class="sm-dep-need-d">You need <strong id="smDepNeedAmt">$0</strong> more to fund this strategy.</div>
+          </div>
+        </div>
+        <button class="sm-dep-topup-btn" onclick="_smartStartTopup()">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          DEPOSIT <span id="smDepTopupAmt">$0</span>
+        </button>
+        <div class="sm-dep-topup-hint">Opens secure deposit flow. After payment, your strategy activates automatically.</div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 7: FINAL CONFIRMATION ═════════════ */
+function _smartStep7HTML(){
+  return `
+  <div class="sm-pane" data-step="7">
+    <div class="sm-final-wrap">
+      <div class="sm-final-icon">
+        <svg viewBox="0 0 52 52" width="64" height="64" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="26" cy="26" r="23" stroke-dasharray="145" stroke-dashoffset="0" class="sm-final-ring"/>
+          <path d="M14 26 l8 8 l16 -16" class="sm-final-check"/>
+        </svg>
+      </div>
+
+      <div class="sm-final-title">Confirm your purchase</div>
+      <p class="sm-final-sub">After confirmation we'll automatically purchase the listed positions for you.</p>
+
+      <div class="sm-final-list" id="smFinalList">
+        <!-- Populated dynamically based on chosen strategy -->
+        <div class="sm-final-item">
+          <div class="sm-final-item-ic">★</div>
+          <div class="sm-final-item-info">
+            <div class="sm-final-item-n">Gold Pool</div>
+            <div class="sm-final-item-d">3%/week · weekly payouts</div>
+          </div>
+          <div class="sm-final-item-v">$0</div>
+        </div>
+      </div>
+
+      <div class="sm-final-totals">
+        <div class="sm-final-totals-row">
+          <span>Strategy total</span>
+          <span id="smFinalStratTotal">$0</span>
+        </div>
+        <div class="sm-final-totals-row" id="smFinalBonusRow" style="display:none">
+          <span>Bonus on Available Balance</span>
+          <span style="color:var(--gold)" id="smFinalBonus">+$0</span>
+        </div>
+        <div class="sm-final-totals-row sm-final-totals-row-grand">
+          <span>Total</span>
+          <span id="smFinalGrand">$0</span>
+        </div>
+      </div>
+
+      <div class="sm-final-disclaimer">
+        By confirming, you agree to our investment terms. Capital is allocated immediately and cannot be partially refunded — you can exit pool positions any time and sell item shares (with a 10% early-exit penalty).
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ NAVIGATION ═════════════ */
+
+function _smartShowStep(n){
+  window._smart.step = n;
+  _smartSaveState();
+
+  // Hide all panes, show current
+  document.querySelectorAll('.sm-pane').forEach(p => {
+    p.classList.toggle('sm-pane-active', parseInt(p.dataset.step) === n);
+  });
+
+  // Progress bar
+  const fill = document.getElementById('smProgFill');
+  const text = document.getElementById('smProgText');
+  if(fill) fill.style.width = (n / 7 * 100) + '%';
+  if(text) text.textContent = `STEP ${n} OF 7`;
+
+  // Back button visibility
+  const back = document.getElementById('smBtnBack');
+  if(back) back.style.display = n > 1 ? '' : 'none';
+
+  // Next button label & state
+  const next = document.getElementById('smBtnNext');
+  if(next){
+    next.disabled = !_smartCanProceed(n);
+    next.innerHTML = _smartNextLabel(n) + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  }
+
+  // Update recaps
+  _smartUpdateRecaps();
+
+  // Step-specific actions
+  if(n === 4){
+    _smartRunLoader();
+  }
+  if(n === 5){
+    _smartRenderStrategies();
+  }
+  if(n === 6){
+    _smartRenderDeposit();
+  }
+  if(n === 7){
+    _smartRenderFinal();
+  }
+
+  // Re-apply selections (for restored state)
+  _smartReapplySelections();
+
+  // Scroll top
+  const dCt = document.getElementById('dSmartContent');
+  if(dCt) dCt.scrollTop = 0;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function _smartNextLabel(step){
+  if(step === 3) return 'ANALYZE';
+  if(step === 4) return 'CONTINUE';
+  if(step === 5) return 'PROCEED TO DEPOSIT';
+  if(step === 6) return 'I\'VE PAID';
+  if(step === 7) return 'CONFIRM PURCHASE';
+  return 'NEXT';
+}
+
+function _smartCanProceed(step){
+  const s = window._smart;
+  if(step === 1) return !!s.frequency;
+  if(step === 2) return !!s.amount && s.amount >= 300 && s.amount <= 300000;
+  if(step === 3) return !!s.portfolioType;
+  if(step === 4) return window._smartLoaderDone === true;
+  if(step === 5) return !!s.chosenStrategy;
+  if(step === 6) return !!s.paymentMethod;
+  if(step === 7) return true;
+  return false;
+}
+
+function _smartNext(){
+  const s = window._smart;
+  if(!_smartCanProceed(s.step)) return;
+
+  if(s.step === 7){
+    _smartConfirmPurchase();
+    return;
+  }
+  _smartShowStep(s.step + 1);
+}
+
+function _smartBack(){
+  const s = window._smart;
+  if(s.step <= 1) return;
+  // If going back from loader, skip back to step 3
+  const target = s.step === 5 ? 3 : s.step - 1;
+  _smartShowStep(target);
+}
+
+function _smartGoToStep(n){
+  if(n < 1 || n > 7) return;
+  // Don't allow jumping forward past current
+  if(n > window._smart.step) return;
+  _smartShowStep(n);
+}
+
+function _smartSelfChoice(){
+  confirmAction({
+    title: 'Skip the strategy?',
+    msg: 'Our calculator picks the optimal strategy for you — it\'s safer and faster. You can always buy items manually later — new lots arrive daily.',
+    okText: 'CHOOSE MYSELF',
+    cancelText: 'STAY HERE',
+  }).then(ok => {
+    if(ok){
+      _smartResetState();
+      navTo('market');
+    }
+  });
+}
+
+/* ═════════════ STEP 1 HANDLERS ═════════════ */
+function _smartSetFreq(f){
+  window._smart.frequency = f;
+  _smartSaveState();
+  document.querySelectorAll('[data-freq]').forEach(el => {
+    el.classList.toggle('sm-choice-selected', el.dataset.freq === f);
+  });
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = false;
+}
+
+/* ═════════════ STEP 2 HANDLERS ═════════════ */
+function _smartSetAmount(v){
+  v = parseInt(v) || 0;
+  window._smart.amount = v;
+  _smartSaveState();
+  const inp = document.getElementById('smAmountInput');
+  if(inp) inp.value = v || '';
+  document.querySelectorAll('.sm-preset').forEach(p => {
+    p.classList.toggle('sm-preset-active', parseInt(p.dataset.amt) === v);
+  });
+  _smartValidateAmount();
+}
+
+function _smartOnAmountInput(v){
+  v = parseInt(v) || 0;
+  window._smart.amount = v;
+  _smartSaveState();
+  document.querySelectorAll('.sm-preset').forEach(p => {
+    p.classList.toggle('sm-preset-active', parseInt(p.dataset.amt) === v);
+  });
+  _smartValidateAmount();
+}
+
+function _smartValidateAmount(){
+  const v = window._smart.amount;
+  const err = document.getElementById('smAmountError');
+  const next = document.getElementById('smBtnNext');
+  let msg = '';
+  if(!v){
+    msg = '';
+  } else if(v < 300){
+    msg = 'Minimum investment is $300.';
+  } else if(v > 300000){
+    msg = 'Maximum investment is $300,000.';
+  }
+  if(err){
+    err.textContent = msg;
+    err.style.display = msg ? '' : 'none';
+  }
+  if(next) next.disabled = !!msg || !v;
+}
+
+function _smartToggleBalance(){
+  const cb = document.getElementById('smUseBalanceCb');
+  window._smart.useExistingBalance = cb ? cb.checked : false;
+  _smartSaveState();
+}
+
+/* ═════════════ STEP 3 HANDLERS ═════════════ */
+function _smartSetPortfolio(t){
+  window._smart.portfolioType = t;
+  _smartSaveState();
+  document.querySelectorAll('[data-pt]').forEach(el => {
+    el.classList.toggle('sm-choice-selected', el.dataset.pt === t);
+  });
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = false;
+}
+
+/* ═════════════ STEP 4 LOADER ═════════════ */
+function _smartRunLoader(){
+  window._smartLoaderDone = false;
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = true;
+
+  // Reset all loader items to inactive
+  document.querySelectorAll('.sm-loader-item').forEach(it => {
+    it.classList.remove('sm-loader-item-done', 'sm-loader-item-active');
+  });
+
+  // Sequentially activate items
+  const items = document.querySelectorAll('.sm-loader-item');
+  if(items.length === 0) return;
+
+  const interval = 700; // ms between steps
+  items.forEach((it, i) => {
+    setTimeout(() => {
+      it.classList.add('sm-loader-item-active');
+      if(i > 0) items[i-1].classList.add('sm-loader-item-done');
+    }, i * interval);
+  });
+
+  // Mark last as done after loader finishes
+  setTimeout(() => {
+    if(items[items.length-1]) items[items.length-1].classList.add('sm-loader-item-done');
+    window._smartLoaderDone = true;
+    // Auto-advance to step 5
+    if(window._smart.step === 4){
+      setTimeout(() => _smartShowStep(5), 350);
+    }
+  }, items.length * interval);
+}
+
+/* ═════════════ STEP 5: STRATEGIES — see Stage 3 engine below ═════════════ */
+
+function _smartSetStrategy(s){
+  window._smart.chosenStrategy = s;
+  _smartSaveState();
+  document.querySelectorAll('[data-strat]').forEach(el => {
+    el.classList.toggle('sm-strategy-selected', el.dataset.strat === s);
+  });
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = false;
+}
+
+/* ═════════════ STEP 6: DEPOSIT ═════════════ */
+function _smartSetCoin(c){
+  window._smart.paymentMethod = c;
+  _smartSaveState();
+  document.querySelectorAll('[data-coin]').forEach(el => {
+    el.classList.toggle('sm-coin-selected', el.dataset.coin === c);
+  });
+  const info = document.getElementById('smDepInfo');
+  if(info) info.style.display = '';
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = false;
+}
+
+/* ═════════════ STEP 6+7: render functions in Stage 3 engine below ═════════════ */
+
+/* ═════════════ RECAPS (breadcrumb-like) ═════════════ */
+function _smartUpdateRecaps(){
+  const s = window._smart;
+  if(!s) return;
+
+  const FREQ_LABEL = { daily: 'Daily payouts', weekly: 'Weekly payouts', monthly: 'Monthly payouts' };
+  const PT_LABEL = { pools: 'Pools only', items: 'Items only', mixed: 'Mixed strategy' };
+
+  const buildRecap = (showAmount, showFreq, showPT, showStrat) => {
+    const parts = [];
+    if(showFreq && s.frequency){
+      parts.push(`<div class="sm-recap-item"><span class="sm-recap-l">FREQUENCY</span> <span class="sm-recap-v">${FREQ_LABEL[s.frequency]}</span> <a class="sm-recap-edit" onclick="_smartGoToStep(1)">edit</a></div>`);
+    }
+    if(showAmount && s.amount){
+      parts.push(`<div class="sm-recap-item"><span class="sm-recap-l">AMOUNT</span> <span class="sm-recap-v">$${s.amount.toLocaleString()}</span> <a class="sm-recap-edit" onclick="_smartGoToStep(2)">edit</a></div>`);
+    }
+    if(showPT && s.portfolioType){
+      parts.push(`<div class="sm-recap-item"><span class="sm-recap-l">TYPE</span> <span class="sm-recap-v">${PT_LABEL[s.portfolioType]}</span> <a class="sm-recap-edit" onclick="_smartGoToStep(3)">edit</a></div>`);
+    }
+    if(showStrat && s.chosenStrategy){
+      parts.push(`<div class="sm-recap-item"><span class="sm-recap-l">STRATEGY</span> <span class="sm-recap-v">${s.chosenStrategy}</span> <a class="sm-recap-edit" onclick="_smartGoToStep(5)">edit</a></div>`);
+    }
+    return parts.join('');
+  };
+
+  const r2 = document.getElementById('smRecap2');
+  if(r2 && s.step >= 2) r2.innerHTML = buildRecap(false, true, false, false);
+
+  const r3 = document.getElementById('smRecap3');
+  if(r3 && s.step >= 3) r3.innerHTML = buildRecap(true, true, false, false);
+
+  const r5 = document.getElementById('smRecap5');
+  if(r5 && s.step >= 5) r5.innerHTML = buildRecap(true, true, true, false);
+
+  const r6 = document.getElementById('smRecap6');
+  if(r6 && s.step >= 6) r6.innerHTML = buildRecap(true, true, true, true);
+}
+
+function _smartReapplySelections(){
+  const s = window._smart;
+  if(!s) return;
+  if(s.frequency){
+    document.querySelectorAll('[data-freq]').forEach(el => el.classList.toggle('sm-choice-selected', el.dataset.freq === s.frequency));
+  }
+  if(s.amount){
+    const inp = document.getElementById('smAmountInput');
+    if(inp) inp.value = s.amount;
+    document.querySelectorAll('.sm-preset').forEach(p => p.classList.toggle('sm-preset-active', parseInt(p.dataset.amt) === s.amount));
+  }
+  if(s.portfolioType){
+    document.querySelectorAll('[data-pt]').forEach(el => el.classList.toggle('sm-choice-selected', el.dataset.pt === s.portfolioType));
+  }
+  if(s.chosenStrategy){
+    document.querySelectorAll('[data-strat]').forEach(el => el.classList.toggle('sm-strategy-selected', el.dataset.strat === s.chosenStrategy));
+  }
+  if(s.paymentMethod){
+    document.querySelectorAll('[data-coin]').forEach(el => el.classList.toggle('sm-coin-selected', el.dataset.coin === s.paymentMethod));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 3: STRATEGY ENGINE (calculation rules from prompt section 3)
+   STAGE 4: Marketplace items shuffle
+   STAGE 5: API integration (deposit + purchase) with graceful fallback
+   STAGE 6: First-deposit bonus +5% + Invested/Available split
+═══════════════════════════════════════════════════════════ */
+
+/* ───────── PRODUCT CONSTANTS (per prompt — DO NOT CHANGE) ───────── */
+const SM_POOL = {
+  Silver:   { rate: 0.5,  period: 'day',   monthly: 15.0,  weekly: 3.5,    daily: 0.5,
+              min: 100, max: 1000, label: 'Silver Pool', exit: 'any day',     ic: '●' },
+  Gold:     { rate: 3.0,  period: 'week',  monthly: 12.0,  weekly: 3.0,    daily: 0.43,
+              min: 1000, max: 10000, label: 'Gold Pool', exit: 'each week',  ic: '★' },
+  Platinum: { rate: 15.0, period: 'month', monthly: 15.0,  weekly: 3.5,    daily: 0.5,
+              min: 10000, max: 300000, label: 'Platinum Pool', exit: 'each month', ic: '◆' },
+};
+const SM_ITEM_AVG = {
+  expectedWeekly: 15.0,    // ~15%/week expected
+  guaranteedMonthly: 10.0, // 10%/month guaranteed minimum
+  avgCycleDays: 10,        // average sale time 1-2 weeks
+};
+
+/* ───────── STAGE 3: ALLOCATION ENGINE ───────── */
+
+/* Returns {strategyA, strategyB} — each: {pools:[{plan, amount}], items:{amount}, freq} */
+function _smartBuildAllocations(state){
+  const { frequency, amount, portfolioType } = state;
+
+  // Override: if user picked "pools only" or "items only"
+  if(portfolioType === 'pools'){
+    return _smartAllocPoolsOnly(amount, frequency);
+  }
+  if(portfolioType === 'items'){
+    return _smartAllocItemsOnly(amount, frequency);
+  }
+
+  // MIXED — apply CASE A/B/C rules from prompt section 3.2
+  if(frequency === 'daily') return _smartCaseA(amount);
+  if(frequency === 'weekly') return _smartCaseB(amount);
+  return _smartCaseC(amount);
+}
+
+/* CASE A — daily payouts. Only Silver Pool available */
+function _smartCaseA(amount){
+  // Strategy A: 100% Silver, split into chunks of $1000 max each
+  const silverChunks = [];
+  let remaining = amount;
+  while(remaining > 0){
+    const chunk = Math.min(1000, remaining);
+    silverChunks.push({ plan:'Silver', amount: chunk });
+    remaining -= chunk;
+  }
+
+  // Strategy B: 50% Silver / 50% Gold (only if amount >= $1000 to fund Gold)
+  let stratBPools;
+  if(amount >= 2000){
+    const half = amount / 2;
+    // Half in Silver chunks
+    const silverPart = [];
+    let remS = half;
+    while(remS > 0){
+      const c = Math.min(1000, remS);
+      silverPart.push({ plan:'Silver', amount: c });
+      remS -= c;
+    }
+    stratBPools = silverPart.concat([{ plan:'Gold', amount: half }]);
+  } else {
+    // Not enough for Gold — same as A
+    stratBPools = [...silverChunks];
+  }
+
+  return {
+    strategyA: { name:'Conservative', sub:'Daily payouts · 100% Silver', pools: silverChunks, items: { amount: 0 }, freq:'daily', warn: null },
+    strategyB: { name:'Balanced',     sub:'Daily + weekly mix',        pools: stratBPools,    items: { amount: 0 }, freq:'daily', warn: amount >= 2000 ? 'Half allocated to Gold (weekly payouts) for ~17% higher return.' : null },
+  };
+}
+
+/* CASE B — weekly payouts. Available: Silver/Gold + items */
+function _smartCaseB(amount){
+  // Sub-case: $300-$1000 — Silver only, no Gold, no items (items min $25 but won't have weekly payout cycle confidence)
+  if(amount < 1000){
+    const silverChunks = [];
+    let remaining = amount;
+    while(remaining > 0){
+      const chunk = Math.min(1000, remaining);
+      silverChunks.push({ plan:'Silver', amount: chunk });
+      remaining -= chunk;
+    }
+    return {
+      strategyA: { name:'Conservative', sub:'Silver Pool only (Gold needs $1K+)', pools: silverChunks, items:{ amount: 0 }, freq:'weekly', warn:'Add $'+(1000-amount)+' more to unlock Gold Pool 3%/week.' },
+      strategyB: { name:'Aggressive',   sub:'Silver Pool only',                    pools: silverChunks, items:{ amount: 0 }, freq:'weekly', warn:'Add $'+(1000-amount)+' more to unlock Gold Pool + items mix.' },
+    };
+  }
+
+  // $1000+ — Gold + items
+  const goldA = Math.round(amount * 0.7);
+  const itemsA = amount - goldA;
+  const goldB = Math.round(amount * 0.4);
+  const itemsB = amount - goldB;
+
+  return {
+    strategyA: {
+      name:'Conservative', sub:'70% Gold Pool · 30% items',
+      pools: [{ plan:'Gold', amount: goldA }],
+      items: { amount: itemsA },
+      freq: 'weekly', warn: null,
+    },
+    strategyB: {
+      name:'Aggressive', sub:'40% Gold Pool · 60% items',
+      pools: [{ plan:'Gold', amount: goldB }],
+      items: { amount: itemsB },
+      freq: 'weekly', warn: null,
+    },
+  };
+}
+
+/* CASE C — monthly payouts. Available: Platinum (from $10K), Gold, items */
+function _smartCaseC(amount){
+  if(amount < 10000){
+    // No Platinum — fallback to weekly (Gold + items)
+    const r = _smartCaseB(amount);
+    r.strategyA.warn = 'Platinum Pool needs $10K+. Showing Gold Pool strategy instead.';
+    r.strategyB.warn = 'Platinum Pool needs $10K+. Showing Gold Pool strategy instead.';
+    r.strategyA.sub = '70% Gold Pool · 30% items (Platinum unavailable)';
+    r.strategyB.sub = '40% Gold Pool · 60% items (Platinum unavailable)';
+    return r;
+  }
+
+  // $10K+ — Platinum is available
+  const platA = Math.round(amount * 0.8);
+  const itemsA = amount - platA;
+  const platB = Math.round(amount * 0.5);
+  const itemsB = amount - platB;
+
+  return {
+    strategyA: {
+      name:'Conservative', sub:'80% Platinum Pool · 20% items',
+      pools: [{ plan:'Platinum', amount: platA }],
+      items: { amount: itemsA },
+      freq:'monthly', warn: null,
+    },
+    strategyB: {
+      name:'Aggressive', sub:'50% Platinum · 50% items',
+      pools: [{ plan:'Platinum', amount: platB }],
+      items: { amount: itemsB },
+      freq:'monthly', warn: null,
+    },
+  };
+}
+
+/* POOLS ONLY override — apply pool tier by amount, both strategies vary risk */
+function _smartAllocPoolsOnly(amount, frequency){
+  // Strategy A: 100% in best pool for amount
+  // Strategy B: split across two pools for liquidity
+  const bestPool = amount >= 10000 ? 'Platinum' : (amount >= 1000 ? 'Gold' : 'Silver');
+
+  // Apply min/max limits from SM_POOL
+  const cap = SM_POOL[bestPool].max;
+  const stratAPools = [];
+  let rem = amount;
+  while(rem > 0){
+    const chunk = Math.min(cap, rem);
+    stratAPools.push({ plan: bestPool, amount: chunk });
+    rem -= chunk;
+  }
+
+  // Strategy B: 70% in best pool, 30% in lower tier (more liquidity)
+  const fallbackPool = bestPool === 'Platinum' ? 'Gold' : (bestPool === 'Gold' ? 'Silver' : 'Silver');
+  const portionA = Math.round(amount * 0.7);
+  const portionB = amount - portionA;
+  const stratBPools = [];
+  // Best pool portion (with chunking)
+  let remBest = portionA;
+  while(remBest > 0){
+    const chunk = Math.min(cap, remBest);
+    stratBPools.push({ plan: bestPool, amount: chunk });
+    remBest -= chunk;
+  }
+  // Fallback portion
+  if(portionB >= SM_POOL[fallbackPool].min){
+    const fbCap = SM_POOL[fallbackPool].max;
+    let remFB = portionB;
+    while(remFB > 0){
+      const chunk = Math.min(fbCap, remFB);
+      stratBPools.push({ plan: fallbackPool, amount: chunk });
+      remFB -= chunk;
+    }
+  } else {
+    // If fallback can't satisfy min, put it all in best pool
+    stratBPools[stratBPools.length-1].amount += portionB;
+  }
+
+  return {
+    strategyA: { name:'All-in '+bestPool, sub:'100% in '+SM_POOL[bestPool].label, pools: stratAPools, items:{amount:0}, freq:frequency, warn:null },
+    strategyB: { name:'Diversified',     sub:'70% '+bestPool+' · 30% '+fallbackPool, pools: stratBPools, items:{amount:0}, freq:frequency, warn: 'Split for added liquidity from '+fallbackPool+' Pool.' },
+  };
+}
+
+/* ITEMS ONLY override */
+function _smartAllocItemsOnly(amount, frequency){
+  // Strategy A: 5-8 small items diversified
+  // Strategy B: 2-3 large premium items
+  return {
+    strategyA: { name:'Diversified', sub:'5-8 items across categories — lower risk', pools: [], items: { amount, mode:'diversified' }, freq:frequency, warn:'Items are riskier than pools on sale timing. 10%/month guaranteed minimum.' },
+    strategyB: { name:'Premium',     sub:'2-3 large stakes in premium items',          pools: [], items: { amount, mode:'concentrated' }, freq:frequency, warn:'Items are riskier than pools on sale timing. 10%/month guaranteed minimum.' },
+  };
+}
+
+/* ───────── STAGE 3: PROFIT MATH ───────── */
+
+/* Pool returns over N months */
+function _smartPoolProfit(amount, plan, months){
+  const p = SM_POOL[plan];
+  if(!p || !amount) return 0;
+  return amount * (p.monthly / 100) * months;
+}
+
+/* Item returns over N months — based on prompt: 15%/week expected, 10%/mo guaranteed min */
+function _smartItemProfit(amount, months){
+  if(!amount) return 0;
+  const totalDays = months * 30;
+  const cycles = totalDays / SM_ITEM_AVG.avgCycleDays;
+  // Expected return per cycle: ~15%/week × (cycleDays/7)
+  // But cycle is sale-event-based, so we cap at ~5 cycles/month (each takes 1-2 weeks)
+  // Realistic: per cycle = principal × (15% × cycleDays/7)
+  const REALISTIC_CAP = 6;  // max 6 cycles total (3 months of cycling)
+  const cappedCycles = Math.min(cycles, REALISTIC_CAP);
+  const perCycle = SM_ITEM_AVG.expectedWeekly * (SM_ITEM_AVG.avgCycleDays / 7);  // ~21.4% per cycle
+  return amount * (perCycle / 100) * cappedCycles;
+}
+
+/* Compound: reinvest each cycle, max 6 cycles, degrading rates */
+function _smartItemCompound(amount, months){
+  if(!amount) return 0;
+  const totalDays = months * 30;
+  const cycles = totalDays / SM_ITEM_AVG.avgCycleDays;
+  const REALISTIC_CAP = 6;
+  const fullCycles = Math.min(Math.floor(cycles), REALISTIC_CAP);
+  const partial = (Math.floor(cycles) < REALISTIC_CAP) ? (cycles - fullCycles) : 0;
+  const baseRatePerCycle = SM_ITEM_AVG.expectedWeekly * (SM_ITEM_AVG.avgCycleDays / 7);  // ~21.4%
+
+  let principal = amount;
+  let earned = 0;
+  for(let i = 0; i < fullCycles; i++){
+    let rate = baseRatePerCycle;
+    if(i === 1) rate = baseRatePerCycle - 3;
+    else if(i >= 2) rate = Math.max(baseRatePerCycle - 6, 12);
+    const e = principal * (rate / 100);
+    earned += e;
+    principal += e;
+  }
+  if(partial > 0){
+    const r = fullCycles === 0 ? baseRatePerCycle : (fullCycles === 1 ? baseRatePerCycle - 3 : Math.max(baseRatePerCycle - 6, 12));
+    earned += principal * (r / 100) * partial;
+  }
+  return earned;
+}
+
+/* Compute strategy projection: per-period, total, with-compound */
+function _smartProjectStrategy(strategy, frequency){
+  // Months horizon: depends on frequency choice
+  // daily → 1 month, weekly → 3 months, monthly → 6 months (typical user planning)
+  const months = frequency === 'daily' ? 1 : (frequency === 'weekly' ? 3 : 6);
+
+  let poolEarned = 0;
+  for(const p of (strategy.pools || [])){
+    poolEarned += _smartPoolProfit(p.amount, p.plan, months);
+  }
+  const itemEarned = _smartItemProfit(strategy.items.amount || 0, months);
+  const itemCompound = _smartItemCompound(strategy.items.amount || 0, months);
+
+  const total = poolEarned + itemEarned;
+  const totalCompound = poolEarned + itemCompound;
+
+  // Per-period earnings
+  let perPeriod = 0;
+  if(frequency === 'daily'){
+    // Sum of daily pool rates
+    for(const p of (strategy.pools || [])){
+      perPeriod += p.amount * (SM_POOL[p.plan].daily / 100);
+    }
+  } else if(frequency === 'weekly'){
+    for(const p of (strategy.pools || [])){
+      perPeriod += p.amount * (SM_POOL[p.plan].weekly / 100);
+    }
+  } else {
+    for(const p of (strategy.pools || [])){
+      perPeriod += p.amount * (SM_POOL[p.plan].monthly / 100);
+    }
+  }
+
+  return { months, perPeriod, total, totalCompound };
+}
+
+/* ───────── STAGE 3: RENDER ───────── */
+
+function _smartRenderStrategies(){
+  const s = window._smart;
+  const allocations = _smartBuildAllocations(s);
+  window._smartAllocations = allocations;
+
+  _smartRenderStrategyCard('A', allocations.strategyA, s);
+  _smartRenderStrategyCard('B', allocations.strategyB, s);
+}
+
+function _smartRenderStrategyCard(letter, strategy, state){
+  const proj = _smartProjectStrategy(strategy, state.frequency);
+  const monthsTxt = proj.months + (proj.months === 1 ? ' month' : ' months');
+
+  const fmt = v => '$' + Math.round(v).toLocaleString();
+
+  // Update months label
+  const monthsEl = document.getElementById(`smStrat${letter}MonthsLabel`);
+  if(monthsEl) monthsEl.textContent = monthsTxt;
+
+  // Update bars
+  const barsEl = document.getElementById(`smStrat${letter}Bars`);
+  if(barsEl){
+    const totalAmount = (strategy.pools || []).reduce((s,p) => s+p.amount, 0) + (strategy.items.amount || 0);
+    const poolPct = totalAmount > 0 ? Math.round(((strategy.pools || []).reduce((s,p) => s+p.amount, 0) / totalAmount) * 100) : 0;
+    const itemPct = 100 - poolPct;
+    let barsHTML = '';
+    if(poolPct > 0){
+      // Group pools by plan
+      const byPlan = {};
+      strategy.pools.forEach(p => { byPlan[p.plan] = (byPlan[p.plan]||0) + p.amount; });
+      Object.entries(byPlan).forEach(([plan, amt]) => {
+        const pct = Math.round((amt / totalAmount) * 100);
+        barsHTML += `<div class="sm-bar-row">
+          <div class="sm-bar-label">${plan}</div>
+          <div class="sm-bar"><div class="sm-bar-fill" style="width:${pct}%;background:var(--gold)"></div></div>
+          <div class="sm-bar-val">${pct}%</div>
+        </div>`;
+      });
+    }
+    if(itemPct > 0){
+      barsHTML += `<div class="sm-bar-row">
+        <div class="sm-bar-label">Items</div>
+        <div class="sm-bar"><div class="sm-bar-fill" style="width:${itemPct}%;background:var(--green)"></div></div>
+        <div class="sm-bar-val">${itemPct}%</div>
+      </div>`;
+    }
+    barsEl.innerHTML = barsHTML;
+  }
+
+  // Items list (Stage 4 will fill with real marketplace data)
+  _smartRenderItemsList(letter, strategy);
+
+  // Strategy sub-text & warning
+  const headEl = barsEl?.previousElementSibling;
+  // Update name & sub via DOM lookup
+  const card = document.querySelector(`[data-strat="${letter}"]`);
+  if(card){
+    const nameEl = card.querySelector('.sm-strategy-name');
+    const subEl = card.querySelector('.sm-strategy-sub');
+    if(nameEl) nameEl.textContent = strategy.name;
+    if(subEl) subEl.textContent = strategy.sub;
+  }
+
+  // Projections
+  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  const periodLabel = state.frequency === 'daily' ? 'Per day' : (state.frequency === 'weekly' ? 'Per week' : 'Per month');
+  // Update first projection label
+  const projCard = card?.querySelector('.sm-strategy-projection');
+  if(projCard){
+    const firstLabel = projCard.querySelector('.sm-proj-row:first-child span:first-child');
+    if(firstLabel) firstLabel.textContent = periodLabel;
+  }
+  setText(`smStrat${letter}Per`, '+' + fmt(proj.perPeriod));
+  setText(`smStrat${letter}Total`, '+' + fmt(proj.total));
+  setText(`smStrat${letter}Compound`, '+' + fmt(proj.totalCompound));
+
+  // Hide compound row if no items (no compound possible)
+  const compRow = document.getElementById(`smStrat${letter}Compound`)?.closest('.sm-proj-row');
+  if(compRow){
+    compRow.style.display = (strategy.items.amount > 0) ? '' : 'none';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 4: MARKETPLACE ITEMS
+═══════════════════════════════════════════════════════════ */
+
+window._smartMarketCache = null;
+window._smartItemsBasket = { A: null, B: null };
+
+async function _smartFetchMarketplace(){
+  if(window._smartMarketCache) return window._smartMarketCache;
+
+  // Try real API first; on failure fall back to existing ITEMS or sample data
+  try{
+    const res = await apiFetch('/api/marketplace?status=active');
+    if(res.ok){
+      const data = await res.json();
+      const items = (data.items || data) || [];
+      if(Array.isArray(items) && items.length > 0){
+        window._smartMarketCache = items.map(_smartNormalizeItem);
+        return window._smartMarketCache;
+      }
+    }
+  }catch(e){ /* fall through */ }
+
+  // Fallback 1: use existing ITEMS array (loaded by main dashboard)
+  if(typeof ITEMS !== 'undefined' && Array.isArray(ITEMS) && ITEMS.length > 0){
+    window._smartMarketCache = ITEMS.filter(i => (i.slots_available || 0) > 0).map(_smartNormalizeItem);
+    return window._smartMarketCache;
+  }
+
+  // Fallback 2: synthetic sample (for empty states)
+  window._smartMarketCache = _smartSampleItems();
+  return window._smartMarketCache;
+}
+
+function _smartNormalizeItem(i){
+  // Normalize different shapes (api/marketplace vs api/items) into consistent form
+  return {
+    id: i.id,
+    name: i.name || 'Item',
+    category: i.category || 'other',
+    price: Number(i.price || i.purchase_price || 0),
+    funded_percent: Number(i.funded_percent || 0),
+    available_amount: Number(i.available_amount || i.slots_available || 25),
+    expected_return: Number(i.expected_return || (i.ret && i.ret[1]) || 30),
+    days_to_sell: Number(i.days_to_sell || (i.days && i.days[1]) || 14),
+    image_url: i.image_url || '',
+    ico: i.ico || _smartCategoryIcon(i.category),
+  };
+}
+
+function _smartCategoryIcon(cat){
+  const map = { watches: '⌚', bags: '👜', sneakers: '👟', jewelry: '💍', fashion: '🧥', art: '🖼️' };
+  return map[cat] || '💎';
+}
+
+function _smartSampleItems(){
+  return [
+    { id: 901, name: 'Rolex Daytona',      category:'watches',  price: 24000, funded_percent: 65, available_amount: 1200, expected_return: 30, days_to_sell: 14, ico:'⌚' },
+    { id: 902, name: 'Hermès Birkin 25',   category:'bags',     price: 15000, funded_percent: 40, available_amount: 750,  expected_return: 28, days_to_sell: 21, ico:'👜' },
+    { id: 903, name: 'Patek Nautilus',     category:'watches',  price: 40000, funded_percent: 50, available_amount: 2000, expected_return: 32, days_to_sell: 14, ico:'⌚' },
+    { id: 904, name: 'Audemars Royal Oak', category:'watches',  price: 32000, funded_percent: 30, available_amount: 1600, expected_return: 30, days_to_sell: 18, ico:'⌚' },
+    { id: 905, name: 'Chrome Hearts Hood', category:'fashion',  price: 2800,  funded_percent: 70, available_amount: 280,  expected_return: 25, days_to_sell: 14, ico:'🧥' },
+    { id: 906, name: 'Jordan 1 Chicago',   category:'sneakers', price: 800,   funded_percent: 25, available_amount: 100,  expected_return: 22, days_to_sell: 14, ico:'👟' },
+    { id: 907, name: 'Cartier Love Ring',  category:'jewelry',  price: 9500,  funded_percent: 45, available_amount: 475,  expected_return: 26, days_to_sell: 21, ico:'💍' },
+    { id: 908, name: 'Off-White Tee',      category:'fashion',  price: 600,   funded_percent: 20, available_amount: 75,   expected_return: 22, days_to_sell: 14, ico:'🧥' },
+  ];
+}
+
+function _smartShuffle(arr){
+  const a = [...arr];
+  for(let i = a.length-1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* Build basket for a given strategy + amount */
+async function _smartBuildBasket(strategy, letter){
+  const items = await _smartFetchMarketplace();
+
+  if(!strategy.items.amount || items.length === 0){
+    return [];
+  }
+
+  const itemBudget = strategy.items.amount;
+  const mode = strategy.items.mode || (letter === 'A' ? 'diversified' : 'concentrated');
+
+  if(mode === 'diversified' || letter === 'A'){
+    // Pick 5-8 different categories, equal-ish split
+    const shuffled = _smartShuffle(items);
+    const seenCategories = new Set();
+    const picked = [];
+    for(const it of shuffled){
+      if(picked.length >= 8) break;
+      if(it.price < 25) continue;  // skip too cheap
+      if(seenCategories.has(it.category) && picked.length >= 5) continue;
+      seenCategories.add(it.category);
+      picked.push(it);
+    }
+    if(picked.length === 0) return [];
+
+    const target = Math.min(picked.length, Math.max(5, Math.min(8, picked.length)));
+    const finalPick = picked.slice(0, target);
+    const perItem = itemBudget / finalPick.length;
+    return finalPick.map(it => ({
+      ...it,
+      contribution: Math.round(perItem),
+      ownership_pct: ((perItem / it.price) * 100),
+    }));
+  } else {
+    // Concentrated: top 3 by price, weighted [50%, 30%, 20%]
+    const sorted = [...items].sort((a, b) => b.price - a.price);
+    const top = sorted.slice(0, 3);
+    if(top.length === 0) return [];
+    const weights = top.length === 3 ? [0.5, 0.3, 0.2] : top.length === 2 ? [0.6, 0.4] : [1.0];
+    return top.map((it, i) => ({
+      ...it,
+      contribution: Math.round(itemBudget * weights[i]),
+      ownership_pct: ((itemBudget * weights[i] / it.price) * 100),
+    }));
+  }
+}
+
+async function _smartRenderItemsList(letter, strategy){
+  const list = document.querySelector(`#smStrat${letter}Items .sm-strategy-items-list`);
+  if(!list) return;
+
+  // Items only allocations (no items.amount) → hide section
+  if(!strategy.items.amount || strategy.items.amount < 25){
+    list.innerHTML = '<div class="sm-empty-items">No items in this strategy.</div>';
+    window._smartItemsBasket[letter] = [];
+    return;
+  }
+
+  // If we don't have a basket cached for this letter, build one
+  if(!window._smartItemsBasket[letter]){
+    list.innerHTML = '<div class="sm-skeleton"></div><div class="sm-skeleton"></div><div class="sm-skeleton"></div>';
+    const basket = await _smartBuildBasket(strategy, letter);
+    window._smartItemsBasket[letter] = basket;
+  }
+
+  const basket = window._smartItemsBasket[letter];
+  if(!basket || basket.length === 0){
+    list.innerHTML = '<div class="sm-empty-items">No matching items found in marketplace.</div>';
+    return;
+  }
+
+  list.innerHTML = basket.map(it => `
+    <div class="sm-basket-item">
+      <span class="sm-basket-ic">${it.ico || '💎'}</span>
+      <span class="sm-basket-name">${it.name}</span>
+      <span class="sm-basket-amt">$${it.contribution.toLocaleString()}</span>
+      <span class="sm-basket-pct">${it.ownership_pct.toFixed(1)}%</span>
+    </div>
+  `).join('');
+}
+
+async function _smartShuffleItems(letter){
+  // Reset cache, re-build basket for this strategy
+  window._smartItemsBasket[letter] = null;
+  const allocations = window._smartAllocations;
+  if(!allocations) return;
+  const strategy = letter === 'A' ? allocations.strategyA : allocations.strategyB;
+  await _smartRenderItemsList(letter, strategy);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 5: API INTEGRATION (deposit + auto-purchase)
+   Uses existing endpoints with graceful fallback
+═══════════════════════════════════════════════════════════ */
+
+async function _smartConfirmPurchase(){
+  const s = window._smart;
+  const allocations = window._smartAllocations;
+
+  console.log('[Smart Invest] === CONFIRM PURCHASE STARTED ===');
+  console.log('[Smart Invest] State:', JSON.parse(JSON.stringify(s || {})));
+  console.log('[Smart Invest] Allocations:', allocations);
+
+  if(!allocations || !s.chosenStrategy){
+    console.error('[Smart Invest] Missing strategy or allocations');
+    showToast('error', 'Strategy missing', 'Please go back to step 5 and select a strategy.');
+    return;
+  }
+
+  // Validate balance one more time before going through with the purchase.
+  const split = _smartGetBalanceSplit();
+  const totalNeeded = s.amount || 0;
+  const fromBalance = s.fromBalance || 0;
+  const toDeposit = s.toDeposit !== undefined ? s.toDeposit : (totalNeeded - fromBalance);
+
+  console.log('[Smart Invest] Balance check:', { available: split.available, fromBalance, toDeposit, totalNeeded });
+
+  if(fromBalance > 0 && split.available < fromBalance){
+    console.error('[Smart Invest] Insufficient balance: have', split.available, 'need', fromBalance);
+    showToast('error', 'Insufficient balance', 'Your wallet balance changed. Please refresh and try again.');
+    return;
+  }
+
+  const strategy = s.chosenStrategy === 'A' ? allocations.strategyA : allocations.strategyB;
+  const basket = window._smartItemsBasket[s.chosenStrategy] || [];
+
+  console.log('[Smart Invest] Strategy', s.chosenStrategy, ':', strategy);
+  console.log('[Smart Invest] Item basket:', basket);
+
+  // Show confirming UI
+  const next = document.getElementById('smBtnNext');
+  if(next){
+    next.disabled = true;
+    next.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-9-9"/></svg>&nbsp;PROCESSING...';
+  }
+
+  const userLogin = (typeof U !== 'undefined' && U.login) || sessionStorage.getItem('luxor_login');
+  console.log('[Smart Invest] User login:', userLogin);
+
+  const errors = [];
+  const successes = { pools: [], items: [] };
+
+  // 1. Create pool positions — uses real endpoint /api/pool/invest with amount_usd
+  for(const p of (strategy.pools || [])){
+    const payload = { user_login: userLogin, plan: p.plan, amount_usd: p.amount };
+    console.log('[Smart Invest] → POST /api/pool/invest', payload);
+    try{
+      const res = await apiFetch('/api/pool/invest', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      console.log('[Smart Invest]   Response status:', res.status);
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok || !data || !data.ok){
+        const errCode = (data && data.detail && data.detail.error) || (data && data.error) || ('HTTP ' + res.status);
+        const map = {
+          'insufficient_balance': 'Wallet balance is not enough',
+          'amount_out_of_range': 'Amount outside allowed range for ' + p.plan,
+          'unknown_plan': 'Unknown pool plan: ' + p.plan,
+          'user_not_found': 'Session expired, please log in again',
+        };
+        const friendly = map[errCode] || errCode;
+        console.error('[Smart Invest]   FAILED:', friendly);
+        errors.push(`Pool ${p.plan} $${p.amount}: ${friendly}`);
+      } else {
+        console.log('[Smart Invest]   OK, new wallet:', data.new_wallet_balance);
+        // Update wallet immediately
+        if(typeof state !== 'undefined' && data.new_wallet_balance !== undefined){
+          state.wallet = data.new_wallet_balance;
+        }
+        if(data.position && Array.isArray(state.positions)){
+          state.positions.unshift(data.position);
+        }
+        successes.pools.push({ plan: p.plan, amount: p.amount });
+      }
+    }catch(e){
+      console.error('[Smart Invest]   Network error:', e);
+      errors.push(`Pool ${p.plan}: ${e.message || 'network error'}`);
+    }
+  }
+
+  // 2. Buy item fractions — uses /api/items/buy with slots_count (integer slots)
+  for(const it of basket){
+    // Convert $ contribution to slots_count using item's price_per_slot
+    const pricePerSlot = it.price_per_slot || (it.price / (it.slots_total || 20));
+    const slotsCount = Math.max(1, Math.floor(it.contribution / pricePerSlot));
+    const payload = { user_login: userLogin, item_id: it.id, slots_count: slotsCount };
+    console.log('[Smart Invest] → POST /api/items/buy', payload, '(price_per_slot=$' + Math.round(pricePerSlot) + ')');
+    try{
+      const res = await apiFetch('/api/items/buy', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      console.log('[Smart Invest]   Response status:', res.status);
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok || !data || !data.ok){
+        const errCode = (data && data.detail && data.detail.error) || (data && data.error) || ('HTTP ' + res.status);
+        const map = {
+          'item_not_found': 'Item not available',
+          'item_not_active': 'Item already sold',
+          'insufficient_fraction': 'Not enough share available',
+          'insufficient_slots': 'Not enough slots available',
+          'insufficient_balance': 'Wallet balance is not enough',
+          'user_not_found': 'Session expired',
+          'item_price_invalid': 'Item price misconfigured',
+          'invalid_amount': 'Amount must be > 0',
+          'invalid_slots_count': 'Must buy at least 1 slot',
+        };
+        const friendly = map[errCode] || errCode;
+        console.error('[Smart Invest]   FAILED:', friendly);
+        errors.push(`Item ${it.name}: ${friendly}`);
+      } else {
+        console.log('[Smart Invest]   OK, new wallet:', data.new_wallet_balance);
+        if(typeof state !== 'undefined' && data.new_wallet_balance !== undefined){
+          state.wallet = data.new_wallet_balance;
+        }
+        successes.items.push({ name: it.name, amount: it.contribution, slots: slotsCount });
+      }
+    }catch(e){
+      console.error('[Smart Invest]   Network error:', e);
+      errors.push(`Item ${it.name}: ${e.message || 'network error'}`);
+    }
+  }
+
+  console.log('[Smart Invest] === RESULT ===');
+  console.log('[Smart Invest] Successes:', successes);
+  console.log('[Smart Invest] Errors:', errors);
+
+  // (Telegram notification skipped — endpoint /api/admin/notify doesn't exist on backend)
+
+  // Notify user with detailed errors
+  if(errors.length === 0){
+    // Add transactions for each successful action
+    successes.pools.forEach(p => {
+      try{ addTx('Smart Invest: ' + p.plan + ' Pool +$' + p.amount.toLocaleString(), 'done'); }catch(e){}
+    });
+    successes.items.forEach(it => {
+      try{ addTx('Smart Invest: ' + (it.slots || 1) + ' slot(s) of ' + it.name + ' · $' + it.amount.toLocaleString(), 'done'); }catch(e){}
+    });
+    _smartResetState();
+    showToast('success', 'Strategy applied!', `${successes.pools.length} pool position(s) + ${successes.items.length} item(s) created.`, 5000);
+    try{ await loadPoolPositions(); }catch(e){}
+    try{ await loadMyItems(); }catch(e){}
+    try{ updateUI(); showConfetti(); }catch(e){}
+    navTo('dash');
+  } else if(successes.pools.length === 0 && successes.items.length === 0){
+    // ALL failed — show detailed error, keep wizard open so user can see what's wrong
+    const errorList = errors.slice(0, 3).map(e => '• ' + e).join('<br>');
+    showToast('error', 'Purchase failed', 'Nothing was bought:<br>' + errorList, 10000);
+    // Restore button so user can retry
+    if(next){
+      next.disabled = false;
+      next.innerHTML = 'CONFIRM PURCHASE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    }
+  } else {
+    // Partial success — add tx for what worked
+    successes.pools.forEach(p => {
+      try{ addTx('Smart Invest: ' + p.plan + ' Pool +$' + p.amount.toLocaleString(), 'done'); }catch(e){}
+    });
+    successes.items.forEach(it => {
+      try{ addTx('Smart Invest: ' + (it.slots || 1) + ' slot(s) of ' + it.name + ' · $' + it.amount.toLocaleString(), 'done'); }catch(e){}
+    });
+    const errorList = errors.slice(0, 3).map(e => '• ' + e).join('<br>');
+    showToast('warn', 'Partially applied', `${successes.pools.length + successes.items.length} succeeded, ${errors.length} failed:<br>${errorList}`, 8000);
+    _smartResetState();
+    try{ await loadPoolPositions(); }catch(e){}
+    try{ await loadMyItems(); }catch(e){}
+    try{ updateUI(); }catch(e){}
+    navTo('dash');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 6: BONUS +5% + INVESTED/AVAILABLE BALANCE SPLIT
+═══════════════════════════════════════════════════════════ */
+
+/* Check if user is eligible for first-deposit +5% bonus.
+   Bonus rules (per Greg's spec):
+   - Only NEW users (has_first_deposit_bonus === false)
+   - Only when amount being deposited (NEW money) is >= $300
+   - NOT applicable when user just spends their existing balance */
+function _smartIsBonusEligible(newDepositAmount){
+  const u = (typeof U !== 'undefined') ? U : null;
+  if(!u) return false;
+  if(u.has_first_deposit_bonus === true) return false;
+  // Must be NEW money coming in, at least $300
+  return (newDepositAmount || 0) >= 300;
+}
+
+/* Compute portfolio split: invested vs available */
+function _smartGetBalanceSplit(){
+  let invested = 0;
+  if(typeof state !== 'undefined'){
+    if(Array.isArray(state.positions)){
+      invested += state.positions.reduce((s,p) => s + (Number(p.amount || p.amount_usd) || 0), 0);
+    }
+    if(Array.isArray(state.myItems)){
+      invested += state.myItems
+        .filter(i => i.status === 'active')
+        .reduce((s,i) => s + (Number(i.invested) || 0), 0);
+    }
+  }
+  const available = (typeof state !== 'undefined' && state.wallet) ? Number(state.wallet) : 0;
+  return { invested, available };
+}
+
+/* Override the placeholder _smartRenderDeposit to handle bonus + auto-balance */
+function _smartRenderDeposit(){
+  const s = window._smart;
+  const fmt = v => '$' + Math.round(v).toLocaleString();
+  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  const setShow = (id, show) => { const el = document.getElementById(id); if(el) el.style.display = show ? '' : 'none'; };
+
+  setText('smDepAmount', fmt(s.amount || 0));
+
+  // Auto-use available balance — always when user has any
+  const split = _smartGetBalanceSplit();
+  const totalNeeded = s.amount || 0;
+  const fromBalance = Math.min(totalNeeded, split.available || 0);
+  const toDeposit = totalNeeded - fromBalance;
+
+  // Save into state for confirm step
+  window._smart.fromBalance = fromBalance;
+  window._smart.toDeposit = toDeposit;
+  window._smart.totalNeeded = totalNeeded;
+
+  setShow('smDepFromBalanceRow', fromBalance > 0);
+  setText('smDepFromBalance', '-' + fmt(fromBalance));
+
+  // First-deposit bonus (on the deposit-required portion only)
+  const eligible = _smartIsBonusEligible(toDeposit);
+  const bonus = eligible ? toDeposit * 0.05 : 0;
+  setShow('smDepBonusRow', eligible);
+  setText('smDepBonus', '+' + fmt(bonus));
+
+  // Total label depends on case
+  const totalLabel = document.getElementById('smDepTotalLabel');
+  if(toDeposit <= 0){
+    // CASE 1: Fully covered — show success state, no payment needed
+    if(totalLabel) totalLabel.textContent = 'To allocate';
+    setText('smDepTotal', fmt(totalNeeded));
+    setShow('smDepOk', true);
+    setShow('smDepNeed', false);
+    s.paymentMethod = 'balance';
+    _smartSaveState();
+    const next = document.getElementById('smBtnNext');
+    if(next){
+      next.disabled = false;
+      next.innerHTML = 'CONFIRM PURCHASE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    }
+  } else {
+    // CASE 2: Top-up needed — show top-up panel
+    if(totalLabel) totalLabel.textContent = 'To pay';
+    setText('smDepTotal', fmt(toDeposit));
+    setShow('smDepOk', false);
+    setShow('smDepNeed', true);
+    setText('smDepNeedAmt', fmt(toDeposit));
+    setText('smDepTopupAmt', fmt(toDeposit));
+    if(s.paymentMethod === 'balance'){
+      s.paymentMethod = null;
+      _smartSaveState();
+    }
+    const next = document.getElementById('smBtnNext');
+    if(next){
+      next.disabled = !s.paymentMethod;
+      next.innerHTML = 'I\'VE PAID <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    }
+  }
+
+  // Hide old "use balance" checkbox (now auto)
+  const balOpt = document.getElementById('smBalanceOpt');
+  if(balOpt) balOpt.style.display = 'none';
+}
+
+/* Trigger existing deposit flow with pre-filled top-up amount */
+function _smartStartTopup(){
+  const s = window._smart;
+  const need = s.toDeposit || 0;
+  if(need <= 0){
+    showToast('info', 'No top-up needed', 'Your balance covers the strategy.');
+    return;
+  }
+  // Mark that after deposit completes, we should resume Smart Invest
+  sessionStorage.setItem('luxor_smart_resume', '1');
+  // Use existing deposit flow — opens its modal
+  if(typeof openTopUp === 'function'){
+    openTopUp(need);
+  } else if(typeof openDeposit === 'function'){
+    openDeposit(need);
+  } else {
+    showToast('error', 'Deposit unavailable', 'Please use Deposit Funds button on the dashboard.');
+  }
+}
+
+/* Override _smartRenderFinal — list pools + items, with totals + bonus */
+function _smartRenderFinal(){
+  const s = window._smart;
+  const allocations = window._smartAllocations;
+  if(!allocations || !s.chosenStrategy) return;
+
+  const strategy = s.chosenStrategy === 'A' ? allocations.strategyA : allocations.strategyB;
+  const basket = window._smartItemsBasket[s.chosenStrategy] || [];
+
+  const fmt = v => '$' + Math.round(v).toLocaleString();
+  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  const setShow = (id, show) => { const el = document.getElementById(id); if(el) el.style.display = show ? '' : 'none'; };
+
+  // Build list
+  const listEl = document.getElementById('smFinalList');
+  if(listEl){
+    let html = '';
+    for(const p of (strategy.pools || [])){
+      const pool = SM_POOL[p.plan];
+      html += `<div class="sm-final-item">
+        <div class="sm-final-item-ic">${pool.ic}</div>
+        <div class="sm-final-item-info">
+          <div class="sm-final-item-n">${pool.label}</div>
+          <div class="sm-final-item-d">${pool.rate}%/${pool.period} · ${pool.exit}</div>
+        </div>
+        <div class="sm-final-item-v">${fmt(p.amount)}</div>
+      </div>`;
+    }
+    for(const it of basket){
+      html += `<div class="sm-final-item">
+        <div class="sm-final-item-ic">${it.ico || '💎'}</div>
+        <div class="sm-final-item-info">
+          <div class="sm-final-item-n">${it.name}</div>
+          <div class="sm-final-item-d">${it.ownership_pct.toFixed(1)}% share · expected +${it.expected_return}%</div>
+        </div>
+        <div class="sm-final-item-v">${fmt(it.contribution)}</div>
+      </div>`;
+    }
+    listEl.innerHTML = html || '<div class="sm-empty-items">No positions to confirm.</div>';
+  }
+
+  // Totals — bonus applies ONLY to new money (toDeposit), not to balance spending
+  const totalAmount = s.amount || 0;
+  const fromBalance = s.fromBalance || 0;
+  const toDeposit = s.toDeposit !== undefined ? s.toDeposit : (totalAmount - fromBalance);
+
+  setText('smFinalStratTotal', fmt(totalAmount));
+
+  const eligible = _smartIsBonusEligible(toDeposit);
+  const bonus = eligible ? toDeposit * 0.05 : 0;
+  setShow('smFinalBonusRow', eligible);
+  setText('smFinalBonus', '+' + fmt(bonus));
+  setText('smFinalGrand', fmt(totalAmount + bonus));
+
+  // If user uses balance — show informative line
+  const summaryRow = document.getElementById('smFinalFromBalanceRow');
+  if(summaryRow){
+    summaryRow.style.display = fromBalance > 0 ? '' : 'none';
+    setText('smFinalFromBalance', '-' + fmt(fromBalance));
+  }
+}
+
+console.log('[stage3-6] Smart Invest engine + items + API + bonus loaded');
+
+
+console.log('[stage2] Smart Invest wizard UI loaded (no calculations yet — Stage 3)');
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS — replaces alert() across the app
+═══════════════════════════════════════════════════════════ */
+
+(function initToasts(){
+  if(document.getElementById('toastStack')) return;
+  const stack = document.createElement('div');
+  stack.id = 'toastStack';
+  stack.className = 'toast-stack';
+  document.body.appendChild(stack);
+})();
+
+const TOAST_ICONS = {
+  success: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+  warn:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+  error:   '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+  info:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+};
+
+/* Show a toast.
+   type: 'success' | 'warn' | 'error' | 'info'
+   title: short title (e.g. "Copied!")
+   msg: optional longer description
+   duration: ms before auto-dismiss (default 3500, 0 = no auto-dismiss) */
+function showToast(type, title, msg, duration){
+  type = type || 'info';
+  duration = duration === undefined ? 3500 : duration;
+  const stack = document.getElementById('toastStack');
+  if(!stack){
+    // Fallback if stack doesn't exist for some reason
+    return;
+  }
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + type;
+  t.innerHTML = `
+    <div class="toast-ic">${TOAST_ICONS[type] || TOAST_ICONS.info}</div>
+    <div class="toast-body">
+      <div class="toast-title">${title || ''}</div>
+      ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
+    </div>
+    <button class="toast-close" aria-label="Close">×</button>
+  `;
+  stack.appendChild(t);
+  const close = () => {
+    if(!t.parentNode) return;
+    t.classList.add('toast-out');
+    setTimeout(() => t.remove(), 250);
+  };
+  t.querySelector('.toast-close').addEventListener('click', close);
+  if(duration > 0) setTimeout(close, duration);
+  return close;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONFIRM MODAL — replaces window.confirm()
+   Usage:  const ok = await confirmAction({title, msg, okText, danger:true})
+═══════════════════════════════════════════════════════════ */
+
+(function initConfirmModal(){
+  if(document.getElementById('confirmOverlay')) return;
+  const o = document.createElement('div');
+  o.id = 'confirmOverlay';
+  o.className = 'confirm-overlay';
+  o.innerHTML = `
+    <div class="confirm-card">
+      <div class="confirm-ic confirm-ic-warn" id="confirmIc">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+      <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+      <div class="confirm-msg" id="confirmMsg"></div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-btn-cancel" id="confirmCancel">CANCEL</button>
+        <button class="confirm-btn confirm-btn-ok" id="confirmOk">CONFIRM</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(o);
+})();
+
+function confirmAction(opts){
+  opts = opts || {};
+  return new Promise(resolve => {
+    const o = document.getElementById('confirmOverlay');
+    const titleEl = document.getElementById('confirmTitle');
+    const msgEl = document.getElementById('confirmMsg');
+    const okBtn = document.getElementById('confirmOk');
+    const cancelBtn = document.getElementById('confirmCancel');
+    const icEl = document.getElementById('confirmIc');
+    if(!o){ resolve(window.confirm(opts.msg || 'Are you sure?')); return; }
+
+    titleEl.textContent = opts.title || 'Are you sure?';
+    msgEl.innerHTML = opts.msg || '';
+    okBtn.textContent = opts.okText || 'CONFIRM';
+    cancelBtn.textContent = opts.cancelText || 'CANCEL';
+
+    okBtn.classList.toggle('confirm-btn-danger', !!opts.danger);
+    okBtn.classList.toggle('confirm-btn-ok', !opts.danger);
+    icEl.classList.toggle('confirm-ic-danger', !!opts.danger);
+    icEl.classList.toggle('confirm-ic-warn', !opts.danger);
+
+    o.classList.add('show');
+    const cleanup = (val) => {
+      o.classList.remove('show');
+      okBtn.onclick = null;
+      cancelBtn.onclick = null;
+      o.onclick = null;
+      resolve(val);
+    };
+    okBtn.onclick = () => cleanup(true);
+    cancelBtn.onclick = () => cleanup(false);
+    o.onclick = (e) => { if(e.target === o) cleanup(false); };
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AVAILABLE BALANCE update on dashboard
+═══════════════════════════════════════════════════════════ */
+
+function _luxorUpdateBalanceSplit(){
+  // Compute invested = sum of pool positions + sum of active item shares
+  let invested = 0;
+  if(typeof state !== 'undefined'){
+    if(Array.isArray(state.positions)){
+      invested += state.positions.reduce((s,p) => s + (Number(p.amount || p.amount_usd) || 0), 0);
+    }
+    if(Array.isArray(state.myItems)){
+      invested += state.myItems
+        .filter(i => i.status === 'active')
+        .reduce((s,i) => s + (Number(i.invested) || 0), 0);
+    }
+  }
+  const wallet = (typeof state !== 'undefined' && state.wallet) ? Number(state.wallet) : 0;
+  // Use fmtMoney (currency-aware) if available, else fallback to USD
+  const fmt = (typeof fmtMoney === 'function') ? fmtMoney : v => '$' + Math.round(v).toLocaleString();
+  ['dInvAmt','mInvAmt'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = fmt(invested);
+  });
+  ['dAvailAmt','mAvailAmt'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = fmt(wallet);
+  });
+}
+
+// Hook into existing updateUI by wrapping (if it exists)
+if(typeof updateUI === 'function'){
+  const _origUpdateUI = updateUI;
+  window.updateUI = function(){
+    _origUpdateUI.apply(this, arguments);
+    try{ _luxorUpdateBalanceSplit(); }catch(e){}
+  };
+}
+// Also call on load
+setTimeout(() => { try{ _luxorUpdateBalanceSplit(); }catch(e){} }, 1500);
+
+console.log('[stage7] Toast + confirm modal + balance split loaded');
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 8: PROFIT CALCULATOR (simple — current portfolio only)
+═══════════════════════════════════════════════════════════ */
+
+const PC_POOL_RATES = {
+  Silver:   { monthlyPct: 15.0, label: 'Silver Pool',   icon: '●' },
+  Gold:     { monthlyPct: 13.04, label: 'Gold Pool',    icon: '★' },
+  Platinum: { monthlyPct: 15.0, label: 'Platinum Pool', icon: '◆' },
+};
+
+function renderCalculator(){
+  const html = _pcShellHTML();
+  const dCt = document.getElementById('dCalcContent');
+  const mCt = document.getElementById('mCalcContent');
+  const isMobile = window.innerWidth <= 768;
+  if(dCt) dCt.innerHTML = isMobile ? '' : html;
+  if(mCt) mCt.innerHTML = isMobile ? html : '';
+
+  // Initial render
+  _pcUpdate(3); // default 3 months
+
+  // Wire slider
+  const slider = document.getElementById('pcMonthsSlider');
+  if(slider){
+    slider.addEventListener('input', e => _pcUpdate(parseInt(e.target.value)));
+  }
+}
+
+function _pcGetPortfolio(){
+  const pools = [];
+  let itemsInvested = 0;
+  let itemsCount = 0;
+
+  if(typeof state !== 'undefined'){
+    if(Array.isArray(state.positions)){
+      state.positions.forEach(p => {
+        if(p.status === 'active' || !p.status){
+          const plan = p.plan || p.pool_plan || 'Silver';
+          const amount = Number(p.amount || p.amount_usd) || 0;
+          if(amount > 0){
+            pools.push({plan, amount});
+          }
+        }
+      });
+    }
+    if(Array.isArray(state.myItems)){
+      state.myItems.filter(i => i.status === 'active').forEach(i => {
+        itemsInvested += Number(i.invested) || 0;
+        itemsCount++;
+      });
+    }
+  }
+
+  return { pools, itemsInvested, itemsCount };
+}
+
+function _pcShellHTML(){
+  const portfolio = _pcGetPortfolio();
+  const totalPools = portfolio.pools.reduce((s,p) => s + p.amount, 0);
+  const hasPortfolio = totalPools > 0 || portfolio.itemsInvested > 0;
+
+  if(!hasPortfolio){
+    return `
+    <div class="pc-wrap">
+      <div class="pc-head">
+        <div class="pc-tag">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-calc"/></svg>
+          PROFIT CALCULATOR
+        </div>
+        <div class="pc-title">See your <em>earnings</em> forecast</div>
+        <p class="pc-sub">This calculator shows projected profits based on your existing investments.</p>
+      </div>
+
+      <div class="pc-empty">
+        <div class="pc-empty-ic">📊</div>
+        <div class="pc-empty-h">NO ACTIVE INVESTMENTS</div>
+        <div class="pc-empty-d">You don't have any active pool positions or items yet. Once you invest, this calculator will show you projected earnings over any time horizon.</div>
+        <div class="pc-empty-cta">
+          <button class="pc-empty-btn" onclick="navTo('smart')">TRY SMART INVEST →</button>
+          <button class="pc-empty-btn pc-empty-btn-out" onclick="navTo('pools')">BROWSE POOLS</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Has investments — show calculator
+  return `
+  <div class="pc-wrap">
+    <div class="pc-head">
+      <div class="pc-tag">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-calc"/></svg>
+        PROFIT CALCULATOR
+      </div>
+      <div class="pc-title">Your <em>earnings</em> forecast</div>
+      <p class="pc-sub">Pick a time horizon to see how much your existing investments will earn at fixed pool rates.</p>
+    </div>
+
+    <div class="pc-card">
+      <div class="pc-card-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        TIME HORIZON
+      </div>
+      <div class="pc-slider-row">
+        <div class="pc-slider-val" id="pcMonthsVal">3 months</div>
+        <input type="range" id="pcMonthsSlider" class="pc-slider" min="1" max="12" step="1" value="3">
+      </div>
+      <div class="pc-slider-marks">
+        <span>1 mo</span><span>3 mo</span><span>6 mo</span><span>12 mo</span>
+      </div>
+    </div>
+
+    <div class="pc-card">
+      <div class="pc-card-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L4 6 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V6 Z"/></svg>
+        YOUR ACTIVE POOLS
+      </div>
+      <div class="pc-pool-list" id="pcPoolList"></div>
+    </div>
+
+    <div class="pc-summary">
+      <div>
+        <div class="l">PERIOD</div>
+        <div class="v" id="pcPeriod">3 months</div>
+      </div>
+      <div>
+        <div class="l">PROFIT</div>
+        <div class="v" id="pcProfit">+$0</div>
+      </div>
+      <div>
+        <div class="l">END BALANCE</div>
+        <div class="v" id="pcEndBal">$0</div>
+      </div>
+    </div>
+
+    <div id="pcItemsNote"></div>
+  </div>`;
+}
+
+function _pcUpdate(months){
+  const portfolio = _pcGetPortfolio();
+  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  const fmt = v => '$' + Math.round(v).toLocaleString();
+  const monthsTxt = months + (months === 1 ? ' month' : ' months');
+
+  setText('pcMonthsVal', monthsTxt);
+  setText('pcPeriod', monthsTxt);
+
+  // Render pool list
+  let totalInvested = 0;
+  let totalProfit = 0;
+  const list = document.getElementById('pcPoolList');
+  if(list){
+    list.innerHTML = portfolio.pools.map(p => {
+      const meta = PC_POOL_RATES[p.plan] || PC_POOL_RATES.Silver;
+      const profit = p.amount * (meta.monthlyPct / 100) * months;
+      totalInvested += p.amount;
+      totalProfit += profit;
+      return `
+        <div class="pc-pool-row">
+          <div class="pc-pool-ic">${meta.icon}</div>
+          <div class="pc-pool-info">
+            <div class="n">${meta.label}</div>
+            <div class="d">${fmt(p.amount)} invested · ${meta.monthlyPct.toFixed(1)}%/month fixed</div>
+          </div>
+          <div class="pc-pool-amt">
+            <div class="a">+${fmt(profit)}</div>
+            <div class="e">over ${monthsTxt}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  setText('pcProfit', '+' + fmt(totalProfit));
+  setText('pcEndBal', fmt(totalInvested + totalProfit));
+
+  // Items note
+  const noteEl = document.getElementById('pcItemsNote');
+  if(noteEl){
+    if(portfolio.itemsInvested > 0){
+      const itemsCount = portfolio.itemsCount;
+      // Items expected ~10%/month minimum guarantee per spec
+      const itemsMinProfit = portfolio.itemsInvested * 0.10 * months;
+      noteEl.innerHTML = `
+        <div class="pc-items-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H18 L22 9 L12 22 L2 9 Z"/></svg>
+          <div>
+            <div class="t">PLUS YOUR ITEMS</div>
+            <div class="d">You also have <b>${itemsCount} active item${itemsCount > 1 ? 's' : ''}</b> totaling <b>${fmt(portfolio.itemsInvested)}</b>. Items are not included in pool calculations above — they earn separately based on individual sale outcomes (10%/month minimum guarantee, ~15%/week expected average). Conservative estimate over ${monthsTxt}: <b>+${fmt(itemsMinProfit)} more</b>.</div>
+          </div>
+        </div>
+      `;
+    } else {
+      noteEl.innerHTML = '';
+    }
+  }
+}
+
+console.log('[stage8] Profit Calculator (simple) loaded');
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 9: CURRENCY SWITCHER (USD / EUR / GBP)
+   - Stores user preference in localStorage
+   - Fetches rates from Binance public API (no auth needed)
+   - Caches rates 5 min, fallback to hardcoded approx if API down
+   - Provides global fmtMoney() that all UI code can use
+═══════════════════════════════════════════════════════════ */
+
+const FX_FALLBACK = { USD: 1.0, EUR: 0.92, GBP: 0.79 };
+const FX_SYMBOL   = { USD: '$',  EUR: '€',  GBP: '£' };
+const FX_CACHE_KEY = 'luxor_fx_cache';
+const FX_PREF_KEY  = 'luxor_currency';
+const FX_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+window._fxRates = { USD: 1.0, EUR: 0.92, GBP: 0.79 };
+window._fxLoaded = false;
+
+function getDisplayCurrency(){
+  // Priority: explicit user setting > U.preferred_currency > USD
+  let c = null;
+  try{ c = localStorage.getItem(FX_PREF_KEY); }catch(e){}
+  if(c && FX_FALLBACK[c]) return c;
+  if(typeof U !== 'undefined' && U.preferred_currency && FX_FALLBACK[U.preferred_currency]){
+    return U.preferred_currency;
+  }
+  return 'USD';
+}
+
+function setDisplayCurrency(code){
+  if(!FX_FALLBACK[code]){ console.warn('Unknown currency', code); return; }
+  try{ localStorage.setItem(FX_PREF_KEY, code); }catch(e){}
+  if(typeof U !== 'undefined') U.preferred_currency = code;
+
+  // Sync the dropdowns
+  ['setCurrency', 'mSetCurrency'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el && el.value !== code) el.value = code;
+  });
+
+  // Also send to backend
+  try{ updateSettingField('display_currency', code); }catch(e){}
+
+  // Reload rates and rerender everything
+  _fxLoadRates().then(() => {
+    _fxApplyToUI();
+    try{ showToast('success', 'Currency updated', 'All amounts now in <b>' + code + '</b>.'); }catch(e){}
+  });
+}
+
+async function _fxLoadRates(force){
+  // Try cache first
+  if(!force){
+    try{
+      const raw = localStorage.getItem(FX_CACHE_KEY);
+      if(raw){
+        const cached = JSON.parse(raw);
+        if(cached && cached.ts && (Date.now() - cached.ts) < FX_CACHE_TTL_MS && cached.rates){
+          window._fxRates = cached.rates;
+          window._fxLoaded = true;
+          return cached.rates;
+        }
+      }
+    }catch(e){}
+  }
+
+  // Fetch from Binance — public API, USD-pegged via USDT
+  // Note: Binance returns USDT/EUR price, so 1 USD ~= 1 USDT, rate is "EUR per USD"
+  try{
+    const [eurRes, gbpRes] = await Promise.all([
+      fetch('https://api.binance.com/api/v3/ticker/price?symbol=EURUSDT').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('https://api.binance.com/api/v3/ticker/price?symbol=GBPUSDT').then(r => r.ok ? r.json() : null).catch(() => null),
+    ]);
+    // EURUSDT means: 1 EUR = X USDT. So USD->EUR = 1/X
+    let eurPrice = eurRes && parseFloat(eurRes.price);
+    let gbpPrice = gbpRes && parseFloat(gbpRes.price);
+
+    const rates = {
+      USD: 1.0,
+      EUR: (eurPrice && eurPrice > 0) ? (1 / eurPrice) : FX_FALLBACK.EUR,
+      GBP: (gbpPrice && gbpPrice > 0) ? (1 / gbpPrice) : FX_FALLBACK.GBP,
+    };
+    window._fxRates = rates;
+    window._fxLoaded = true;
+    try{ localStorage.setItem(FX_CACHE_KEY, JSON.stringify({ ts: Date.now(), rates })); }catch(e){}
+    return rates;
+  }catch(e){
+    console.warn('FX rates fetch failed, using fallback', e);
+    window._fxRates = { ...FX_FALLBACK };
+    window._fxLoaded = true;
+    return window._fxRates;
+  }
+}
+
+/**
+ * Format money amount.
+ * @param {number} usdAmount — amount in USD (canonical storage)
+ * @param {object} opts — { decimals?: 0, sign?: false, currency?: 'USD' }
+ * @returns {string} — e.g. "£1,234" or "+€123.45"
+ */
+function fmtMoney(usdAmount, opts){
+  opts = opts || {};
+  const code = opts.currency || getDisplayCurrency();
+  const rate = (window._fxRates && window._fxRates[code]) || FX_FALLBACK[code] || 1;
+  const sym = FX_SYMBOL[code] || '$';
+  const decimals = opts.decimals !== undefined ? opts.decimals : 0;
+
+  const amount = (Number(usdAmount) || 0) * rate;
+  const sign = (opts.sign && amount > 0) ? '+' : (amount < 0 ? '-' : '');
+  const abs = Math.abs(amount);
+  const formatted = decimals > 0
+    ? abs.toLocaleString(undefined, {minimumFractionDigits: decimals, maximumFractionDigits: decimals})
+    : Math.round(abs).toLocaleString();
+  return sign + sym + formatted;
+}
+
+/**
+ * Convert input by user (in display currency) to USD for backend.
+ * E.g. user typed 5000 GBP → returns ~6322 USD.
+ */
+function toUSD(amountInDisplayCurrency){
+  const code = getDisplayCurrency();
+  const rate = (window._fxRates && window._fxRates[code]) || FX_FALLBACK[code] || 1;
+  return (Number(amountInDisplayCurrency) || 0) / rate;
+}
+
+/**
+ * Re-render parts of UI that show money. Lightweight — only updates
+ * elements with [data-money-usd] attribute. For the rest, the next
+ * updateUI() call will use fmtMoney().
+ */
+function _fxApplyToUI(){
+  // Update standard balance/labels
+  try{ updateUI(); }catch(e){}
+  try{ _luxorUpdateBalanceSplit(); }catch(e){}
+  try{ renderTxs(); }catch(e){}
+
+  // Generic [data-money-usd] elements
+  document.querySelectorAll('[data-money-usd]').forEach(el => {
+    const usd = parseFloat(el.getAttribute('data-money-usd'));
+    if(isFinite(usd)){
+      const decimals = parseInt(el.getAttribute('data-money-decimals') || '0');
+      const sign = el.getAttribute('data-money-sign') === 'true';
+      el.textContent = fmtMoney(usd, { decimals, sign });
+    }
+  });
+
+  // Re-render dashboard widgets
+  try{ if(typeof drawGraph === 'function') drawGraph(); }catch(e){}
+}
+
+// Initial load — pull rates, set dropdown to user's preference
+async function _fxInit(){
+  await _fxLoadRates();
+  const cur = getDisplayCurrency();
+  ['setCurrency', 'mSetCurrency'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = cur;
+  });
+  // First apply so any currency-aware widget rendered before init catches up
+  _fxApplyToUI();
+}
+
+// Run on load + refresh every 5 min
+setTimeout(() => { try{ _fxInit(); }catch(e){ console.warn('FX init failed', e); } }, 1000);
+setInterval(() => { try{ _fxLoadRates(true).then(_fxApplyToUI); }catch(e){} }, FX_CACHE_TTL_MS);
+
+console.log('[stage9] Currency switcher (USD/EUR/GBP) loaded');
+
+</script>
+</body>
+</html>
