@@ -2506,40 +2506,57 @@ function _favResolve(favEntry){
 
 /* ═══ INITIAL LOAD ═══ */
 (async function loadBalanceFromBackend(){
-  try{
-    const userLogin = U.login || sessionStorage.getItem('luxor_login');
-    if(!userLogin || userLogin === 'unknown'){
-      console.warn('[balance] no userLogin — redirect to login');
-      location.href = 'index.html';
-      return;
-    }
-    console.log('[balance] loading for:', userLogin);
-    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin));
-    const data = await r.json();
-    if(data.ok && data.user){
-      state.wallet = Number(data.user.wallet_balance) || 0;
-      state.balance = Number(data.user.balance) || 0;
-      U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
-      if(data.user.ref_code){
-        U.ref_code = data.user.ref_code;
-        try{ sessionStorage.setItem('luxor_user', JSON.stringify(U)); }catch(e){}
-        try{
-          const rc = document.getElementById('refCode'); if(rc) rc.textContent = U.ref_code;
-          const rcm = document.getElementById('mRefCode'); if(rcm) rcm.textContent = U.ref_code;
-        }catch(e){}
-      }
-      sessionStorage.setItem('luxor_login', userLogin);
-      try{ updateUI(); }catch(e){ console.warn(e); }
-      saveState();
-    }
-    try{ await loadPoolPositions(); }catch(e){ console.warn(e); }
-    try{ await loadMyItems(); }catch(e){ console.warn(e); }
-    try{ await loadMarketplaceItems(); }catch(e){ console.warn(e); }
-    try{ await loadTransactionsFromBackend(); }catch(e){ console.warn(e); }
-    try{ updateUI(); }catch(e){}
-  }catch(e){
-    console.error('[balance] load error:', e);
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin || userLogin === 'unknown'){
+    console.warn('[balance] no userLogin — redirect to login');
+    location.href = 'index.html';
+    return;
   }
+  console.log('[balance] loading for:', userLogin);
+
+  // 1. Load user data — wrap separately so other loaders still run if this fails
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin));
+    if(!r.ok){
+      console.error('[balance] /api/user/' + userLogin + ' returned ' + r.status);
+    } else {
+      const data = await r.json().catch(e => { console.error('[balance] JSON parse failed:', e); return {}; });
+      if(data.ok && data.user){
+        state.wallet = Number(data.user.wallet_balance) || 0;
+        state.balance = Number(data.user.balance) || 0;
+        U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
+        if(data.user.ref_code){
+          U.ref_code = data.user.ref_code;
+          try{ sessionStorage.setItem('luxor_user', JSON.stringify(U)); }catch(e){}
+          try{
+            const rc = document.getElementById('refCode'); if(rc) rc.textContent = U.ref_code;
+            const rcm = document.getElementById('mRefCode'); if(rcm) rcm.textContent = U.ref_code;
+          }catch(e){}
+        }
+        sessionStorage.setItem('luxor_login', userLogin);
+        console.log('[balance] loaded — wallet:', state.wallet);
+        try{ updateUI(); }catch(e){ console.warn('[balance] updateUI failed:', e); }
+        saveState();
+      } else {
+        console.warn('[balance] response missing ok/user:', data);
+      }
+    }
+  }catch(e){
+    console.error('[balance] /api/user error:', e);
+  }
+
+  // 2. Load each section independently — failure in one shouldn't break others
+  try{ await loadPoolPositions(); }catch(e){ console.warn('[loadPoolPositions]:', e); }
+  try{ await loadMyItems(); }catch(e){ console.warn('[loadMyItems]:', e); }
+  try{ await loadMarketplaceItems(); }catch(e){ console.warn('[loadMarketplaceItems]:', e); }
+  try{ await loadTransactionsFromBackend(); }catch(e){ console.warn('[loadTransactionsFromBackend]:', e); }
+
+  // 3. Final UI update — always run regardless of failures above
+  try{ updateUI(); }catch(e){ console.error('[balance] final updateUI failed:', e); }
+  try{ if(typeof _luxorUpdateBalanceSplit === 'function') _luxorUpdateBalanceSplit(); }catch(e){}
+  try{ if(typeof renderTxs === 'function') renderTxs(); }catch(e){}
+  try{ if(typeof renderMyItems === 'function') renderMyItems(); }catch(e){}
+  console.log('[balance] initial load complete');
 })();
 
 async function loadTransactionsFromBackend(){
@@ -4925,4 +4942,1270 @@ async function processWithdraw(){
 
   if(!addr || addr.length < 10){ if(errBox) errBox.textContent = 'Please enter a valid wallet address'; return; }
   if(!amt || amt <= 0){ if(errBox) errBox.textContent = 'Please enter a valid amount'; return; }
-  c
+  const minAmt = WITHDRAW_MIN_BY_CURRENCY[net] || 10;
+  if(amt < minAmt){ if(errBox) errBox.textContent = 'Minimum for ' + net + ' is $' + minAmt; return; }
+  if(amt > WITHDRAW_MAX_SINGLE){ if(errBox) errBox.textContent = 'Maximum per transaction is $' + WITHDRAW_MAX_SINGLE; return; }
+  if(amt > state.wallet){ if(errBox) errBox.textContent = 'Exceeds available wallet balance'; return; }
+
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin){ alert('Session expired. Please log in again.'); return; }
+
+  state.savedWallet = addr; saveState();
+
+  showModal(`<div style="text-align:center;padding:40px 20px">
+    <div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">SUBMITTING REQUEST</div>
+  </div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+
+  try{
+    const res = await apiFetch('/api/withdraw/start', {
+      method: 'POST',
+      body: JSON.stringify({ user_login:userLogin, amount_usd:amt, wallet_address:addr, crypto_currency:net })
+    });
+    const data = await res.json();
+    if(!res.ok || !data || !data.ok){
+      const err = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'below_minimum':'Amount below minimum for this network.',
+        'above_max_single':'Amount exceeds single-transaction limit ($10,000).',
+        'above_max_daily':'Daily limit $10,000 reached. Remaining: $' + (((data.detail||{}).remaining) || 0),
+        'insufficient_balance':'Not enough balance.',
+        'invalid_wallet_address':'Invalid wallet address.',
+        'unknown_currency':'Unsupported network.',
+        'invalid_amount':'Invalid amount.',
+        'user_not_found':'Session error. Please log in again.',
+        'email_not_verified':'Please verify your email before withdrawing.',
+      };
+      closeModal();
+      setTimeout(() => openWithdraw(), 100);
+      setTimeout(() => {
+        const eb = document.getElementById('wdErrBox');
+        if(eb) eb.textContent = map[err] || err;
+      }, 200);
+      return;
+    }
+    if(data.requires_2fa){
+      show2FAWithdraw(data, amt);
+      return;
+    }
+    state.wallet = data.new_wallet_balance;
+    addTx('Withdrawal -$' + amt.toFixed(2), 'processing');
+    updateUI(); saveState();
+    window._wd.withdrawalId = data.withdrawal_id;
+    showWithdrawWaiting(data);
+    startWithdrawPolling(data.withdrawal_id);
+  }catch(e){
+    closeModal();
+    setTimeout(() => alert('Network error. Please try again.'), 100);
+  }
+}
+
+function show2FAWithdraw(pendingData, amt){
+  const shortAddr = pendingData.wallet_address.length > 14
+    ? pendingData.wallet_address.slice(0,6) + '...' + pendingData.wallet_address.slice(-6)
+    : pendingData.wallet_address;
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="width:56px;height:56px;background:var(--gold-d);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px">📧</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">EMAIL CONFIRMATION</div>
+      <p style="color:var(--t3);font-size:11px;line-height:1.5;margin:8px 0 0">
+        We sent a 6-digit code to your email.<br>Enter it to confirm the withdrawal.
+      </p>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid var(--bd)">
+        <span style="color:var(--t3)">Amount</span><span style="font-weight:600">$${Number(amt).toFixed(2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid var(--bd)">
+        <span style="color:var(--t3)">Currency</span><span style="font-weight:600">${pendingData.crypto_currency}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0">
+        <span style="color:var(--t3)">Address</span><span style="font-family:'Space Mono',monospace;font-size:10px">${shortAddr}</span>
+      </div>
+    </div>
+    <div style="margin-bottom:8px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px;font-family:'Space Mono',monospace">CODE FROM EMAIL</label>
+      <input id="wd2fa_code" type="text" inputmode="numeric" pattern="\\d{6}" maxlength="6"
+        autocomplete="one-time-code" placeholder="123456"
+        style="width:100%;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);font-size:24px;text-align:center;letter-spacing:10px;font-family:'Space Mono',monospace;margin-top:6px;outline:none">
+    </div>
+    <div id="wd2fa_err" style="color:var(--red);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="wd2fa_btn" class="btn-primary" onclick="confirmWithdraw2FA(${pendingData.pending_id}, ${amt})">
+      CONFIRM WITHDRAWAL →
+    </button>
+    <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:11px">
+      <a href="#" onclick="cancelWithdraw2FA(${pendingData.pending_id});return false" style="color:var(--t3);text-decoration:none">← Cancel</a>
+      <span style="color:var(--t3)">Expires in <span id="wd2fa_timer">10:00</span></span>
+    </div>
+    <p style="font-size:10px;color:var(--t3);text-align:center;margin-top:14px;line-height:1.5">
+      Wallet not debited until confirmed.<br>Code expires in 10 minutes.
+    </p>
+  </div>`);
+  setTimeout(() => document.getElementById('wd2fa_code')?.focus(), 100);
+  const inp = document.getElementById('wd2fa_code');
+  if(inp){
+    inp.addEventListener('input', e => {
+      const v = e.target.value.replace(/\D/g, '');
+      e.target.value = v;
+      if(v.length === 6){ confirmWithdraw2FA(pendingData.pending_id, amt); }
+    });
+  }
+  let secs = pendingData.expires_in_seconds || 600;
+  const tEl = document.getElementById('wd2fa_timer');
+  const iv = setInterval(() => {
+    secs -= 1;
+    if(!document.getElementById('wd2fa_timer')){ clearInterval(iv); return; }
+    if(secs <= 0){
+      clearInterval(iv);
+      const errEl = document.getElementById('wd2fa_err');
+      if(errEl) errEl.textContent = 'Code expired. Please start a new withdrawal.';
+      const btn = document.getElementById('wd2fa_btn');
+      if(btn){ btn.disabled = true; btn.style.opacity = '.5'; }
+      return;
+    }
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    if(tEl) tEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  }, 1000);
+}
+
+async function confirmWithdraw2FA(pendingId, amt){
+  const code = (document.getElementById('wd2fa_code')?.value || '').trim();
+  const errEl = document.getElementById('wd2fa_err');
+  const btn = document.getElementById('wd2fa_btn');
+  if(errEl) errEl.textContent = '';
+  if(code.length !== 6 || !/^\d{6}$/.test(code)){
+    if(errEl) errEl.textContent = 'Enter 6-digit code';
+    return;
+  }
+  if(btn){ btn.textContent = 'CONFIRMING...'; btn.disabled = true; }
+  try{
+    const res = await apiFetch('/api/withdraw/confirm-2fa', {
+      method: 'POST',
+      body: JSON.stringify({ pending_id: pendingId, code })
+    });
+    const data = await res.json();
+    if(!res.ok || !data.ok){
+      const err = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const reason = (data.detail && data.detail.reason) || '';
+      const msgKey = err === 'invalid_code' ? (reason || err) : err;
+      const msg = ({
+        'invalid_code':'Wrong code. Try again.',
+        'wrong_code':'Wrong code. Try again.',
+        'expired':'Code expired. Start a new withdrawal.',
+        'no_code':'No active code. Start a new withdrawal.',
+        'too_many_attempts':'Too many attempts. Cancel and try again.',
+        'pending_not_found':'Withdrawal request not found or expired.',
+        'code_mismatch':'Code does not match this withdrawal.',
+        'insufficient_balance':'Not enough balance.',
+      })[msgKey] || err;
+      if(errEl) errEl.textContent = msg;
+      if(btn){ btn.textContent = 'CONFIRM WITHDRAWAL →'; btn.disabled = false; }
+      if(['wrong_code','too_many_attempts'].includes(err) || ['wrong_code','too_many_attempts'].includes(reason)){
+        const inp = document.getElementById('wd2fa_code'); if(inp) inp.value = '';
+      }
+      return;
+    }
+    state.wallet = data.new_wallet_balance;
+    addTx('Withdrawal -$' + amt.toFixed(2), 'processing');
+    updateUI(); saveState();
+    window._wd.withdrawalId = data.withdrawal_id;
+    showWithdrawWaiting(data);
+    startWithdrawPolling(data.withdrawal_id);
+  }catch(e){
+    if(errEl) errEl.textContent = 'Network error. Please try again.';
+    if(btn){ btn.textContent = 'CONFIRM WITHDRAWAL →'; btn.disabled = false; }
+  }
+}
+
+async function cancelWithdraw2FA(pendingId){
+  if(!confirm('Cancel withdrawal? You can start a new one anytime.')) return;
+  try{
+    await apiFetch('/api/withdraw/cancel-pending', {
+      method: 'POST',
+      body: JSON.stringify({ pending_id: pendingId })
+    });
+  }catch(e){}
+  closeModal();
+}
+
+function showWithdrawWaiting(data){
+  showModal(`<div style="text-align:center;padding:12px">
+    <div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:8px">PROCESSING WITHDRAWAL</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:14px">Your request is being reviewed. You'll be notified once approved.</p>
+    <div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:14px;text-align:left">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Amount</span><span style="font-weight:700">$${data.amount_usd.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Network</span><span>${data.crypto_currency}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--t3)">Request ID</span><span>#${data.withdrawal_id}</span></div>
+    </div>
+    <p style="font-size:10px;color:var(--t3)">Usually takes under 24 hours.<br>You can safely close this window — we'll update your dashboard.</p>
+    <button class="btn-out" style="margin-top:10px" onclick="closeWithdrawWaiting()">CLOSE</button>
+  </div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+}
+
+function closeWithdrawWaiting(){
+  if(window._wd.pollInt){ clearInterval(window._wd.pollInt); window._wd.pollInt = null; }
+  closeModal();
+}
+
+function startWithdrawPolling(wid){
+  if(window._wd.pollInt) clearInterval(window._wd.pollInt);
+  let attempts = 0;
+  const maxAttempts = 120;
+  window._wd.pollInt = setInterval(async () => {
+    attempts++;
+    if(attempts > maxAttempts){ clearInterval(window._wd.pollInt); window._wd.pollInt = null; return; }
+    try{
+      const res = await apiFetch('/api/withdraw/' + wid + '/status');
+      const data = await res.json();
+      if(!data || !data.ok) return;
+      if(data.status === 'completed'){
+        clearInterval(window._wd.pollInt); window._wd.pollInt = null;
+        showWithdrawSuccess(data);
+        addTx('Withdrawal sent: $' + data.amount_usd.toLocaleString(), 'done');
+      } else if(data.status === 'rejected'){
+        clearInterval(window._wd.pollInt); window._wd.pollInt = null;
+        try{
+          const r = await apiFetch('/api/user/' + encodeURIComponent(U.login || sessionStorage.getItem('luxor_login')));
+          const d2 = await r.json();
+          if(d2 && d2.ok && d2.user){ state.wallet = d2.user.wallet_balance || 0; updateUI(); saveState(); }
+        }catch(e){}
+        showWithdrawRejected(data);
+        addTx('Withdrawal rejected: refunded $' + data.amount_usd.toLocaleString(), 'done');
+      }
+    }catch(e){}
+  }, 5000);
+}
+
+function showWithdrawSuccess(data){
+  const txLine = data.tx_hash ? `<div style="margin-top:10px;padding:8px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;word-break:break-all;font-size:10px;font-family:monospace">${data.tx_hash}</div>` : '';
+  showModal(`<div style="text-align:center;padding:8px">
+    <div style="font-size:48px;margin-bottom:10px">✅</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--green);margin-bottom:8px">WITHDRAWAL SENT</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Your funds have been sent to the blockchain.</p>
+    <div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:12px;text-align:left">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Amount</span><span style="font-weight:700;color:var(--green)">$${data.amount_usd.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Network</span><span>${data.crypto_currency||'—'}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--t3)">Address</span><span style="font-family:monospace;font-size:9px">${(data.wallet_address||'').substring(0,8)}...${(data.wallet_address||'').slice(-6)}</span></div>
+      ${txLine}
+    </div>
+    <button class="btn-primary" onclick="closeModal()">DONE</button>
+  </div>`);
+  showGoldRain();
+}
+
+function showWithdrawRejected(data){
+  showModal(`<div style="text-align:center;padding:8px">
+    <div style="font-size:48px;margin-bottom:10px">❌</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--red);margin-bottom:8px">WITHDRAWAL REJECTED</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:6px">Your withdrawal request was not approved.</p>
+    <p style="font-size:11px;color:var(--t3);margin-bottom:12px">Funds have been returned to your wallet balance.</p>
+    <div style="background:var(--bg2);border:1px solid var(--bd);padding:12px;border-radius:8px;margin-bottom:12px;text-align:left">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--t3)">Amount refunded</span><span style="font-weight:700">$${data.amount_usd.toLocaleString()}</span></div>
+      ${data.rejection_reason?`<div style="font-size:11px;color:var(--t3);margin-top:6px">Reason: ${data.rejection_reason}</div>`:''}
+    </div>
+    <p style="font-size:10px;color:var(--t3);margin-bottom:10px">Questions? Contact <a href="mailto:dispute@luxorinvest.com" style="color:var(--gold)">dispute@luxorinvest.com</a></p>
+    <button class="btn-out" onclick="closeModal()">CLOSE</button>
+  </div>`);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   POOL INVEST MODAL
+═══════════════════════════════════════════════════════════ */
+function openPoolInvest(plan, rate, tier, presetAmt){
+  const mins = {1:100, 2:1000, 3:10000};
+  const maxs = {1:1000, 2:10000, 3:300000};
+  const steps = {1:50, 2:500, 3:5000};
+  const defs = {1:300, 2:3000, 3:25000};
+  const startVal = (presetAmt && presetAmt >= mins[tier] && presetAmt <= maxs[tier]) ? presetAmt : defs[tier];
+
+  showModal(`<div style="text-align:center;margin-bottom:14px">
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px">${plan} Pool</h3>
+    <p style="font-size:13px;color:var(--gold);margin-top:4px;font-weight:600">${rate}</p>
+  </div>
+  <div style="text-align:center;margin-bottom:14px">
+    <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--t3);margin-bottom:4px">YOU INVEST</div>
+    <div id="poolSliderVal" style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1">$${startVal.toLocaleString()}</div>
+  </div>
+  <input type="range" id="poolSlider" min="${mins[tier]}" max="${maxs[tier]}" value="${startVal}" step="${steps[tier]}" oninput="updatePoolCalc(${tier},this.value)" style="width:100%;height:4px;background:var(--bd2);border-radius:2px;outline:none;-webkit-appearance:none;appearance:none;margin-bottom:8px">
+  <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);font-weight:700;margin-bottom:14px">
+    <span>$${mins[tier].toLocaleString()}</span>
+    <span>$${maxs[tier].toLocaleString()}</span>
+  </div>
+  <div id="poolCalc" style="background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-bottom:12px"></div>
+  <p style="font-size:11px;color:var(--t3);margin:8px 0 12px;text-align:center">Wallet: <strong style="color:var(--gold)">$${Math.round(state.wallet).toLocaleString()}</strong></p>
+  <button class="btn-primary" onclick="processPoolInvest('${plan}','${rate}',${tier})">INVEST NOW</button>
+  <button class="btn-out" style="margin-top:6px" onclick="closeModal()">Cancel</button>`);
+  updatePoolCalc(tier, startVal);
+}
+
+function updatePoolCalc(tier, v){
+  v = parseInt(v);
+  const sv = document.getElementById('poolSliderVal');
+  if(sv) sv.textContent = '$' + v.toLocaleString();
+  const c = document.getElementById('poolCalc');
+  if(!c) return;
+  const wallet = Math.round(state.wallet);
+  const afterBal = wallet - v;
+  const balColor = afterBal >= 0 ? 'var(--green)' : 'var(--red)';
+  const row = (l, v, vc) => `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span style="color:var(--t3)">${l}</span><span style="font-weight:600${vc?';color:'+vc:''}">${v}</span></div>`;
+  if(tier === 1){
+    const day = v * .005, week = day * 7, month = day * 30, year = day * 365;
+    c.innerHTML =
+      row('Daily profit', '+$' + day.toFixed(2), 'var(--green)') +
+      row('Weekly profit', '+$' + week.toFixed(2)) +
+      row('Monthly profit', '+$' + month.toFixed(2)) +
+      row('Yearly profit', '+$' + Math.round(year).toLocaleString(), 'var(--gold)') +
+      `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)">${row('Total after 1 week', '$' + Math.round(v+week).toLocaleString(), 'var(--gold)')}${row('Wallet after invest', '$' + afterBal.toLocaleString(), balColor)}${row('Payout frequency', 'Every 24h')}${row('Lock-up period', 'None — withdraw anytime')}</div>`;
+  } else if(tier === 2){
+    const week = v * .03, month = week * 4.345, year = week * 52;
+    c.innerHTML =
+      row('Weekly profit', '+$' + Math.round(week).toLocaleString(), 'var(--green)') +
+      row('Monthly profit', '+$' + Math.round(month).toLocaleString()) +
+      row('Yearly profit', '+$' + Math.round(year).toLocaleString(), 'var(--gold)') +
+      `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)">${row('Total after 1 month', '$' + Math.round(v+month).toLocaleString(), 'var(--gold)')}${row('Wallet after invest', '$' + afterBal.toLocaleString(), balColor)}${row('Payout frequency', 'Every 7 days')}${row('Focus assets', 'Designer · Watches')}</div>`;
+  } else {
+    const month = v * .15, year = month * 12;
+    c.innerHTML =
+      row('Monthly profit', '+$' + Math.round(month).toLocaleString(), 'var(--green)') +
+      row('Quarterly profit', '+$' + Math.round(month*3).toLocaleString()) +
+      row('Yearly profit', '+$' + Math.round(year).toLocaleString(), 'var(--gold)') +
+      `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)">${row('Total after 1 year', '$' + Math.round(v+year).toLocaleString(), 'var(--gold)')}${row('Wallet after invest', '$' + afterBal.toLocaleString(), balColor)}${row('Payout frequency', 'Every 30 days')}${row('Focus assets', 'Rolex · Patek · Hermès')}</div>`;
+  }
+}
+
+async function processPoolInvest(plan, rate, tier){
+  const amt = parseInt(document.getElementById('poolSlider').value);
+  if(state.wallet < amt){
+    closeModal();
+    setTimeout(() => {
+      showModal(`<div style="text-align:center;padding:8px">
+        <div style="font-size:42px;margin-bottom:8px">💰</div>
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:6px">INSUFFICIENT BALANCE</h3>
+        <p style="font-size:12px;color:var(--t2);margin-bottom:6px">You need <strong style="color:var(--gold)">$${amt.toLocaleString()}</strong> to invest in ${plan} Pool</p>
+        <p style="font-size:10px;color:var(--t3);margin-bottom:14px">Current wallet: <strong>$${Math.round(state.wallet).toLocaleString()}</strong> · Need: <strong style="color:var(--red)">$${Math.round(amt-state.wallet).toLocaleString()}</strong> more</p>
+        <button class="btn-primary" onclick="closeModal();openTopUp()">TOP UP NOW</button>
+        <button class="btn-out" style="margin-top:6px" onclick="closeModal();openPoolInvest('${plan}','${rate}',${tier},${amt})">← Back to Pool</button>
+      </div>`);
+    }, 200);
+    return;
+  }
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin){ alert('Session expired. Please log in again.'); return; }
+
+  showModal(`<div style="text-align:center;padding:40px 20px">
+    <div style="width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">CREATING POSITION</div>
+  </div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`);
+
+  try{
+    const res = await apiFetch('/api/pool/invest', {
+      method: 'POST',
+      body: JSON.stringify({ user_login:userLogin, plan, amount_usd:amt })
+    });
+    const data = await res.json();
+    if(!res.ok || !data || !data.ok){
+      const errMsg = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'insufficient_balance':'Wallet balance is not enough for this investment',
+        'amount_out_of_range':'Amount is outside the allowed range for this plan',
+        'unknown_plan':'Unknown pool plan',
+        'user_not_found':'Session error. Please log in again.',
+      };
+      closeModal();
+      setTimeout(() => alert('Pool invest failed: ' + (map[errMsg] || errMsg)), 100);
+      return;
+    }
+    state.wallet = data.new_wallet_balance;
+    if(!Array.isArray(state.positions)) state.positions = [];
+    state.positions.unshift(data.position);
+    closeModal();
+    addTx('Pool: ' + plan + ' +$' + amt.toLocaleString(), 'done');
+    updateUI(); showConfetti(); saveState();
+    try{ await loadPoolPositions(); }catch(e){}
+  }catch(e){
+    closeModal();
+    setTimeout(() => alert('Network error. Please try again.'), 100);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   POOL POSITION DETAIL MODAL (Q19 — клик на позицию → детальный экран)
+═══════════════════════════════════════════════════════════ */
+function openPoolPositionDetail(positionId){
+  const pos = state.positions.find(p => p.id === positionId);
+  if(!pos){ alert('Position not found'); return; }
+
+  // Save current position ID for live tick & exit handler
+  window._currentPoolPosId = pos.id;
+
+  const principal = Number(pos.amount || pos.amount_usd) || 0;
+  const liveEarned = getLiveEarned(pos);
+  const baseEarned = Number(pos.earned || pos.earned_usd) || 0;
+  const ratePct = Number(pos.rate_pct) || 0;
+  const period = pos.period || 'day';
+  const periodSec = _PERIOD_SEC[period] || 86400;
+  const secLeft = getSecondsToNextPayout(pos);
+  const progressPct = Math.max(0, Math.min(100, ((periodSec - secLeft) / periodSec) * 100));
+  const timeLeftTxt = _fmtTimeLeft(secLeft);
+  const annualMult = period === 'day' ? 365 : period === 'week' ? 52 : 12;
+  const annualEarn = principal * (ratePct/100) * annualMult;
+  const apy = principal > 0 ? (annualEarn / principal * 100) : 0;
+
+  // Penalty calc (early exit = lose pending pro-rated period)
+  const penaltyAmt = liveEarned - baseEarned;
+  const exitTotal = principal + baseEarned;
+
+  // Days elapsed since open
+  const opened = pos.created_at ? new Date(pos.created_at) : null;
+  const daysActive = opened && !isNaN(opened.getTime())
+    ? Math.floor((Date.now() - opened.getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+
+  const tierColor = pos.plan === 'Platinum' ? 'var(--blue)' : pos.plan === 'Gold' ? 'var(--gold)' : '#a0a0a0';
+
+  // Build the content HTML (used in both desktop and mobile screens)
+  const html = `<div style="max-width:760px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="display:inline-block;padding:4px 14px;background:var(--gold-d);color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;border-radius:4px;margin-bottom:8px">POSITION #${pos.id}</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:${tierColor}">${pos.plan} POOL</h2>
+      <p style="font-size:13px;color:var(--gold);margin-top:4px;font-weight:600">${ratePct}% / ${period}</p>
+    </div>
+
+    <!-- Live earnings card -->
+    <div style="background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:18px;margin-bottom:14px;text-align:center">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:6px">LIVE EARNINGS</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--green);line-height:1;margin-bottom:8px" id="popDetail-live">+$${liveEarned.toFixed(2)}</div>
+      <div style="font-size:11px;color:var(--t3)">on principal of <strong style="color:var(--t)">$${principal.toLocaleString()}</strong></div>
+    </div>
+
+    <!-- Next payout countdown -->
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:6px">
+        <span>NEXT PAYOUT</span>
+        <span style="color:var(--gold);font-weight:700" id="popDetail-time">${timeLeftTxt}</span>
+      </div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+        <div id="popDetail-bar" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:3px;width:${progressPct}%;transition:width 1s linear"></div>
+      </div>
+    </div>
+
+    <!-- Position details table -->
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px;font-size:13px">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Principal</span><span style="font-weight:600">$${principal.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Earned (locked)</span><span style="color:var(--green);font-weight:700">+$${baseEarned.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Live earned (incl. pending)</span><span style="color:var(--green);font-weight:700">+$${liveEarned.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Effective APY</span><span style="color:var(--gold);font-weight:700">${apy.toFixed(0)}%</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Annual projection</span><span style="font-weight:600">+$${Math.round(annualEarn).toLocaleString()}</span></div>
+      ${daysActive !== null ? `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--t3)">Active for</span><span style="font-weight:600">${daysActive} day${daysActive!==1?'s':''}</span></div>` : ''}
+      <div style="display:flex;justify-content:space-between;padding:6px 0"><span style="color:var(--t3)">Lock-up</span><span style="color:var(--green);font-weight:600">None — exit anytime</span></div>
+    </div>
+
+    <!-- Payout chart -->
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:10px">
+        <span style="letter-spacing:1.5px;font-family:'Space Mono',monospace">PAYOUT PROJECTION (12 ${period}s)</span>
+      </div>
+      <canvas id="popPayChart" width="600" height="160" style="width:100%;height:160px;display:block"></canvas>
+    </div>
+
+    <!-- Exit warning -->
+    ${penaltyAmt > 0.5 ? `
+    <div style="padding:12px 14px;background:var(--gold-d);border:1px solid var(--gold);border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.5">
+      <strong style="color:var(--gold)">⏱ Wait for next payout to maximize earnings</strong><br>
+      If you exit now, <strong>$${penaltyAmt.toFixed(2)} pending interest</strong> (the unpaid portion of the current ${period}, ${timeLeftTxt} remaining until payout) will be lost.
+    </div>` : ''}
+
+    <!-- Action buttons -->
+    <button class="btn-red" onclick="withdrawFromPool(${pos.id})" style="margin-bottom:8px">EXIT POSITION — $${Math.round(exitTotal).toLocaleString()}</button>
+    <button class="btn-out" onclick="navTo('pools')">← Back to Pools</button>
+  </div>`;
+
+  // Render into both desktop and mobile detail screens
+  const dCt = document.getElementById('dPoolDetailContent');
+  const mCt = document.getElementById('mPoolDetailContent');
+  if(dCt) dCt.innerHTML = html;
+  if(mCt) mCt.innerHTML = html.replace(/id="popDetail-/g, 'id="popDetail-m-').replace(/id="popPayChart"/g, 'id="popPayChart-m"');
+
+  // Update breadcrumbs
+  const dBc = document.getElementById('dPoolDetailBC');
+  const mBc = document.getElementById('mPoolDetailBC');
+  if(dBc) dBc.textContent = `${pos.plan.toUpperCase()} POOL · #${pos.id}`;
+  if(mBc) mBc.textContent = `${pos.plan.toUpperCase()} #${pos.id}`;
+
+  // Navigate to detail screen
+  navTo('poolDetail');
+
+  // Draw payout projection charts (both versions)
+  setTimeout(() => {
+    _drawPayoutProjection(pos, 'popPayChart');
+    _drawPayoutProjection(pos, 'popPayChart-m');
+  }, 80);
+
+  // Live tick — single timer updates whichever screen is currently visible
+  if(window._popLiveTimer) clearInterval(window._popLiveTimer);
+  window._popLiveTimer = setInterval(() => {
+    if(window._currentPoolPosId !== pos.id){ clearInterval(window._popLiveTimer); return; }
+    const live = getLiveEarned(pos);
+    const sLeft = getSecondsToNextPayout(pos);
+    const pct = Math.max(0, Math.min(100, ((periodSec - sLeft) / periodSec) * 100));
+    const timeTxt = _fmtTimeLeft(sLeft);
+    ['popDetail-live', 'popDetail-m-live'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = '+$' + live.toFixed(2);
+    });
+    ['popDetail-time', 'popDetail-m-time'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = timeTxt;
+    });
+    ['popDetail-bar', 'popDetail-m-bar'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.width = pct + '%';
+    });
+  }, 1000);
+}
+
+function _drawPayoutProjection(pos, canvasId){
+  const c = document.getElementById(canvasId || ('popPayChart-' + pos.id));
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const w = c.width, h = c.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const principal = Number(pos.amount || pos.amount_usd) || 0;
+  const ratePct = Number(pos.rate_pct) || 0;
+  const period = pos.period || 'day';
+  // Project compound 12 periods ahead
+  const n = 12;
+  const pts = [];
+  let cumulative = principal;
+  for(let i = 0; i <= n; i++){
+    pts.push(cumulative);
+    cumulative += principal * (ratePct / 100);
+  }
+
+  const padL = 36, padR = 6, padT = 8, padB = 22;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const mn = Math.min(...pts);
+  const mx = Math.max(...pts);
+  const rng = Math.max(1, mx - mn);
+  const xOf = i => padL + (i / n) * plotW;
+  const yOf = v => padT + plotH - ((v - mn) / rng) * plotH;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(201,168,76,.06)';
+  ctx.lineWidth = 1;
+  for(let k = 1; k <= 3; k++){
+    const y = padT + (plotH * k / 4);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+  }
+
+  // Area
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+  grad.addColorStop(0, 'rgba(201,168,76,0.4)');
+  grad.addColorStop(1, 'rgba(201,168,76,0.02)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), padT + plotH);
+  pts.forEach((v, i) => ctx.lineTo(xOf(i), yOf(v)));
+  ctx.lineTo(xOf(n), padT + plotH);
+  ctx.closePath();
+  ctx.fill();
+
+  // Line
+  ctx.strokeStyle = '#c9a84c';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  pts.forEach((v, i) => {
+    const x = xOf(i), y = yOf(v);
+    if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Dots
+  ctx.fillStyle = '#c9a84c';
+  pts.forEach((v, i) => {
+    ctx.beginPath(); ctx.arc(xOf(i), yOf(v), 2.5, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Y labels
+  ctx.fillStyle = 'rgba(240,237,230,0.55)';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('$' + Math.round(mx).toLocaleString(), 2, padT + 8);
+  ctx.fillText('$' + Math.round(mn).toLocaleString(), 2, padT + plotH);
+
+  // X label
+  ctx.textAlign = 'center';
+  ctx.fillText('Now', xOf(0), h - 6);
+  ctx.fillText('In ' + n + ' ' + period + 's', xOf(n), h - 6);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STYLED RECEIPT MODAL
+═══════════════════════════════════════════════════════════ */
+function showReceipt(idx){
+  const t = state.txs[idx];
+  if(!t) return;
+  const isDeposit = /deposit/i.test(t.desc) || (/\+\$/.test(t.desc) && !/Pool:/.test(t.desc) && !/Fraction|slot/i.test(t.desc));
+  const isWithdraw = /withdraw/i.test(t.desc);
+  const amtMatch = t.desc.match(/[+\-]?\$[\d,.]+/);
+  const amt = amtMatch ? amtMatch[0] : '$0';
+  const id = 'RCP-' + (Date.now() + idx).toString().slice(-10);
+  const type = /Pool:/.test(t.desc) ? 'POOL INVESTMENT'
+    : /Pool withdraw/i.test(t.desc) ? 'POOL EXIT'
+    : /Fraction|slot/i.test(t.desc) || /Quick Invest/i.test(t.desc) ? 'ITEM PURCHASE'
+    : /Early sale/i.test(t.desc) ? 'EARLY EXIT'
+    : isWithdraw ? 'WITHDRAWAL'
+    : isDeposit ? 'DEPOSIT'
+    : 'TRANSACTION';
+  const statusColor = t.status === 'processing' ? 'var(--gold)' : t.status === 'rejected' ? 'var(--red)' : 'var(--green)';
+  const statusTxt = t.status === 'processing' ? 'PROCESSING' : t.status === 'rejected' ? 'REJECTED' : 'COMPLETED ✓';
+
+  showModal(`<div style="border:2px dashed var(--bd);padding:20px;background:var(--bg2);border-radius:8px;font-family:'Space Mono',monospace">
+    <div style="text-align:center;border-bottom:1px dashed var(--bd);padding-bottom:12px;margin-bottom:12px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold)">LUXOR INVEST</div>
+      <div style="font-size:9px;color:var(--t3);margin-top:2px">OFFICIAL RECEIPT</div>
+    </div>
+    <div style="font-size:11px;line-height:2">
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Receipt #</span><strong>${id}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Date</span><strong>${new Date().toLocaleDateString('en-GB')}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Time</span><strong>${t.time || '—'}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Type</span><strong>${type}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--t3)">Status</span><strong style="color:${statusColor}">${statusTxt}</strong></div>
+    </div>
+    <div style="border-top:1px dashed var(--bd);margin-top:12px;padding-top:12px">
+      <div style="font-size:10px;color:var(--t3);margin-bottom:2px">Description</div>
+      <div style="font-size:12px;font-weight:700">${t.desc}</div>
+    </div>
+    <div style="border-top:1px dashed var(--bd);margin-top:12px;padding-top:12px;text-align:center">
+      <div style="font-size:10px;color:var(--t3);letter-spacing:2px;margin-bottom:4px">AMOUNT</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);letter-spacing:1px">${amt}</div>
+    </div>
+    <div style="border-top:1px dashed var(--bd);margin-top:12px;padding-top:10px;font-size:8px;color:var(--t3);text-align:center;line-height:1.5">
+      LUXOR INVEST LTD · UK Company No. 14582937<br>
+      71-75 Shelton Street, London, WC2H 9JQ<br>
+      This is an official transaction record. Keep for your records.
+    </div>
+  </div>
+  <button class="btn-out" style="margin-top:10px" onclick="closeModal()">Close</button>`);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHANGE PASSWORD MODAL
+═══════════════════════════════════════════════════════════ */
+function openChangePassword(){
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">CHANGE PASSWORD</div>
+      <p style="color:var(--t3);font-size:11px;margin-top:6px">Enter your current password and choose a new one</p>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CURRENT PASSWORD</label>
+      <input type="password" id="cp_old" autocomplete="current-password" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">NEW PASSWORD</label>
+      <input type="password" id="cp_new" autocomplete="new-password" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">Min 6 characters</div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CONFIRM NEW PASSWORD</label>
+      <input type="password" id="cp_new2" autocomplete="new-password" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+    </div>
+    <div id="cp_err" style="color:var(--red);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="cp_btn" class="btn-primary" onclick="submitChangePassword()">UPDATE PASSWORD</button>
+    <button class="btn-out" style="margin-top:6px" onclick="closeModal()">Cancel</button>
+  </div>`);
+  setTimeout(() => document.getElementById('cp_old')?.focus(), 100);
+}
+
+async function submitChangePassword(){
+  const old = document.getElementById('cp_old')?.value || '';
+  const newp = document.getElementById('cp_new')?.value || '';
+  const newp2 = document.getElementById('cp_new2')?.value || '';
+  const err = document.getElementById('cp_err');
+  const btn = document.getElementById('cp_btn');
+  if(err) err.textContent = '';
+  if(!old || !newp){ if(err) err.textContent = 'Fill in all fields'; return; }
+  if(newp.length < 6){ if(err) err.textContent = 'New password too short (min 6)'; return; }
+  if(newp !== newp2){ if(err) err.textContent = 'New passwords do not match'; return; }
+  if(old === newp){ if(err) err.textContent = 'New password must differ from old'; return; }
+
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(btn){ btn.textContent = 'UPDATING...'; btn.disabled = true; }
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ old_password: old, new_password: newp })
+    });
+    const data = await r.json();
+    if(!r.ok || !data.ok){
+      const e = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'wrong_old_password':'Current password is incorrect',
+        'password_too_short':'New password too short (min 6)',
+        'same_password':'New password must differ from old',
+      };
+      if(err) err.textContent = map[e] || e;
+      if(btn){ btn.textContent = 'UPDATE PASSWORD'; btn.disabled = false; }
+      return;
+    }
+    closeModal();
+    setTimeout(() => alert('✓ Password updated successfully'), 100);
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent = 'UPDATE PASSWORD'; btn.disabled = false; }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHANGE EMAIL MODAL (request → confirm with code)
+═══════════════════════════════════════════════════════════ */
+function openChangeEmail(){
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">CHANGE EMAIL</div>
+      <p style="color:var(--t3);font-size:11px;margin-top:6px">A confirmation code will be sent to the NEW email</p>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">NEW EMAIL</label>
+      <input type="email" id="ce_email" autocomplete="email" placeholder="newmail@example.com" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CURRENT PASSWORD</label>
+      <input type="password" id="ce_pw" autocomplete="current-password" style="width:100%;padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-top:4px;outline:none;font-family:inherit;font-size:13px">
+    </div>
+    <div id="ce_err" style="color:var(--red);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="ce_btn" class="btn-primary" onclick="submitChangeEmailRequest()">SEND CONFIRMATION CODE</button>
+    <button class="btn-out" style="margin-top:6px" onclick="closeModal()">Cancel</button>
+  </div>`);
+  setTimeout(() => document.getElementById('ce_email')?.focus(), 100);
+}
+
+async function submitChangeEmailRequest(){
+  const newEmail = (document.getElementById('ce_email')?.value || '').trim();
+  const pw = document.getElementById('ce_pw')?.value || '';
+  const err = document.getElementById('ce_err');
+  const btn = document.getElementById('ce_btn');
+  if(err) err.textContent = '';
+  if(!newEmail || !newEmail.includes('@')){ if(err) err.textContent = 'Invalid email'; return; }
+  if(!pw){ if(err) err.textContent = 'Enter your password'; return; }
+
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(btn){ btn.textContent = 'SENDING...'; btn.disabled = true; }
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/request-email-change', {
+      method: 'POST',
+      body: JSON.stringify({ new_email: newEmail, password: pw })
+    });
+    const data = await r.json();
+    if(!r.ok || !data.ok){
+      const e = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'wrong_password':'Wrong password',
+        'invalid_email':'Invalid email format',
+        'same_email':'New email must differ from current',
+        'email_taken':'This email is already registered',
+      };
+      if(err) err.textContent = map[e] || e;
+      if(btn){ btn.textContent = 'SEND CONFIRMATION CODE'; btn.disabled = false; }
+      return;
+    }
+    closeModal();
+    setTimeout(() => openConfirmEmailChange(newEmail), 100);
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent = 'SEND CONFIRMATION CODE'; btn.disabled = false; }
+  }
+}
+
+function openConfirmEmailChange(newEmail){
+  const masked = newEmail.replace(/(.{2}).*(@.*)/, '$1***$2');
+  showModal(`<div style="padding:8px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">CONFIRM NEW EMAIL</div>
+      <p style="color:var(--t3);font-size:11px;line-height:1.5;margin-top:8px">
+        We sent a 6-digit code to<br><strong style="color:var(--t)">${masked}</strong>
+      </p>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:10px;color:var(--t3);letter-spacing:1.5px">CODE FROM NEW EMAIL</label>
+      <input type="text" id="cec_code" inputmode="numeric" pattern="\\d{6}" maxlength="6" autocomplete="one-time-code" style="width:100%;padding:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);text-align:center;font-size:22px;letter-spacing:8px;font-family:'Space Mono',monospace;margin-top:4px;outline:none">
+    </div>
+    <div id="cec_err" style="color:var(--red);font-size:11px;text-align:center;min-height:14px;margin:8px 0"></div>
+    <button id="cec_btn" class="btn-primary" onclick="submitConfirmEmailChange()">CONFIRM CHANGE</button>
+    <button class="btn-out" style="margin-top:6px" onclick="closeModal()">Cancel</button>
+  </div>`);
+  setTimeout(() => document.getElementById('cec_code')?.focus(), 100);
+  const inp = document.getElementById('cec_code');
+  if(inp){
+    inp.addEventListener('input', e => {
+      const v = e.target.value.replace(/\D/g, '');
+      e.target.value = v;
+      if(v.length === 6) submitConfirmEmailChange();
+    });
+  }
+}
+
+async function submitConfirmEmailChange(){
+  const code = (document.getElementById('cec_code')?.value || '').trim();
+  const err = document.getElementById('cec_err');
+  const btn = document.getElementById('cec_btn');
+  if(err) err.textContent = '';
+  if(code.length !== 6){ if(err) err.textContent = 'Enter 6-digit code'; return; }
+
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(btn){ btn.textContent = 'CONFIRMING...'; btn.disabled = true; }
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/confirm-email-change', {
+      method: 'POST',
+      body: JSON.stringify({ code })
+    });
+    const data = await r.json();
+    if(!r.ok || !data.ok){
+      const e = (data && data.detail && data.detail.error) || (data && data.error) || 'unknown';
+      const map = {
+        'wrong_code':'Wrong code. Try again.',
+        'expired':'Code expired',
+        'no_code':'No active code. Request again.',
+        'too_many_attempts':'Too many attempts. Cancel and try again.',
+        'email_taken':'Email already registered',
+      };
+      if(err) err.textContent = map[e] || e;
+      if(btn){ btn.textContent = 'CONFIRM CHANGE'; btn.disabled = false; }
+      const inp = document.getElementById('cec_code');
+      if(inp) inp.value = '';
+      return;
+    }
+    closeModal();
+    setTimeout(() => {
+      alert('✓ Email changed successfully');
+      loadSettings();
+    }, 100);
+  }catch(e){
+    if(err) err.textContent = 'Network error. Try again.';
+    if(btn){ btn.textContent = 'CONFIRM CHANGE'; btn.disabled = false; }
+  }
+}
+
+console.log('[snap3] modals loaded');
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   SNAP 5 — Real-time updates: smart polling marketplace + item detail
+   Заменяет full reload на точечное обновление, не дёргает бэк когда вкладка неактивна
+═══════════════════════════════════════════════════════════ */
+
+window._poll = {
+  marketInt: null,
+  marketIntervalMs: 15000,   // 15s when on Market screen
+  detailIntervalMs: 5000,    // 5s when item detail open
+  inFlight: false,
+  lastSnapshot: null,        // {id: {slots_available, slots_sold, funded, available_fraction}}
+  silentMode: true,          // если true — не показываем визуальные toast'ы
+};
+
+/**
+ * Какой экран активен сейчас? (для решения: дёргать polling или нет)
+ * Поллим только если открыт market / detail / favs / dashboard.
+ * НЕ поллим на settings / referrals / pools и пр. — там данные не меняются от других юзеров.
+ */
+function _shouldPollMarket(){
+  if(document.hidden) return false;
+  // Какой screen активен — берём show на mobile или desktop
+  const dShown = document.querySelector('.d-screen.show');
+  const mShown = document.querySelector('.m-screen.show');
+  const activeId = (dShown?.id || mShown?.id || '').replace(/^(ds|ms)-/, '');
+  return ['dash', 'market', 'detail', 'favs'].includes(activeId);
+}
+
+/**
+ * Делаем snapshot текущих slot-счётчиков чтобы потом сравнивать.
+ */
+function _marketSnapshot(){
+  const snap = {};
+  ITEMS.forEach(i => {
+    snap[i.id] = {
+      slots_available: i.slots_available,
+      slots_sold: i.slots_sold,
+      funded: i.funded,
+      available_fraction: i.available_fraction,
+    };
+  });
+  return snap;
+}
+
+/**
+ * Точечное обновление UI marketplace на основе diff'а старого и нового состояния.
+ * Меняет ТОЛЬКО slot-счётчики и progress bar — без полного re-render (избегаем мерцания).
+ * Если какая-то карточка стала sold-out — добавляем оверлей.
+ * @param changedIds — массив ID товаров у которых что-то изменилось
+ */
+function _diffAndUpdateMarketCards(changedIds){
+  changedIds.forEach(id => {
+    const it = ITEMS.find(x => x.id === id);
+    if(!it) return;
+
+    // Карточки рендерятся в .dmp-card (desktop) и .vc-m-card (mobile)
+    // Используем data-attribute? Нет — у нас onclick="openItemDetail(ID)" — найдём через :has?
+    // Проще: пробежимся по всем карточкам и найдём те что ссылаются на этот id
+    document.querySelectorAll('.dmp-card, .vc-m-card').forEach(card => {
+      const onclickAttr = card.getAttribute('onclick') || '';
+      if(!onclickAttr.includes('openItemDetail(' + id + ')')) return;
+
+      // Update slot counter & progress bar
+      const slotsTxt = (it.slots_sold || 0) + '/' + (it.slots_total || 20);
+      const slotsEl = card.querySelector('.slots span');
+      if(slotsEl && slotsEl.textContent !== slotsTxt){
+        // Highlight briefly
+        slotsEl.style.transition = 'color .3s';
+        slotsEl.style.color = 'var(--gold)';
+        slotsEl.textContent = slotsTxt;
+        setTimeout(() => { slotsEl.style.color = ''; }, 1200);
+      }
+      const fillEl = card.querySelector('.slots .pb .f');
+      if(fillEl){
+        fillEl.style.transition = 'width .5s';
+        fillEl.style.width = (it.funded || 0) + '%';
+      }
+
+      // Sold out badge
+      const soldOut = (it.slots_available !== undefined && it.slots_available <= 0);
+      const existingBadge = card.querySelector('.soldout-badge');
+      if(soldOut && !existingBadge){
+        const img = card.querySelector('.img, .pic');
+        if(img){
+          const badge = document.createElement('div');
+          badge.className = 'soldout-badge';
+          badge.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;color:#fff;z-index:3';
+          badge.textContent = 'SOLD OUT';
+          img.appendChild(badge);
+        }
+      } else if(!soldOut && existingBadge){
+        existingBadge.remove();
+      }
+    });
+  });
+}
+
+/**
+ * Если открыт item detail — обновить его (slot counter, slider max, кнопку BUY).
+ * Если юзер выбрал больше слотов чем теперь доступно — корректируем + показываем уведомление.
+ */
+function _updateOpenItemDetail(){
+  const detailId = window._currentDetailId;
+  if(!detailId) return;
+
+  // Проверяем что detail-экран активен
+  const dActive = document.getElementById('ds-detail')?.classList.contains('show');
+  const mActive = document.getElementById('ms-detail')?.classList.contains('show');
+  if(!dActive && !mActive) return;
+
+  const it = ITEMS.find(x => x.id === Number(detailId));
+  if(!it) return;
+
+  const slotsTotal = it.slots_total || 20;
+  const slotsAvail = it.slots_available !== undefined ? it.slots_available : slotsTotal;
+  const slotsSold = slotsTotal - slotsAvail;
+  const pricePerSlot = it.price_per_slot || (it.price / slotsTotal);
+
+  // Sold out — отрубаем покупку
+  if(slotsAvail <= 0){
+    ['mBuyBtn', 'dBuyBtn'].forEach(id => {
+      const btn = document.getElementById(id);
+      if(btn){
+        btn.disabled = true;
+        btn.style.opacity = '.5';
+        btn.style.cursor = 'not-allowed';
+        btn.textContent = 'SOLD OUT';
+      }
+    });
+    // Toast
+    _showLiveToast('All slots have been sold while you were viewing.', 'red');
+    return;
+  }
+
+  // Обновляем тексты в DETAILS табе если он сейчас открыт
+  ['dIdContent', 'mIdContent'].forEach(id => {
+    const c = document.getElementById(id); if(!c) return;
+    const rows = c.querySelectorAll('.row');
+    rows.forEach(r => {
+      const lbl = r.querySelector('.l')?.textContent || '';
+      if(lbl === 'Slots'){
+        const v = r.querySelector('.v');
+        const newTxt = slotsSold + ' of ' + slotsTotal + ' sold';
+        if(v && v.textContent !== newTxt){
+          v.style.transition = 'color .3s';
+          v.style.color = 'var(--gold)';
+          v.textContent = newTxt;
+          setTimeout(() => v.style.color = '', 1200);
+        }
+      }
+      if(lbl === 'Slots available'){
+        const v = r.querySelector('.v');
+        if(v && v.textContent !== String(slotsAvail)){
+          v.textContent = slotsAvail;
+          v.className = 'v ' + (slotsAvail > 0 ? 'green' : '');
+        }
+      }
+    });
+  });
+
+  // Обновляем slider max + если выбранное количество стало больше доступного — корректируем
+  ['m', 'd'].forEach(prefix => {
+    const slotsField = document.getElementById(prefix + 'V5Slots');
+    const manualField = document.getElementById(prefix + 'V5Manual');
+    if(!slotsField || !manualField) return;
+
+    // Update max attribute on slider/manual
+    manualField.setAttribute('max', slotsAvail);
+
+    let currentSelected = parseInt(slotsField.value) || 1;
+    if(currentSelected > slotsAvail){
+      // Юзер выбрал больше чем теперь есть — корректируем
+      _updateItemSlots(slotsAvail, prefix === 'm' ? 'mobile' : 'desktop', it);
+      _showLiveToast(`${currentSelected - slotsAvail} slot${currentSelected-slotsAvail>1?'s':''} were sold while you were viewing — adjusted to max available (${slotsAvail})`, 'gold');
+    } else {
+      // Просто обновляем визуал — fill bar чтобы соответствовал новому max
+      const fillPct = (currentSelected / slotsAvail) * 100;
+      const fillEl = document.getElementById(prefix + 'V5Fill');
+      if(fillEl) fillEl.style.width = fillPct + '%';
+    }
+  });
+}
+
+/**
+ * Toast в правом верхнем углу — короткое уведомление о live-изменении.
+ * Не использует основную модалку чтобы не мешать.
+ */
+function _showLiveToast(msg, color){
+  const colorVar = color === 'red' ? 'var(--red)' : color === 'gold' ? 'var(--gold)' : 'var(--green)';
+  const bgVar = color === 'red' ? 'var(--red-l)' : color === 'gold' ? 'var(--gold-d)' : 'var(--green-l)';
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;top:20px;right:20px;max-width:340px;background:var(--card);border:1px solid ${colorVar};border-left:4px solid ${colorVar};border-radius:8px;padding:12px 16px;font-size:12px;color:var(--t);box-shadow:var(--shadow);z-index:500;animation:toastIn .25s ease-out;line-height:1.5`;
+  t.textContent = msg;
+  // Вставим стили анимации один раз
+  if(!document.getElementById('_liveToastStyle')){
+    const st = document.createElement('style');
+    st.id = '_liveToastStyle';
+    st.textContent = '@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}@keyframes toastOut{to{opacity:0;transform:translateX(20px)}}';
+    document.head.appendChild(st);
+  }
+  document.body.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'toastOut .25s ease-in forwards';
+    setTimeout(() => t.remove(), 280);
+  }, 5000);
+}
+
+/**
+ * Главная функция polling'а. Дёргает /api/items, сравнивает с текущим snapshot, обновляет точечно.
+ */
+async function _pollMarket(){
+  if(window._poll.inFlight) return;
+  if(!_shouldPollMarket()) return;
+  window._poll.inFlight = true;
+
+  try{
+    const r = await fetch(API_URL + '/api/items');
+    const data = await r.json();
+    if(!data || !data.ok || !Array.isArray(data.items)){
+      window._poll.inFlight = false;
+      return;
+    }
+
+    const newItems = data.items.map(_mapServerItem);
+    const oldSnap = _marketSnapshot();
+
+    // Сравниваем поштучно — что изменилось?
+    const changedIds = [];
+    const newSnap = {};
+    newItems.forEach(it => {
+      newSnap[it.id] = {
+        slots_available: it.slots_available,
+        slots_sold: it.slots_sold,
+        funded: it.funded,
+        available_fraction: it.available_fraction,
+      };
+      const old = oldSnap[it.id];
+      if(!old){ changedIds.push(it.id); return; } // новый item
+      if(old.slots_available !== it.slots_available ||
+         old.slots_sold !== it.slots_sold){
+        changedIds.push(it.id);
+      }
+    });
+
+    // Items которые исчезли (удалены админом или проданы и сняты с публикации)
+    const removedIds = Object.keys(oldSnap).filter(id => !newSnap[id]).map(Number);
+
+    // Обновляем глобальный массив ITEMS
+    ITEMS = newItems;
+
+    // Если ничего не изменилось — выходим
+    if(changedIds.length === 0 && removedIds.length === 0){
+      window._poll.inFlight = false;
+      return;
+    }
+
+    // Точечно обновляем marketplace карточки
+    _diffAndUpdateMarketCards(changedIds);
+
+    // Если открыт item detail — обновим его
+    _updateOpenItemDetail();
+
+    // Если изменился favorite item — пере-рендерим favorites с актуальной инфой
+    if(changedIds.some(id => _favIncludes(id))){
+      try{ renderFavs(); }catch(e){}
+    }
+
+    // Если открыт favs — мягкий refresh (там нет slot-счётчиков, но цены могут поменяться)
+    const favsActive = document.getElementById('ds-favs')?.classList.contains('show')
+                    || document.getElementById('ms-favs')?.classList.contains('show');
+    if(favsActive){ try{ renderFavs(); }catch(e){} }
+
+    console.log('[poll] updated', changedIds.length, 'items, removed', removedIds.length);
+  }catch(e){
+    console.warn('[poll] failed:', e);
+  }finally{
+    window._poll.inFlight = false;
+  }
+}
+
+/**
+ * Запускаем/останавливаем polling. Адаптивный интервал: чаще при открытом detail.
+ */
+function _startMarketPolling(){
+  if(window._poll.marketInt) clearInterval(window._poll.marketInt);
+  // Динамический интервал: 5с если открыт detail, 15с иначе
+  let lastInterval = null;
+  const tick = () => {
+    const detailOpen = document.getElementById('ds-detail')?.classList.contains('show')
+                    || document.getElementById('ms-detail')?.classList.contains('show');
+    const wantInterval = detailOpen ? window._poll.detailIntervalMs : window._poll.marketIntervalMs;
+    if(wantInterval !== lastInterval){
+      // Reschedule
+      if(window._poll.marketInt) clearInterval(window._poll.marketInt);
+      lastInterval = wantInterval;
+      window._poll.marketInt = setInterval(_pollMarket, wantInterval);
+    }
+  };
+  // Re-evaluate every 1s — если юзер открыл/закрыл detail, переключаем частоту poll'а
+  setInterval(tick, 1000);
+  // Первый запуск
+  window._poll.marketInt = setInterval(_pollMarket, window._poll.marketIntervalMs);
+  lastInterval = window._poll.marketIntervalMs;
+}
+
+/* Pause polling when tab hidden — не дёргаем бэк впустую */
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden){
+    // Юзер вернулся на вкладку — сразу делаем catch-up poll
+    setTimeout(_pollMarket, 200);
+  }
+});
+
+/* Запускаем polling после загрузки страницы (даём время первичному loadMarketplaceItems) */
+window.addEventListener('load', () => {
+  setTimeout(_startMarketPolling, 3000);
+});
+
+console.log('[snap5] real-time polling enabled (15s market / 5s detail)');
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   SNAP 5 — Real-time marketplace updates (smart polling)
+═══════════════════════════════════════════════════════════ */
+
+window._poll = {
+  marketInt: null,
+  detailInt: null,
+  detailItemId: null,
+  lastSnapshot: {},
+};
+
+function _itemsSnapshot(){
+  const snap = {};
+  ITEMS.forEach(i => { snap[i.id] = { slots_available: i.slots_available, funded: i.funded, slots_sold: i.slots_sold }; });
+  return snap;
+}
+
+async function _softLoadMarketplace(){
+  if(document.hidden) return;
+  try{
+    const r = await fetch(API_URL + '/api/items');
+    const data = await r.json();
+    if(!data || !data.ok || !Array.isArray(data.items)) return;
+
+    const prevById = window._poll.lastSnapshot;
+    const newItems = data.items.map(_mapServerItem);
+
+    const changes = [];
+    newItems.forEach(n => {
+      const prev = prevById[n.id];
+      if(!prev) return;
+      if(prev.slots_available !== n.slots_available){
+        changes.push({
+          id: n.id,
+          oldAvail: prev.slots_available,
+          newAvail: n.slots_available,
+          soldDelta: prev.slots_available - n.slots_available,
+          newFunded: n.funded,
+          newSlotsSold: n.slots_sold,
+        });
+      }
+    });
+
+    ITEMS = newItems;
+    const newSnap = {};
+    newItems.forEach(i => { newSnap[i.id] = { slots_available: i.slots_available, funded: i.funded, slots_sold: i.slots_sold }; });
+    window._poll.lastSnapshot = newSnap;
+
+    if(changes.length > 0){
+      try{ renderMarketplace(window._currentCat || 'all'); }catch(e){}
+      try{ renderFavs(); }catch(e){}
+      setTimeout(() => _flashChangedCards(changes), 80);
+
+      const detailId = window._poll.detailItemId;
+      if(detailId){
+        const change = changes.find(c => c.id === detailId);
+        if(change){ _onDetailItemChanged(change); }
+      }
+    }
+  }catch(e){
+    /* transient errors fine */
+  }
+}
+
+function _flashChangedCards(changes){
+  changes.forEach(ch => {
+    const cards = document.querySelectorAll(`[data-mk-id="${ch.id}"]`);
+    cards.forEach(card => {
+      card.style.transition = 'box-shadow .35s ease-out, transform .35s ease-out';
+      card.style.boxShadow = '0 0 0 2px var(--gold), 0 8px 24px rgba(201,168,76,.3)';
+      card.style.transform = 'translateY(-2px)';
+      setTimeout(() => {
+        card.style.boxShadow = '';
+        card.style.transform = '';
+      }, 1200);
+    });
+    console.log(`[poll] Item #${ch.id}: ${ch.soldDelta} slot(s) sold (${ch.oldAvail} → ${ch.newAvail})`);
+  });
+}
+
+function _onDetailItemChanged(change){
+  const item = ITEMS.find(x => x.id === change.id);
+  if(!item) return;
+
+  const mSlotsInput = document.getElementById('mV5Slots');
+  const dSlotsInput = document.getElementById('dV5Slots');
+  const currentSlots = Math.max(
+    parseInt(mSlotsInput?.value || '0'),
+    parseInt(dSlotsInput?.value || '0')
+  ) || 1;
+
+  const ne
