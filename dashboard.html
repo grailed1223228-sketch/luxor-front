@@ -182,6 +182,21 @@ button{font-family:inherit}
   .profit-calc-btn .txt-main{font-size:18px}
 }
 
+/* Profit Calculator screen */
+.calc-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px}
+.calc-section-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:6px}
+.calc-chip{padding:8px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:20px;color:var(--t2);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.calc-chip:hover{background:var(--gold-d);color:var(--gold);border-color:var(--gold)}
+.calc-item-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.calc-item-row:last-child{border-bottom:none}
+.calc-item-icon{width:36px;height:36px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.calc-item-name{font-size:13px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calc-item-sub{font-size:11px;color:var(--t3)}
+.calc-total-row{display:flex;justify-content:space-between;align-items:flex-end;padding:14px 0 0;margin-top:10px;border-top:1px solid var(--bd);gap:14px}
+input[type="range"].calc-range::-webkit-slider-thumb,
+.calc-card input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;background:var(--gold);border:2px solid var(--bg);border-radius:50%;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.calc-card input[type="range"]::-moz-range-thumb{width:18px;height:18px;background:var(--gold);border:2px solid var(--bg);border-radius:50%;cursor:pointer}
+
 .m-sec{margin-bottom:16px}
 .m-sec .head{display:flex;justify-content:space-between;align-items:center;padding:0 4px 8px;border-bottom:1px solid var(--bd);margin-bottom:8px}
 .m-sec .head .ttl{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;display:flex;align-items:center;gap:8px}
@@ -1062,6 +1077,12 @@ button{font-family:inherit}
 <div id="dPoolDetailContent"></div>
 </div>
 
+<!-- ──────── DESKTOP: PROFIT CALCULATOR ──────── -->
+<div class="d-screen" id="ds-calc">
+<div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>PROFIT CALCULATOR</b></div>
+<div id="dCalcContent"></div>
+</div>
+
 <!-- ──────── DESKTOP: MY ITEMS ──────── -->
 <div class="d-screen" id="ds-items">
 <div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>MY ITEMS</b></div>
@@ -1545,6 +1566,14 @@ button{font-family:inherit}
 <div class="m-content">
 <div class="m-back" onclick="navTo('pools')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl" id="mPoolDetailBC">POSITION</span><span style="width:18px"></span></div>
 <div id="mPoolDetailContent"></div>
+</div>
+</div>
+
+<!-- ──────── MOBILE: PROFIT CALCULATOR ──────── -->
+<div class="m-screen" id="ms-calc">
+<div class="m-content">
+<div class="m-back" onclick="navTo('dash')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl">PROFIT CALCULATOR</span><span style="width:18px"></span></div>
+<div id="mCalcContent"></div>
 </div>
 </div>
 
@@ -2223,8 +2252,8 @@ function navTo(target){
   const dEl = document.getElementById('ds-' + target);
   if(dEl) dEl.classList.add('show');
   document.querySelectorAll('.d-side .nav-item').forEach(n => n.classList.remove('active'));
-  // Map pseudo-targets (detail, poolDetail) to their parent sidebar item
-  const sidebarMap = { detail:'market', poolDetail:'pools' };
+  // Map pseudo-targets (detail, poolDetail, calc) to their parent sidebar item
+  const sidebarMap = { detail:'market', poolDetail:'pools', calc:'dash' };
   const sidebarKey = sidebarMap[target] || target;
   const dNav = document.querySelector('.d-side .nav-item[data-target="' + sidebarKey + '"]');
   if(dNav){
@@ -2239,13 +2268,14 @@ function navTo(target){
   document.querySelectorAll('.m-bottom .nv').forEach(n => n.classList.remove('active'));
   const navMap = {dash:'dash', pools:'pools', market:'market', items:'items', more:'more',
                   detail:'market', favs:'more', referral:'more', settings:'more',
-                  trade:'more', insights:'more', manager:'more', poolDetail:'pools'};
+                  trade:'more', insights:'more', manager:'more', poolDetail:'pools', calc:'dash'};
   const nKey = navMap[target] || 'more';
   const mNav = document.querySelector('.m-bottom .nv[data-nav-target="' + nKey + '"]');
   if(mNav) mNav.classList.add('active');
   // Trigger panel-specific loaders
   if(target === 'referral'){ try{ loadReferrals(); }catch(e){} }
   if(target === 'settings'){ try{ loadSettings(); }catch(e){} }
+  if(target === 'calc'){ try{ renderCalculator(); }catch(e){} }
   // Scroll top
   const c = document.querySelector('.d-content'); if(c) c.scrollTop = 0;
   window.scrollTo(0, 0);
@@ -3746,55 +3776,27 @@ function closeModal(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PROFIT CALCULATOR — placeholder (full version coming in next sprint)
+   PROFIT CALCULATOR — Stage 2: full implementation
+   - Duration slider (1-12 months)
+   - Base scenario from current portfolio
+   - Boosted scenario with reinvestment
+   - Empty state for users with no positions (virtual portfolio)
 ═══════════════════════════════════════════════════════════ */
 function openProfitCalculator(){
-  // Compute current portfolio quick stats to show in placeholder
-  const totalPrincipal = state.positions.reduce((s,p) => s + (Number(p.amount||p.amount_usd)||0), 0);
-  const totalEarned = state.positions.reduce((s,p) => s + getLiveEarned(p), 0);
-  const itemsActive = (state.myItems||[]).filter(i => i.status === 'active').length;
-  const hasPositions = totalPrincipal > 0 || itemsActive > 0;
-
-  showModal(`<div style="padding:8px">
-    <div style="text-align:center;margin-bottom:18px">
-      <div style="font-size:48px;margin-bottom:10px">📊</div>
-      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:8px">PROFIT CALCULATOR</h3>
-      <p style="font-size:12px;color:var(--t3);line-height:1.5">Coming soon. Calculate your earnings over time across pools and items, with smart reinvestment scenarios.</p>
-    </div>
-
-    <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px">
-      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:10px">YOUR CURRENT PORTFOLIO</div>
-      ${hasPositions ? `
-        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--bd)">
-          <span style="color:var(--t3)">Pool positions</span>
-          <span style="font-weight:700">${state.positions.length} · $${Math.round(totalPrincipal).toLocaleString()}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--bd)">
-          <span style="color:var(--t3)">Active item investments</span>
-          <span style="font-weight:700">${itemsActive}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px">
-          <span style="color:var(--t3)">Live earned (pools)</span>
-          <span style="color:var(--green);font-weight:700">+$${totalEarned.toFixed(2)}</span>
-        </div>
-      ` : `
-        <div style="text-align:center;padding:14px 0;color:var(--t3);font-size:12px">
-          No active investments yet.<br>Make your first deposit to unlock the calculator.
-        </div>
-      `}
-    </div>
-
-    <div style="background:linear-gradient(135deg,var(--gold-d),rgba(201,168,76,.05));border:1px solid var(--gold);border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.6;color:var(--t2)">
-      <div style="color:var(--gold);font-weight:700;margin-bottom:6px">🚀 What's coming in the next update</div>
-      • Slider 1–12 months — see total profit projection<br>
-      • Reinvestment scenarios — what if you reinvest item profits<br>
-      • Suggested marketplace items based on your goals<br>
-      • Pool tier comparison side-by-side
-    </div>
-
-    <button class="btn-out" onclick="closeModal()">Close</button>
-  </div>`);
+  navTo('calc');
 }
+
+/* Calculator state — persists in window between renders */
+window._calc = {
+  durationMonths: 6,                  // 1-12
+  reinvestTarget: null,               // item id, pool plan, or 'wallet'
+  reinvestCycles: 1,                  // for repeating items
+  // Empty-state mode (no positions yet):
+  virtualBudget: 5000,
+  virtualSilver: 25,                  // % of budget
+  virtualGold: 50,
+  virtualItems: [],                   // selected item IDs
+};
 
 /* ═══════════════════════════════════════════════════════════
    DEPOSIT FLOW (Phase 2): bonus → amount+coin → QR+timer → polling
@@ -5622,6 +5624,699 @@ window.addEventListener('beforeunload', () => {
 });
 
 console.log('[snap5] real-time polling loaded');
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 2 — PROFIT CALCULATOR FULL IMPLEMENTATION
+═══════════════════════════════════════════════════════════ */
+
+/* ───────── FORMULAS ───────── */
+
+/* Returns total profit from a pool position over N months.
+   Pool earnings are paid to wallet (no compound by default). */
+function _calcPoolProfit(principal, ratePct, period, months){
+  if(!principal || !ratePct || months <= 0) return 0;
+  // Convert period rate to monthly rate
+  let monthlyRate;
+  if(period === 'day')   monthlyRate = ratePct * 30;       // 0.5%/day → 15%/month
+  else if(period === 'week') monthlyRate = ratePct * 4.345; // 3%/week → 13.04%/month
+  else                   monthlyRate = ratePct;            // 15%/month
+  return principal * (monthlyRate / 100) * months;
+}
+
+/* Returns total profit from a single item investment over N months.
+   Items have fixed return % over fixed days, can run multiple cycles. */
+function _calcItemProfit(invested, expectedReturnPct, returnDays, months){
+  if(!invested || !expectedReturnPct || !returnDays || months <= 0) return 0;
+  const totalDays = months * 30;
+  const fullCycles = Math.floor(totalDays / returnDays);
+  const partialCycleFraction = (totalDays % returnDays) / returnDays;
+  const profitPerCycle = invested * (expectedReturnPct / 100);
+  return profitPerCycle * fullCycles + profitPerCycle * partialCycleFraction;
+}
+
+/* Reinvest scenario: take principal+profit from one item, reinvest into target,
+   accumulating over remaining time after first cycle completes. */
+function _calcReinvestScenario(item, targetId, months){
+  // item: {invested, expected_return, return_period_days, name, ...}
+  const cycleDays = item.return_period_days || 14;
+  const cycleProfit = item.invested * (item.expected_return / 100);
+  const moneyAfterCycle = item.invested + cycleProfit;
+  const daysAfterFirstCycle = (months * 30) - cycleDays;
+
+  if(daysAfterFirstCycle <= 0){
+    // Item doesn't even complete first cycle in this period
+    return { firstCycleProfit: 0, reinvestProfit: 0, total: cycleProfit };
+  }
+  const monthsAfterFirstCycle = daysAfterFirstCycle / 30;
+
+  let reinvestProfit = 0;
+  if(targetId === 'wallet'){
+    reinvestProfit = 0;
+  } else if(targetId.startsWith('pool:')){
+    const plan = targetId.split(':')[1];
+    const POOL_RATES = { 'Silver': {rate:0.5, period:'day'}, 'Gold': {rate:3, period:'week'}, 'Platinum': {rate:15, period:'month'} };
+    const pr = POOL_RATES[plan];
+    if(pr){
+      reinvestProfit = _calcPoolProfit(moneyAfterCycle, pr.rate, pr.period, monthsAfterFirstCycle);
+    }
+  } else {
+    // It's an item id — simulate reinvest into that item
+    const targetItem = ITEMS.find(x => x.id === Number(targetId));
+    if(targetItem){
+      reinvestProfit = _calcItemProfit(
+        moneyAfterCycle,
+        targetItem.ret ? targetItem.ret[1] : 30,
+        (targetItem.days && targetItem.days[1]) ? targetItem.days[1] : 14,
+        monthsAfterFirstCycle
+      );
+    }
+  }
+  return {
+    firstCycleProfit: cycleProfit,
+    reinvestProfit,
+    total: cycleProfit + reinvestProfit
+  };
+}
+
+/* ───────── DATA AGGREGATION ───────── */
+
+function _calcGetCurrentBreakdown(months){
+  const breakdown = { items:[], totalEarned:0, totalPrincipal:0 };
+
+  // Pools
+  state.positions.forEach(p => {
+    const principal = Number(p.amount||p.amount_usd) || 0;
+    const ratePct = Number(p.rate_pct) || 0;
+    const period = p.period || 'day';
+    const profit = _calcPoolProfit(principal, ratePct, period, months);
+    breakdown.items.push({
+      type: 'pool',
+      label: `${p.plan} Pool`,
+      sub: `${ratePct}% / ${period} · $${principal.toLocaleString()}`,
+      principal, profit,
+      icon: p.plan === 'Platinum' ? '◆' : p.plan === 'Gold' ? '★' : '●'
+    });
+    breakdown.totalPrincipal += principal;
+    breakdown.totalEarned += profit;
+  });
+
+  // Active items
+  (state.myItems || []).filter(i => i.status === 'active').forEach(it => {
+    const invested = Number(it.invested) || 0;
+    const expReturn = Number(it.retMax || it.ret) || 0;
+    const days = Number(it.return_period_days) ||
+                 (it.days && it.days[1]) || 14;
+    const profit = _calcItemProfit(invested, expReturn, days, months);
+    breakdown.items.push({
+      type: 'item',
+      label: it.name || 'Item',
+      sub: `+${expReturn}% / ${days}d · $${invested.toLocaleString()}`,
+      principal: invested, profit,
+      icon: '💎',
+      itemMeta: { invested, expected_return: expReturn, return_period_days: days, name: it.name }
+    });
+    breakdown.totalPrincipal += invested;
+    breakdown.totalEarned += profit;
+  });
+
+  return breakdown;
+}
+
+/* ───────── MAIN RENDER ───────── */
+
+function renderCalculator(){
+  const hasPositions = state.positions.length > 0
+                    || (state.myItems || []).some(i => i.status === 'active');
+
+  const html = hasPositions ? _renderCalcWithPortfolio() : _renderCalcEmptyState();
+
+  const dCt = document.getElementById('dCalcContent');
+  const mCt = document.getElementById('mCalcContent');
+  if(dCt) dCt.innerHTML = html;
+  if(mCt) mCt.innerHTML = html;
+
+  // Recompute and render results
+  setTimeout(() => _calcUpdateResults(), 50);
+}
+
+function _renderCalcWithPortfolio(){
+  const c = window._calc;
+  return `<div style="max-width:880px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:42px;margin-bottom:8px">📊</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px">Profit Calculator</h2>
+      <p style="font-size:13px;color:var(--t3);margin-top:4px">See how much your portfolio will earn over time</p>
+    </div>
+
+    <!-- Duration slider -->
+    <div class="calc-card">
+      <div class="calc-section-label">DURATION</div>
+      <div style="text-align:center;margin:10px 0 16px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1" id="calcDurLabel">${c.durationMonths} ${c.durationMonths === 1 ? 'month' : 'months'}</div>
+      </div>
+      <input type="range" id="calcDurSlider" min="1" max="12" step="1" value="${c.durationMonths}"
+        style="width:100%;height:6px;background:var(--bd2);border-radius:3px;outline:none;-webkit-appearance:none;appearance:none"
+        oninput="_calcOnDurationChange(this.value)">
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:'Space Mono',monospace;font-size:9px;color:var(--t3)">
+        <span>1 mo</span><span>3 mo</span><span>6 mo</span><span>12 mo</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
+        <button class="calc-chip" onclick="_calcOnDurationChange(1)">1 month</button>
+        <button class="calc-chip" onclick="_calcOnDurationChange(3)">3 months</button>
+        <button class="calc-chip" onclick="_calcOnDurationChange(6)">6 months</button>
+        <button class="calc-chip" onclick="_calcOnDurationChange(12)">1 year</button>
+      </div>
+    </div>
+
+    <!-- Base scenario -->
+    <div class="calc-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="calc-section-label" style="margin:0">BASE SCENARIO</div>
+        <div style="font-size:10px;color:var(--t3);font-style:italic">if nothing changes</div>
+      </div>
+      <div id="calcBaseList"></div>
+      <div class="calc-total-row">
+        <div>
+          <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;margin-bottom:2px">TOTAL EARNED</div>
+          <div id="calcBaseTotalEarned" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);line-height:1">+$0</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;margin-bottom:2px">END BALANCE</div>
+          <div id="calcBaseEndBalance" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1">$0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Boosted scenario (only shown if user has items that can be reinvested) -->
+    <div class="calc-card" id="calcBoostedCard" style="border:1px solid var(--gold);background:linear-gradient(135deg,var(--gold-d) 0%,rgba(201,168,76,.02) 100%)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="calc-section-label" style="margin:0;color:var(--gold)">💡 BOOSTED SCENARIO</div>
+        <div style="font-size:10px;color:var(--gold);font-style:italic">with smart reinvestment</div>
+      </div>
+      <div id="calcBoostedBody"></div>
+    </div>
+
+    <!-- Comparison chart -->
+    <div class="calc-card">
+      <div class="calc-section-label">PROJECTION OVER TIME</div>
+      <canvas id="calcChart" width="800" height="200" style="width:100%;height:200px;display:block;margin-top:8px"></canvas>
+      <div style="display:flex;gap:18px;justify-content:center;margin-top:10px;font-size:11px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:3px;background:var(--green);display:inline-block"></span>Base scenario</div>
+        <div style="display:flex;align-items:center;gap:6px" id="calcChartLegend2"><span style="width:14px;height:3px;background:var(--gold);display:inline-block"></span>Boosted</div>
+      </div>
+    </div>
+
+    <button class="btn-out" onclick="navTo('dash')" style="margin-top:14px">← Back to Dashboard</button>
+  </div>`;
+}
+
+function _renderCalcEmptyState(){
+  const c = window._calc;
+  return `<div style="max-width:880px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:42px;margin-bottom:8px">📊</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px">Profit Calculator</h2>
+      <p style="font-size:13px;color:var(--t3);margin-top:4px">Plan your investment strategy before you start</p>
+    </div>
+
+    <div class="calc-card" style="background:linear-gradient(135deg,var(--gold-d) 0%,rgba(201,168,76,.02) 100%);border:1px solid var(--gold)">
+      <div class="calc-section-label" style="color:var(--gold)">START FROM ZERO</div>
+      <p style="font-size:12px;color:var(--t2);margin:6px 0 14px;line-height:1.5">Set a virtual budget and allocation to see what you could earn. Once you make your first deposit, the calculator will use your real portfolio.</p>
+    </div>
+
+    <!-- Budget -->
+    <div class="calc-card">
+      <div class="calc-section-label">BUDGET</div>
+      <div style="text-align:center;margin:10px 0 14px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1" id="calcVBudgetLabel">$${c.virtualBudget.toLocaleString()}</div>
+      </div>
+      <input type="range" id="calcVBudget" min="100" max="100000" step="100" value="${c.virtualBudget}"
+        style="width:100%;height:6px;background:var(--bd2);border-radius:3px;outline:none;-webkit-appearance:none;appearance:none"
+        oninput="_calcVBudgetChange(this.value)">
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:'Space Mono',monospace;font-size:9px;color:var(--t3)">
+        <span>$100</span><span>$10K</span><span>$50K</span><span>$100K</span>
+      </div>
+    </div>
+
+    <!-- Duration -->
+    <div class="calc-card">
+      <div class="calc-section-label">DURATION</div>
+      <div style="text-align:center;margin:10px 0 14px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1" id="calcDurLabel">${c.durationMonths} ${c.durationMonths === 1 ? 'month' : 'months'}</div>
+      </div>
+      <input type="range" id="calcDurSlider" min="1" max="12" step="1" value="${c.durationMonths}"
+        style="width:100%;height:6px;background:var(--bd2);border-radius:3px;outline:none;-webkit-appearance:none;appearance:none"
+        oninput="_calcOnDurationChange(this.value)">
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        <button class="calc-chip" onclick="_calcOnDurationChange(1)">1 month</button>
+        <button class="calc-chip" onclick="_calcOnDurationChange(3)">3 months</button>
+        <button class="calc-chip" onclick="_calcOnDurationChange(6)">6 months</button>
+        <button class="calc-chip" onclick="_calcOnDurationChange(12)">1 year</button>
+      </div>
+    </div>
+
+    <!-- Allocation -->
+    <div class="calc-card">
+      <div class="calc-section-label">ALLOCATION</div>
+      <p style="font-size:11px;color:var(--t3);margin-bottom:12px">How to split your budget across pools and items</p>
+
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+          <span style="color:var(--t2)">● Silver Pool (0.5% / day)</span>
+          <span style="color:var(--gold);font-weight:700" id="calcVSilverAmt">$0</span>
+        </div>
+        <input type="range" id="calcVSilver" min="0" max="100" step="5" value="${c.virtualSilver}"
+          style="width:100%;height:5px;outline:none;-webkit-appearance:none;appearance:none"
+          oninput="_calcVAllocChange('Silver', this.value)">
+      </div>
+
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+          <span style="color:var(--t2)">★ Gold Pool (3% / week)</span>
+          <span style="color:var(--gold);font-weight:700" id="calcVGoldAmt">$0</span>
+        </div>
+        <input type="range" id="calcVGold" min="0" max="100" step="5" value="${c.virtualGold}"
+          style="width:100%;height:5px;outline:none;-webkit-appearance:none;appearance:none"
+          oninput="_calcVAllocChange('Gold', this.value)">
+      </div>
+
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+          <span style="color:var(--t2)">💎 Items (rest)</span>
+          <span style="color:var(--gold);font-weight:700" id="calcVItemsAmt">$0</span>
+        </div>
+      </div>
+
+      <div id="calcVItemsPicker" style="margin-top:14px">
+        <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;margin-bottom:8px">PICK ITEMS (TAP TO SELECT)</div>
+        <div id="calcVItemsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px"></div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="calc-card" style="border:1px solid var(--gold);background:linear-gradient(135deg,var(--gold-d) 0%,rgba(201,168,76,.02) 100%)">
+      <div class="calc-section-label" style="color:var(--gold)">PROJECTED RESULT</div>
+      <div id="calcVResult" style="margin-top:10px"></div>
+    </div>
+
+    <button class="btn-out" onclick="navTo('dash')" style="margin-top:14px">← Back to Dashboard</button>
+  </div>`;
+}
+
+/* ───────── EVENT HANDLERS ───────── */
+
+function _calcOnDurationChange(val){
+  window._calc.durationMonths = parseInt(val);
+  // Sync slider position if changed via chip
+  document.querySelectorAll('#calcDurSlider').forEach(el => { el.value = val; });
+  document.querySelectorAll('#calcDurLabel').forEach(el => {
+    el.textContent = val + ' ' + (val == 1 ? 'month' : 'months');
+  });
+  _calcUpdateResults();
+}
+
+function _calcVBudgetChange(val){
+  window._calc.virtualBudget = parseInt(val);
+  document.querySelectorAll('#calcVBudgetLabel').forEach(el => {
+    el.textContent = '$' + parseInt(val).toLocaleString();
+  });
+  _calcUpdateResults();
+}
+
+function _calcVAllocChange(plan, val){
+  if(plan === 'Silver') window._calc.virtualSilver = parseInt(val);
+  else if(plan === 'Gold') window._calc.virtualGold = parseInt(val);
+  // Items = 100 - silver - gold (auto-rest)
+  // But cap so silver+gold <= 100
+  if(window._calc.virtualSilver + window._calc.virtualGold > 100){
+    if(plan === 'Silver'){
+      window._calc.virtualGold = 100 - window._calc.virtualSilver;
+      const gEl = document.getElementById('calcVGold');
+      if(gEl) gEl.value = window._calc.virtualGold;
+    } else {
+      window._calc.virtualSilver = 100 - window._calc.virtualGold;
+      const sEl = document.getElementById('calcVSilver');
+      if(sEl) sEl.value = window._calc.virtualSilver;
+    }
+  }
+  _calcUpdateResults();
+}
+
+function _calcVToggleItem(itemId){
+  const idx = window._calc.virtualItems.indexOf(itemId);
+  if(idx >= 0) window._calc.virtualItems.splice(idx, 1);
+  else window._calc.virtualItems.push(itemId);
+  _calcUpdateResults();
+}
+
+function _calcSetReinvestTarget(target){
+  window._calc.reinvestTarget = target;
+  _calcUpdateResults();
+}
+
+/* ───────── RESULTS RENDER ───────── */
+
+function _calcUpdateResults(){
+  const hasPositions = state.positions.length > 0
+                    || (state.myItems || []).some(i => i.status === 'active');
+  if(hasPositions) _calcUpdateWithPortfolio();
+  else             _calcUpdateEmptyState();
+}
+
+function _calcUpdateWithPortfolio(){
+  const months = window._calc.durationMonths;
+  const breakdown = _calcGetCurrentBreakdown(months);
+
+  // Render base list
+  const baseListHTML = breakdown.items.length
+    ? breakdown.items.map(it => `
+      <div class="calc-item-row">
+        <div class="calc-item-icon">${it.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div class="calc-item-name">${it.label}</div>
+          <div class="calc-item-sub">${it.sub}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:14px;font-weight:700;color:var(--green)">+$${Math.round(it.profit).toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--t3)">${months} mo</div>
+        </div>
+      </div>`).join('')
+    : '<div style="text-align:center;padding:18px;color:var(--t3);font-size:12px">No active positions</div>';
+
+  document.querySelectorAll('#calcBaseList').forEach(el => { el.innerHTML = baseListHTML; });
+
+  const totalEnd = breakdown.totalPrincipal + breakdown.totalEarned + (state.wallet || 0);
+  document.querySelectorAll('#calcBaseTotalEarned').forEach(el => {
+    el.textContent = '+$' + Math.round(breakdown.totalEarned).toLocaleString();
+  });
+  document.querySelectorAll('#calcBaseEndBalance').forEach(el => {
+    el.textContent = '$' + Math.round(totalEnd).toLocaleString();
+  });
+
+  // Boosted scenario — only render if user has at least one item that can complete a cycle within the period
+  const reinvestableItems = breakdown.items.filter(it => {
+    if(it.type !== 'item') return false;
+    const days = it.itemMeta.return_period_days || 14;
+    return days <= months * 30;
+  });
+
+  document.querySelectorAll('#calcBoostedCard').forEach(card => {
+    if(reinvestableItems.length === 0){
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = '';
+  });
+
+  if(reinvestableItems.length > 0){
+    const item = reinvestableItems[0];   // Use first reinvestable item
+    const itemMeta = item.itemMeta;
+    const cycleDays = itemMeta.return_period_days;
+
+    // Default reinvest target if not chosen
+    if(!window._calc.reinvestTarget){
+      // Default: top item from marketplace by return%
+      const topItem = ITEMS.filter(i => (i.slots_available||0) > 0)
+                           .sort((a,b) => (b.ret?.[1]||0) - (a.ret?.[1]||0))[0];
+      window._calc.reinvestTarget = topItem ? String(topItem.id) : 'pool:Gold';
+    }
+
+    // Build options
+    const topItems = ITEMS.filter(i => (i.slots_available||0) > 0)
+                          .sort((a,b) => (b.ret?.[1]||0) - (a.ret?.[1]||0))
+                          .slice(0, 3);
+    const targetOptions = [
+      ...topItems.map(i => ({ id: String(i.id), label: i.name, sub: `+${i.ret?.[1]||0}% / ${i.days?.[1]||14}d`, icon: '💎' })),
+      { id: 'pool:Gold', label: 'Gold Pool', sub: '3% / week', icon: '★' },
+      { id: 'pool:Platinum', label: 'Platinum Pool', sub: '15% / month', icon: '◆' },
+      { id: 'wallet', label: 'Keep in wallet', sub: 'No extra earnings', icon: '💰' },
+    ];
+
+    // Calculate boosted scenario
+    const scenario = _calcReinvestScenario(itemMeta, window._calc.reinvestTarget, months);
+    const baseItemProfit = item.profit;
+    const boostedItemProfit = scenario.total;
+    const extraFromBoost = boostedItemProfit - baseItemProfit;
+    const boostedTotal = breakdown.totalEarned - baseItemProfit + boostedItemProfit;
+    const extraPct = breakdown.totalEarned > 0 ? (extraFromBoost / breakdown.totalEarned * 100) : 0;
+
+    const targetName = (() => {
+      const opt = targetOptions.find(o => o.id === window._calc.reinvestTarget);
+      return opt ? opt.label : 'Selected target';
+    })();
+
+    const boostedHTML = `
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:14px">
+        Your <strong style="color:var(--t)">${itemMeta.name}</strong> position completes its cycle in <strong style="color:var(--gold)">${cycleDays} days</strong>, returning <strong style="color:var(--green)">$${Math.round(itemMeta.invested + scenario.firstCycleProfit).toLocaleString()}</strong>. Reinvest into:
+      </div>
+
+      <div style="display:grid;gap:6px;margin-bottom:14px">
+        ${targetOptions.map(opt => {
+          const sel = window._calc.reinvestTarget === opt.id;
+          return `<div onclick="_calcSetReinvestTarget('${opt.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${sel?'var(--gold-d)':'var(--bg2)'};border:1px solid ${sel?'var(--gold)':'var(--bd)'};border-radius:8px;cursor:pointer;transition:all .15s">
+            <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?'var(--gold)':'var(--bd2)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${sel?'<div style="width:10px;height:10px;background:var(--gold);border-radius:50%"></div>':''}</div>
+            <div style="font-size:18px">${opt.icon}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:13px">${opt.label}</div>
+              <div style="font-size:10px;color:var(--t3)">${opt.sub}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div class="calc-total-row" style="border-color:var(--gold)">
+        <div>
+          <div style="font-size:10px;color:var(--gold);letter-spacing:1.5px;margin-bottom:2px">BOOSTED EARNED</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);line-height:1">+$${Math.round(boostedTotal).toLocaleString()}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:var(--gold);letter-spacing:1.5px;margin-bottom:2px">EXTRA</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1">+$${Math.round(extraFromBoost).toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">+${extraPct.toFixed(0)}% over base</div>
+        </div>
+      </div>
+    `;
+
+    document.querySelectorAll('#calcBoostedBody').forEach(el => { el.innerHTML = boostedHTML; });
+  }
+
+  // Draw chart
+  setTimeout(() => _calcDrawChart(breakdown, reinvestableItems), 30);
+}
+
+function _calcUpdateEmptyState(){
+  const c = window._calc;
+  const months = c.durationMonths;
+  const budget = c.virtualBudget;
+  const silverPct = c.virtualSilver;
+  const goldPct = c.virtualGold;
+  const itemsPct = Math.max(0, 100 - silverPct - goldPct);
+
+  const silverAmt = budget * silverPct / 100;
+  const goldAmt = budget * goldPct / 100;
+  const itemsAmt = budget * itemsPct / 100;
+
+  document.querySelectorAll('#calcVSilverAmt').forEach(el => { el.textContent = '$' + Math.round(silverAmt).toLocaleString(); });
+  document.querySelectorAll('#calcVGoldAmt').forEach(el => { el.textContent = '$' + Math.round(goldAmt).toLocaleString(); });
+  document.querySelectorAll('#calcVItemsAmt').forEach(el => { el.textContent = '$' + Math.round(itemsAmt).toLocaleString(); });
+
+  // Render items picker
+  const availableItems = (ITEMS || []).filter(i => (i.slots_available||0) > 0).slice(0, 8);
+  document.querySelectorAll('#calcVItemsList').forEach(list => {
+    list.innerHTML = availableItems.map(i => {
+      const sel = c.virtualItems.includes(i.id);
+      const ret = i.ret ? `+${i.ret[1]}%` : '';
+      return `<div onclick="_calcVToggleItem(${i.id})" style="padding:10px;background:${sel?'var(--gold-d)':'var(--bg2)'};border:1px solid ${sel?'var(--gold)':'var(--bd)'};border-radius:8px;cursor:pointer;transition:all .15s;text-align:center">
+        <div style="font-size:24px;margin-bottom:4px">${i.ico||'💎'}</div>
+        <div style="font-size:11px;font-weight:700;line-height:1.2;margin-bottom:2px;${sel?'color:var(--gold)':''}">${i.name}</div>
+        <div style="font-size:10px;color:var(--green)">${ret}</div>
+      </div>`;
+    }).join('');
+  });
+
+  // Calculate
+  const silverProfit = _calcPoolProfit(silverAmt, 0.5, 'day', months);
+  const goldProfit = _calcPoolProfit(goldAmt, 3, 'week', months);
+  let itemsProfit = 0;
+  if(c.virtualItems.length > 0 && itemsAmt > 0){
+    const perItem = itemsAmt / c.virtualItems.length;
+    c.virtualItems.forEach(id => {
+      const item = ITEMS.find(x => x.id === id);
+      if(item){
+        itemsProfit += _calcItemProfit(perItem, item.ret?.[1] || 30, item.days?.[1] || 14, months);
+      }
+    });
+  }
+
+  const totalEarned = silverProfit + goldProfit + itemsProfit;
+  const endBalance = budget + totalEarned;
+  const yieldPct = budget > 0 ? (totalEarned / budget * 100) : 0;
+
+  const resultHTML = `
+    <div style="display:grid;gap:8px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--bd)">
+        <span style="color:var(--t3)">Silver Pool ($${Math.round(silverAmt).toLocaleString()})</span>
+        <span style="color:var(--green);font-weight:700">+$${Math.round(silverProfit).toLocaleString()}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--bd)">
+        <span style="color:var(--t3)">Gold Pool ($${Math.round(goldAmt).toLocaleString()})</span>
+        <span style="color:var(--green);font-weight:700">+$${Math.round(goldProfit).toLocaleString()}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px">
+        <span style="color:var(--t3)">Items (${c.virtualItems.length} selected, $${Math.round(itemsAmt).toLocaleString()})</span>
+        <span style="color:var(--green);font-weight:700">+$${Math.round(itemsProfit).toLocaleString()}</span>
+      </div>
+    </div>
+    <div class="calc-total-row" style="border-color:var(--gold)">
+      <div>
+        <div style="font-size:10px;color:var(--gold);letter-spacing:1.5px;margin-bottom:2px">TOTAL EARNED</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);line-height:1">+$${Math.round(totalEarned).toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:2px">${yieldPct.toFixed(1)}% yield</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:var(--gold);letter-spacing:1.5px;margin-bottom:2px">END BALANCE</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1">$${Math.round(endBalance).toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:2px">in ${months} ${months==1?'month':'months'}</div>
+      </div>
+    </div>
+    <button class="btn-primary" style="margin-top:14px" onclick="navTo('market')">📦 START INVESTING NOW</button>
+  `;
+
+  document.querySelectorAll('#calcVResult').forEach(el => { el.innerHTML = resultHTML; });
+}
+
+/* ───────── CHART ───────── */
+
+function _calcDrawChart(breakdown, reinvestableItems){
+  const canvases = document.querySelectorAll('#calcChart');
+  canvases.forEach(c => {
+    const ctx = c.getContext('2d');
+    const w = c.width, h = c.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const months = window._calc.durationMonths;
+    const monthsArr = Array.from({length: months + 1}, (_, i) => i);
+
+    // Base series — cumulative earnings month by month
+    const basePoints = monthsArr.map(m => {
+      let total = 0;
+      breakdown.items.forEach(it => {
+        if(it.type === 'pool'){
+          const pos = state.positions.find(p => `${p.plan} Pool` === it.label);
+          if(pos){
+            total += _calcPoolProfit(it.principal, Number(pos.rate_pct)||0, pos.period||'day', m);
+          }
+        } else {
+          total += _calcItemProfit(it.principal, it.itemMeta.expected_return, it.itemMeta.return_period_days, m);
+        }
+      });
+      return total;
+    });
+
+    // Boosted series (if applicable)
+    let boostedPoints = null;
+    if(reinvestableItems.length > 0){
+      const item = reinvestableItems[0].itemMeta;
+      const target = window._calc.reinvestTarget;
+      boostedPoints = monthsArr.map(m => {
+        let total = 0;
+        // All non-reinvest items are same as base
+        breakdown.items.forEach(it => {
+          if(it.label === reinvestableItems[0].label) return;   // skip the reinvested one
+          if(it.type === 'pool'){
+            const pos = state.positions.find(p => `${p.plan} Pool` === it.label);
+            if(pos){
+              total += _calcPoolProfit(it.principal, Number(pos.rate_pct)||0, pos.period||'day', m);
+            }
+          } else {
+            total += _calcItemProfit(it.principal, it.itemMeta.expected_return, it.itemMeta.return_period_days, m);
+          }
+        });
+        // Reinvested item profit
+        const sc = _calcReinvestScenario(item, target, m);
+        total += sc.total;
+        return total;
+      });
+    }
+
+    // Drawing
+    const padL = 50, padR = 12, padT = 12, padB = 30;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+    const allPts = boostedPoints ? [...basePoints, ...boostedPoints] : basePoints;
+    const mx = Math.max(...allPts, 1);
+
+    // Grid
+    ctx.strokeStyle = 'rgba(201,168,76,.06)';
+    ctx.lineWidth = 1;
+    for(let k = 1; k <= 3; k++){
+      const y = padT + (plotH * k / 4);
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+    }
+
+    // Y labels
+    ctx.fillStyle = 'rgba(240,237,230,0.5)';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText('$' + Math.round(mx).toLocaleString(), padL - 6, padT + 8);
+    ctx.fillText('$0', padL - 6, padT + plotH);
+
+    // X labels (months)
+    ctx.textAlign = 'center';
+    monthsArr.forEach((m, i) => {
+      if(i === 0 || i === months || (months > 6 && i === Math.floor(months/2)) || (months <= 6 && i % 2 === 0)){
+        const x = padL + (i / months) * plotW;
+        ctx.fillText(m === 0 ? 'Now' : m + 'mo', x, h - 10);
+      }
+    });
+
+    const drawSeries = (pts, color, fillColor) => {
+      // Area fill
+      ctx.beginPath();
+      ctx.moveTo(padL, padT + plotH);
+      pts.forEach((v, i) => {
+        const x = padL + (i / months) * plotW;
+        const y = padT + plotH - (v / mx) * plotH;
+        ctx.lineTo(x, y);
+      });
+      ctx.lineTo(padL + plotW, padT + plotH);
+      ctx.closePath();
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+      // Line
+      ctx.beginPath();
+      pts.forEach((v, i) => {
+        const x = padL + (i / months) * plotW;
+        const y = padT + plotH - (v / mx) * plotH;
+        if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // Dots
+      pts.forEach((v, i) => {
+        const x = padL + (i / months) * plotW;
+        const y = padT + plotH - (v / mx) * plotH;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.5, 0, Math.PI*2);
+        ctx.fillStyle = color;
+        ctx.fill();
+      });
+    };
+
+    drawSeries(basePoints, '#2d8f3e', 'rgba(45,143,62,0.18)');
+    if(boostedPoints) drawSeries(boostedPoints, '#c9a84c', 'rgba(201,168,76,0.18)');
+  });
+
+  // Hide legend item 2 if no boosted
+  document.querySelectorAll('#calcChartLegend2').forEach(el => {
+    el.style.display = reinvestableItems.length > 0 ? '' : 'none';
+  });
+}
+
+console.log('[stage2] profit calculator loaded');
 
 </script>
 </body>
