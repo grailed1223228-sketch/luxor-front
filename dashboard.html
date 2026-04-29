@@ -71,6 +71,7 @@ button{font-family:inherit}
 .d-side .nav-item{display:flex;align-items:center;gap:14px;padding:12px 24px;color:var(--t2);font-size:13px;cursor:pointer;border-left:3px solid transparent;font-weight:500;text-decoration:none;transition:all .15s}
 .d-side .nav-item:hover{background:var(--bg2);color:var(--t)}
 .d-side .nav-item.active{background:var(--gold-d);color:var(--gold);border-left-color:var(--gold);font-weight:600}
+.d-side .nav-new{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1.5px;background:var(--gold);color:#0a0a0a;padding:2px 6px;border-radius:3px;margin-left:auto;font-weight:700}
 .d-side .nav-item .lx{font-size:18px;width:20px}
 
 .d-side .nav-more{position:relative}
@@ -169,33 +170,29 @@ button{font-family:inherit}
 .m-summary .b .v.gold{color:var(--gold)}
 
 /* Profit Calculator CTA button */
-.profit-calc-btn{display:flex;align-items:center;gap:14px;width:100%;padding:14px 18px;margin-top:14px;background:linear-gradient(135deg,var(--gold-d) 0%,rgba(201,168,76,.05) 100%);border:1px solid var(--gold);border-radius:10px;color:var(--t);cursor:pointer;font-family:inherit;text-align:left;transition:all .2s}
-.profit-calc-btn:hover{background:linear-gradient(135deg,rgba(201,168,76,.18) 0%,rgba(201,168,76,.08) 100%);transform:translateY(-1px);box-shadow:0 6px 18px rgba(201,168,76,.15)}
-.profit-calc-btn .ico{font-size:24px;flex-shrink:0}
-.profit-calc-btn .txts{flex:1;display:flex;flex-direction:column;min-width:0}
-.profit-calc-btn .txt-main{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--gold);font-weight:600;line-height:1.2}
-.profit-calc-btn .txt-sub{font-size:11px;color:var(--t3);margin-top:3px}
-.profit-calc-btn .arrow{color:var(--gold);font-size:20px;font-weight:700;flex-shrink:0;transition:transform .2s}
-.profit-calc-btn:hover .arrow{transform:translateX(4px)}
+/* Smart Invest banner with sparkle animation */
+.smart-banner{display:flex;align-items:center;gap:16px;width:100%;padding:18px 22px;margin-top:14px;background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);border:none;border-radius:12px;color:#0a0a0a;cursor:pointer;font-family:inherit;text-align:left;transition:all .25s;position:relative;overflow:hidden;box-shadow:0 4px 16px rgba(201,168,76,.2)}
+.smart-banner:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.35)}
+.smart-banner-ic{width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:2}
+.smart-banner-txt{flex:1;min-width:0;position:relative;z-index:2}
+.smart-banner-h{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:#0a0a0a;font-weight:700;line-height:1.1;margin-bottom:4px}
+.smart-banner-d{font-size:12px;color:rgba(0,0,0,.7);line-height:1.4}
+.smart-banner-d strong{color:#0a0a0a;font-weight:700}
+.smart-banner-arrow{color:#0a0a0a;font-size:24px;font-weight:700;flex-shrink:0;transition:transform .2s;z-index:2;position:relative}
+.smart-banner:hover .smart-banner-arrow{transform:translateX(6px)}
+/* Sparkles */
+.smart-banner-sparkles{position:absolute;inset:0;pointer-events:none;z-index:1}
+.smart-banner-sparkles .sp{position:absolute;background:#fff;border-radius:50%;opacity:0}
+.smart-banner-sparkles .sp.s1{width:6px;height:6px;top:18%;left:30%;animation:sparkle 2.4s ease-in-out infinite;animation-delay:.0s}
+.smart-banner-sparkles .sp.s2{width:4px;height:4px;top:60%;left:55%;animation:sparkle 2.4s ease-in-out infinite;animation-delay:.6s}
+.smart-banner-sparkles .sp.s3{width:5px;height:5px;top:30%;left:75%;animation:sparkle 2.4s ease-in-out infinite;animation-delay:1.2s}
+.smart-banner-sparkles .sp.s4{width:3px;height:3px;top:75%;left:88%;animation:sparkle 2.4s ease-in-out infinite;animation-delay:1.8s}
+@keyframes sparkle{0%,100%{opacity:0;transform:scale(0)}50%{opacity:.85;transform:scale(1)}}
 @media (min-width:769px){
-  .profit-calc-btn{padding:18px 22px}
-  .profit-calc-btn .txt-main{font-size:18px}
+  .smart-banner{padding:22px 26px}
+  .smart-banner-h{font-size:17px}
+  .smart-banner-d{font-size:13px}
 }
-
-/* Profit Calculator screen */
-.calc-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px}
-.calc-section-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:6px}
-.calc-chip{padding:8px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:20px;color:var(--t2);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
-.calc-chip:hover{background:var(--gold-d);color:var(--gold);border-color:var(--gold)}
-.calc-item-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)}
-.calc-item-row:last-child{border-bottom:none}
-.calc-item-icon{width:36px;height:36px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.calc-item-name{font-size:13px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.calc-item-sub{font-size:11px;color:var(--t3)}
-.calc-total-row{display:flex;justify-content:space-between;align-items:flex-end;padding:14px 0 0;margin-top:10px;border-top:1px solid var(--bd);gap:14px}
-input[type="range"].calc-range::-webkit-slider-thumb,
-.calc-card input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;background:var(--gold);border:2px solid var(--bg);border-radius:50%;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.calc-card input[type="range"]::-moz-range-thumb{width:18px;height:18px;background:var(--gold);border:2px solid var(--bg);border-radius:50%;cursor:pointer}
 
 .m-sec{margin-bottom:16px}
 .m-sec .head{display:flex;justify-content:space-between;align-items:center;padding:0 4px 8px;border-bottom:1px solid var(--bd);margin-bottom:8px}
@@ -746,6 +743,247 @@ input[type="range"].calc-range::-webkit-slider-thumb,
 .bell-drop .item{padding:9px 10px;font-size:11px;color:var(--t2);border-bottom:1px solid var(--bd)}
 .bell-drop .item:last-child{border-bottom:none}
 
+
+/* ═══════════════════════════════════════════════════════════
+   SMART INVEST WIZARD STYLES
+═══════════════════════════════════════════════════════════ */
+
+.sm-wrap{max-width:920px;margin:0 auto;padding-bottom:140px;position:relative}
+
+/* Header */
+.sm-head{margin-bottom:22px}
+.sm-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:var(--gold);color:#0a0a0a;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:3px;border-radius:4px;font-weight:700;margin-bottom:10px}
+.sm-tag svg{color:#0a0a0a}
+.sm-title{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;line-height:1.1;margin-bottom:6px}
+.sm-title em{color:var(--gold);font-style:italic}
+.sm-sub{font-size:13px;color:var(--t3);max-width:560px}
+
+/* Progress bar */
+.sm-progress{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-bottom:24px;padding:14px 18px;background:var(--bg2);border:1px solid var(--bd);border-radius:12px}
+.sm-prog-bar{position:relative;height:4px;background:var(--bd2);border-radius:2px;overflow:hidden}
+.sm-prog-fill{position:absolute;top:0;left:0;bottom:0;background:linear-gradient(90deg,var(--gold),var(--goldL));border-radius:2px;transition:width .35s ease;box-shadow:0 0 12px rgba(201,168,76,.4)}
+.sm-prog-txt{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);white-space:nowrap}
+
+/* Step panes (only one visible at a time) */
+.sm-pane{display:none}
+.sm-pane.sm-pane-active{display:block;animation:sm-fadeIn .35s ease}
+@keyframes sm-fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* Recap chips */
+.sm-recap{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;padding:12px 16px;background:var(--bg3);border-radius:8px;font-size:11px}
+.sm-recap:empty{display:none}
+.sm-recap-item{display:flex;align-items:center;gap:6px;color:var(--t3)}
+.sm-recap-l{font-family:'Space Mono',monospace;letter-spacing:1px;color:var(--t3)}
+.sm-recap-v{color:var(--gold);font-weight:700}
+.sm-recap-edit{margin-left:4px;color:var(--t3);cursor:pointer;font-size:10px;text-decoration:underline}
+.sm-recap-edit:hover{color:var(--gold)}
+
+/* Step header */
+.sm-step-h{margin-bottom:18px}
+.sm-step-q{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1.15;margin-bottom:6px}
+.sm-step-q em{color:var(--gold);font-style:italic}
+.sm-step-hint{font-size:13px;color:var(--t3);max-width:540px}
+
+/* Choice cards (steps 1, 3) */
+.sm-choices{display:grid;grid-template-columns:1fr;gap:10px}
+.sm-choice{padding:18px 22px;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;cursor:pointer;transition:all .15s;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;position:relative}
+.sm-choice:hover{border-color:var(--gold);transform:translateY(-1px)}
+.sm-choice.sm-choice-selected{background:var(--gold-d);border-color:var(--gold);box-shadow:0 4px 18px rgba(201,168,76,.12)}
+.sm-choice-ic{width:48px;height:48px;border-radius:12px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0;transition:all .15s}
+.sm-choice.sm-choice-selected .sm-choice-ic{background:var(--gold);color:#0a0a0a}
+.sm-choice-info .sm-choice-t{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sm-choice.sm-choice-selected .sm-choice-info .sm-choice-t{color:var(--gold)}
+.sm-choice-info .sm-choice-d{font-size:12px;color:var(--t3);line-height:1.55}
+.sm-choice-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--bd2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.sm-choice.sm-choice-selected .sm-choice-check{border-color:var(--gold);background:var(--gold)}
+.sm-choice.sm-choice-selected .sm-choice-check::after{content:'✓';color:#0a0a0a;font-weight:700;font-size:14px}
+
+.sm-tag-mini{display:inline-block;padding:2px 8px;background:var(--bd2);color:var(--t2);font-size:9px;letter-spacing:1.5px;border-radius:3px;font-weight:700;font-family:'Space Mono',monospace}
+.sm-tag-mini-red{background:rgba(192,57,43,.15);color:var(--red)}
+.sm-tag-mini-green{background:rgba(45,143,62,.15);color:var(--green)}
+
+.sm-choice-rec{position:relative;border-color:var(--gold)}
+.sm-choice-rec-tag{position:absolute;top:-9px;right:18px;background:var(--gold);color:#0a0a0a;font-family:'Bebas Neue',sans-serif;font-size:9px;letter-spacing:2px;padding:3px 10px;border-radius:3px;font-weight:700}
+
+/* Step 2: amount input */
+.sm-amount-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:30px 28px;text-align:center}
+.sm-amount-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px}
+.sm-amount-prefix{font-family:'Bebas Neue',sans-serif;font-size:54px;color:var(--gold);line-height:1}
+.sm-amount-input{font-family:'Bebas Neue',sans-serif;font-size:54px;color:var(--gold);background:transparent;border:none;outline:none;text-align:center;width:300px;line-height:1;font-weight:700;-moz-appearance:textfield}
+.sm-amount-input::-webkit-outer-spin-button,
+.sm-amount-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.sm-amount-input::placeholder{color:var(--bd2)}
+
+.sm-presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.sm-preset{padding:8px 16px;background:var(--bg3);border:1px solid var(--bd);border-radius:24px;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit}
+.sm-preset:hover{background:var(--gold-d);color:var(--gold);border-color:var(--gold)}
+.sm-preset.sm-preset-active{background:var(--gold);color:#0a0a0a;border-color:var(--gold)}
+
+.sm-balance-opt{margin-top:14px;padding:12px 16px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;text-align:left}
+.sm-checkbox{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px;color:var(--t2)}
+.sm-checkbox input{display:none}
+.sm-checkbox-mark{width:18px;height:18px;border:2px solid var(--bd2);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.sm-checkbox input:checked + .sm-checkbox-mark{background:var(--gold);border-color:var(--gold)}
+.sm-checkbox input:checked + .sm-checkbox-mark::after{content:'✓';color:#0a0a0a;font-weight:700;font-size:12px}
+.sm-checkbox-text strong{color:var(--gold)}
+
+.sm-amount-error{margin-top:12px;color:var(--red);font-size:12px;padding:10px;background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.3);border-radius:6px}
+
+/* Step 4: loader */
+.sm-loader-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 20px}
+.sm-loader-ring{width:90px;height:90px;border-radius:50%;background:var(--gold-d);border:2px solid var(--gold);position:relative;margin-bottom:24px;animation:sm-pulse 2s ease-in-out infinite}
+.sm-loader-ring::before{content:'';position:absolute;inset:-10px;border-radius:50%;border:2px solid var(--gold);opacity:.3;animation:sm-ripple 2s ease-out infinite}
+.sm-loader-ring::after{content:'';position:absolute;inset:-20px;border-radius:50%;border:2px solid var(--gold);opacity:.15;animation:sm-ripple 2s ease-out infinite .4s}
+@keyframes sm-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes sm-ripple{from{transform:scale(.95);opacity:.4}to{transform:scale(1.4);opacity:0}}
+.sm-loader-core{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.sm-loader-core svg{animation:sm-rotate 4s linear infinite}
+@keyframes sm-rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+.sm-loader-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold);margin-bottom:30px}
+
+.sm-loader-list{display:flex;flex-direction:column;gap:12px;max-width:440px;width:100%}
+.sm-loader-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;color:var(--t3);font-size:13px;opacity:.4;transition:all .35s ease}
+.sm-loader-item.sm-loader-item-active{opacity:1;border-color:var(--gold);color:var(--t)}
+.sm-loader-item.sm-loader-item-active .sm-loader-dot{background:var(--gold);animation:sm-blink 1s ease-in-out infinite}
+.sm-loader-item.sm-loader-item-done{opacity:.7;color:var(--t2)}
+.sm-loader-item.sm-loader-item-done .sm-loader-dot{background:var(--green);animation:none}
+.sm-loader-item.sm-loader-item-done .sm-loader-dot::after{content:'✓';color:#fff;font-size:9px;font-weight:700}
+.sm-loader-dot{width:14px;height:14px;border-radius:50%;background:var(--bd2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .25s}
+@keyframes sm-blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Step 5: strategies */
+.sm-strategies{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.sm-strategy{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:22px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column}
+.sm-strategy:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.10)}
+.sm-strategy.sm-strategy-selected{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-d) 0%,var(--bg2) 50%);box-shadow:0 8px 28px rgba(201,168,76,.18)}
+
+.sm-strategy-h{margin-bottom:16px}
+.sm-strategy-tag{display:inline-block;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;background:var(--gold-d);color:var(--gold);padding:3px 10px;border-radius:3px;font-weight:700;margin-bottom:6px}
+.sm-strategy-tag.sm-strategy-tag-b{background:rgba(192,57,43,.12);color:var(--red)}
+.sm-strategy-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;line-height:1;margin-bottom:3px}
+.sm-strategy-sub{font-size:11px;color:var(--t3)}
+
+.sm-strategy-bars{margin-bottom:16px}
+.sm-bar-row{display:grid;grid-template-columns:60px 1fr 50px;gap:10px;align-items:center;margin-bottom:8px;font-size:11px}
+.sm-bar-row:last-child{margin-bottom:0}
+.sm-bar-label{color:var(--t3);font-family:'Space Mono',monospace;letter-spacing:1px}
+.sm-bar{height:8px;background:var(--bd2);border-radius:4px;overflow:hidden}
+.sm-bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.sm-bar-val{text-align:right;font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--gold)}
+
+.sm-strategy-items{margin-bottom:16px;padding:12px;background:var(--bg);border:1px solid var(--bd);border-radius:8px}
+.sm-strategy-items-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--t3)}
+.sm-shuffle-btn{background:transparent;border:1px solid var(--bd);color:var(--t2);padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;transition:all .15s}
+.sm-shuffle-btn:hover{border-color:var(--gold);color:var(--gold)}
+.sm-strategy-items-list{display:flex;flex-direction:column;gap:6px}
+
+.sm-skeleton{height:30px;background:linear-gradient(90deg,var(--bd) 0%,var(--bg3) 50%,var(--bd) 100%);background-size:200% 100%;border-radius:6px;animation:sm-shimmer 1.5s infinite}
+@keyframes sm-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.sm-strategy-projection{margin-bottom:16px;padding:14px;background:var(--bg);border:1px solid var(--bd);border-radius:8px}
+.sm-proj-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;color:var(--t2)}
+.sm-proj-v{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--green);font-weight:700}
+.sm-proj-v-big{font-size:24px}
+.sm-proj-row-bonus{margin-top:4px;padding-top:8px;border-top:1px dashed var(--bd)}
+.sm-proj-v-bonus{color:var(--gold)}
+
+.sm-strategy-pick{margin-top:auto;padding:12px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;font-weight:700;color:var(--t2);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.sm-strategy.sm-strategy-selected .sm-strategy-pick{background:var(--gold);color:#0a0a0a;border-color:var(--gold)}
+.sm-strategy-pick-check{display:none}
+.sm-strategy.sm-strategy-selected .sm-strategy-pick-txt{display:none}
+.sm-strategy.sm-strategy-selected .sm-strategy-pick-check{display:inline}
+.sm-strategy.sm-strategy-selected .sm-strategy-pick::before{content:'SELECTED';font-weight:700}
+
+.sm-disclaimer{font-size:10px;color:var(--t3);font-style:italic;line-height:1.6;padding:14px;background:var(--bg3);border-radius:8px;border-left:2px solid var(--gold)}
+
+/* Step 6: deposit */
+.sm-deposit-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:24px}
+.sm-deposit-summary{margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--bd)}
+.sm-deposit-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px;color:var(--t2)}
+.sm-deposit-row span:last-child{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--t)}
+.sm-deposit-row-total{margin-top:6px;padding-top:12px;border-top:1px solid var(--bd);font-weight:700;color:var(--t)}
+.sm-deposit-row-total span:last-child{font-size:24px;color:var(--gold)}
+
+.sm-coin-pick{margin-bottom:18px}
+.sm-coin-pick-h{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:10px}
+.sm-coin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.sm-coin{padding:14px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;cursor:pointer;transition:all .15s;text-align:center}
+.sm-coin:hover{border-color:var(--gold)}
+.sm-coin.sm-coin-selected{background:var(--gold-d);border-color:var(--gold)}
+.sm-coin-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:2px}
+.sm-coin.sm-coin-selected .sm-coin-name{color:var(--gold)}
+.sm-coin-net{font-size:10px;color:var(--t3);font-family:'Space Mono',monospace}
+
+.sm-deposit-info{padding:14px;background:var(--bg3);border-radius:8px;text-align:center}
+.sm-deposit-info-placeholder{color:var(--t3);font-style:italic;font-size:12px}
+
+/* Step 7: final confirmation */
+.sm-final-wrap{text-align:center;padding:24px}
+.sm-final-icon{margin-bottom:18px;display:flex;justify-content:center}
+.sm-final-ring{stroke-dasharray:145;stroke-dashoffset:145;animation:sm-draw 1s ease-out forwards}
+.sm-final-check{stroke-dasharray:30;stroke-dashoffset:30;animation:sm-draw 0.6s ease-out 0.8s forwards}
+@keyframes sm-draw{to{stroke-dashoffset:0}}
+
+.sm-final-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:6px}
+.sm-final-sub{color:var(--t3);font-size:13px;margin-bottom:24px;max-width:500px;margin-left:auto;margin-right:auto}
+
+.sm-final-list{text-align:left;max-width:580px;margin:0 auto 18px;display:flex;flex-direction:column;gap:8px}
+.sm-final-item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px}
+.sm-final-item-ic{width:32px;height:32px;border-radius:50%;background:var(--gold-d);color:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;flex-shrink:0}
+.sm-final-item-info .sm-final-item-n{font-size:13px;font-weight:700;margin-bottom:2px}
+.sm-final-item-info .sm-final-item-d{font-size:11px;color:var(--t3)}
+.sm-final-item-v{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold)}
+
+.sm-final-totals{max-width:580px;margin:0 auto 14px;padding:18px;background:var(--bg2);border:1px solid var(--gold);border-radius:10px;text-align:left}
+.sm-final-totals-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:var(--t2)}
+.sm-final-totals-row span:last-child{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--t)}
+.sm-final-totals-row-grand{margin-top:6px;padding-top:10px;border-top:1px solid var(--bd);color:var(--t);font-weight:700}
+.sm-final-totals-row-grand span:last-child{font-size:28px;color:var(--gold)}
+
+.sm-final-disclaimer{max-width:560px;margin:0 auto;font-size:10px;color:var(--t3);font-style:italic;line-height:1.6}
+
+/* Sticky footer with Back/Next buttons */
+.sm-foot{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--bg) 30%);padding:24px 0 14px;display:flex;gap:10px;z-index:50;margin-top:24px}
+.sm-btn{flex:1;padding:16px 22px;border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.sm-btn-back{background:transparent;border:1px solid var(--bd2);color:var(--t2);max-width:200px}
+.sm-btn-back:hover{border-color:var(--gold);color:var(--gold)}
+.sm-btn-next{background:var(--gold);color:#0a0a0a;flex:2}
+.sm-btn-next:hover:not(:disabled){background:var(--goldL);transform:translateY(-1px);box-shadow:0 6px 18px rgba(201,168,76,.3)}
+.sm-btn-next:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* "I want to choose myself" subtle link */
+.sm-self-link{text-align:center;margin-top:16px;font-size:11px;color:var(--t3)}
+.sm-self-link a{color:var(--t3);text-decoration:underline;cursor:pointer;transition:color .15s}
+.sm-self-link a:hover{color:var(--gold)}
+
+/* "NEW" badge in sidebar */
+.nav-new{display:inline-block;font-family:'Bebas Neue',sans-serif;font-size:8px;letter-spacing:1.5px;background:var(--gold);color:#0a0a0a;padding:1px 5px;border-radius:3px;font-weight:700;margin-left:6px;vertical-align:1px}
+
+/* Mobile responsive */
+@media (max-width:720px){
+  .sm-strategies{grid-template-columns:1fr}
+  .sm-title{font-size:26px}
+  .sm-step-q{font-family:'Playfair Display',serif;font-size:22px}
+  .sm-amount-input{font-size:42px;width:200px}
+  .sm-amount-prefix{font-size:42px}
+  .sm-coin-grid{grid-template-columns:1fr 1fr}
+  .sm-presets{gap:6px}
+  .sm-preset{padding:7px 12px;font-size:11px}
+  .sm-recap{padding:10px 12px;gap:8px;font-size:10px}
+  .sm-recap-item{flex:1 1 100%}
+  .sm-foot{padding:16px 0 8px}
+  .sm-btn{padding:14px 12px;font-size:12px;letter-spacing:2px}
+}
+
+/* Basket items (rendered inside .sm-strategy-items-list) */
+.sm-basket-item{display:grid;grid-template-columns:24px 1fr auto auto;gap:8px;align-items:center;padding:8px 10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;font-size:11px}
+.sm-basket-ic{font-size:14px;text-align:center}
+.sm-basket-name{color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.sm-basket-amt{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;font-weight:700}
+.sm-basket-pct{color:var(--t3);font-family:'Space Mono',monospace;font-size:10px;background:var(--bg3);padding:2px 6px;border-radius:4px}
+.sm-empty-items{padding:14px;text-align:center;color:var(--t3);font-size:11px;font-style:italic}
+
 </style>
 </head>
 <body>
@@ -777,6 +1015,8 @@ input[type="range"].calc-range::-webkit-slider-thumb,
 <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9 H15 M9 12 H15 M9 15 H15"/></symbol>
 <symbol id="i-snkr" viewBox="0 0 24 24"><path d="M2 16 H22 V20 H2 Z M2 16 L5 8 L9 10 L13 6 L19 14"/></symbol>
 <symbol id="i-jewel" viewBox="0 0 24 24"><path d="M12 2 L4 9 L12 22 L20 9 Z M4 9 H20 M9 9 L12 22 L15 9 M9 2 L9 9 M15 2 L15 9"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><path d="M3 21 H21 M5 21 V14 M10 21 V10 M15 21 V6 M20 21 V3 M5 9 L10 6 L15 4 L20 2"/><circle cx="20" cy="2" r="1.2" fill="currentColor"/></symbol>
+<symbol id="i-smart" viewBox="0 0 24 24"><path d="M12 2 L13.5 7.5 L19 9 L13.5 10.5 L12 16 L10.5 10.5 L5 9 L10.5 7.5 Z" fill="currentColor"/><path d="M19 14 L19.7 16.3 L22 17 L19.7 17.7 L19 20 L18.3 17.7 L16 17 L18.3 16.3 Z" fill="currentColor"/><path d="M5 17 L5.5 18.5 L7 19 L5.5 19.5 L5 21 L4.5 19.5 L3 19 L4.5 18.5 Z" fill="currentColor"/></symbol>
 </defs>
 </svg>
 
@@ -795,6 +1035,7 @@ input[type="range"].calc-range::-webkit-slider-thumb,
 <div class="nav-section">
 <a class="nav-item active" data-target="dash"><svg class="lx"><use href="#i-home"/></svg>Dashboard</a>
 <a class="nav-item" data-target="pools"><svg class="lx"><use href="#i-pool"/></svg>Investment Pools</a>
+<a class="nav-item" data-target="smart"><svg class="lx"><use href="#i-smart"/></svg>Smart Invest <span class="nav-new">NEW</span></a>
 <a class="nav-item" data-target="market"><svg class="lx"><use href="#i-market"/></svg>Marketplace</a>
 <a class="nav-item" data-target="items"><svg class="lx"><use href="#i-items"/></svg>My Items</a>
 <a class="nav-item" data-target="favs"><svg class="lx"><use href="#i-fav"/></svg>Favorites</a>
@@ -841,13 +1082,18 @@ input[type="range"].calc-range::-webkit-slider-thumb,
 <div class="l">PORTFOLIO BALANCE</div>
 <div class="a" id="dBalAmount">$0</div>
 <div class="delta" id="dBalDelta">▲ +$0.00 (+0.00%) all time</div>
-<button class="profit-calc-btn" onclick="openProfitCalculator()">
-  <span class="ico">📊</span>
-  <span class="txts">
-    <span class="txt-main">PROFIT CALCULATOR</span>
-    <span class="txt-sub">See how much you'll earn over time</span>
-  </span>
-  <span class="arrow">→</span>
+<button class="smart-banner" onclick="openProfitCalculator()">
+  <div class="smart-banner-sparkles">
+    <span class="sp s1"></span><span class="sp s2"></span><span class="sp s3"></span><span class="sp s4"></span>
+  </div>
+  <div class="smart-banner-ic">
+    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor" style="color:#0a0a0a"><use href="#i-smart"/></svg>
+  </div>
+  <div class="smart-banner-txt">
+    <div class="smart-banner-h">DON'T KNOW WHAT TO CHOOSE?</div>
+    <div class="smart-banner-d">Launch <strong>Smart Invest</strong> — get a personalized strategy in 60 seconds</div>
+  </div>
+  <div class="smart-banner-arrow">→</div>
 </button>
 </div>
 <div class="right">
@@ -1077,10 +1323,10 @@ input[type="range"].calc-range::-webkit-slider-thumb,
 <div id="dPoolDetailContent"></div>
 </div>
 
-<!-- ──────── DESKTOP: PROFIT CALCULATOR ──────── -->
-<div class="d-screen" id="ds-calc">
-<div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>PROFIT CALCULATOR</b></div>
-<div id="dCalcContent"></div>
+<!-- ──────── DESKTOP: SMART INVEST ──────── -->
+<div class="d-screen" id="ds-smart">
+<div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>SMART INVEST</b></div>
+<div id="dSmartContent"></div>
 </div>
 
 <!-- ──────── DESKTOP: MY ITEMS ──────── -->
@@ -1377,13 +1623,18 @@ input[type="range"].calc-range::-webkit-slider-thumb,
 <button class="btn-out" onclick="openWithdraw()"><svg class="lx"><use href="#i-withdraw"/></svg>WITHDRAW</button>
 </div>
 
-<button class="profit-calc-btn" onclick="openProfitCalculator()">
-  <span class="ico">📊</span>
-  <span class="txts">
-    <span class="txt-main">PROFIT CALCULATOR</span>
-    <span class="txt-sub">See how much you'll earn over time</span>
-  </span>
-  <span class="arrow">→</span>
+<button class="smart-banner" onclick="openProfitCalculator()">
+  <div class="smart-banner-sparkles">
+    <span class="sp s1"></span><span class="sp s2"></span><span class="sp s3"></span><span class="sp s4"></span>
+  </div>
+  <div class="smart-banner-ic">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" style="color:#0a0a0a"><use href="#i-smart"/></svg>
+  </div>
+  <div class="smart-banner-txt">
+    <div class="smart-banner-h">DON'T KNOW WHAT TO CHOOSE?</div>
+    <div class="smart-banner-d">Launch <strong>Smart Invest</strong> — strategy in 60 seconds</div>
+  </div>
+  <div class="smart-banner-arrow">→</div>
 </button>
 
 <div class="m-sec">
@@ -1569,11 +1820,11 @@ input[type="range"].calc-range::-webkit-slider-thumb,
 </div>
 </div>
 
-<!-- ──────── MOBILE: PROFIT CALCULATOR ──────── -->
-<div class="m-screen" id="ms-calc">
+<!-- ──────── MOBILE: SMART INVEST ──────── -->
+<div class="m-screen" id="ms-smart">
 <div class="m-content">
-<div class="m-back" onclick="navTo('dash')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl">PROFIT CALCULATOR</span><span style="width:18px"></span></div>
-<div id="mCalcContent"></div>
+<div class="m-back" onclick="navTo('dash')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl">SMART INVEST</span><span style="width:18px"></span></div>
+<div id="mSmartContent"></div>
 </div>
 </div>
 
@@ -1760,6 +2011,11 @@ input[type="range"].calc-range::-webkit-slider-thumb,
 <div class="m-content">
 <div class="m-back" onclick="navTo('dash')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl">MORE</span><span style="width:18px"></span></div>
 <div style="display:grid;gap:8px">
+<a class="set-card smart-mobile-card" style="margin-bottom:0;display:flex;align-items:center;gap:14px;cursor:pointer;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.04));border:1px solid var(--gold);position:relative;overflow:hidden" onclick="navTo('smart')">
+<svg class="lx" style="font-size:24px;color:var(--gold);width:24px;height:24px"><use href="#i-smart"/></svg>
+<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--gold)">Smart Invest <span style="font-size:9px;background:var(--gold);color:#0a0a0a;padding:1px 6px;border-radius:3px;letter-spacing:1px;margin-left:4px;font-family:'Space Mono',monospace;font-weight:700">NEW</span></div><div style="font-size:11px;color:var(--t2);margin-top:2px">Get a personalized strategy in 60 seconds</div></div>
+<svg class="lx" style="font-size:14px;color:var(--gold)"><use href="#i-back"/></svg>
+</a>
 <a class="set-card" style="margin-bottom:0;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="navTo('favs')">
 <svg class="lx" style="font-size:24px;color:var(--gold)"><use href="#i-fav"/></svg>
 <div style="flex:1"><div style="font-size:14px;font-weight:600">Favorites</div><div style="font-size:11px;color:var(--t3);margin-top:2px">Saved items</div></div>
@@ -2252,8 +2508,8 @@ function navTo(target){
   const dEl = document.getElementById('ds-' + target);
   if(dEl) dEl.classList.add('show');
   document.querySelectorAll('.d-side .nav-item').forEach(n => n.classList.remove('active'));
-  // Map pseudo-targets (detail, poolDetail, calc) to their parent sidebar item
-  const sidebarMap = { detail:'market', poolDetail:'pools', calc:'dash' };
+  // Map pseudo-targets (detail, poolDetail) to their parent sidebar item
+  const sidebarMap = { detail:'market', poolDetail:'pools' };
   const sidebarKey = sidebarMap[target] || target;
   const dNav = document.querySelector('.d-side .nav-item[data-target="' + sidebarKey + '"]');
   if(dNav){
@@ -2268,14 +2524,14 @@ function navTo(target){
   document.querySelectorAll('.m-bottom .nv').forEach(n => n.classList.remove('active'));
   const navMap = {dash:'dash', pools:'pools', market:'market', items:'items', more:'more',
                   detail:'market', favs:'more', referral:'more', settings:'more',
-                  trade:'more', insights:'more', manager:'more', poolDetail:'pools', calc:'dash'};
+                  trade:'more', insights:'more', manager:'more', poolDetail:'pools', smart:'more'};
   const nKey = navMap[target] || 'more';
   const mNav = document.querySelector('.m-bottom .nv[data-nav-target="' + nKey + '"]');
   if(mNav) mNav.classList.add('active');
   // Trigger panel-specific loaders
   if(target === 'referral'){ try{ loadReferrals(); }catch(e){} }
   if(target === 'settings'){ try{ loadSettings(); }catch(e){} }
-  if(target === 'calc'){ try{ renderCalculator(); }catch(e){} }
+  if(target === 'smart'){ try{ renderSmartInvest(); }catch(e){ console.error('Smart Invest render failed:', e); } }
   // Scroll top
   const c = document.querySelector('.d-content'); if(c) c.scrollTop = 0;
   window.scrollTo(0, 0);
@@ -3819,28 +4075,10 @@ function closeModal(){
   document.body.style.overflow = '';
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PROFIT CALCULATOR — Stage 2: full implementation
-   - Duration slider (1-12 months)
-   - Base scenario from current portfolio
-   - Boosted scenario with reinvestment
-   - Empty state for users with no positions (virtual portfolio)
-═══════════════════════════════════════════════════════════ */
+/* Smart Invest entry point — replaces old Stage-2 calculator. Implementation below. */
 function openProfitCalculator(){
-  navTo('calc');
+  navTo('smart');
 }
-
-/* Calculator state — persists in window between renders */
-window._calc = {
-  durationMonths: 6,                  // 1-12
-  reinvestTarget: null,               // item id, pool plan, or 'wallet'
-  reinvestCycles: 1,                  // for repeating items
-  // Empty-state mode (no positions yet):
-  virtualBudget: 5000,
-  virtualSilver: 25,                  // % of budget
-  virtualGold: 50,
-  virtualItems: [],                   // selected item IDs
-};
 
 /* ═══════════════════════════════════════════════════════════
    DEPOSIT FLOW (Phase 2): bonus → amount+coin → QR+timer → polling
@@ -5671,696 +5909,1578 @@ console.log('[snap5] real-time polling loaded');
 
 
 
+
+
 /* ═══════════════════════════════════════════════════════════
-   STAGE 2 — PROFIT CALCULATOR FULL IMPLEMENTATION
+   SMART INVEST — 7-step wizard
+   Stage 2: UI skeleton + navigation + sessionStorage
+   (Stage 3 will add calculation engine, Stage 4 — marketplace items)
 ═══════════════════════════════════════════════════════════ */
 
-/* ───────── FORMULAS ───────── */
+const SMART_STATE_KEY = 'luxor_calc_state';
 
-/* Returns total profit from a pool position over N months.
-   Pool earnings are paid to wallet (no compound by default). */
-function _calcPoolProfit(principal, ratePct, period, months){
-  if(!principal || !ratePct || months <= 0) return 0;
-  // Convert period rate to monthly rate
-  let monthlyRate;
-  if(period === 'day')   monthlyRate = ratePct * 30;       // 0.5%/day → 15%/month
-  else if(period === 'week') monthlyRate = ratePct * 4.345; // 3%/week → 13.04%/month
-  else                   monthlyRate = ratePct;            // 15%/month
-  return principal * (monthlyRate / 100) * months;
+function _smartLoadState(){
+  try{
+    const raw = sessionStorage.getItem(SMART_STATE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
 }
 
-/* Returns total profit from a single item investment over N months.
-   Items have fixed return % over fixed days, can run multiple cycles. */
-function _calcItemProfit(invested, expectedReturnPct, returnDays, months){
-  if(!invested || !expectedReturnPct || !returnDays || months <= 0) return 0;
-  const totalDays = months * 30;
-  const fullCycles = Math.floor(totalDays / returnDays);
-  const partialCycleFraction = (totalDays % returnDays) / returnDays;
-  const profitPerCycle = invested * (expectedReturnPct / 100);
-  return profitPerCycle * fullCycles + profitPerCycle * partialCycleFraction;
+function _smartSaveState(s){
+  const data = s || window._smart;
+  if(!data) return;
+  try{ sessionStorage.setItem(SMART_STATE_KEY, JSON.stringify(data)); }catch(e){}
 }
 
-/* Reinvest scenario: take principal+profit from one item, reinvest into target,
-   accumulating over remaining time after first cycle completes. */
-function _calcReinvestScenario(item, targetId, months){
-  // item: {invested, expected_return, return_period_days, name, ...}
-  const cycleDays = item.return_period_days || 14;
-  const cycleProfit = item.invested * (item.expected_return / 100);
-  const moneyAfterCycle = item.invested + cycleProfit;
-  const daysAfterFirstCycle = (months * 30) - cycleDays;
+function _smartResetState(){
+  try{ sessionStorage.removeItem(SMART_STATE_KEY); }catch(e){}
+  window._smart = null;
+}
 
-  if(daysAfterFirstCycle <= 0){
-    // Item doesn't even complete first cycle in this period
-    return { firstCycleProfit: 0, reinvestProfit: 0, total: cycleProfit };
-  }
-  const monthsAfterFirstCycle = daysAfterFirstCycle / 30;
-
-  let reinvestProfit = 0;
-  if(targetId === 'wallet'){
-    reinvestProfit = 0;
-  } else if(targetId.startsWith('pool:')){
-    const plan = targetId.split(':')[1];
-    const POOL_RATES = { 'Silver': {rate:0.5, period:'day'}, 'Gold': {rate:3, period:'week'}, 'Platinum': {rate:15, period:'month'} };
-    const pr = POOL_RATES[plan];
-    if(pr){
-      reinvestProfit = _calcPoolProfit(moneyAfterCycle, pr.rate, pr.period, monthsAfterFirstCycle);
-    }
-  } else {
-    // It's an item id — simulate reinvest into that item
-    const targetItem = ITEMS.find(x => x.id === Number(targetId));
-    if(targetItem){
-      reinvestProfit = _calcItemProfit(
-        moneyAfterCycle,
-        targetItem.ret ? targetItem.ret[1] : 30,
-        (targetItem.days && targetItem.days[1]) ? targetItem.days[1] : 14,
-        monthsAfterFirstCycle
-      );
-    }
-  }
-  return {
-    firstCycleProfit: cycleProfit,
-    reinvestProfit,
-    total: cycleProfit + reinvestProfit
+function _smartInitState(){
+  const saved = _smartLoadState();
+  window._smart = saved || {
+    step: 1,             // 1..7
+    frequency: null,     // 'daily' | 'weekly' | 'monthly'
+    amount: null,        // number
+    portfolioType: null, // 'pools' | 'items' | 'mixed'
+    chosenStrategy: null,// 'A' | 'B'
+    useExistingBalance: false,
+    paymentMethod: null, // 'USDT-TRC20' | 'BTC' | 'ETH' etc
   };
 }
 
-/* ───────── DATA AGGREGATION ───────── */
+/* ═════════════ MAIN RENDER ═════════════ */
 
-function _calcGetCurrentBreakdown(months){
-  const breakdown = { items:[], totalEarned:0, totalPrincipal:0 };
-
-  // Pools
-  state.positions.forEach(p => {
-    const principal = Number(p.amount||p.amount_usd) || 0;
-    const ratePct = Number(p.rate_pct) || 0;
-    const period = p.period || 'day';
-    const profit = _calcPoolProfit(principal, ratePct, period, months);
-    breakdown.items.push({
-      type: 'pool',
-      label: `${p.plan} Pool`,
-      sub: `${ratePct}% / ${period} · $${principal.toLocaleString()}`,
-      principal, profit,
-      icon: p.plan === 'Platinum' ? '◆' : p.plan === 'Gold' ? '★' : '●'
-    });
-    breakdown.totalPrincipal += principal;
-    breakdown.totalEarned += profit;
-  });
-
-  // Active items
-  (state.myItems || []).filter(i => i.status === 'active').forEach(it => {
-    const invested = Number(it.invested) || 0;
-    const expReturn = Number(it.retMax || it.ret) || 0;
-    const days = Number(it.return_period_days) ||
-                 (it.days && it.days[1]) || 14;
-    const profit = _calcItemProfit(invested, expReturn, days, months);
-    breakdown.items.push({
-      type: 'item',
-      label: it.name || 'Item',
-      sub: `+${expReturn}% / ${days}d · $${invested.toLocaleString()}`,
-      principal: invested, profit,
-      icon: '💎',
-      itemMeta: { invested, expected_return: expReturn, return_period_days: days, name: it.name }
-    });
-    breakdown.totalPrincipal += invested;
-    breakdown.totalEarned += profit;
-  });
-
-  return breakdown;
+function renderSmartInvest(){
+  _smartInitState();
+  const html = _smartShellHTML();
+  const dCt = document.getElementById('dSmartContent');
+  const mCt = document.getElementById('mSmartContent');
+  // Render only in the visible container to avoid duplicate IDs
+  // (desktop/mobile screens share the same ID namespace).
+  const isMobile = window.innerWidth <= 768;
+  if(dCt) dCt.innerHTML = isMobile ? '' : html;
+  if(mCt) mCt.innerHTML = isMobile ? html : '';
+  _smartShowStep(window._smart.step);
 }
 
-/* ───────── MAIN RENDER ───────── */
+/* Shell with all 7 step containers; only one visible at a time */
+function _smartShellHTML(){
+  return `
+  <div class="sm-wrap">
 
-function renderCalculator(){
-  const hasPositions = state.positions.length > 0
-                    || (state.myItems || []).some(i => i.status === 'active');
-
-  const html = hasPositions ? _renderCalcWithPortfolio() : _renderCalcEmptyState();
-
-  const dCt = document.getElementById('dCalcContent');
-  const mCt = document.getElementById('mCalcContent');
-  if(dCt) dCt.innerHTML = html;
-  if(mCt) mCt.innerHTML = html;
-
-  // Recompute and render results
-  setTimeout(() => _calcUpdateResults(), 50);
-}
-
-function _renderCalcWithPortfolio(){
-  const c = window._calc;
-  return `<div style="max-width:880px;margin:0 auto">
-    <div style="text-align:center;margin-bottom:18px">
-      <div style="font-size:42px;margin-bottom:8px">📊</div>
-      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px">Profit Calculator</h2>
-      <p style="font-size:13px;color:var(--t3);margin-top:4px">See how much your portfolio will earn over time</p>
+    <!-- Header -->
+    <div class="sm-head">
+      <div class="sm-tag">
+        <svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-smart"/></svg>
+        SMART INVEST
+      </div>
+      <h2 class="sm-title">Find your <em>perfect</em> strategy</h2>
+      <p class="sm-sub">Answer 3 quick questions and our calculator will build a personalized investment plan for you.</p>
     </div>
 
-    <!-- Duration slider -->
-    <div class="calc-card">
-      <div class="calc-section-label">DURATION</div>
-      <div style="text-align:center;margin:10px 0 16px">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1" id="calcDurLabel">${c.durationMonths} ${c.durationMonths === 1 ? 'month' : 'months'}</div>
-      </div>
-      <input type="range" id="calcDurSlider" min="1" max="12" step="1" value="${c.durationMonths}"
-        style="width:100%;height:6px;background:var(--bd2);border-radius:3px;outline:none;-webkit-appearance:none;appearance:none"
-        oninput="_calcOnDurationChange(this.value)">
-      <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:'Space Mono',monospace;font-size:9px;color:var(--t3)">
-        <span>1 mo</span><span>3 mo</span><span>6 mo</span><span>12 mo</span>
-      </div>
-      <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
-        <button class="calc-chip" onclick="_calcOnDurationChange(1)">1 month</button>
-        <button class="calc-chip" onclick="_calcOnDurationChange(3)">3 months</button>
-        <button class="calc-chip" onclick="_calcOnDurationChange(6)">6 months</button>
-        <button class="calc-chip" onclick="_calcOnDurationChange(12)">1 year</button>
-      </div>
+    <!-- Progress -->
+    <div class="sm-progress">
+      <div class="sm-prog-bar"><div class="sm-prog-fill" id="smProgFill"></div></div>
+      <div class="sm-prog-txt" id="smProgText">STEP 1 OF 7</div>
     </div>
 
-    <!-- Base scenario -->
-    <div class="calc-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div class="calc-section-label" style="margin:0">BASE SCENARIO</div>
-        <div style="font-size:10px;color:var(--t3);font-style:italic">if nothing changes</div>
-      </div>
-      <div id="calcBaseList"></div>
-      <div class="calc-total-row">
-        <div>
-          <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;margin-bottom:2px">TOTAL EARNED</div>
-          <div id="calcBaseTotalEarned" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);line-height:1">+$0</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;margin-bottom:2px">END BALANCE</div>
-          <div id="calcBaseEndBalance" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1">$0</div>
-        </div>
-      </div>
+    <!-- All step panes -->
+    ${_smartStep1HTML()}
+    ${_smartStep2HTML()}
+    ${_smartStep3HTML()}
+    ${_smartStep4HTML()}
+    ${_smartStep5HTML()}
+    ${_smartStep6HTML()}
+    ${_smartStep7HTML()}
+
+    <!-- Sticky nav footer -->
+    <div class="sm-foot">
+      <button class="sm-btn sm-btn-back" id="smBtnBack" onclick="_smartBack()" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        BACK
+      </button>
+      <button class="sm-btn sm-btn-next" id="smBtnNext" onclick="_smartNext()" disabled>
+        NEXT
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
     </div>
 
-    <!-- Boosted scenario (only shown if user has items that can be reinvested) -->
-    <div class="calc-card" id="calcBoostedCard" style="border:1px solid var(--gold);background:linear-gradient(135deg,var(--gold-d) 0%,rgba(201,168,76,.02) 100%)">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div class="calc-section-label" style="margin:0;color:var(--gold)">💡 BOOSTED SCENARIO</div>
-        <div style="font-size:10px;color:var(--gold);font-style:italic">with smart reinvestment</div>
-      </div>
-      <div id="calcBoostedBody"></div>
+    <!-- "I want to choose myself" subtle link -->
+    <div class="sm-self-link">
+      <a onclick="_smartSelfChoice()">I want to choose items myself</a>
     </div>
-
-    <!-- Comparison chart -->
-    <div class="calc-card">
-      <div class="calc-section-label">PROJECTION OVER TIME</div>
-      <canvas id="calcChart" width="800" height="200" style="width:100%;height:200px;display:block;margin-top:8px"></canvas>
-      <div style="display:flex;gap:18px;justify-content:center;margin-top:10px;font-size:11px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:3px;background:var(--green);display:inline-block"></span>Base scenario</div>
-        <div style="display:flex;align-items:center;gap:6px" id="calcChartLegend2"><span style="width:14px;height:3px;background:var(--gold);display:inline-block"></span>Boosted</div>
-      </div>
-    </div>
-
-    <button class="btn-out" onclick="navTo('dash')" style="margin-top:14px">← Back to Dashboard</button>
-  </div>`;
-}
-
-function _renderCalcEmptyState(){
-  const c = window._calc;
-  return `<div style="max-width:880px;margin:0 auto">
-    <div style="text-align:center;margin-bottom:18px">
-      <div style="font-size:42px;margin-bottom:8px">📊</div>
-      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px">Profit Calculator</h2>
-      <p style="font-size:13px;color:var(--t3);margin-top:4px">Plan your investment strategy before you start</p>
-    </div>
-
-    <div class="calc-card" style="background:linear-gradient(135deg,var(--gold-d) 0%,rgba(201,168,76,.02) 100%);border:1px solid var(--gold)">
-      <div class="calc-section-label" style="color:var(--gold)">START FROM ZERO</div>
-      <p style="font-size:12px;color:var(--t2);margin:6px 0 14px;line-height:1.5">Set a virtual budget and allocation to see what you could earn. Once you make your first deposit, the calculator will use your real portfolio.</p>
-    </div>
-
-    <!-- Budget -->
-    <div class="calc-card">
-      <div class="calc-section-label">BUDGET</div>
-      <div style="text-align:center;margin:10px 0 14px">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1" id="calcVBudgetLabel">$${c.virtualBudget.toLocaleString()}</div>
-      </div>
-      <input type="range" id="calcVBudget" min="100" max="100000" step="100" value="${c.virtualBudget}"
-        style="width:100%;height:6px;background:var(--bd2);border-radius:3px;outline:none;-webkit-appearance:none;appearance:none"
-        oninput="_calcVBudgetChange(this.value)">
-      <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:'Space Mono',monospace;font-size:9px;color:var(--t3)">
-        <span>$100</span><span>$10K</span><span>$50K</span><span>$100K</span>
-      </div>
-    </div>
-
-    <!-- Duration -->
-    <div class="calc-card">
-      <div class="calc-section-label">DURATION</div>
-      <div style="text-align:center;margin:10px 0 14px">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1" id="calcDurLabel">${c.durationMonths} ${c.durationMonths === 1 ? 'month' : 'months'}</div>
-      </div>
-      <input type="range" id="calcDurSlider" min="1" max="12" step="1" value="${c.durationMonths}"
-        style="width:100%;height:6px;background:var(--bd2);border-radius:3px;outline:none;-webkit-appearance:none;appearance:none"
-        oninput="_calcOnDurationChange(this.value)">
-      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-        <button class="calc-chip" onclick="_calcOnDurationChange(1)">1 month</button>
-        <button class="calc-chip" onclick="_calcOnDurationChange(3)">3 months</button>
-        <button class="calc-chip" onclick="_calcOnDurationChange(6)">6 months</button>
-        <button class="calc-chip" onclick="_calcOnDurationChange(12)">1 year</button>
-      </div>
-    </div>
-
-    <!-- Allocation -->
-    <div class="calc-card">
-      <div class="calc-section-label">ALLOCATION</div>
-      <p style="font-size:11px;color:var(--t3);margin-bottom:12px">How to split your budget across pools and items</p>
-
-      <div style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-          <span style="color:var(--t2)">● Silver Pool (0.5% / day)</span>
-          <span style="color:var(--gold);font-weight:700" id="calcVSilverAmt">$0</span>
-        </div>
-        <input type="range" id="calcVSilver" min="0" max="100" step="5" value="${c.virtualSilver}"
-          style="width:100%;height:5px;outline:none;-webkit-appearance:none;appearance:none"
-          oninput="_calcVAllocChange('Silver', this.value)">
-      </div>
-
-      <div style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-          <span style="color:var(--t2)">★ Gold Pool (3% / week)</span>
-          <span style="color:var(--gold);font-weight:700" id="calcVGoldAmt">$0</span>
-        </div>
-        <input type="range" id="calcVGold" min="0" max="100" step="5" value="${c.virtualGold}"
-          style="width:100%;height:5px;outline:none;-webkit-appearance:none;appearance:none"
-          oninput="_calcVAllocChange('Gold', this.value)">
-      </div>
-
-      <div style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-          <span style="color:var(--t2)">💎 Items (rest)</span>
-          <span style="color:var(--gold);font-weight:700" id="calcVItemsAmt">$0</span>
-        </div>
-      </div>
-
-      <div id="calcVItemsPicker" style="margin-top:14px">
-        <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;margin-bottom:8px">PICK ITEMS (TAP TO SELECT)</div>
-        <div id="calcVItemsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px"></div>
-      </div>
-    </div>
-
-    <!-- Result -->
-    <div class="calc-card" style="border:1px solid var(--gold);background:linear-gradient(135deg,var(--gold-d) 0%,rgba(201,168,76,.02) 100%)">
-      <div class="calc-section-label" style="color:var(--gold)">PROJECTED RESULT</div>
-      <div id="calcVResult" style="margin-top:10px"></div>
-    </div>
-
-    <button class="btn-out" onclick="navTo('dash')" style="margin-top:14px">← Back to Dashboard</button>
-  </div>`;
-}
-
-/* ───────── EVENT HANDLERS ───────── */
-
-function _calcOnDurationChange(val){
-  window._calc.durationMonths = parseInt(val);
-  // Sync slider position if changed via chip
-  document.querySelectorAll('#calcDurSlider').forEach(el => { el.value = val; });
-  document.querySelectorAll('#calcDurLabel').forEach(el => {
-    el.textContent = val + ' ' + (val == 1 ? 'month' : 'months');
-  });
-  _calcUpdateResults();
-}
-
-function _calcVBudgetChange(val){
-  window._calc.virtualBudget = parseInt(val);
-  document.querySelectorAll('#calcVBudgetLabel').forEach(el => {
-    el.textContent = '$' + parseInt(val).toLocaleString();
-  });
-  _calcUpdateResults();
-}
-
-function _calcVAllocChange(plan, val){
-  if(plan === 'Silver') window._calc.virtualSilver = parseInt(val);
-  else if(plan === 'Gold') window._calc.virtualGold = parseInt(val);
-  // Items = 100 - silver - gold (auto-rest)
-  // But cap so silver+gold <= 100
-  if(window._calc.virtualSilver + window._calc.virtualGold > 100){
-    if(plan === 'Silver'){
-      window._calc.virtualGold = 100 - window._calc.virtualSilver;
-      const gEl = document.getElementById('calcVGold');
-      if(gEl) gEl.value = window._calc.virtualGold;
-    } else {
-      window._calc.virtualSilver = 100 - window._calc.virtualGold;
-      const sEl = document.getElementById('calcVSilver');
-      if(sEl) sEl.value = window._calc.virtualSilver;
-    }
-  }
-  _calcUpdateResults();
-}
-
-function _calcVToggleItem(itemId){
-  const idx = window._calc.virtualItems.indexOf(itemId);
-  if(idx >= 0) window._calc.virtualItems.splice(idx, 1);
-  else window._calc.virtualItems.push(itemId);
-  _calcUpdateResults();
-}
-
-function _calcSetReinvestTarget(target){
-  window._calc.reinvestTarget = target;
-  _calcUpdateResults();
-}
-
-/* ───────── RESULTS RENDER ───────── */
-
-function _calcUpdateResults(){
-  const hasPositions = state.positions.length > 0
-                    || (state.myItems || []).some(i => i.status === 'active');
-  if(hasPositions) _calcUpdateWithPortfolio();
-  else             _calcUpdateEmptyState();
-}
-
-function _calcUpdateWithPortfolio(){
-  const months = window._calc.durationMonths;
-  const breakdown = _calcGetCurrentBreakdown(months);
-
-  // Render base list
-  const baseListHTML = breakdown.items.length
-    ? breakdown.items.map(it => `
-      <div class="calc-item-row">
-        <div class="calc-item-icon">${it.icon}</div>
-        <div style="flex:1;min-width:0">
-          <div class="calc-item-name">${it.label}</div>
-          <div class="calc-item-sub">${it.sub}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:14px;font-weight:700;color:var(--green)">+$${Math.round(it.profit).toLocaleString()}</div>
-          <div style="font-size:10px;color:var(--t3)">${months} mo</div>
-        </div>
-      </div>`).join('')
-    : '<div style="text-align:center;padding:18px;color:var(--t3);font-size:12px">No active positions</div>';
-
-  document.querySelectorAll('#calcBaseList').forEach(el => { el.innerHTML = baseListHTML; });
-
-  const totalEnd = breakdown.totalPrincipal + breakdown.totalEarned + (state.wallet || 0);
-  document.querySelectorAll('#calcBaseTotalEarned').forEach(el => {
-    el.textContent = '+$' + Math.round(breakdown.totalEarned).toLocaleString();
-  });
-  document.querySelectorAll('#calcBaseEndBalance').forEach(el => {
-    el.textContent = '$' + Math.round(totalEnd).toLocaleString();
-  });
-
-  // Boosted scenario — only render if user has at least one item that can complete a cycle within the period
-  const reinvestableItems = breakdown.items.filter(it => {
-    if(it.type !== 'item') return false;
-    const days = it.itemMeta.return_period_days || 14;
-    return days <= months * 30;
-  });
-
-  document.querySelectorAll('#calcBoostedCard').forEach(card => {
-    if(reinvestableItems.length === 0){
-      card.style.display = 'none';
-      return;
-    }
-    card.style.display = '';
-  });
-
-  if(reinvestableItems.length > 0){
-    const item = reinvestableItems[0];   // Use first reinvestable item
-    const itemMeta = item.itemMeta;
-    const cycleDays = itemMeta.return_period_days;
-
-    // Default reinvest target if not chosen
-    if(!window._calc.reinvestTarget){
-      // Default: top item from marketplace by return%
-      const topItem = ITEMS.filter(i => (i.slots_available||0) > 0)
-                           .sort((a,b) => (b.ret?.[1]||0) - (a.ret?.[1]||0))[0];
-      window._calc.reinvestTarget = topItem ? String(topItem.id) : 'pool:Gold';
-    }
-
-    // Build options
-    const topItems = ITEMS.filter(i => (i.slots_available||0) > 0)
-                          .sort((a,b) => (b.ret?.[1]||0) - (a.ret?.[1]||0))
-                          .slice(0, 3);
-    const targetOptions = [
-      ...topItems.map(i => ({ id: String(i.id), label: i.name, sub: `+${i.ret?.[1]||0}% / ${i.days?.[1]||14}d`, icon: '💎' })),
-      { id: 'pool:Gold', label: 'Gold Pool', sub: '3% / week', icon: '★' },
-      { id: 'pool:Platinum', label: 'Platinum Pool', sub: '15% / month', icon: '◆' },
-      { id: 'wallet', label: 'Keep in wallet', sub: 'No extra earnings', icon: '💰' },
-    ];
-
-    // Calculate boosted scenario
-    const scenario = _calcReinvestScenario(itemMeta, window._calc.reinvestTarget, months);
-    const baseItemProfit = item.profit;
-    const boostedItemProfit = scenario.total;
-    const extraFromBoost = boostedItemProfit - baseItemProfit;
-    const boostedTotal = breakdown.totalEarned - baseItemProfit + boostedItemProfit;
-    const extraPct = breakdown.totalEarned > 0 ? (extraFromBoost / breakdown.totalEarned * 100) : 0;
-
-    const targetName = (() => {
-      const opt = targetOptions.find(o => o.id === window._calc.reinvestTarget);
-      return opt ? opt.label : 'Selected target';
-    })();
-
-    const boostedHTML = `
-      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:14px">
-        Your <strong style="color:var(--t)">${itemMeta.name}</strong> position completes its cycle in <strong style="color:var(--gold)">${cycleDays} days</strong>, returning <strong style="color:var(--green)">$${Math.round(itemMeta.invested + scenario.firstCycleProfit).toLocaleString()}</strong>. Reinvest into:
-      </div>
-
-      <div style="display:grid;gap:6px;margin-bottom:14px">
-        ${targetOptions.map(opt => {
-          const sel = window._calc.reinvestTarget === opt.id;
-          return `<div onclick="_calcSetReinvestTarget('${opt.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${sel?'var(--gold-d)':'var(--bg2)'};border:1px solid ${sel?'var(--gold)':'var(--bd)'};border-radius:8px;cursor:pointer;transition:all .15s">
-            <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?'var(--gold)':'var(--bd2)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${sel?'<div style="width:10px;height:10px;background:var(--gold);border-radius:50%"></div>':''}</div>
-            <div style="font-size:18px">${opt.icon}</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:700;font-size:13px">${opt.label}</div>
-              <div style="font-size:10px;color:var(--t3)">${opt.sub}</div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-
-      <div class="calc-total-row" style="border-color:var(--gold)">
-        <div>
-          <div style="font-size:10px;color:var(--gold);letter-spacing:1.5px;margin-bottom:2px">BOOSTED EARNED</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);line-height:1">+$${Math.round(boostedTotal).toLocaleString()}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:10px;color:var(--gold);letter-spacing:1.5px;margin-bottom:2px">EXTRA</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1">+$${Math.round(extraFromBoost).toLocaleString()}</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:2px">+${extraPct.toFixed(0)}% over base</div>
-        </div>
-      </div>
-    `;
-
-    document.querySelectorAll('#calcBoostedBody').forEach(el => { el.innerHTML = boostedHTML; });
-  }
-
-  // Draw chart
-  setTimeout(() => _calcDrawChart(breakdown, reinvestableItems), 30);
-}
-
-function _calcUpdateEmptyState(){
-  const c = window._calc;
-  const months = c.durationMonths;
-  const budget = c.virtualBudget;
-  const silverPct = c.virtualSilver;
-  const goldPct = c.virtualGold;
-  const itemsPct = Math.max(0, 100 - silverPct - goldPct);
-
-  const silverAmt = budget * silverPct / 100;
-  const goldAmt = budget * goldPct / 100;
-  const itemsAmt = budget * itemsPct / 100;
-
-  document.querySelectorAll('#calcVSilverAmt').forEach(el => { el.textContent = '$' + Math.round(silverAmt).toLocaleString(); });
-  document.querySelectorAll('#calcVGoldAmt').forEach(el => { el.textContent = '$' + Math.round(goldAmt).toLocaleString(); });
-  document.querySelectorAll('#calcVItemsAmt').forEach(el => { el.textContent = '$' + Math.round(itemsAmt).toLocaleString(); });
-
-  // Render items picker
-  const availableItems = (ITEMS || []).filter(i => (i.slots_available||0) > 0).slice(0, 8);
-  document.querySelectorAll('#calcVItemsList').forEach(list => {
-    list.innerHTML = availableItems.map(i => {
-      const sel = c.virtualItems.includes(i.id);
-      const ret = i.ret ? `+${i.ret[1]}%` : '';
-      return `<div onclick="_calcVToggleItem(${i.id})" style="padding:10px;background:${sel?'var(--gold-d)':'var(--bg2)'};border:1px solid ${sel?'var(--gold)':'var(--bd)'};border-radius:8px;cursor:pointer;transition:all .15s;text-align:center">
-        <div style="font-size:24px;margin-bottom:4px">${i.ico||'💎'}</div>
-        <div style="font-size:11px;font-weight:700;line-height:1.2;margin-bottom:2px;${sel?'color:var(--gold)':''}">${i.name}</div>
-        <div style="font-size:10px;color:var(--green)">${ret}</div>
-      </div>`;
-    }).join('');
-  });
-
-  // Calculate
-  const silverProfit = _calcPoolProfit(silverAmt, 0.5, 'day', months);
-  const goldProfit = _calcPoolProfit(goldAmt, 3, 'week', months);
-  let itemsProfit = 0;
-  if(c.virtualItems.length > 0 && itemsAmt > 0){
-    const perItem = itemsAmt / c.virtualItems.length;
-    c.virtualItems.forEach(id => {
-      const item = ITEMS.find(x => x.id === id);
-      if(item){
-        itemsProfit += _calcItemProfit(perItem, item.ret?.[1] || 30, item.days?.[1] || 14, months);
-      }
-    });
-  }
-
-  const totalEarned = silverProfit + goldProfit + itemsProfit;
-  const endBalance = budget + totalEarned;
-  const yieldPct = budget > 0 ? (totalEarned / budget * 100) : 0;
-
-  const resultHTML = `
-    <div style="display:grid;gap:8px;margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--bd)">
-        <span style="color:var(--t3)">Silver Pool ($${Math.round(silverAmt).toLocaleString()})</span>
-        <span style="color:var(--green);font-weight:700">+$${Math.round(silverProfit).toLocaleString()}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--bd)">
-        <span style="color:var(--t3)">Gold Pool ($${Math.round(goldAmt).toLocaleString()})</span>
-        <span style="color:var(--green);font-weight:700">+$${Math.round(goldProfit).toLocaleString()}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px">
-        <span style="color:var(--t3)">Items (${c.virtualItems.length} selected, $${Math.round(itemsAmt).toLocaleString()})</span>
-        <span style="color:var(--green);font-weight:700">+$${Math.round(itemsProfit).toLocaleString()}</span>
-      </div>
-    </div>
-    <div class="calc-total-row" style="border-color:var(--gold)">
-      <div>
-        <div style="font-size:10px;color:var(--gold);letter-spacing:1.5px;margin-bottom:2px">TOTAL EARNED</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);line-height:1">+$${Math.round(totalEarned).toLocaleString()}</div>
-        <div style="font-size:11px;color:var(--t3);margin-top:2px">${yieldPct.toFixed(1)}% yield</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:10px;color:var(--gold);letter-spacing:1.5px;margin-bottom:2px">END BALANCE</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1">$${Math.round(endBalance).toLocaleString()}</div>
-        <div style="font-size:11px;color:var(--t3);margin-top:2px">in ${months} ${months==1?'month':'months'}</div>
-      </div>
-    </div>
-    <button class="btn-primary" style="margin-top:14px" onclick="navTo('market')">📦 START INVESTING NOW</button>
+  </div>
   `;
-
-  document.querySelectorAll('#calcVResult').forEach(el => { el.innerHTML = resultHTML; });
 }
 
-/* ───────── CHART ───────── */
+/* ═════════════ STEP 1: FREQUENCY ═════════════ */
+function _smartStep1HTML(){
+  return `
+  <div class="sm-pane" data-step="1">
+    <div class="sm-step-h">
+      <div class="sm-step-q">How often do you want <em>payouts</em>?</div>
+      <div class="sm-step-hint">This determines which pools are available and what types of items we'll suggest.</div>
+    </div>
 
-function _calcDrawChart(breakdown, reinvestableItems){
-  const canvases = document.querySelectorAll('#calcChart');
-  canvases.forEach(c => {
-    const ctx = c.getContext('2d');
-    const w = c.width, h = c.height;
-    ctx.clearRect(0, 0, w, h);
+    <div class="sm-choices">
+      <div class="sm-choice" data-freq="daily" onclick="_smartSetFreq('daily')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">EVERY DAY</div>
+          <div class="sm-choice-d">Fast cashflow. Daily payouts via Silver Pool. Best for emergency funds and short-term parking.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
 
-    const months = window._calc.durationMonths;
-    const monthsArr = Array.from({length: months + 1}, (_, i) => i);
+      <div class="sm-choice" data-freq="weekly" onclick="_smartSetFreq('weekly')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">EVERY WEEK</div>
+          <div class="sm-choice-d">Balanced option. Gold Pool weekly returns + items that complete cycles in 1-2 weeks. Optimal yield.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
 
-    // Base series — cumulative earnings month by month
-    const basePoints = monthsArr.map(m => {
-      let total = 0;
-      breakdown.items.forEach(it => {
-        if(it.type === 'pool'){
-          const pos = state.positions.find(p => `${p.plan} Pool` === it.label);
-          if(pos){
-            total += _calcPoolProfit(it.principal, Number(pos.rate_pct)||0, pos.period||'day', m);
-          }
-        } else {
-          total += _calcItemProfit(it.principal, it.itemMeta.expected_return, it.itemMeta.return_period_days, m);
-        }
-      });
-      return total;
-    });
+      <div class="sm-choice" data-freq="monthly" onclick="_smartSetFreq('monthly')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">EVERY MONTH</div>
+          <div class="sm-choice-d">Maximum returns. Platinum Pool 15%/month (from $10K) + premium items. Best for serious capital.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+    </div>
+  </div>
+  `;
+}
 
-    // Boosted series (if applicable)
-    let boostedPoints = null;
-    if(reinvestableItems.length > 0){
-      const item = reinvestableItems[0].itemMeta;
-      const target = window._calc.reinvestTarget;
-      boostedPoints = monthsArr.map(m => {
-        let total = 0;
-        // All non-reinvest items are same as base
-        breakdown.items.forEach(it => {
-          if(it.label === reinvestableItems[0].label) return;   // skip the reinvested one
-          if(it.type === 'pool'){
-            const pos = state.positions.find(p => `${p.plan} Pool` === it.label);
-            if(pos){
-              total += _calcPoolProfit(it.principal, Number(pos.rate_pct)||0, pos.period||'day', m);
-            }
-          } else {
-            total += _calcItemProfit(it.principal, it.itemMeta.expected_return, it.itemMeta.return_period_days, m);
-          }
-        });
-        // Reinvested item profit
-        const sc = _calcReinvestScenario(item, target, m);
-        total += sc.total;
-        return total;
-      });
+/* ═════════════ STEP 2: AMOUNT ═════════════ */
+function _smartStep2HTML(){
+  return `
+  <div class="sm-pane" data-step="2">
+    <div class="sm-recap" id="smRecap2"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">How much do you want to <em>invest</em>?</div>
+      <div class="sm-step-hint">Pick a preset or enter a custom amount. Minimum $300, maximum $300,000.</div>
+    </div>
+
+    <div class="sm-amount-card">
+      <div class="sm-amount-row">
+        <div class="sm-amount-prefix">$</div>
+        <input type="number" id="smAmountInput" class="sm-amount-input" placeholder="0" min="300" max="300000" step="100" oninput="_smartOnAmountInput(this.value)">
+      </div>
+
+      <div class="sm-presets">
+        <button class="sm-preset" data-amt="500" onclick="_smartSetAmount(500)">$500</button>
+        <button class="sm-preset" data-amt="1000" onclick="_smartSetAmount(1000)">$1,000</button>
+        <button class="sm-preset" data-amt="5000" onclick="_smartSetAmount(5000)">$5,000</button>
+        <button class="sm-preset" data-amt="10000" onclick="_smartSetAmount(10000)">$10,000</button>
+        <button class="sm-preset" data-amt="25000" onclick="_smartSetAmount(25000)">$25,000</button>
+      </div>
+
+      <div class="sm-balance-opt" id="smBalanceOpt" style="display:none">
+        <label class="sm-checkbox">
+          <input type="checkbox" id="smUseBalanceCb" onchange="_smartToggleBalance()">
+          <span class="sm-checkbox-mark"></span>
+          <span class="sm-checkbox-text">Use <strong id="smBalanceAmount">$0</strong> from my available balance</span>
+        </label>
+      </div>
+
+      <div class="sm-amount-error" id="smAmountError" style="display:none"></div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 3: PORTFOLIO TYPE ═════════════ */
+function _smartStep3HTML(){
+  return `
+  <div class="sm-pane" data-step="3">
+    <div class="sm-recap" id="smRecap3"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">What's your <em>risk profile</em>?</div>
+      <div class="sm-step-hint">Three approaches — each balances risk and return differently.</div>
+    </div>
+
+    <div class="sm-choices">
+      <div class="sm-choice" data-pt="pools" onclick="_smartSetPortfolio('pools')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 6 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V6 Z"/><path d="M9 12 L11 14 L15 10"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">POOLS ONLY <span class="sm-tag-mini">STABLE</span></div>
+          <div class="sm-choice-d">We allocate your funds across luxury items — watches, bags, sneakers — through guaranteed-rate pools. Lowest risk, fixed returns.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice" data-pt="items" onclick="_smartSetPortfolio('items')">
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H18 L22 9 L12 22 L2 9 Z"/><path d="M6 3 L9 9 L2 9 M18 3 L15 9 L22 9 M9 9 L12 22 L15 9 M9 9 H15"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">ITEMS ONLY <span class="sm-tag-mini sm-tag-mini-red">AGGRESSIVE</span></div>
+          <div class="sm-choice-d">Higher upside (~15%/week expected). If items sell below expectations (rare), 10%/month minimum is guaranteed. Higher risk, higher ceiling.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+
+      <div class="sm-choice sm-choice-rec" data-pt="mixed" onclick="_smartSetPortfolio('mixed')">
+        <div class="sm-choice-rec-tag">RECOMMENDED</div>
+        <div class="sm-choice-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><path d="M9 12h6"/></svg></div>
+        <div class="sm-choice-info">
+          <div class="sm-choice-t">MIXED <span class="sm-tag-mini sm-tag-mini-green">BALANCED</span></div>
+          <div class="sm-choice-d">Part in stable pools with fixed returns, part in items with growth potential. Best risk/reward ratio.</div>
+        </div>
+        <div class="sm-choice-check"></div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 4: LOADER ═════════════ */
+function _smartStep4HTML(){
+  return `
+  <div class="sm-pane" data-step="4">
+    <div class="sm-loader-wrap">
+      <div class="sm-loader-ring">
+        <div class="sm-loader-core">
+          <svg viewBox="0 0 24 24" width="32" height="32" style="color:var(--gold)"><use href="#i-smart"/></svg>
+        </div>
+      </div>
+
+      <div class="sm-loader-title">Analyzing your strategy</div>
+
+      <div class="sm-loader-list" id="smLoaderList">
+        <div class="sm-loader-item" data-l="1">
+          <div class="sm-loader-dot"></div>
+          <span>Scanning luxury market data</span>
+        </div>
+        <div class="sm-loader-item" data-l="2">
+          <div class="sm-loader-dot"></div>
+          <span>Matching optimal allocation for your amount</span>
+        </div>
+        <div class="sm-loader-item" data-l="3">
+          <div class="sm-loader-dot"></div>
+          <span>Calculating risk-adjusted projections</span>
+        </div>
+        <div class="sm-loader-item" data-l="4">
+          <div class="sm-loader-dot"></div>
+          <span>Building your strategy</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 5: TWO STRATEGIES ═════════════ */
+function _smartStep5HTML(){
+  return `
+  <div class="sm-pane" data-step="5">
+    <div class="sm-recap" id="smRecap5"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">Choose your <em>strategy</em></div>
+      <div class="sm-step-hint">Two personalized options. Pick the one that matches your style.</div>
+    </div>
+
+    <div class="sm-strategies">
+      <!-- STRATEGY A: CONSERVATIVE -->
+      <div class="sm-strategy" data-strat="A" onclick="_smartSetStrategy('A')">
+        <div class="sm-strategy-h">
+          <div class="sm-strategy-tag">STRATEGY A</div>
+          <div class="sm-strategy-name">Conservative</div>
+          <div class="sm-strategy-sub">Lower risk · Steady returns</div>
+        </div>
+
+        <div class="sm-strategy-bars" id="smStratABars">
+          <!-- filled by Stage 3 — placeholder for now -->
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Pool</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:70%;background:var(--gold)"></div></div>
+            <div class="sm-bar-val">70%</div>
+          </div>
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Items</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:30%;background:var(--green)"></div></div>
+            <div class="sm-bar-val">30%</div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-items" id="smStratAItems">
+          <div class="sm-strategy-items-h">
+            <span>Suggested items</span>
+            <button class="sm-shuffle-btn" onclick="event.stopPropagation();_smartShuffleItems('A')" title="Pick different items">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+              Shuffle
+            </button>
+          </div>
+          <div class="sm-strategy-items-list">
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-projection">
+          <div class="sm-proj-row">
+            <span>Per period</span>
+            <span class="sm-proj-v" id="smStratAPer">+$0</span>
+          </div>
+          <div class="sm-proj-row">
+            <span>Over <span id="smStratAMonthsLabel">3 months</span></span>
+            <span class="sm-proj-v sm-proj-v-big" id="smStratATotal">+$0</span>
+          </div>
+          <div class="sm-proj-row sm-proj-row-bonus">
+            <span>With reinvest</span>
+            <span class="sm-proj-v sm-proj-v-bonus" id="smStratACompound">+$0</span>
+          </div>
+        </div>
+
+        <div class="sm-strategy-pick" id="smStratAPickBtn">
+          <span class="sm-strategy-pick-txt">SELECT THIS STRATEGY</span>
+          <span class="sm-strategy-pick-check">✓</span>
+        </div>
+      </div>
+
+      <!-- STRATEGY B: AGGRESSIVE -->
+      <div class="sm-strategy" data-strat="B" onclick="_smartSetStrategy('B')">
+        <div class="sm-strategy-h">
+          <div class="sm-strategy-tag sm-strategy-tag-b">STRATEGY B</div>
+          <div class="sm-strategy-name">Aggressive</div>
+          <div class="sm-strategy-sub">Higher upside · Higher risk</div>
+        </div>
+
+        <div class="sm-strategy-bars" id="smStratBBars">
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Pool</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:40%;background:var(--gold)"></div></div>
+            <div class="sm-bar-val">40%</div>
+          </div>
+          <div class="sm-bar-row">
+            <div class="sm-bar-label">Items</div>
+            <div class="sm-bar"><div class="sm-bar-fill" style="width:60%;background:var(--green)"></div></div>
+            <div class="sm-bar-val">60%</div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-items" id="smStratBItems">
+          <div class="sm-strategy-items-h">
+            <span>Suggested items</span>
+            <button class="sm-shuffle-btn" onclick="event.stopPropagation();_smartShuffleItems('B')" title="Pick different items">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+              Shuffle
+            </button>
+          </div>
+          <div class="sm-strategy-items-list">
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+            <div class="sm-skeleton"></div>
+          </div>
+        </div>
+
+        <div class="sm-strategy-projection">
+          <div class="sm-proj-row">
+            <span>Per period</span>
+            <span class="sm-proj-v" id="smStratBPer">+$0</span>
+          </div>
+          <div class="sm-proj-row">
+            <span>Over <span id="smStratBMonthsLabel">3 months</span></span>
+            <span class="sm-proj-v sm-proj-v-big" id="smStratBTotal">+$0</span>
+          </div>
+          <div class="sm-proj-row sm-proj-row-bonus">
+            <span>With reinvest</span>
+            <span class="sm-proj-v sm-proj-v-bonus" id="smStratBCompound">+$0</span>
+          </div>
+        </div>
+
+        <div class="sm-strategy-pick" id="smStratBPickBtn">
+          <span class="sm-strategy-pick-txt">SELECT THIS STRATEGY</span>
+          <span class="sm-strategy-pick-check">✓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sm-disclaimer">
+      Projections are based on historical returns over the last 12 months. The 10%/month minimum guarantee for items applies only when all items in the portfolio sell below expectation — a scenario that hasn't occurred in 2 years. Not financial advice.
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 6: DEPOSIT ═════════════ */
+function _smartStep6HTML(){
+  return `
+  <div class="sm-pane" data-step="6">
+    <div class="sm-recap" id="smRecap6"></div>
+
+    <div class="sm-step-h">
+      <div class="sm-step-q">Fund your <em>strategy</em></div>
+      <div class="sm-step-hint">Top up your account to activate the chosen strategy. We'll auto-purchase positions after confirmation.</div>
+    </div>
+
+    <div class="sm-deposit-card">
+      <div class="sm-deposit-summary">
+        <div class="sm-deposit-row">
+          <span>Strategy amount</span>
+          <span id="smDepAmount">$0</span>
+        </div>
+        <div class="sm-deposit-row" id="smDepFromBalanceRow" style="display:none">
+          <span>Using from balance</span>
+          <span id="smDepFromBalance" style="color:var(--green)">-$0</span>
+        </div>
+        <div class="sm-deposit-row" id="smDepBonusRow" style="display:none">
+          <span>+5% first deposit bonus</span>
+          <span id="smDepBonus" style="color:var(--gold)">+$0</span>
+        </div>
+        <div class="sm-deposit-row sm-deposit-row-total">
+          <span>To deposit</span>
+          <span id="smDepTotal">$0</span>
+        </div>
+      </div>
+
+      <div class="sm-coin-pick">
+        <div class="sm-coin-pick-h">CHOOSE PAYMENT METHOD</div>
+        <div class="sm-coin-grid">
+          <div class="sm-coin" data-coin="USDT-TRC20" onclick="_smartSetCoin('USDT-TRC20')">
+            <div class="sm-coin-name">USDT</div>
+            <div class="sm-coin-net">TRC-20</div>
+          </div>
+          <div class="sm-coin" data-coin="USDT-ERC20" onclick="_smartSetCoin('USDT-ERC20')">
+            <div class="sm-coin-name">USDT</div>
+            <div class="sm-coin-net">ERC-20</div>
+          </div>
+          <div class="sm-coin" data-coin="BTC" onclick="_smartSetCoin('BTC')">
+            <div class="sm-coin-name">BTC</div>
+            <div class="sm-coin-net">Bitcoin</div>
+          </div>
+          <div class="sm-coin" data-coin="ETH" onclick="_smartSetCoin('ETH')">
+            <div class="sm-coin-name">ETH</div>
+            <div class="sm-coin-net">Ethereum</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sm-deposit-info" id="smDepInfo" style="display:none">
+        <!-- QR + wallet address will be filled here in Stage 5 (deposit API integration) -->
+        <div class="sm-deposit-info-placeholder">
+          Wallet address &amp; QR will appear here after Stage 5 (API integration).
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ STEP 7: FINAL CONFIRMATION ═════════════ */
+function _smartStep7HTML(){
+  return `
+  <div class="sm-pane" data-step="7">
+    <div class="sm-final-wrap">
+      <div class="sm-final-icon">
+        <svg viewBox="0 0 52 52" width="64" height="64" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="26" cy="26" r="23" stroke-dasharray="145" stroke-dashoffset="0" class="sm-final-ring"/>
+          <path d="M14 26 l8 8 l16 -16" class="sm-final-check"/>
+        </svg>
+      </div>
+
+      <div class="sm-final-title">Confirm your purchase</div>
+      <p class="sm-final-sub">After confirmation we'll automatically purchase the listed positions for you.</p>
+
+      <div class="sm-final-list" id="smFinalList">
+        <!-- Populated dynamically based on chosen strategy -->
+        <div class="sm-final-item">
+          <div class="sm-final-item-ic">★</div>
+          <div class="sm-final-item-info">
+            <div class="sm-final-item-n">Gold Pool</div>
+            <div class="sm-final-item-d">3%/week · weekly payouts</div>
+          </div>
+          <div class="sm-final-item-v">$0</div>
+        </div>
+      </div>
+
+      <div class="sm-final-totals">
+        <div class="sm-final-totals-row">
+          <span>Strategy total</span>
+          <span id="smFinalStratTotal">$0</span>
+        </div>
+        <div class="sm-final-totals-row" id="smFinalBonusRow" style="display:none">
+          <span>Bonus on Available Balance</span>
+          <span style="color:var(--gold)" id="smFinalBonus">+$0</span>
+        </div>
+        <div class="sm-final-totals-row sm-final-totals-row-grand">
+          <span>Total</span>
+          <span id="smFinalGrand">$0</span>
+        </div>
+      </div>
+
+      <div class="sm-final-disclaimer">
+        By confirming, you agree to our investment terms. Capital is allocated immediately and cannot be partially refunded — you can exit pool positions any time and sell item shares (with a 10% early-exit penalty).
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ═════════════ NAVIGATION ═════════════ */
+
+function _smartShowStep(n){
+  window._smart.step = n;
+  _smartSaveState();
+
+  // Hide all panes, show current
+  document.querySelectorAll('.sm-pane').forEach(p => {
+    p.classList.toggle('sm-pane-active', parseInt(p.dataset.step) === n);
+  });
+
+  // Progress bar
+  const fill = document.getElementById('smProgFill');
+  const text = document.getElementById('smProgText');
+  if(fill) fill.style.width = (n / 7 * 100) + '%';
+  if(text) text.textContent = `STEP ${n} OF 7`;
+
+  // Back button visibility
+  const back = document.getElementById('smBtnBack');
+  if(back) back.style.display = n > 1 ? '' : 'none';
+
+  // Next button label & state
+  const next = document.getElementById('smBtnNext');
+  if(next){
+    next.disabled = !_smartCanProceed(n);
+    next.innerHTML = _smartNextLabel(n) + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  }
+
+  // Update recaps
+  _smartUpdateRecaps();
+
+  // Step-specific actions
+  if(n === 4){
+    _smartRunLoader();
+  }
+  if(n === 5){
+    _smartRenderStrategies();
+  }
+  if(n === 6){
+    _smartRenderDeposit();
+  }
+  if(n === 7){
+    _smartRenderFinal();
+  }
+
+  // Re-apply selections (for restored state)
+  _smartReapplySelections();
+
+  // Scroll top
+  const dCt = document.getElementById('dSmartContent');
+  if(dCt) dCt.scrollTop = 0;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function _smartNextLabel(step){
+  if(step === 3) return 'ANALYZE';
+  if(step === 4) return 'CONTINUE';
+  if(step === 5) return 'PROCEED TO DEPOSIT';
+  if(step === 6) return 'I\'VE PAID';
+  if(step === 7) return 'CONFIRM PURCHASE';
+  return 'NEXT';
+}
+
+function _smartCanProceed(step){
+  const s = window._smart;
+  if(step === 1) return !!s.frequency;
+  if(step === 2) return !!s.amount && s.amount >= 300 && s.amount <= 300000;
+  if(step === 3) return !!s.portfolioType;
+  if(step === 4) return window._smartLoaderDone === true;
+  if(step === 5) return !!s.chosenStrategy;
+  if(step === 6) return !!s.paymentMethod;
+  if(step === 7) return true;
+  return false;
+}
+
+function _smartNext(){
+  const s = window._smart;
+  if(!_smartCanProceed(s.step)) return;
+
+  if(s.step === 7){
+    _smartConfirmPurchase();
+    return;
+  }
+  _smartShowStep(s.step + 1);
+}
+
+function _smartBack(){
+  const s = window._smart;
+  if(s.step <= 1) return;
+  // If going back from loader, skip back to step 3
+  const target = s.step === 5 ? 3 : s.step - 1;
+  _smartShowStep(target);
+}
+
+function _smartGoToStep(n){
+  if(n < 1 || n > 7) return;
+  // Don't allow jumping forward past current
+  if(n > window._smart.step) return;
+  _smartShowStep(n);
+}
+
+function _smartSelfChoice(){
+  if(confirm('Are you sure?\n\nOur calculator picks the optimal strategy for you — it\'s safer and faster. You can always buy items manually later — new lots arrive daily.\n\nClick OK to choose items yourself, Cancel to stay.')){
+    _smartResetState();
+    navTo('market');
+  }
+}
+
+/* ═════════════ STEP 1 HANDLERS ═════════════ */
+function _smartSetFreq(f){
+  window._smart.frequency = f;
+  _smartSaveState();
+  document.querySelectorAll('[data-freq]').forEach(el => {
+    el.classList.toggle('sm-choice-selected', el.dataset.freq === f);
+  });
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = false;
+}
+
+/* ═════════════ STEP 2 HANDLERS ═════════════ */
+function _smartSetAmount(v){
+  v = parseInt(v) || 0;
+  window._smart.amount = v;
+  _smartSaveState();
+  const inp = document.getElementById('smAmountInput');
+  if(inp) inp.value = v || '';
+  document.querySelectorAll('.sm-preset').forEach(p => {
+    p.classList.toggle('sm-preset-active', parseInt(p.dataset.amt) === v);
+  });
+  _smartValidateAmount();
+}
+
+function _smartOnAmountInput(v){
+  v = parseInt(v) || 0;
+  window._smart.amount = v;
+  _smartSaveState();
+  document.querySelectorAll('.sm-preset').forEach(p => {
+    p.classList.toggle('sm-preset-active', parseInt(p.dataset.amt) === v);
+  });
+  _smartValidateAmount();
+}
+
+function _smartValidateAmount(){
+  const v = window._smart.amount;
+  const err = document.getElementById('smAmountError');
+  const next = document.getElementById('smBtnNext');
+  let msg = '';
+  if(!v){
+    msg = '';
+  } else if(v < 300){
+    msg = 'Minimum investment is $300.';
+  } else if(v > 300000){
+    msg = 'Maximum investment is $300,000.';
+  }
+  if(err){
+    err.textContent = msg;
+    err.style.display = msg ? '' : 'none';
+  }
+  if(next) next.disabled = !!msg || !v;
+}
+
+function _smartToggleBalance(){
+  const cb = document.getElementById('smUseBalanceCb');
+  window._smart.useExistingBalance = cb ? cb.checked : false;
+  _smartSaveState();
+}
+
+/* ═════════════ STEP 3 HANDLERS ═════════════ */
+function _smartSetPortfolio(t){
+  window._smart.portfolioType = t;
+  _smartSaveState();
+  document.querySelectorAll('[data-pt]').forEach(el => {
+    el.classList.toggle('sm-choice-selected', el.dataset.pt === t);
+  });
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = false;
+}
+
+/* ═════════════ STEP 4 LOADER ═════════════ */
+function _smartRunLoader(){
+  window._smartLoaderDone = false;
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = true;
+
+  // Reset all loader items to inactive
+  document.querySelectorAll('.sm-loader-item').forEach(it => {
+    it.classList.remove('sm-loader-item-done', 'sm-loader-item-active');
+  });
+
+  // Sequentially activate items
+  const items = document.querySelectorAll('.sm-loader-item');
+  if(items.length === 0) return;
+
+  const interval = 700; // ms between steps
+  items.forEach((it, i) => {
+    setTimeout(() => {
+      it.classList.add('sm-loader-item-active');
+      if(i > 0) items[i-1].classList.add('sm-loader-item-done');
+    }, i * interval);
+  });
+
+  // Mark last as done after loader finishes
+  setTimeout(() => {
+    if(items[items.length-1]) items[items.length-1].classList.add('sm-loader-item-done');
+    window._smartLoaderDone = true;
+    // Auto-advance to step 5
+    if(window._smart.step === 4){
+      setTimeout(() => _smartShowStep(5), 350);
     }
+  }, items.length * interval);
+}
 
-    // Drawing
-    const padL = 50, padR = 12, padT = 12, padB = 30;
-    const plotW = w - padL - padR;
-    const plotH = h - padT - padB;
-    const allPts = boostedPoints ? [...basePoints, ...boostedPoints] : basePoints;
-    const mx = Math.max(...allPts, 1);
+/* ═════════════ STEP 5: STRATEGIES — see Stage 3 engine below ═════════════ */
 
-    // Grid
-    ctx.strokeStyle = 'rgba(201,168,76,.06)';
-    ctx.lineWidth = 1;
-    for(let k = 1; k <= 3; k++){
-      const y = padT + (plotH * k / 4);
-      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+function _smartSetStrategy(s){
+  window._smart.chosenStrategy = s;
+  _smartSaveState();
+  document.querySelectorAll('[data-strat]').forEach(el => {
+    el.classList.toggle('sm-strategy-selected', el.dataset.strat === s);
+  });
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = false;
+}
+
+/* ═════════════ STEP 6: DEPOSIT ═════════════ */
+function _smartSetCoin(c){
+  window._smart.paymentMethod = c;
+  _smartSaveState();
+  document.querySelectorAll('[data-coin]').forEach(el => {
+    el.classList.toggle('sm-coin-selected', el.dataset.coin === c);
+  });
+  const info = document.getElementById('smDepInfo');
+  if(info) info.style.display = '';
+  const next = document.getElementById('smBtnNext');
+  if(next) next.disabled = false;
+}
+
+/* ═════════════ STEP 6+7: render functions in Stage 3 engine below ═════════════ */
+
+/* ═════════════ RECAPS (breadcrumb-like) ═════════════ */
+function _smartUpdateRecaps(){
+  const s = window._smart;
+  if(!s) return;
+
+  const FREQ_LABEL = { daily: 'Daily payouts', weekly: 'Weekly payouts', monthly: 'Monthly payouts' };
+  const PT_LABEL = { pools: 'Pools only', items: 'Items only', mixed: 'Mixed strategy' };
+
+  const buildRecap = (showAmount, showFreq, showPT, showStrat) => {
+    const parts = [];
+    if(showFreq && s.frequency){
+      parts.push(`<div class="sm-recap-item"><span class="sm-recap-l">FREQUENCY</span> <span class="sm-recap-v">${FREQ_LABEL[s.frequency]}</span> <a class="sm-recap-edit" onclick="_smartGoToStep(1)">edit</a></div>`);
     }
+    if(showAmount && s.amount){
+      parts.push(`<div class="sm-recap-item"><span class="sm-recap-l">AMOUNT</span> <span class="sm-recap-v">$${s.amount.toLocaleString()}</span> <a class="sm-recap-edit" onclick="_smartGoToStep(2)">edit</a></div>`);
+    }
+    if(showPT && s.portfolioType){
+      parts.push(`<div class="sm-recap-item"><span class="sm-recap-l">TYPE</span> <span class="sm-recap-v">${PT_LABEL[s.portfolioType]}</span> <a class="sm-recap-edit" onclick="_smartGoToStep(3)">edit</a></div>`);
+    }
+    if(showStrat && s.chosenStrategy){
+      parts.push(`<div class="sm-recap-item"><span class="sm-recap-l">STRATEGY</span> <span class="sm-recap-v">${s.chosenStrategy}</span> <a class="sm-recap-edit" onclick="_smartGoToStep(5)">edit</a></div>`);
+    }
+    return parts.join('');
+  };
 
-    // Y labels
-    ctx.fillStyle = 'rgba(240,237,230,0.5)';
-    ctx.font = '10px monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText('$' + Math.round(mx).toLocaleString(), padL - 6, padT + 8);
-    ctx.fillText('$0', padL - 6, padT + plotH);
+  const r2 = document.getElementById('smRecap2');
+  if(r2 && s.step >= 2) r2.innerHTML = buildRecap(false, true, false, false);
 
-    // X labels (months)
-    ctx.textAlign = 'center';
-    monthsArr.forEach((m, i) => {
-      if(i === 0 || i === months || (months > 6 && i === Math.floor(months/2)) || (months <= 6 && i % 2 === 0)){
-        const x = padL + (i / months) * plotW;
-        ctx.fillText(m === 0 ? 'Now' : m + 'mo', x, h - 10);
-      }
-    });
+  const r3 = document.getElementById('smRecap3');
+  if(r3 && s.step >= 3) r3.innerHTML = buildRecap(true, true, false, false);
 
-    const drawSeries = (pts, color, fillColor) => {
-      // Area fill
-      ctx.beginPath();
-      ctx.moveTo(padL, padT + plotH);
-      pts.forEach((v, i) => {
-        const x = padL + (i / months) * plotW;
-        const y = padT + plotH - (v / mx) * plotH;
-        ctx.lineTo(x, y);
-      });
-      ctx.lineTo(padL + plotW, padT + plotH);
-      ctx.closePath();
-      ctx.fillStyle = fillColor;
-      ctx.fill();
-      // Line
-      ctx.beginPath();
-      pts.forEach((v, i) => {
-        const x = padL + (i / months) * plotW;
-        const y = padT + plotH - (v / mx) * plotH;
-        if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      // Dots
-      pts.forEach((v, i) => {
-        const x = padL + (i / months) * plotW;
-        const y = padT + plotH - (v / mx) * plotH;
-        ctx.beginPath();
-        ctx.arc(x, y, 2.5, 0, Math.PI*2);
-        ctx.fillStyle = color;
-        ctx.fill();
-      });
+  const r5 = document.getElementById('smRecap5');
+  if(r5 && s.step >= 5) r5.innerHTML = buildRecap(true, true, true, false);
+
+  const r6 = document.getElementById('smRecap6');
+  if(r6 && s.step >= 6) r6.innerHTML = buildRecap(true, true, true, true);
+}
+
+function _smartReapplySelections(){
+  const s = window._smart;
+  if(!s) return;
+  if(s.frequency){
+    document.querySelectorAll('[data-freq]').forEach(el => el.classList.toggle('sm-choice-selected', el.dataset.freq === s.frequency));
+  }
+  if(s.amount){
+    const inp = document.getElementById('smAmountInput');
+    if(inp) inp.value = s.amount;
+    document.querySelectorAll('.sm-preset').forEach(p => p.classList.toggle('sm-preset-active', parseInt(p.dataset.amt) === s.amount));
+  }
+  if(s.portfolioType){
+    document.querySelectorAll('[data-pt]').forEach(el => el.classList.toggle('sm-choice-selected', el.dataset.pt === s.portfolioType));
+  }
+  if(s.chosenStrategy){
+    document.querySelectorAll('[data-strat]').forEach(el => el.classList.toggle('sm-strategy-selected', el.dataset.strat === s.chosenStrategy));
+  }
+  if(s.paymentMethod){
+    document.querySelectorAll('[data-coin]').forEach(el => el.classList.toggle('sm-coin-selected', el.dataset.coin === s.paymentMethod));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 3: STRATEGY ENGINE (calculation rules from prompt section 3)
+   STAGE 4: Marketplace items shuffle
+   STAGE 5: API integration (deposit + purchase) with graceful fallback
+   STAGE 6: First-deposit bonus +5% + Invested/Available split
+═══════════════════════════════════════════════════════════ */
+
+/* ───────── PRODUCT CONSTANTS (per prompt — DO NOT CHANGE) ───────── */
+const SM_POOL = {
+  Silver:   { rate: 0.5,  period: 'day',   monthly: 15.0,  weekly: 3.5,    daily: 0.5,
+              min: 100, max: 1000, label: 'Silver Pool', exit: 'any day',     ic: '●' },
+  Gold:     { rate: 3.0,  period: 'week',  monthly: 12.0,  weekly: 3.0,    daily: 0.43,
+              min: 1000, max: 10000, label: 'Gold Pool', exit: 'each week',  ic: '★' },
+  Platinum: { rate: 15.0, period: 'month', monthly: 15.0,  weekly: 3.5,    daily: 0.5,
+              min: 10000, max: 300000, label: 'Platinum Pool', exit: 'each month', ic: '◆' },
+};
+const SM_ITEM_AVG = {
+  expectedWeekly: 15.0,    // ~15%/week expected
+  guaranteedMonthly: 10.0, // 10%/month guaranteed minimum
+  avgCycleDays: 10,        // average sale time 1-2 weeks
+};
+
+/* ───────── STAGE 3: ALLOCATION ENGINE ───────── */
+
+/* Returns {strategyA, strategyB} — each: {pools:[{plan, amount}], items:{amount}, freq} */
+function _smartBuildAllocations(state){
+  const { frequency, amount, portfolioType } = state;
+
+  // Override: if user picked "pools only" or "items only"
+  if(portfolioType === 'pools'){
+    return _smartAllocPoolsOnly(amount, frequency);
+  }
+  if(portfolioType === 'items'){
+    return _smartAllocItemsOnly(amount, frequency);
+  }
+
+  // MIXED — apply CASE A/B/C rules from prompt section 3.2
+  if(frequency === 'daily') return _smartCaseA(amount);
+  if(frequency === 'weekly') return _smartCaseB(amount);
+  return _smartCaseC(amount);
+}
+
+/* CASE A — daily payouts. Only Silver Pool available */
+function _smartCaseA(amount){
+  // Strategy A: 100% Silver, split into chunks of $1000 max each
+  const silverChunks = [];
+  let remaining = amount;
+  while(remaining > 0){
+    const chunk = Math.min(1000, remaining);
+    silverChunks.push({ plan:'Silver', amount: chunk });
+    remaining -= chunk;
+  }
+
+  // Strategy B: 50% Silver / 50% Gold (only if amount >= $1000 to fund Gold)
+  let stratBPools;
+  if(amount >= 2000){
+    const half = amount / 2;
+    // Half in Silver chunks
+    const silverPart = [];
+    let remS = half;
+    while(remS > 0){
+      const c = Math.min(1000, remS);
+      silverPart.push({ plan:'Silver', amount: c });
+      remS -= c;
+    }
+    stratBPools = silverPart.concat([{ plan:'Gold', amount: half }]);
+  } else {
+    // Not enough for Gold — same as A
+    stratBPools = [...silverChunks];
+  }
+
+  return {
+    strategyA: { name:'Conservative', sub:'Daily payouts · 100% Silver', pools: silverChunks, items: { amount: 0 }, freq:'daily', warn: null },
+    strategyB: { name:'Balanced',     sub:'Daily + weekly mix',        pools: stratBPools,    items: { amount: 0 }, freq:'daily', warn: amount >= 2000 ? 'Half allocated to Gold (weekly payouts) for ~17% higher return.' : null },
+  };
+}
+
+/* CASE B — weekly payouts. Available: Silver/Gold + items */
+function _smartCaseB(amount){
+  // Sub-case: $300-$1000 — Silver only, no Gold, no items (items min $25 but won't have weekly payout cycle confidence)
+  if(amount < 1000){
+    const silverChunks = [];
+    let remaining = amount;
+    while(remaining > 0){
+      const chunk = Math.min(1000, remaining);
+      silverChunks.push({ plan:'Silver', amount: chunk });
+      remaining -= chunk;
+    }
+    return {
+      strategyA: { name:'Conservative', sub:'Silver Pool only (Gold needs $1K+)', pools: silverChunks, items:{ amount: 0 }, freq:'weekly', warn:'Add $'+(1000-amount)+' more to unlock Gold Pool 3%/week.' },
+      strategyB: { name:'Aggressive',   sub:'Silver Pool only',                    pools: silverChunks, items:{ amount: 0 }, freq:'weekly', warn:'Add $'+(1000-amount)+' more to unlock Gold Pool + items mix.' },
     };
+  }
 
-    drawSeries(basePoints, '#2d8f3e', 'rgba(45,143,62,0.18)');
-    if(boostedPoints) drawSeries(boostedPoints, '#c9a84c', 'rgba(201,168,76,0.18)');
-  });
+  // $1000+ — Gold + items
+  const goldA = Math.round(amount * 0.7);
+  const itemsA = amount - goldA;
+  const goldB = Math.round(amount * 0.4);
+  const itemsB = amount - goldB;
 
-  // Hide legend item 2 if no boosted
-  document.querySelectorAll('#calcChartLegend2').forEach(el => {
-    el.style.display = reinvestableItems.length > 0 ? '' : 'none';
-  });
+  return {
+    strategyA: {
+      name:'Conservative', sub:'70% Gold Pool · 30% items',
+      pools: [{ plan:'Gold', amount: goldA }],
+      items: { amount: itemsA },
+      freq: 'weekly', warn: null,
+    },
+    strategyB: {
+      name:'Aggressive', sub:'40% Gold Pool · 60% items',
+      pools: [{ plan:'Gold', amount: goldB }],
+      items: { amount: itemsB },
+      freq: 'weekly', warn: null,
+    },
+  };
 }
 
-console.log('[stage2] profit calculator loaded');
+/* CASE C — monthly payouts. Available: Platinum (from $10K), Gold, items */
+function _smartCaseC(amount){
+  if(amount < 10000){
+    // No Platinum — fallback to weekly (Gold + items)
+    const r = _smartCaseB(amount);
+    r.strategyA.warn = 'Platinum Pool needs $10K+. Showing Gold Pool strategy instead.';
+    r.strategyB.warn = 'Platinum Pool needs $10K+. Showing Gold Pool strategy instead.';
+    r.strategyA.sub = '70% Gold Pool · 30% items (Platinum unavailable)';
+    r.strategyB.sub = '40% Gold Pool · 60% items (Platinum unavailable)';
+    return r;
+  }
+
+  // $10K+ — Platinum is available
+  const platA = Math.round(amount * 0.8);
+  const itemsA = amount - platA;
+  const platB = Math.round(amount * 0.5);
+  const itemsB = amount - platB;
+
+  return {
+    strategyA: {
+      name:'Conservative', sub:'80% Platinum Pool · 20% items',
+      pools: [{ plan:'Platinum', amount: platA }],
+      items: { amount: itemsA },
+      freq:'monthly', warn: null,
+    },
+    strategyB: {
+      name:'Aggressive', sub:'50% Platinum · 50% items',
+      pools: [{ plan:'Platinum', amount: platB }],
+      items: { amount: itemsB },
+      freq:'monthly', warn: null,
+    },
+  };
+}
+
+/* POOLS ONLY override — apply pool tier by amount, both strategies vary risk */
+function _smartAllocPoolsOnly(amount, frequency){
+  // Strategy A: 100% in best pool for amount
+  // Strategy B: split across two pools for liquidity
+  const bestPool = amount >= 10000 ? 'Platinum' : (amount >= 1000 ? 'Gold' : 'Silver');
+
+  // Apply min/max limits from SM_POOL
+  const cap = SM_POOL[bestPool].max;
+  const stratAPools = [];
+  let rem = amount;
+  while(rem > 0){
+    const chunk = Math.min(cap, rem);
+    stratAPools.push({ plan: bestPool, amount: chunk });
+    rem -= chunk;
+  }
+
+  // Strategy B: 70% in best pool, 30% in lower tier (more liquidity)
+  const fallbackPool = bestPool === 'Platinum' ? 'Gold' : (bestPool === 'Gold' ? 'Silver' : 'Silver');
+  const portionA = Math.round(amount * 0.7);
+  const portionB = amount - portionA;
+  const stratBPools = [];
+  // Best pool portion (with chunking)
+  let remBest = portionA;
+  while(remBest > 0){
+    const chunk = Math.min(cap, remBest);
+    stratBPools.push({ plan: bestPool, amount: chunk });
+    remBest -= chunk;
+  }
+  // Fallback portion
+  if(portionB >= SM_POOL[fallbackPool].min){
+    const fbCap = SM_POOL[fallbackPool].max;
+    let remFB = portionB;
+    while(remFB > 0){
+      const chunk = Math.min(fbCap, remFB);
+      stratBPools.push({ plan: fallbackPool, amount: chunk });
+      remFB -= chunk;
+    }
+  } else {
+    // If fallback can't satisfy min, put it all in best pool
+    stratBPools[stratBPools.length-1].amount += portionB;
+  }
+
+  return {
+    strategyA: { name:'All-in '+bestPool, sub:'100% in '+SM_POOL[bestPool].label, pools: stratAPools, items:{amount:0}, freq:frequency, warn:null },
+    strategyB: { name:'Diversified',     sub:'70% '+bestPool+' · 30% '+fallbackPool, pools: stratBPools, items:{amount:0}, freq:frequency, warn: 'Split for added liquidity from '+fallbackPool+' Pool.' },
+  };
+}
+
+/* ITEMS ONLY override */
+function _smartAllocItemsOnly(amount, frequency){
+  // Strategy A: 5-8 small items diversified
+  // Strategy B: 2-3 large premium items
+  return {
+    strategyA: { name:'Diversified', sub:'5-8 items across categories — lower risk', pools: [], items: { amount, mode:'diversified' }, freq:frequency, warn:'Items are riskier than pools on sale timing. 10%/month guaranteed minimum.' },
+    strategyB: { name:'Premium',     sub:'2-3 large stakes in premium items',          pools: [], items: { amount, mode:'concentrated' }, freq:frequency, warn:'Items are riskier than pools on sale timing. 10%/month guaranteed minimum.' },
+  };
+}
+
+/* ───────── STAGE 3: PROFIT MATH ───────── */
+
+/* Pool returns over N months */
+function _smartPoolProfit(amount, plan, months){
+  const p = SM_POOL[plan];
+  if(!p || !amount) return 0;
+  return amount * (p.monthly / 100) * months;
+}
+
+/* Item returns over N months — based on prompt: 15%/week expected, 10%/mo guaranteed min */
+function _smartItemProfit(amount, months){
+  if(!amount) return 0;
+  const totalDays = months * 30;
+  const cycles = totalDays / SM_ITEM_AVG.avgCycleDays;
+  // Expected return per cycle: ~15%/week × (cycleDays/7)
+  // But cycle is sale-event-based, so we cap at ~5 cycles/month (each takes 1-2 weeks)
+  // Realistic: per cycle = principal × (15% × cycleDays/7)
+  const REALISTIC_CAP = 6;  // max 6 cycles total (3 months of cycling)
+  const cappedCycles = Math.min(cycles, REALISTIC_CAP);
+  const perCycle = SM_ITEM_AVG.expectedWeekly * (SM_ITEM_AVG.avgCycleDays / 7);  // ~21.4% per cycle
+  return amount * (perCycle / 100) * cappedCycles;
+}
+
+/* Compound: reinvest each cycle, max 6 cycles, degrading rates */
+function _smartItemCompound(amount, months){
+  if(!amount) return 0;
+  const totalDays = months * 30;
+  const cycles = totalDays / SM_ITEM_AVG.avgCycleDays;
+  const REALISTIC_CAP = 6;
+  const fullCycles = Math.min(Math.floor(cycles), REALISTIC_CAP);
+  const partial = (Math.floor(cycles) < REALISTIC_CAP) ? (cycles - fullCycles) : 0;
+  const baseRatePerCycle = SM_ITEM_AVG.expectedWeekly * (SM_ITEM_AVG.avgCycleDays / 7);  // ~21.4%
+
+  let principal = amount;
+  let earned = 0;
+  for(let i = 0; i < fullCycles; i++){
+    let rate = baseRatePerCycle;
+    if(i === 1) rate = baseRatePerCycle - 3;
+    else if(i >= 2) rate = Math.max(baseRatePerCycle - 6, 12);
+    const e = principal * (rate / 100);
+    earned += e;
+    principal += e;
+  }
+  if(partial > 0){
+    const r = fullCycles === 0 ? baseRatePerCycle : (fullCycles === 1 ? baseRatePerCycle - 3 : Math.max(baseRatePerCycle - 6, 12));
+    earned += principal * (r / 100) * partial;
+  }
+  return earned;
+}
+
+/* Compute strategy projection: per-period, total, with-compound */
+function _smartProjectStrategy(strategy, frequency){
+  // Months horizon: depends on frequency choice
+  // daily → 1 month, weekly → 3 months, monthly → 6 months (typical user planning)
+  const months = frequency === 'daily' ? 1 : (frequency === 'weekly' ? 3 : 6);
+
+  let poolEarned = 0;
+  for(const p of (strategy.pools || [])){
+    poolEarned += _smartPoolProfit(p.amount, p.plan, months);
+  }
+  const itemEarned = _smartItemProfit(strategy.items.amount || 0, months);
+  const itemCompound = _smartItemCompound(strategy.items.amount || 0, months);
+
+  const total = poolEarned + itemEarned;
+  const totalCompound = poolEarned + itemCompound;
+
+  // Per-period earnings
+  let perPeriod = 0;
+  if(frequency === 'daily'){
+    // Sum of daily pool rates
+    for(const p of (strategy.pools || [])){
+      perPeriod += p.amount * (SM_POOL[p.plan].daily / 100);
+    }
+  } else if(frequency === 'weekly'){
+    for(const p of (strategy.pools || [])){
+      perPeriod += p.amount * (SM_POOL[p.plan].weekly / 100);
+    }
+  } else {
+    for(const p of (strategy.pools || [])){
+      perPeriod += p.amount * (SM_POOL[p.plan].monthly / 100);
+    }
+  }
+
+  return { months, perPeriod, total, totalCompound };
+}
+
+/* ───────── STAGE 3: RENDER ───────── */
+
+function _smartRenderStrategies(){
+  const s = window._smart;
+  const allocations = _smartBuildAllocations(s);
+  window._smartAllocations = allocations;
+
+  _smartRenderStrategyCard('A', allocations.strategyA, s);
+  _smartRenderStrategyCard('B', allocations.strategyB, s);
+}
+
+function _smartRenderStrategyCard(letter, strategy, state){
+  const proj = _smartProjectStrategy(strategy, state.frequency);
+  const monthsTxt = proj.months + (proj.months === 1 ? ' month' : ' months');
+
+  const fmt = v => '$' + Math.round(v).toLocaleString();
+
+  // Update months label
+  const monthsEl = document.getElementById(`smStrat${letter}MonthsLabel`);
+  if(monthsEl) monthsEl.textContent = monthsTxt;
+
+  // Update bars
+  const barsEl = document.getElementById(`smStrat${letter}Bars`);
+  if(barsEl){
+    const totalAmount = (strategy.pools || []).reduce((s,p) => s+p.amount, 0) + (strategy.items.amount || 0);
+    const poolPct = totalAmount > 0 ? Math.round(((strategy.pools || []).reduce((s,p) => s+p.amount, 0) / totalAmount) * 100) : 0;
+    const itemPct = 100 - poolPct;
+    let barsHTML = '';
+    if(poolPct > 0){
+      // Group pools by plan
+      const byPlan = {};
+      strategy.pools.forEach(p => { byPlan[p.plan] = (byPlan[p.plan]||0) + p.amount; });
+      Object.entries(byPlan).forEach(([plan, amt]) => {
+        const pct = Math.round((amt / totalAmount) * 100);
+        barsHTML += `<div class="sm-bar-row">
+          <div class="sm-bar-label">${plan}</div>
+          <div class="sm-bar"><div class="sm-bar-fill" style="width:${pct}%;background:var(--gold)"></div></div>
+          <div class="sm-bar-val">${pct}%</div>
+        </div>`;
+      });
+    }
+    if(itemPct > 0){
+      barsHTML += `<div class="sm-bar-row">
+        <div class="sm-bar-label">Items</div>
+        <div class="sm-bar"><div class="sm-bar-fill" style="width:${itemPct}%;background:var(--green)"></div></div>
+        <div class="sm-bar-val">${itemPct}%</div>
+      </div>`;
+    }
+    barsEl.innerHTML = barsHTML;
+  }
+
+  // Items list (Stage 4 will fill with real marketplace data)
+  _smartRenderItemsList(letter, strategy);
+
+  // Strategy sub-text & warning
+  const headEl = barsEl?.previousElementSibling;
+  // Update name & sub via DOM lookup
+  const card = document.querySelector(`[data-strat="${letter}"]`);
+  if(card){
+    const nameEl = card.querySelector('.sm-strategy-name');
+    const subEl = card.querySelector('.sm-strategy-sub');
+    if(nameEl) nameEl.textContent = strategy.name;
+    if(subEl) subEl.textContent = strategy.sub;
+  }
+
+  // Projections
+  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  const periodLabel = state.frequency === 'daily' ? 'Per day' : (state.frequency === 'weekly' ? 'Per week' : 'Per month');
+  // Update first projection label
+  const projCard = card?.querySelector('.sm-strategy-projection');
+  if(projCard){
+    const firstLabel = projCard.querySelector('.sm-proj-row:first-child span:first-child');
+    if(firstLabel) firstLabel.textContent = periodLabel;
+  }
+  setText(`smStrat${letter}Per`, '+' + fmt(proj.perPeriod));
+  setText(`smStrat${letter}Total`, '+' + fmt(proj.total));
+  setText(`smStrat${letter}Compound`, '+' + fmt(proj.totalCompound));
+
+  // Hide compound row if no items (no compound possible)
+  const compRow = document.getElementById(`smStrat${letter}Compound`)?.closest('.sm-proj-row');
+  if(compRow){
+    compRow.style.display = (strategy.items.amount > 0) ? '' : 'none';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 4: MARKETPLACE ITEMS
+═══════════════════════════════════════════════════════════ */
+
+window._smartMarketCache = null;
+window._smartItemsBasket = { A: null, B: null };
+
+async function _smartFetchMarketplace(){
+  if(window._smartMarketCache) return window._smartMarketCache;
+
+  // Try real API first; on failure fall back to existing ITEMS or sample data
+  try{
+    const res = await apiFetch('/api/marketplace?status=active');
+    if(res.ok){
+      const data = await res.json();
+      const items = (data.items || data) || [];
+      if(Array.isArray(items) && items.length > 0){
+        window._smartMarketCache = items.map(_smartNormalizeItem);
+        return window._smartMarketCache;
+      }
+    }
+  }catch(e){ /* fall through */ }
+
+  // Fallback 1: use existing ITEMS array (loaded by main dashboard)
+  if(typeof ITEMS !== 'undefined' && Array.isArray(ITEMS) && ITEMS.length > 0){
+    window._smartMarketCache = ITEMS.filter(i => (i.slots_available || 0) > 0).map(_smartNormalizeItem);
+    return window._smartMarketCache;
+  }
+
+  // Fallback 2: synthetic sample (for empty states)
+  window._smartMarketCache = _smartSampleItems();
+  return window._smartMarketCache;
+}
+
+function _smartNormalizeItem(i){
+  // Normalize different shapes (api/marketplace vs api/items) into consistent form
+  return {
+    id: i.id,
+    name: i.name || 'Item',
+    category: i.category || 'other',
+    price: Number(i.price || i.purchase_price || 0),
+    funded_percent: Number(i.funded_percent || 0),
+    available_amount: Number(i.available_amount || i.slots_available || 25),
+    expected_return: Number(i.expected_return || (i.ret && i.ret[1]) || 30),
+    days_to_sell: Number(i.days_to_sell || (i.days && i.days[1]) || 14),
+    image_url: i.image_url || '',
+    ico: i.ico || _smartCategoryIcon(i.category),
+  };
+}
+
+function _smartCategoryIcon(cat){
+  const map = { watches: '⌚', bags: '👜', sneakers: '👟', jewelry: '💍', fashion: '🧥', art: '🖼️' };
+  return map[cat] || '💎';
+}
+
+function _smartSampleItems(){
+  return [
+    { id: 901, name: 'Rolex Daytona',      category:'watches',  price: 24000, funded_percent: 65, available_amount: 1200, expected_return: 30, days_to_sell: 14, ico:'⌚' },
+    { id: 902, name: 'Hermès Birkin 25',   category:'bags',     price: 15000, funded_percent: 40, available_amount: 750,  expected_return: 28, days_to_sell: 21, ico:'👜' },
+    { id: 903, name: 'Patek Nautilus',     category:'watches',  price: 40000, funded_percent: 50, available_amount: 2000, expected_return: 32, days_to_sell: 14, ico:'⌚' },
+    { id: 904, name: 'Audemars Royal Oak', category:'watches',  price: 32000, funded_percent: 30, available_amount: 1600, expected_return: 30, days_to_sell: 18, ico:'⌚' },
+    { id: 905, name: 'Chrome Hearts Hood', category:'fashion',  price: 2800,  funded_percent: 70, available_amount: 280,  expected_return: 25, days_to_sell: 14, ico:'🧥' },
+    { id: 906, name: 'Jordan 1 Chicago',   category:'sneakers', price: 800,   funded_percent: 25, available_amount: 100,  expected_return: 22, days_to_sell: 14, ico:'👟' },
+    { id: 907, name: 'Cartier Love Ring',  category:'jewelry',  price: 9500,  funded_percent: 45, available_amount: 475,  expected_return: 26, days_to_sell: 21, ico:'💍' },
+    { id: 908, name: 'Off-White Tee',      category:'fashion',  price: 600,   funded_percent: 20, available_amount: 75,   expected_return: 22, days_to_sell: 14, ico:'🧥' },
+  ];
+}
+
+function _smartShuffle(arr){
+  const a = [...arr];
+  for(let i = a.length-1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* Build basket for a given strategy + amount */
+async function _smartBuildBasket(strategy, letter){
+  const items = await _smartFetchMarketplace();
+
+  if(!strategy.items.amount || items.length === 0){
+    return [];
+  }
+
+  const itemBudget = strategy.items.amount;
+  const mode = strategy.items.mode || (letter === 'A' ? 'diversified' : 'concentrated');
+
+  if(mode === 'diversified' || letter === 'A'){
+    // Pick 5-8 different categories, equal-ish split
+    const shuffled = _smartShuffle(items);
+    const seenCategories = new Set();
+    const picked = [];
+    for(const it of shuffled){
+      if(picked.length >= 8) break;
+      if(it.price < 25) continue;  // skip too cheap
+      if(seenCategories.has(it.category) && picked.length >= 5) continue;
+      seenCategories.add(it.category);
+      picked.push(it);
+    }
+    if(picked.length === 0) return [];
+
+    const target = Math.min(picked.length, Math.max(5, Math.min(8, picked.length)));
+    const finalPick = picked.slice(0, target);
+    const perItem = itemBudget / finalPick.length;
+    return finalPick.map(it => ({
+      ...it,
+      contribution: Math.round(perItem),
+      ownership_pct: ((perItem / it.price) * 100),
+    }));
+  } else {
+    // Concentrated: top 3 by price, weighted [50%, 30%, 20%]
+    const sorted = [...items].sort((a, b) => b.price - a.price);
+    const top = sorted.slice(0, 3);
+    if(top.length === 0) return [];
+    const weights = top.length === 3 ? [0.5, 0.3, 0.2] : top.length === 2 ? [0.6, 0.4] : [1.0];
+    return top.map((it, i) => ({
+      ...it,
+      contribution: Math.round(itemBudget * weights[i]),
+      ownership_pct: ((itemBudget * weights[i] / it.price) * 100),
+    }));
+  }
+}
+
+async function _smartRenderItemsList(letter, strategy){
+  const list = document.querySelector(`#smStrat${letter}Items .sm-strategy-items-list`);
+  if(!list) return;
+
+  // Items only allocations (no items.amount) → hide section
+  if(!strategy.items.amount || strategy.items.amount < 25){
+    list.innerHTML = '<div class="sm-empty-items">No items in this strategy.</div>';
+    window._smartItemsBasket[letter] = [];
+    return;
+  }
+
+  // If we don't have a basket cached for this letter, build one
+  if(!window._smartItemsBasket[letter]){
+    list.innerHTML = '<div class="sm-skeleton"></div><div class="sm-skeleton"></div><div class="sm-skeleton"></div>';
+    const basket = await _smartBuildBasket(strategy, letter);
+    window._smartItemsBasket[letter] = basket;
+  }
+
+  const basket = window._smartItemsBasket[letter];
+  if(!basket || basket.length === 0){
+    list.innerHTML = '<div class="sm-empty-items">No matching items found in marketplace.</div>';
+    return;
+  }
+
+  list.innerHTML = basket.map(it => `
+    <div class="sm-basket-item">
+      <span class="sm-basket-ic">${it.ico || '💎'}</span>
+      <span class="sm-basket-name">${it.name}</span>
+      <span class="sm-basket-amt">$${it.contribution.toLocaleString()}</span>
+      <span class="sm-basket-pct">${it.ownership_pct.toFixed(1)}%</span>
+    </div>
+  `).join('');
+}
+
+async function _smartShuffleItems(letter){
+  // Reset cache, re-build basket for this strategy
+  window._smartItemsBasket[letter] = null;
+  const allocations = window._smartAllocations;
+  if(!allocations) return;
+  const strategy = letter === 'A' ? allocations.strategyA : allocations.strategyB;
+  await _smartRenderItemsList(letter, strategy);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 5: API INTEGRATION (deposit + auto-purchase)
+   Uses existing endpoints with graceful fallback
+═══════════════════════════════════════════════════════════ */
+
+async function _smartConfirmPurchase(){
+  const s = window._smart;
+  const allocations = window._smartAllocations;
+  if(!allocations || !s.chosenStrategy){
+    alert('Strategy not selected. Please go back to step 5.');
+    return;
+  }
+
+  const strategy = s.chosenStrategy === 'A' ? allocations.strategyA : allocations.strategyB;
+  const basket = window._smartItemsBasket[s.chosenStrategy] || [];
+
+  // Show confirming UI
+  const next = document.getElementById('smBtnNext');
+  if(next){
+    next.disabled = true;
+    next.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-9-9"/></svg>&nbsp;PROCESSING...';
+  }
+
+  const userLogin = (typeof U !== 'undefined' && U.login) || sessionStorage.getItem('luxor_login');
+  const errors = [];
+
+  // 1. Create pool positions
+  for(const p of (strategy.pools || [])){
+    try{
+      const res = await apiFetch('/api/invest_pool', {
+        method: 'POST',
+        body: JSON.stringify({ user_login: userLogin, plan: p.plan, amount: p.amount }),
+      });
+      if(!res.ok){
+        const txt = await res.text();
+        errors.push(`Pool ${p.plan} $${p.amount}: ${txt.substring(0, 80)}`);
+      }
+    }catch(e){
+      errors.push(`Pool ${p.plan}: network error`);
+    }
+  }
+
+  // 2. Buy item fractions
+  for(const it of basket){
+    try{
+      const res = await apiFetch('/api/buy_fraction', {
+        method: 'POST',
+        body: JSON.stringify({ user_login: userLogin, item_id: it.id, amount: it.contribution }),
+      });
+      if(!res.ok){
+        const txt = await res.text();
+        errors.push(`Item ${it.name}: ${txt.substring(0, 80)}`);
+      }
+    }catch(e){
+      errors.push(`Item ${it.name}: network error`);
+    }
+  }
+
+  // 3. Telegram notification (best-effort)
+  try{
+    apiFetch('/api/admin/notify', {
+      method: 'POST',
+      body: JSON.stringify({
+        event: 'smart_invest_complete',
+        user_login: userLogin,
+        amount: s.amount,
+        strategy: s.chosenStrategy,
+        positions_count: (strategy.pools || []).length + basket.length,
+      }),
+    }).catch(()=>{});  // fire-and-forget
+  }catch(e){}
+
+  // Reset wizard state
+  _smartResetState();
+
+  // Notify user
+  if(errors.length === 0){
+    alert('✓ Strategy applied successfully!\n\nYour positions are now active. Check My Pools and My Items in the dashboard.');
+  } else {
+    alert('Strategy partially applied.\n\n' + errors.length + ' position(s) had issues:\n\n' + errors.slice(0,5).join('\n') + '\n\nPlease check My Pools / My Items and retry failed ones manually.');
+  }
+
+  // Refresh dashboard data and navigate home
+  try{ await loadPoolPositions(); }catch(e){}
+  try{ await loadMyItems(); }catch(e){}
+  try{ updateUI(); }catch(e){}
+  navTo('dash');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAGE 6: BONUS +5% + INVESTED/AVAILABLE BALANCE SPLIT
+═══════════════════════════════════════════════════════════ */
+
+/* Check if user is eligible for first-deposit +5% bonus */
+function _smartIsBonusEligible(amount){
+  // U is declared with const at module level — not on window
+  const u = (typeof U !== 'undefined') ? U : null;
+  if(!u) return false;
+  if(u.has_first_deposit_bonus === true) return false;
+  return amount >= 300;
+}
+
+/* Compute portfolio split: invested vs available */
+function _smartGetBalanceSplit(){
+  let invested = 0;
+  if(typeof state !== 'undefined'){
+    if(Array.isArray(state.positions)){
+      invested += state.positions.reduce((s,p) => s + (Number(p.amount || p.amount_usd) || 0), 0);
+    }
+    if(Array.isArray(state.myItems)){
+      invested += state.myItems
+        .filter(i => i.status === 'active')
+        .reduce((s,i) => s + (Number(i.invested) || 0), 0);
+    }
+  }
+  const available = (typeof state !== 'undefined' && state.wallet) ? Number(state.wallet) : 0;
+  return { invested, available };
+}
+
+/* Override the placeholder _smartRenderDeposit to handle bonus */
+function _smartRenderDeposit(){
+  const s = window._smart;
+  const fmt = v => '$' + Math.round(v).toLocaleString();
+  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  const setShow = (id, show) => { const el = document.getElementById(id); if(el) el.style.display = show ? '' : 'none'; };
+
+  setText('smDepAmount', fmt(s.amount || 0));
+
+  // From available balance
+  const split = _smartGetBalanceSplit();
+  const fromBalance = s.useExistingBalance && split.available > 0 ? Math.min(s.amount, split.available) : 0;
+  setShow('smDepFromBalanceRow', fromBalance > 0);
+  setText('smDepFromBalance', '-' + fmt(fromBalance));
+
+  // To deposit (after balance applied)
+  const toDeposit = (s.amount || 0) - fromBalance;
+  setText('smDepTotal', fmt(toDeposit));
+
+  // First-deposit bonus
+  const eligible = _smartIsBonusEligible(toDeposit);
+  const bonus = eligible ? toDeposit * 0.05 : 0;
+  setShow('smDepBonusRow', eligible);
+  setText('smDepBonus', '+' + fmt(bonus));
+
+  // Show "use balance" checkbox if user has available funds
+  const balOpt = document.getElementById('smBalanceOpt');
+  if(balOpt){
+    if(split.available >= 100){
+      balOpt.style.display = '';
+      const balAmt = document.getElementById('smBalanceAmount');
+      if(balAmt) balAmt.textContent = fmt(split.available);
+    } else {
+      balOpt.style.display = 'none';
+    }
+  }
+}
+
+/* Override _smartRenderFinal — list pools + items, with totals + bonus */
+function _smartRenderFinal(){
+  const s = window._smart;
+  const allocations = window._smartAllocations;
+  if(!allocations || !s.chosenStrategy) return;
+
+  const strategy = s.chosenStrategy === 'A' ? allocations.strategyA : allocations.strategyB;
+  const basket = window._smartItemsBasket[s.chosenStrategy] || [];
+
+  const fmt = v => '$' + Math.round(v).toLocaleString();
+  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  const setShow = (id, show) => { const el = document.getElementById(id); if(el) el.style.display = show ? '' : 'none'; };
+
+  // Build list
+  const listEl = document.getElementById('smFinalList');
+  if(listEl){
+    let html = '';
+    for(const p of (strategy.pools || [])){
+      const pool = SM_POOL[p.plan];
+      html += `<div class="sm-final-item">
+        <div class="sm-final-item-ic">${pool.ic}</div>
+        <div class="sm-final-item-info">
+          <div class="sm-final-item-n">${pool.label}</div>
+          <div class="sm-final-item-d">${pool.rate}%/${pool.period} · ${pool.exit}</div>
+        </div>
+        <div class="sm-final-item-v">${fmt(p.amount)}</div>
+      </div>`;
+    }
+    for(const it of basket){
+      html += `<div class="sm-final-item">
+        <div class="sm-final-item-ic">${it.ico || '💎'}</div>
+        <div class="sm-final-item-info">
+          <div class="sm-final-item-n">${it.name}</div>
+          <div class="sm-final-item-d">${it.ownership_pct.toFixed(1)}% share · expected +${it.expected_return}%</div>
+        </div>
+        <div class="sm-final-item-v">${fmt(it.contribution)}</div>
+      </div>`;
+    }
+    listEl.innerHTML = html || '<div class="sm-empty-items">No positions to confirm.</div>';
+  }
+
+  // Totals
+  setText('smFinalStratTotal', fmt(s.amount || 0));
+  const eligible = _smartIsBonusEligible(s.amount);
+  const bonus = eligible ? s.amount * 0.05 : 0;
+  setShow('smFinalBonusRow', eligible);
+  setText('smFinalBonus', '+' + fmt(bonus));
+  setText('smFinalGrand', fmt((s.amount || 0) + bonus));
+}
+
+console.log('[stage3-6] Smart Invest engine + items + API + bonus loaded');
+
+
+console.log('[stage2] Smart Invest wizard UI loaded (no calculations yet — Stage 3)');
 
 </script>
 </body>
