@@ -1393,7 +1393,7 @@ button{font-family:inherit}
 </div>
 
 <!-- GOLD -->
-<div class="pool-card gold hidden" id="poolTierGold">
+<div class="pool-card gold" id="poolTierGold">
 <div class="top">
 <div class="left">
 <div class="pop-tag">★ POPULAR</div>
@@ -1416,7 +1416,7 @@ button{font-family:inherit}
 </div>
 
 <!-- PLATINUM -->
-<div class="pool-card platinum hidden" id="poolTierPlatinum">
+<div class="pool-card platinum" id="poolTierPlatinum">
 <div class="top">
 <div class="left">
 <h3>MONTHLY RETURNS</h3>
@@ -1929,7 +1929,7 @@ button{font-family:inherit}
 </div>
 
 <!-- GOLD mobile -->
-<div class="pool-card gold hidden" id="poolTierGoldM">
+<div class="pool-card gold" id="poolTierGoldM">
 <div class="top">
 <div class="left">
 <div class="pop-tag">★ POPULAR</div>
@@ -1952,7 +1952,7 @@ button{font-family:inherit}
 </div>
 
 <!-- PLATINUM mobile -->
-<div class="pool-card platinum hidden" id="poolTierPlatinumM">
+<div class="pool-card platinum" id="poolTierPlatinumM">
 <div class="top">
 <div class="left">
 <h3 style="font-size:20px">MONTHLY RETURNS</h3>
@@ -2679,18 +2679,27 @@ function getItemEarnings(i){
 
 /* ═══ POOL TIER UI ═══ */
 function switchPoolTier(t, btnEl){
+  // Highlight the active tab
   document.querySelectorAll('[data-tier]').forEach(b => b.classList.toggle('active', b.dataset.tier === t));
-  ['Silver','Gold','Platinum'].forEach(name => {
-    const el = document.getElementById('poolTier' + name);
-    if(el) el.classList.toggle('hidden', name.toLowerCase() !== t);
-  });
+  // Scroll smoothly to the chosen card (all 3 are visible now)
+  const target = document.getElementById('poolTier' + t.charAt(0).toUpperCase() + t.slice(1));
+  if(target){
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Brief flash to draw attention
+    target.style.transition = 'box-shadow .4s';
+    target.style.boxShadow = '0 0 0 2px var(--gold)';
+    setTimeout(() => { target.style.boxShadow = ''; }, 1200);
+  }
 }
 function switchPoolTierM(t, btnEl){
   document.querySelectorAll('[data-tier-m]').forEach(b => b.classList.toggle('active', b.dataset.tierM === t));
-  ['Silver','Gold','Platinum'].forEach(name => {
-    const el = document.getElementById('poolTier' + name + 'M');
-    if(el) el.classList.toggle('hidden', name.toLowerCase() !== t);
-  });
+  const target = document.getElementById('poolTier' + t.charAt(0).toUpperCase() + t.slice(1) + 'M');
+  if(target){
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    target.style.transition = 'box-shadow .4s';
+    target.style.boxShadow = '0 0 0 2px var(--gold)';
+    setTimeout(() => { target.style.boxShadow = ''; }, 1200);
+  }
 }
 
 /* ═══ POOL SLIDERS — real calc ═══ */
@@ -7605,23 +7614,36 @@ async function _smartShuffleItems(letter){
 async function _smartConfirmPurchase(){
   const s = window._smart;
   const allocations = window._smartAllocations;
+
+  console.log('[Smart Invest] === CONFIRM PURCHASE STARTED ===');
+  console.log('[Smart Invest] State:', JSON.parse(JSON.stringify(s || {})));
+  console.log('[Smart Invest] Allocations:', allocations);
+
   if(!allocations || !s.chosenStrategy){
+    console.error('[Smart Invest] Missing strategy or allocations');
     showToast('error', 'Strategy missing', 'Please go back to step 5 and select a strategy.');
     return;
   }
 
   // Validate balance one more time before going through with the purchase.
-  // If user used 'balance' payment method, ensure their wallet still covers it.
   const split = _smartGetBalanceSplit();
-  const totalNeeded = s.totalNeeded || s.amount || 0;
+  const totalNeeded = s.amount || 0;
   const fromBalance = s.fromBalance || 0;
-  if(s.paymentMethod === 'balance' && split.available < fromBalance){
+  const toDeposit = s.toDeposit !== undefined ? s.toDeposit : (totalNeeded - fromBalance);
+
+  console.log('[Smart Invest] Balance check:', { available: split.available, fromBalance, toDeposit, totalNeeded });
+
+  if(fromBalance > 0 && split.available < fromBalance){
+    console.error('[Smart Invest] Insufficient balance: have', split.available, 'need', fromBalance);
     showToast('error', 'Insufficient balance', 'Your wallet balance changed. Please refresh and try again.');
     return;
   }
 
   const strategy = s.chosenStrategy === 'A' ? allocations.strategyA : allocations.strategyB;
   const basket = window._smartItemsBasket[s.chosenStrategy] || [];
+
+  console.log('[Smart Invest] Strategy', s.chosenStrategy, ':', strategy);
+  console.log('[Smart Invest] Item basket:', basket);
 
   // Show confirming UI
   const next = document.getElementById('smBtnNext');
@@ -7631,39 +7653,64 @@ async function _smartConfirmPurchase(){
   }
 
   const userLogin = (typeof U !== 'undefined' && U.login) || sessionStorage.getItem('luxor_login');
+  console.log('[Smart Invest] User login:', userLogin);
+
   const errors = [];
+  const successes = { pools: [], items: [] };
 
   // 1. Create pool positions
   for(const p of (strategy.pools || [])){
+    const payload = { user_login: userLogin, plan: p.plan, amount: p.amount };
+    console.log('[Smart Invest] → POST /api/invest_pool', payload);
     try{
       const res = await apiFetch('/api/invest_pool', {
         method: 'POST',
-        body: JSON.stringify({ user_login: userLogin, plan: p.plan, amount: p.amount }),
+        body: JSON.stringify(payload),
       });
+      console.log('[Smart Invest]   Response status:', res.status);
       if(!res.ok){
         const txt = await res.text();
-        errors.push(`Pool ${p.plan} $${p.amount}: ${txt.substring(0, 80)}`);
+        console.error('[Smart Invest]   FAILED:', txt);
+        errors.push(`Pool ${p.plan} $${p.amount}: ${(txt || 'HTTP ' + res.status).substring(0, 100)}`);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        console.log('[Smart Invest]   OK:', data);
+        successes.pools.push({ plan: p.plan, amount: p.amount });
       }
     }catch(e){
-      errors.push(`Pool ${p.plan}: network error`);
+      console.error('[Smart Invest]   Network error:', e);
+      errors.push(`Pool ${p.plan}: ${e.message || 'network error'}`);
     }
   }
 
   // 2. Buy item fractions
   for(const it of basket){
+    const payload = { user_login: userLogin, item_id: it.id, amount: it.contribution };
+    console.log('[Smart Invest] → POST /api/buy_fraction', payload);
     try{
       const res = await apiFetch('/api/buy_fraction', {
         method: 'POST',
-        body: JSON.stringify({ user_login: userLogin, item_id: it.id, amount: it.contribution }),
+        body: JSON.stringify(payload),
       });
+      console.log('[Smart Invest]   Response status:', res.status);
       if(!res.ok){
         const txt = await res.text();
-        errors.push(`Item ${it.name}: ${txt.substring(0, 80)}`);
+        console.error('[Smart Invest]   FAILED:', txt);
+        errors.push(`Item ${it.name}: ${(txt || 'HTTP ' + res.status).substring(0, 100)}`);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        console.log('[Smart Invest]   OK:', data);
+        successes.items.push({ name: it.name, amount: it.contribution });
       }
     }catch(e){
-      errors.push(`Item ${it.name}: network error`);
+      console.error('[Smart Invest]   Network error:', e);
+      errors.push(`Item ${it.name}: ${e.message || 'network error'}`);
     }
   }
+
+  console.log('[Smart Invest] === RESULT ===');
+  console.log('[Smart Invest] Successes:', successes);
+  console.log('[Smart Invest] Errors:', errors);
 
   // 3. Telegram notification (best-effort)
   try{
@@ -7674,39 +7721,57 @@ async function _smartConfirmPurchase(){
         user_login: userLogin,
         amount: s.amount,
         strategy: s.chosenStrategy,
-        positions_count: (strategy.pools || []).length + basket.length,
+        successes_pools: successes.pools.length,
+        successes_items: successes.items.length,
+        errors_count: errors.length,
       }),
     }).catch(()=>{});
   }catch(e){}
 
-  // Reset wizard state
-  _smartResetState();
-
-  // Notify user
+  // Notify user with detailed errors
   if(errors.length === 0){
+    _smartResetState();
     showToast('success', 'Strategy applied!', 'Your positions are now active. Check My Pools and My Items.', 5000);
+    try{ await loadPoolPositions(); }catch(e){}
+    try{ await loadMyItems(); }catch(e){}
+    try{ updateUI(); }catch(e){}
+    navTo('dash');
+  } else if(successes.pools.length === 0 && successes.items.length === 0){
+    // ALL failed — show detailed error, keep wizard open so user can see what's wrong
+    const errorList = errors.slice(0, 3).map(e => '• ' + e).join('<br>');
+    showToast('error', 'Purchase failed', 'Nothing was bought. Check console for details:<br>' + errorList, 10000);
+    // Restore button so user can retry
+    if(next){
+      next.disabled = false;
+      next.innerHTML = 'CONFIRM PURCHASE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    }
   } else {
-    showToast('warn', 'Partially applied', errors.length + ' position(s) had issues. Check My Pools / My Items and retry manually.', 6000);
+    // Partial success
+    const errorList = errors.slice(0, 3).map(e => '• ' + e).join('<br>');
+    showToast('warn', 'Partially applied', `${successes.pools.length + successes.items.length} succeeded, ${errors.length} failed:<br>${errorList}`, 8000);
+    _smartResetState();
+    try{ await loadPoolPositions(); }catch(e){}
+    try{ await loadMyItems(); }catch(e){}
+    try{ updateUI(); }catch(e){}
+    navTo('dash');
   }
-
-  // Refresh dashboard data and navigate home
-  try{ await loadPoolPositions(); }catch(e){}
-  try{ await loadMyItems(); }catch(e){}
-  try{ updateUI(); }catch(e){}
-  navTo('dash');
 }
 
 /* ═══════════════════════════════════════════════════════════
    STAGE 6: BONUS +5% + INVESTED/AVAILABLE BALANCE SPLIT
 ═══════════════════════════════════════════════════════════ */
 
-/* Check if user is eligible for first-deposit +5% bonus */
-function _smartIsBonusEligible(amount){
-  // U is declared with const at module level — not on window
+/* Check if user is eligible for first-deposit +5% bonus.
+   Bonus rules (per Greg's spec):
+   - Only NEW users (has_first_deposit_bonus === false)
+   - Only when amount being deposited (NEW money) is >= $300
+   - NOT applicable when user just spends their existing balance */
+function _smartIsBonusEligible(newDepositAmount){
   const u = (typeof U !== 'undefined') ? U : null;
   if(!u) return false;
   if(u.has_first_deposit_bonus === true) return false;
-  return amount >= 300;
+  // Must be NEW money coming in, at least $300
+  return (newDepositAmount || 0) >= 300;
 }
 
 /* Compute portfolio split: invested vs available */
@@ -7855,13 +7920,25 @@ function _smartRenderFinal(){
     listEl.innerHTML = html || '<div class="sm-empty-items">No positions to confirm.</div>';
   }
 
-  // Totals
-  setText('smFinalStratTotal', fmt(s.amount || 0));
-  const eligible = _smartIsBonusEligible(s.amount);
-  const bonus = eligible ? s.amount * 0.05 : 0;
+  // Totals — bonus applies ONLY to new money (toDeposit), not to balance spending
+  const totalAmount = s.amount || 0;
+  const fromBalance = s.fromBalance || 0;
+  const toDeposit = s.toDeposit !== undefined ? s.toDeposit : (totalAmount - fromBalance);
+
+  setText('smFinalStratTotal', fmt(totalAmount));
+
+  const eligible = _smartIsBonusEligible(toDeposit);
+  const bonus = eligible ? toDeposit * 0.05 : 0;
   setShow('smFinalBonusRow', eligible);
   setText('smFinalBonus', '+' + fmt(bonus));
-  setText('smFinalGrand', fmt((s.amount || 0) + bonus));
+  setText('smFinalGrand', fmt(totalAmount + bonus));
+
+  // If user uses balance — show informative line
+  const summaryRow = document.getElementById('smFinalFromBalanceRow');
+  if(summaryRow){
+    summaryRow.style.display = fromBalance > 0 ? '' : 'none';
+    setText('smFinalFromBalance', '-' + fmt(fromBalance));
+  }
 }
 
 console.log('[stage3-6] Smart Invest engine + items + API + bonus loaded');
