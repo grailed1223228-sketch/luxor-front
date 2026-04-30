@@ -770,10 +770,13 @@ button{font-family:inherit}
 
 /* Pay methods grid (deposit modal) */
 .pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.pay-m{padding:12px 6px;background:var(--bg2);border:1px solid var(--bd);text-align:center;cursor:pointer;border-radius:8px;transition:all .15s;font-size:11px;font-weight:600;color:var(--t2)}
-.pay-m:hover{border-color:var(--gold)}
+.pay-m{padding:12px 8px;background:var(--bg2);border:1px solid var(--bd);text-align:center;cursor:pointer;border-radius:8px;transition:all .15s;font-size:11px;font-weight:600;color:var(--t2)}
+.pay-m:hover{border-color:var(--gold);transform:translateY(-1px)}
 .pay-m.selected{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-d)}
 .pay-m .symbol{font-size:18px;display:block;margin-bottom:3px;color:var(--gold)}
+.pay-m .coin-icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:0 auto 6px}
+.pay-m .coin-icon svg{width:32px;height:32px;display:block}
+.pay-m .coin-name{font-size:12px;color:var(--t);margin-bottom:2px;font-weight:700}
 .pay-m .net-name{font-size:8px;color:var(--t3);margin-top:2px}
 
 /* ═══════════════════════════════════════════════════════════
@@ -1045,6 +1048,35 @@ button{font-family:inherit}
 /* "NEW" badge in sidebar */
 .nav-new{display:inline-block;font-family:'Bebas Neue',sans-serif;font-size:8px;letter-spacing:1.5px;background:var(--gold);color:#0a0a0a;padding:1px 5px;border-radius:3px;font-weight:700;margin-left:6px;vertical-align:1px}
 
+/* === SUPPORT (chat) === */
+.d-side .nav-unread{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 6px;background:var(--red);color:#fff;border-radius:9px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;margin-left:auto}
+.support-chat{max-width:760px;background:var(--card);border:1px solid var(--bd);border-radius:14px;height:600px;overflow:hidden;position:relative}
+.support-chat .chat-header{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;background:var(--bg2);height:64px;box-sizing:border-box}
+.support-chat .chat-header .h-l{display:flex;flex-direction:column;gap:2px}
+.support-chat .chat-header .h-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:var(--t)}
+.support-chat .chat-header .h-sub{font-size:11px;color:var(--t3)}
+.support-chat .chat-header .h-sub .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:1px}
+.support-chat .chat-header .h-close{background:transparent;border:1px solid var(--bd2);color:var(--t3);padding:6px 12px;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1px;cursor:pointer;font-weight:600}
+.support-chat .chat-header .h-close:hover{border-color:var(--red);color:var(--red)}
+.support-chat .chat-messages{position:absolute;top:64px;left:0;right:0;bottom:71px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;background:var(--bg);box-sizing:border-box}
+.support-chat .empty-chat{margin:auto;text-align:center;color:var(--t3);font-size:13px;line-height:1.6;padding:30px}
+.support-chat .empty-chat .ic{font-size:36px;margin-bottom:10px;opacity:.4}
+.support-chat .msg{max-width:75%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;word-wrap:break-word;position:relative}
+.support-chat .msg.user{align-self:flex-end;background:var(--gold);color:#0a0a0a;border-bottom-right-radius:4px}
+.support-chat .msg.admin{align-self:flex-start;background:var(--bg2);color:var(--t);border:1px solid var(--bd2);border-bottom-left-radius:4px}
+.support-chat .msg .time{font-size:9px;color:rgba(0,0,0,.5);margin-top:4px;font-family:'Space Mono',monospace}
+.support-chat .msg.admin .time{color:var(--t3)}
+.support-chat .chat-input{position:absolute;bottom:0;left:0;right:0;padding:14px 18px;border-top:1px solid var(--bd);display:flex;gap:10px;background:var(--bg2);align-items:flex-end;height:71px;box-sizing:border-box}
+.support-chat .chat-input textarea{flex:1;background:var(--bg);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;color:var(--t);font-size:13px;font-family:inherit;resize:none;min-height:42px;max-height:120px;line-height:1.4;box-sizing:border-box}
+.support-chat .chat-input textarea:focus{outline:none;border-color:var(--gold)}
+.support-chat .chat-input .send-btn{background:var(--gold);color:#0a0a0a;border:none;padding:0 20px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;cursor:pointer;font-weight:700;height:42px;flex-shrink:0}
+.support-chat .chat-input .send-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Mobile chat */
+@media(max-width:768px){
+  .support-chat{height:calc(100vh - 130px);border-radius:0;border-left:none;border-right:none}
+}
+
 /* Mobile responsive */
 @media (max-width:720px){
   .sm-strategies{grid-template-columns:1fr}
@@ -1086,6 +1118,7 @@ button{font-family:inherit}
 /* Balance split (Invested / Available) */
 .bal-split{margin:14px 0 16px;padding:12px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px}
 .bal-split-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bal-split-row:has(.bal-split-pending:not([style*="display: none"])){grid-template-columns:1fr 1fr 1fr}
 .bal-split-col{position:relative;padding-right:14px}
 .bal-split-col + .bal-split-col{border-left:1px solid var(--bd);padding-left:14px;padding-right:0}
 .bal-split-l{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.8px;color:var(--t3);margin-bottom:3px}
@@ -1171,6 +1204,7 @@ button{font-family:inherit}
 <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21 L4 13 A5 5 0 0 1 12 7 A5 5 0 0 1 20 13 Z"/></symbol>
 <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12 H5 M11 6 L5 12 L11 18"/></symbol>
 <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
 <symbol id="i-tx" viewBox="0 0 24 24"><path d="M3 7 H17 L21 11 L17 15 H3 M21 11 H7 M3 19 H17 L21 15"/></symbol>
 <symbol id="i-logout" viewBox="0 0 24 24"><path d="M16 17 L21 12 L16 7 M21 12 H9 M9 21 H4 V3 H9"/></symbol>
 <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9 H15 M9 12 H15 M9 15 H15"/></symbol>
@@ -1203,6 +1237,7 @@ button{font-family:inherit}
 <a class="nav-item" data-target="favs"><svg class="lx"><use href="#i-fav"/></svg>Favorites</a>
 <a class="nav-item" data-target="trade"><svg class="lx"><use href="#i-trade"/></svg>Secondary Market</a>
 <a class="nav-item" data-target="referral"><svg class="lx"><use href="#i-ref"/></svg>Referral Program</a>
+<a class="nav-item" data-target="support"><svg class="lx"><use href="#i-chat"/></svg>Support <span class="nav-unread" id="dSupportBadge" style="display:none">0</span></a>
 <a class="nav-item" data-target="settings"><svg class="lx"><use href="#i-settings"/></svg>Settings</a>
 
 <div class="nav-more">
@@ -1245,7 +1280,7 @@ button{font-family:inherit}
 <div class="a" id="dBalAmount">$0</div>
 <div class="delta" id="dBalDelta">▲ +$0.00 (+0.00%) all time</div>
 <div class="bal-split" id="dBalSplit">
-  <div class="bal-split-row">
+  <div class="bal-split-row" id="dBalSplitRow">
     <div class="bal-split-col">
       <div class="bal-split-l">INVESTED</div>
       <div class="bal-split-v" id="dInvAmt">$0</div>
@@ -1255,6 +1290,11 @@ button{font-family:inherit}
       <div class="bal-split-l">AVAILABLE</div>
       <div class="bal-split-v" id="dAvailAmt">$0</div>
       <div class="bal-split-d">ready to invest or withdraw</div>
+    </div>
+    <div class="bal-split-col bal-split-pending" id="dPendingCol" style="display:none">
+      <div class="bal-split-l">PENDING</div>
+      <div class="bal-split-v" id="dPendAmt" style="color:#e0a020">$0</div>
+      <div class="bal-split-d" id="dPendDesc">processing</div>
     </div>
   </div>
 </div>
@@ -1638,6 +1678,34 @@ button{font-family:inherit}
 </div>
 </div>
 
+<!-- ──────── DESKTOP: SUPPORT ──────── -->
+<div class="d-screen" id="ds-support">
+<div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>SUPPORT</b></div>
+<h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:6px">Support</h2>
+<p style="font-size:13px;color:var(--t3);margin-bottom:18px">Got a question? Write us — we usually reply within 1–2 hours.</p>
+
+<div class="support-chat">
+  <div class="chat-header">
+    <div class="h-l">
+      <div class="h-title">LUXOR SUPPORT</div>
+      <div class="h-sub"><span class="dot"></span>Online · typically replies within 1h</div>
+    </div>
+    <button class="h-close" onclick="supportCloseConversation()">CLOSE CONVERSATION</button>
+  </div>
+  <div class="chat-messages" id="dSupportMessages">
+    <div class="empty-chat">
+      <div class="ic">💬</div>
+      <div>No messages yet.</div>
+      <div style="margin-top:6px;opacity:.7">Start the conversation by typing below.</div>
+    </div>
+  </div>
+  <div class="chat-input">
+    <textarea id="dSupportInput" placeholder="Type your message..." rows="1" maxlength="4000" oninput="supportAutoresize(this)"></textarea>
+    <button class="send-btn" id="dSupportSend" onclick="supportSendMessage()">SEND</button>
+  </div>
+</div>
+</div>
+
 <!-- ──────── DESKTOP: SETTINGS ──────── -->
 <div class="d-screen" id="ds-settings">
 <div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>SETTINGS</b></div>
@@ -1810,6 +1878,10 @@ button{font-family:inherit}
     <div class="bal-split-col">
       <div class="bal-split-l">AVAILABLE</div>
       <div class="bal-split-v" id="mAvailAmt">$0</div>
+    </div>
+    <div class="bal-split-col bal-split-pending" id="mPendingCol" style="display:none">
+      <div class="bal-split-l">PENDING</div>
+      <div class="bal-split-v" id="mPendAmt" style="color:#e0a020">$0</div>
     </div>
   </div>
 </div>
@@ -2144,6 +2216,35 @@ button{font-family:inherit}
 <div class="d-panel">
 <div class="head"><h5>YOUR REFERRALS</h5></div>
 <div id="mRefListContainer"><div class="empty-state">No referrals yet.</div></div>
+</div>
+
+</div>
+</div>
+
+<!-- ──────── MOBILE: SUPPORT ──────── -->
+<div class="m-screen" id="ms-support">
+<div class="m-content">
+<div class="m-back" onclick="navTo('more')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl">SUPPORT</span><span style="width:18px"></span></div>
+
+<div class="support-chat" style="height:calc(100vh - 130px);min-height:auto">
+  <div class="chat-header">
+    <div class="h-l">
+      <div class="h-title">LUXOR SUPPORT</div>
+      <div class="h-sub"><span class="dot"></span>Online</div>
+    </div>
+    <button class="h-close" onclick="supportCloseConversation()">CLOSE</button>
+  </div>
+  <div class="chat-messages" id="mSupportMessages">
+    <div class="empty-chat">
+      <div class="ic">💬</div>
+      <div>No messages yet.</div>
+      <div style="margin-top:6px;opacity:.7">Start the conversation.</div>
+    </div>
+  </div>
+  <div class="chat-input">
+    <textarea id="mSupportInput" placeholder="Type your message..." rows="1" maxlength="4000" oninput="supportAutoresize(this)"></textarea>
+    <button class="send-btn" id="mSupportSend" onclick="supportSendMessage()">SEND</button>
+  </div>
 </div>
 
 </div>
@@ -2560,6 +2661,296 @@ function _favResolve(favEntry){
   try{ if(typeof renderMyItems === 'function') renderMyItems(); }catch(e){}
   console.log('[balance] initial load complete');
 })();
+
+/* ═══ BACKGROUND POLLING — refresh balance every 30s ═══
+   Detects changes (admin actions, deposits cleared, withdrawals approved)
+   and shows toast notifications to user. */
+window._lastWallet = null;
+window._lastTxCount = 0;
+
+async function _luxorPollBalance(){
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin) return;
+
+  // 1. Refresh user data (wallet)
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin));
+    if(r.ok){
+      const data = await r.json();
+      if(data && data.ok && data.user){
+        const newWallet = Number(data.user.wallet_balance) || 0;
+        const oldWallet = window._lastWallet;
+        if(oldWallet !== null && newWallet !== oldWallet){
+          const diff = newWallet - oldWallet;
+          const fmt = (typeof fmtMoney === 'function') ? fmtMoney : v => '$' + Math.round(v).toLocaleString();
+          if(diff > 0){
+            try{ showToast('success', 'Balance updated', '<b style="color:var(--green)">+' + fmt(diff) + '</b> credited to your wallet.'); }catch(e){}
+          } else if(diff < 0){
+            try{ showToast('warn', 'Balance updated', fmt(diff) + ' deducted from wallet.'); }catch(e){}
+          }
+        }
+        state.wallet = newWallet;
+        window._lastWallet = newWallet;
+        U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
+      }
+    }
+  }catch(e){ console.warn('[poll-balance] user error:', e); }
+
+  // 2. Refresh transactions (detect new ones)
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin) + '/transactions');
+    if(r.ok){
+      const txs = await r.json();
+      if(Array.isArray(txs) && txs.length > window._lastTxCount && window._lastTxCount > 0){
+        // New tx appeared — refresh display
+        try{ await loadTransactionsFromBackend(); }catch(e){}
+      }
+      window._lastTxCount = Array.isArray(txs) ? txs.length : 0;
+    }
+  }catch(e){}
+
+  // 3. Refresh positions silently
+  try{ await loadPoolPositions(); }catch(e){}
+  try{ await loadMyItems(); }catch(e){}
+
+  // 4. Update UI
+  try{ updateUI(); }catch(e){}
+  try{ if(typeof _luxorUpdateBalanceSplit === 'function') _luxorUpdateBalanceSplit(); }catch(e){}
+  try{ if(typeof renderMyItems === 'function') renderMyItems(); }catch(e){}
+}
+
+// Start polling 5 seconds after initial load (give first load time to set _lastWallet)
+setTimeout(() => {
+  window._lastWallet = state.wallet || 0;
+  window._lastTxCount = (state.txs || []).length;
+  setInterval(() => {
+    _luxorPollBalance().catch(e => console.warn('[poll-balance] failed:', e));
+    _luxorPollSupportUnread().catch(e => {});
+  }, 30000); // every 30s
+  console.log('[balance] polling started (30s interval)');
+}, 5000);
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SUPPORT (chat with admin) — Stage 12
+   Endpoints:
+     POST /api/support/send                — send message
+     GET  /api/support/messages            — get history (auto marks as read)
+     GET  /api/support/unread-count        — count for bell badge
+     POST /api/support/close               — clear conversation (user-side only)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+window._support = {
+  lastUnread: 0,
+  messages: [],
+  initialPollDone: false,
+};
+
+async function _luxorPollSupportUnread(){
+  const userLogin = (typeof U !== 'undefined' && U.login) || sessionStorage.getItem('luxor_login');
+  if(!userLogin) return;
+  try{
+    const r = await apiFetch('/api/support/unread-count');
+    if(!r.ok) return;
+    const data = await r.json();
+    if(!data || !data.ok) return;
+    const newUnread = Number(data.unread) || 0;
+
+    // Update badges
+    ['dSupportBadge'].forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(newUnread > 0){
+        el.textContent = newUnread > 99 ? '99+' : String(newUnread);
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+
+    // Toast on first detection of new messages (not initial load)
+    if(window._support.initialPollDone && newUnread > window._support.lastUnread){
+      const diff = newUnread - window._support.lastUnread;
+      try{
+        showToast('success', 'New message from support',
+          `You have <b>${diff}</b> new ${diff === 1 ? 'message' : 'messages'}. <a onclick="navTo(\'support\')" style="color:var(--gold);text-decoration:underline;cursor:pointer">Open chat</a>`,
+          7000);
+      }catch(e){}
+    }
+    window._support.lastUnread = newUnread;
+    window._support.initialPollDone = true;
+  }catch(e){
+    // silent
+  }
+}
+
+async function supportLoadMessages(){
+  const userLogin = (typeof U !== 'undefined' && U.login) || sessionStorage.getItem('luxor_login');
+  if(!userLogin) return;
+  try{
+    const r = await apiFetch('/api/support/messages');
+    if(!r.ok) return;
+    const data = await r.json();
+    if(!data || !data.ok) return;
+    window._support.messages = data.messages || [];
+    supportRenderMessages();
+    // Reset unread badge after viewing
+    window._support.lastUnread = 0;
+    ['dSupportBadge'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = 'none';
+    });
+  }catch(e){
+    console.warn('[support] load failed:', e);
+  }
+}
+
+function supportRenderMessages(){
+  const msgs = window._support.messages || [];
+  const html = msgs.length === 0
+    ? `<div class="empty-chat"><div class="ic">💬</div><div>No messages yet.</div><div style="margin-top:6px;opacity:.7">Start the conversation by typing below.</div></div>`
+    : msgs.map(m => {
+        const time = m.created_at ? new Date(m.created_at).toLocaleString() : '';
+        const cls = m.sender === 'admin' ? 'admin' : 'user';
+        const text = (m.text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        return `<div class="msg ${cls}">${text}<div class="time">${time}</div></div>`;
+      }).join('');
+
+  ['dSupportMessages','mSupportMessages'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){
+      el.innerHTML = html;
+      // Scroll to bottom
+      el.scrollTop = el.scrollHeight;
+    }
+  });
+}
+
+async function supportSendMessage(){
+  // Get text from whichever input is visible
+  const dInp = document.getElementById('dSupportInput');
+  const mInp = document.getElementById('mSupportInput');
+  const text = (dInp?.value || mInp?.value || '').trim();
+  if(!text){
+    try{ showToast('warn', 'Empty message', 'Type something before sending.'); }catch(e){}
+    return;
+  }
+  if(text.length > 4000){
+    try{ showToast('error', 'Too long', 'Maximum 4000 characters per message.'); }catch(e){}
+    return;
+  }
+
+  // Disable button while sending
+  const dBtn = document.getElementById('dSupportSend');
+  const mBtn = document.getElementById('mSupportSend');
+  [dBtn, mBtn].forEach(b => { if(b){ b.disabled = true; b.textContent = '...'; } });
+
+  // Optimistic UI — show message immediately
+  window._support.messages.push({
+    id: 'tmp-' + Date.now(),
+    sender: 'user',
+    text: text,
+    created_at: new Date().toISOString(),
+  });
+  supportRenderMessages();
+
+  try{
+    const r = await apiFetch('/api/support/send', {
+      method: 'POST',
+      body: JSON.stringify({ text: text }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if(!r.ok || !data.ok){
+      // Remove optimistic message
+      window._support.messages = window._support.messages.filter(m => !String(m.id).startsWith('tmp-'));
+      supportRenderMessages();
+      const errMap = {
+        'empty_message': 'Cannot send empty message.',
+        'message_too_long': 'Maximum 4000 characters per message.',
+      };
+      const errCode = (data && data.error) || (data && data.detail && data.detail.error) || 'unknown';
+      try{ showToast('error', 'Failed to send', errMap[errCode] || 'Please try again.'); }catch(e){}
+      return;
+    }
+    // Clear inputs
+    if(dInp) dInp.value = '';
+    if(mInp) mInp.value = '';
+    if(dInp) dInp.style.height = '42px';
+    if(mInp) mInp.style.height = '42px';
+    // Reload from server (replaces optimistic with real)
+    await supportLoadMessages();
+  }catch(e){
+    console.error('[support] send error:', e);
+    // Remove optimistic message
+    window._support.messages = window._support.messages.filter(m => !String(m.id).startsWith('tmp-'));
+    supportRenderMessages();
+    try{ showToast('error', 'Network error', 'Could not send. Check connection.'); }catch(e2){}
+  } finally {
+    [dBtn, mBtn].forEach(b => { if(b){ b.disabled = false; b.textContent = 'SEND'; } });
+  }
+}
+
+async function supportCloseConversation(){
+  if(typeof confirmAction === 'function'){
+    const ok = await confirmAction({
+      title: 'Close conversation?',
+      msg: 'Your chat history will be cleared from your view. Support will still see the full history if you contact them again.',
+      okText: 'CLOSE',
+      cancelText: 'CANCEL',
+    });
+    if(!ok) return;
+  } else {
+    if(!confirm('Close conversation? Chat will be cleared from your view.')) return;
+  }
+
+  try{
+    const r = await apiFetch('/api/support/close', { method: 'POST' });
+    const data = await r.json().catch(() => ({}));
+    if(!r.ok || !data.ok){
+      try{ showToast('error', 'Failed', 'Could not close conversation.'); }catch(e){}
+      return;
+    }
+    window._support.messages = [];
+    supportRenderMessages();
+    try{ showToast('success', 'Conversation closed', 'Your chat history is cleared.'); }catch(e){}
+  }catch(e){
+    console.error('[support] close error:', e);
+    try{ showToast('error', 'Network error', 'Could not close. Try again.'); }catch(e2){}
+  }
+}
+
+function supportAutoresize(el){
+  if(!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// Hook into navTo to load messages when entering Support screen
+(function _supportHookNav(){
+  if(typeof navTo !== 'function') return;
+  const _origNav = navTo;
+  window.navTo = function(target){
+    _origNav.apply(this, arguments);
+    if(target === 'support'){
+      try{ supportLoadMessages(); }catch(e){}
+    }
+  };
+})();
+
+// Send on Enter (Shift+Enter = newline)
+['dSupportInput', 'mSupportInput'].forEach(id => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      supportSendMessage();
+    }
+  });
+});
+
+console.log('[stage12] Support chat loaded');
+
 
 async function loadTransactionsFromBackend(){
   const userLogin = U.login || sessionStorage.getItem('luxor_login');
@@ -4506,11 +4897,31 @@ function openProfitCalculator(){
 window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
 
 const COIN_META = {
-  'USDT-TRC20': { name:'USDT', network:'TRON (TRC20)', sym:'₮', warn:'TRON network only' },
-  'USDT-ERC20': { name:'USDT', network:'Ethereum (ERC20)', sym:'₮', warn:'Ethereum network only' },
-  'BTC':        { name:'Bitcoin', network:'Bitcoin', sym:'₿', warn:'Bitcoin network only' },
-  'ETH':        { name:'Ethereum', network:'Ethereum (ERC20)', sym:'Ξ', warn:'Ethereum network only' },
-  'TON':        { name:'Toncoin', network:'TON', sym:'◆', warn:'TON network only' }
+  'USDT-TRC20': {
+    name:'USDT', network:'TRON (TRC20)', sym:'₮', warn:'TRON network only',
+    color:'#26A17B', // Tether green
+    icon:'<svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path d="M17.92 17.38v-.01c-.11.01-.69.04-1.97.04-1.02 0-1.74-.03-2-.04v.01c-3.91-.17-6.83-.85-6.83-1.66 0-.81 2.92-1.49 6.83-1.66v2.65c.26.02 1 .06 2.02.06 1.22 0 1.84-.05 1.95-.06v-2.65c3.9.17 6.81.85 6.81 1.66 0 .81-2.91 1.49-6.81 1.66m0-3.59v-2.37h5.43V7.79H8.66v3.62h5.43v2.37c-4.41.2-7.74 1.08-7.74 2.13 0 1.05 3.32 1.92 7.74 2.13v7.6h3.83v-7.6c4.41-.21 7.73-1.08 7.73-2.13 0-1.05-3.32-1.92-7.73-2.13" fill="#fff"/></svg>'
+  },
+  'USDT-ERC20': {
+    name:'USDT', network:'Ethereum (ERC20)', sym:'₮', warn:'Ethereum network only',
+    color:'#26A17B',
+    icon:'<svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path d="M17.92 17.38v-.01c-.11.01-.69.04-1.97.04-1.02 0-1.74-.03-2-.04v.01c-3.91-.17-6.83-.85-6.83-1.66 0-.81 2.92-1.49 6.83-1.66v2.65c.26.02 1 .06 2.02.06 1.22 0 1.84-.05 1.95-.06v-2.65c3.9.17 6.81.85 6.81 1.66 0 .81-2.91 1.49-6.81 1.66m0-3.59v-2.37h5.43V7.79H8.66v3.62h5.43v2.37c-4.41.2-7.74 1.08-7.74 2.13 0 1.05 3.32 1.92 7.74 2.13v7.6h3.83v-7.6c4.41-.21 7.73-1.08 7.73-2.13 0-1.05-3.32-1.92-7.73-2.13" fill="#fff"/></svg>'
+  },
+  'BTC': {
+    name:'Bitcoin', network:'Bitcoin', sym:'₿', warn:'Bitcoin network only',
+    color:'#F7931A', // Bitcoin orange
+    icon:'<svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#F7931A"/><path d="M22.94 14.13c.32-2.13-1.31-3.27-3.53-4.04l.72-2.89-1.76-.44-.7 2.81-1.4-.33.71-2.83-1.76-.44-.72 2.89c-.38-.09-.75-.17-1.11-.25v-.01l-2.42-.6-.47 1.88s1.31.3 1.28.32c.71.18.84.65.82 1.02l-1.97 7.9c-.09.22-.31.55-.81.43.02.03-1.28-.32-1.28-.32l-.87 2.01 2.29.57c.42.11.84.22 1.25.32l-.73 2.92 1.76.44.72-2.89c.48.13.95.25 1.4.36l-.72 2.88 1.76.44.73-2.92c3 .57 5.26.34 6.21-2.37.77-2.18-.04-3.44-1.61-4.27 1.15-.26 2.01-1.02 2.24-2.59zm-4.01 5.64c-.55 2.18-4.21 1-5.4.71l.96-3.86c1.19.3 5 .89 4.44 3.15zm.55-5.67c-.5 1.98-3.55 1.97-4.54 1.72l.87-3.5c.99.25 4.18.71 3.66 1.78z" fill="#fff"/></svg>'
+  },
+  'ETH': {
+    name:'Ethereum', network:'Ethereum (ERC20)', sym:'Ξ', warn:'Ethereum network only',
+    color:'#627EEA', // Ethereum blue
+    icon:'<svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#627EEA"/><path d="M16.498 4v8.87l7.497 3.35z" fill="#fff" fill-opacity=".602"/><path d="M16.498 4L9 16.22l7.498-3.35z" fill="#fff"/><path d="M16.498 21.968v6.027L24 17.616z" fill="#fff" fill-opacity=".602"/><path d="M16.498 27.995v-6.028L9 17.616z" fill="#fff"/><path d="M16.498 20.573l7.497-4.353-7.497-3.348z" fill="#fff" fill-opacity=".2"/><path d="M9 16.22l7.498 4.353v-7.701z" fill="#fff" fill-opacity=".602"/></svg>'
+  },
+  'TON': {
+    name:'Toncoin', network:'TON', sym:'◆', warn:'TON network only',
+    color:'#0098EA', // TON blue
+    icon:'<svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#0098EA"/><path d="M22.21 10.05H9.79c-2.28 0-3.73 2.46-2.58 4.45L14.81 27.4c.5.87 1.76.87 2.27 0l7.6-12.91c1.16-1.99-.29-4.44-2.47-4.44m-7.4 12.86l-1.66-3.21-3.99-7.13c-.27-.46.07-1.05.62-1.05h5.03zm6.66-10.34l-3.99 7.13-1.66 3.21V11.51h5.03c.55 0 .89.59.62 1.06" fill="#fff"/></svg>'
+  }
 };
 
 function openTopUp(){
@@ -4595,9 +5006,11 @@ async function depStepAmount(){
       return;
     }
     list.innerHTML = coins.map(c => {
-      const m = COIN_META[c] || {name:c, network:c, sym:'●'};
+      const m = COIN_META[c] || {name:c, network:c, sym:'●', color:'#666'};
+      const iconHtml = m.icon || `<span class="symbol">${m.sym}</span>`;
       return `<div class="pay-m" data-cur="${c}" onclick="depPickCoin('${c}',this)">
-        <span class="symbol">${m.sym}</span>${m.name}
+        <div class="coin-icon">${iconHtml}</div>
+        <div class="coin-name">${m.name}</div>
         <div class="net-name">${m.network}</div>
       </div>`;
     }).join('');
@@ -8211,6 +8624,30 @@ function _luxorUpdateBalanceSplit(){
     }
   }
   const wallet = (typeof state !== 'undefined' && state.wallet) ? Number(state.wallet) : 0;
+
+  // Pending = sum of deposits (processing/pending) + sum of withdrawals (pending)
+  let pendingDeposit = 0;
+  let pendingWithdraw = 0;
+  if(typeof state !== 'undefined' && Array.isArray(state.txs)){
+    state.txs.forEach(t => {
+      const status = t.status || '';
+      // 'processing' is what backend returns mapped from 'pending' too
+      if(status !== 'processing' && status !== 'pending') return;
+      // Prefer mapped fields _amount and _type, fallback to regex from desc
+      let amt = Number(t._amount) || 0;
+      let type = t._type || '';
+      if(!amt || !type){
+        const amtMatch = (t.desc || '').match(/\$([\d,.]+)/);
+        amt = amtMatch ? parseFloat(amtMatch[1].replace(/,/g, '')) : 0;
+        if(/withdraw/i.test(t.desc || '')) type = 'withdrawal';
+        else if(/deposit/i.test(t.desc || '')) type = 'deposit';
+      }
+      if(type === 'withdrawal') pendingWithdraw += amt;
+      else if(type === 'deposit') pendingDeposit += amt;
+    });
+  }
+  const pendingTotal = pendingDeposit + pendingWithdraw;
+
   // Use fmtMoney (currency-aware) if available, else fallback to USD
   const fmt = (typeof fmtMoney === 'function') ? fmtMoney : v => '$' + Math.round(v).toLocaleString();
   ['dInvAmt','mInvAmt'].forEach(id => {
@@ -8221,6 +8658,30 @@ function _luxorUpdateBalanceSplit(){
     const el = document.getElementById(id);
     if(el) el.textContent = fmt(wallet);
   });
+
+  // Show/hide pending column based on whether there are pending tx
+  const showPending = pendingTotal > 0;
+  ['dPendingCol','mPendingCol'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = showPending ? '' : 'none';
+  });
+  if(showPending){
+    ['dPendAmt','mPendAmt'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = fmt(pendingTotal);
+    });
+    // Description: explain what's pending
+    let desc = '';
+    if(pendingDeposit > 0 && pendingWithdraw > 0){
+      desc = 'deposit + withdraw';
+    } else if(pendingDeposit > 0){
+      desc = 'deposit awaiting confirmation';
+    } else {
+      desc = 'withdrawal pending approval';
+    }
+    const dPd = document.getElementById('dPendDesc');
+    if(dPd) dPd.textContent = desc;
+  }
 }
 
 // Hook into existing updateUI by wrapping (if it exists)
