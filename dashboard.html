@@ -654,10 +654,11 @@ button{font-family:inherit}
 .my-item-card .earn-box .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
 .my-item-card .earn-box .h .l{font-size:10px;color:var(--t3);letter-spacing:1px}
 .my-item-card .earn-box .h .days{font-size:9px;color:var(--gold);font-weight:700}
-.my-item-card .earn-box .v{display:flex;align-items:baseline;gap:6px}
-.my-item-card .earn-box .v .num{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--green)}
+.my-item-card .earn-box .v{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.my-item-card .earn-box .v .num{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--green);line-height:1}
 .my-item-card .earn-box .v .num.red{color:var(--red)}
-.my-item-card .earn-box .v .lab{font-size:10px;color:var(--t3)}
+.my-item-card .earn-box .v .breakdown{font-family:'Space Mono',monospace;font-size:11px;color:var(--t3);letter-spacing:.3px;margin-top:2px}
+.my-item-card .earn-box .v .lab{font-size:10px;color:var(--t3);margin-top:2px}
 .my-item-card .earn-box .pbar{height:4px;background:var(--bg3);border-radius:2px;margin-top:8px;overflow:hidden}
 .my-item-card .earn-box .pbar .pf{height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:2px}
 .my-item-card .earn-box .pdays{display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-top:3px;font-family:'Space Mono',monospace}
@@ -665,6 +666,10 @@ button{font-family:inherit}
 .my-item-card .meta-row .l{color:var(--t3)}
 .my-item-card .meta-row .v.gold{color:var(--gold);font-weight:600}
 .my-item-card .meta-row .v.green{color:var(--green);font-weight:700}
+.my-item-card .meta-row .v.red{color:var(--red);font-weight:700}
+.my-item-card .learn-more-row{text-align:center;padding:10px 0 4px;margin-bottom:4px}
+.my-item-card .learn-more-link{color:var(--t3);font-size:11px;cursor:pointer;text-decoration:underline;letter-spacing:.3px;display:inline-flex;align-items:center;gap:4px}
+.my-item-card .learn-more-link:hover{color:var(--gold)}
 .my-item-card .actions-row{display:flex;gap:8px;margin-top:10px}
 .my-item-card .actions-row button{flex:1;padding:9px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer;font-weight:600}
 .my-item-card .sell-btn{background:var(--red);color:#fff;border:none}
@@ -1393,7 +1398,7 @@ button{font-family:inherit}
 </div>
 
 <!-- GOLD -->
-<div class="pool-card gold hidden" id="poolTierGold">
+<div class="pool-card gold" id="poolTierGold">
 <div class="top">
 <div class="left">
 <div class="pop-tag">★ POPULAR</div>
@@ -1416,7 +1421,7 @@ button{font-family:inherit}
 </div>
 
 <!-- PLATINUM -->
-<div class="pool-card platinum hidden" id="poolTierPlatinum">
+<div class="pool-card platinum" id="poolTierPlatinum">
 <div class="top">
 <div class="left">
 <h3>MONTHLY RETURNS</h3>
@@ -1929,7 +1934,7 @@ button{font-family:inherit}
 </div>
 
 <!-- GOLD mobile -->
-<div class="pool-card gold hidden" id="poolTierGoldM">
+<div class="pool-card gold" id="poolTierGoldM">
 <div class="top">
 <div class="left">
 <div class="pop-tag">★ POPULAR</div>
@@ -1952,7 +1957,7 @@ button{font-family:inherit}
 </div>
 
 <!-- PLATINUM mobile -->
-<div class="pool-card platinum hidden" id="poolTierPlatinumM">
+<div class="pool-card platinum" id="poolTierPlatinumM">
 <div class="top">
 <div class="left">
 <h3 style="font-size:20px">MONTHLY RETURNS</h3>
@@ -2503,40 +2508,57 @@ function _favResolve(favEntry){
 
 /* ═══ INITIAL LOAD ═══ */
 (async function loadBalanceFromBackend(){
-  try{
-    const userLogin = U.login || sessionStorage.getItem('luxor_login');
-    if(!userLogin || userLogin === 'unknown'){
-      console.warn('[balance] no userLogin — redirect to login');
-      location.href = 'index.html';
-      return;
-    }
-    console.log('[balance] loading for:', userLogin);
-    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin));
-    const data = await r.json();
-    if(data.ok && data.user){
-      state.wallet = Number(data.user.wallet_balance) || 0;
-      state.balance = Number(data.user.balance) || 0;
-      U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
-      if(data.user.ref_code){
-        U.ref_code = data.user.ref_code;
-        try{ sessionStorage.setItem('luxor_user', JSON.stringify(U)); }catch(e){}
-        try{
-          const rc = document.getElementById('refCode'); if(rc) rc.textContent = U.ref_code;
-          const rcm = document.getElementById('mRefCode'); if(rcm) rcm.textContent = U.ref_code;
-        }catch(e){}
-      }
-      sessionStorage.setItem('luxor_login', userLogin);
-      try{ updateUI(); }catch(e){ console.warn(e); }
-      saveState();
-    }
-    try{ await loadPoolPositions(); }catch(e){ console.warn(e); }
-    try{ await loadMyItems(); }catch(e){ console.warn(e); }
-    try{ await loadMarketplaceItems(); }catch(e){ console.warn(e); }
-    try{ await loadTransactionsFromBackend(); }catch(e){ console.warn(e); }
-    try{ updateUI(); }catch(e){}
-  }catch(e){
-    console.error('[balance] load error:', e);
+  const userLogin = U.login || sessionStorage.getItem('luxor_login');
+  if(!userLogin || userLogin === 'unknown'){
+    console.warn('[balance] no userLogin — redirect to login');
+    location.href = 'index.html';
+    return;
   }
+  console.log('[balance] loading for:', userLogin);
+
+  // 1. Load user data — wrap separately so other loaders still run if this fails
+  try{
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin));
+    if(!r.ok){
+      console.error('[balance] /api/user/' + userLogin + ' returned ' + r.status);
+    } else {
+      const data = await r.json().catch(e => { console.error('[balance] JSON parse failed:', e); return {}; });
+      if(data.ok && data.user){
+        state.wallet = Number(data.user.wallet_balance) || 0;
+        state.balance = Number(data.user.balance) || 0;
+        U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
+        if(data.user.ref_code){
+          U.ref_code = data.user.ref_code;
+          try{ sessionStorage.setItem('luxor_user', JSON.stringify(U)); }catch(e){}
+          try{
+            const rc = document.getElementById('refCode'); if(rc) rc.textContent = U.ref_code;
+            const rcm = document.getElementById('mRefCode'); if(rcm) rcm.textContent = U.ref_code;
+          }catch(e){}
+        }
+        sessionStorage.setItem('luxor_login', userLogin);
+        console.log('[balance] loaded — wallet:', state.wallet);
+        try{ updateUI(); }catch(e){ console.warn('[balance] updateUI failed:', e); }
+        saveState();
+      } else {
+        console.warn('[balance] response missing ok/user:', data);
+      }
+    }
+  }catch(e){
+    console.error('[balance] /api/user error:', e);
+  }
+
+  // 2. Load each section independently — failure in one shouldn't break others
+  try{ await loadPoolPositions(); }catch(e){ console.warn('[loadPoolPositions]:', e); }
+  try{ await loadMyItems(); }catch(e){ console.warn('[loadMyItems]:', e); }
+  try{ await loadMarketplaceItems(); }catch(e){ console.warn('[loadMarketplaceItems]:', e); }
+  try{ await loadTransactionsFromBackend(); }catch(e){ console.warn('[loadTransactionsFromBackend]:', e); }
+
+  // 3. Final UI update — always run regardless of failures above
+  try{ updateUI(); }catch(e){ console.error('[balance] final updateUI failed:', e); }
+  try{ if(typeof _luxorUpdateBalanceSplit === 'function') _luxorUpdateBalanceSplit(); }catch(e){}
+  try{ if(typeof renderTxs === 'function') renderTxs(); }catch(e){}
+  try{ if(typeof renderMyItems === 'function') renderMyItems(); }catch(e){}
+  console.log('[balance] initial load complete');
 })();
 
 async function loadTransactionsFromBackend(){
@@ -2679,18 +2701,27 @@ function getItemEarnings(i){
 
 /* ═══ POOL TIER UI ═══ */
 function switchPoolTier(t, btnEl){
+  // Highlight the active tab
   document.querySelectorAll('[data-tier]').forEach(b => b.classList.toggle('active', b.dataset.tier === t));
-  ['Silver','Gold','Platinum'].forEach(name => {
-    const el = document.getElementById('poolTier' + name);
-    if(el) el.classList.toggle('hidden', name.toLowerCase() !== t);
-  });
+  // Scroll smoothly to the chosen card (all 3 are visible now)
+  const target = document.getElementById('poolTier' + t.charAt(0).toUpperCase() + t.slice(1));
+  if(target){
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Brief flash to draw attention
+    target.style.transition = 'box-shadow .4s';
+    target.style.boxShadow = '0 0 0 2px var(--gold)';
+    setTimeout(() => { target.style.boxShadow = ''; }, 1200);
+  }
 }
 function switchPoolTierM(t, btnEl){
   document.querySelectorAll('[data-tier-m]').forEach(b => b.classList.toggle('active', b.dataset.tierM === t));
-  ['Silver','Gold','Platinum'].forEach(name => {
-    const el = document.getElementById('poolTier' + name + 'M');
-    if(el) el.classList.toggle('hidden', name.toLowerCase() !== t);
-  });
+  const target = document.getElementById('poolTier' + t.charAt(0).toUpperCase() + t.slice(1) + 'M');
+  if(target){
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    target.style.transition = 'box-shadow .4s';
+    target.style.boxShadow = '0 0 0 2px var(--gold)';
+    setTimeout(() => { target.style.boxShadow = ''; }, 1200);
+  }
 }
 
 /* ═══ POOL SLIDERS — real calc ═══ */
@@ -3181,13 +3212,31 @@ function renderMyItems(){
     const e = getItemEarnings(i);
     const stLabel = { active:'Active', sold_guaranteed:'Sold · Guaranteed', sold_profit:'Sold · Profit', early_exit:'Exited Early' };
     const stCls = { active:'active', sold_guaranteed:'sold', sold_profit:'sold', early_exit:'exit' };
-    const daysLeftTxt = e.daysLeft < 1 ? 'Selling soon' : Math.ceil(e.daysLeft) + ' days left';
+    const daysLeftTxt = e.daysLeft < 1 ? 'Selling soon' : '~' + Math.ceil(e.daysLeft) + ' days left';
     const isClosed = i.status !== 'active';
-    const earningsHeader = isClosed ? 'ACTUAL PAYOUT' : 'EXPECTED EARNINGS';
-    const earningsValue = isClosed ? (i.payout_usd ? (+i.payout_usd - +i.invested) : 0) : e.expectedEarned;
+    const earningsHeader = isClosed ? 'ACTUAL PAYOUT' : 'EXPECTED RETURNS';
+    // For active items: show TOTAL payout (invested + EXPECTED return) — what user receives when sold
+    // For closed items: show actual realized profit
+    const investedAmt = +i.invested || 0;
+    const expectedReturnUsd = e.expectedUsd || 0;  // expected return $ (not guaranteed minimum)
+    // Actual realized profit on closed items
+    const actualProfitUsd = isClosed && i.payout_usd ? (+i.payout_usd - investedAmt) : 0;
+    // For closed: total payout = actual full payout (invested + profit). For active: invested + expected return.
+    const earningsValue = isClosed
+      ? (i.payout_usd ? +i.payout_usd : investedAmt)
+      : (investedAmt + expectedReturnUsd);
     const earningsSubtext = isClosed ? 'Sold — already credited' : 'When item is sold';
-    const ev = earningsValue >= 0 ? '+$' + Math.abs(earningsValue).toFixed(2) : '-$' + Math.abs(earningsValue).toFixed(2);
-    const vNumCls = earningsValue >= 0 ? '' : 'red';
+    const ev = '$' + Math.round(earningsValue).toLocaleString();
+    // Breakdown explanation: "$5,325 + $3,717"
+    const breakdownProfit = isClosed ? actualProfitUsd : expectedReturnUsd;
+    const breakdownTxt = `$${Math.round(investedAmt).toLocaleString()} + $${Math.round(breakdownProfit).toLocaleString()}`;
+    const vNumCls = isClosed && actualProfitUsd < 0 ? 'red' : '';
+    // Label for second meta row: "Actual return" for closed, "Expected return" for active
+    const returnRowLabel = isClosed ? 'Actual return' : 'Expected return';
+    const returnRowPct = isClosed
+      ? (investedAmt > 0 ? ((actualProfitUsd / investedAmt) * 100).toFixed(1) : '0.0')
+      : (e.expectedPct || 0);
+    const returnRowSign = (isClosed && actualProfitUsd < 0) ? '' : '+';
     const safeIco = i.ico || '💎';
     const thumbInner = (i.image_url && i.image_url.trim()) ? `<img src="${i.image_url}" alt="">` : safeIco;
     return `<div class="my-item-card" data-item-row-id="${i.item_id || i.id}">
@@ -3202,12 +3251,19 @@ function renderMyItems(){
       <div class="body">
         <div class="earn-box">
           <div class="h"><span class="l">${earningsHeader}</span>${!isClosed?`<span class="days">⏱ ${daysLeftTxt}</span>`:''}</div>
-          <div class="v"><span class="num ${vNumCls}">${ev}</span><span class="lab">${earningsSubtext}</span></div>
+          <div class="v">
+            <span class="num ${vNumCls}">${ev}</span>
+            <span class="breakdown">${breakdownTxt}</span>
+            <span class="lab">${earningsSubtext}</span>
+          </div>
           ${!isClosed?`<div class="pbar"><div class="pf" style="width:${e.progress*100}%"></div></div>
             <div class="pdays"><span>Day ${Math.floor(e.daysElapsed)}</span><span>${Math.round(e.progress*100)}%</span><span>Day ${e.daysTotal}</span></div>`:''}
         </div>
-        <div class="meta-row"><span class="l">Guaranteed min</span><span class="v gold">+${e.guaranteed}% · $${e.guaranteedUsd.toFixed(0)}</span></div>
-        <div class="meta-row"><span class="l">Expected return</span><span class="v green">+${e.expectedPct}% · $${e.expectedUsd.toFixed(0)}</span></div>
+        <div class="meta-row"><span class="l">Guaranteed min</span><span class="v gold">+${e.guaranteed}%</span></div>
+        <div class="meta-row"><span class="l">${returnRowLabel}</span><span class="v ${actualProfitUsd < 0 ? 'red' : 'green'}">${returnRowSign}${returnRowPct}%</span></div>
+        <div class="learn-more-row">
+          <a class="learn-more-link" onclick="event.stopPropagation();showItemEarningsInfo()">ⓘ Learn more about returns</a>
+        </div>
         ${!isClosed?`<div class="actions-row">
           <button class="sell-btn" onclick="sellNow(${i.id})">SELL NOW −10%</button>
           <button class="view-btn" onclick="openItemDetail(${i.item_id || i.id})">VIEW DETAILS</button>
@@ -3247,10 +3303,12 @@ function renderMyItems(){
   const dashHtml = groups.length ? groups.map(g => {
     const thumbInner = (g.image_url && g.image_url.trim()) ? `<img src="${g.image_url}" alt="">` : g.ico;
     const subTxt = g.count > 1 ? `${g.count} positions · $${Math.round(g.totalInvested).toLocaleString()}` : `1 position · $${Math.round(g.totalInvested).toLocaleString()}`;
+    // Total payout = invested + expected return (matches main item card)
+    const totalPayout = g.totalInvested + g.totalExpected;
     return `<div class="row" onclick="goToMyItem(${g.item_id})">
       <div class="ic">${thumbInner}</div>
       <div class="info"><div class="n">${g.name}</div><div class="s">${subTxt}</div></div>
-      <div class="v"><div class="a">+$${Math.round(g.totalExpected).toLocaleString()}</div><div class="d gold">+${g.guaranteedPct}% min</div></div>
+      <div class="v"><div class="a">$${Math.round(totalPayout).toLocaleString()}</div><div class="d gold">+${g.guaranteedPct}% min guaranteed</div></div>
     </div>`;
   }).join('') : '<div class="empty-state">No items yet.<br><a onclick="navTo(\'market\')" style="color:var(--gold);cursor:pointer">→ Browse marketplace</a></div>';
   ['dItemsList', 'mItemsList'].forEach(id => {
@@ -4399,6 +4457,44 @@ function closeModal(){
   document.body.style.overflow = '';
 }
 
+/* Modal: explain how item earnings work (Guaranteed min vs Expected return) */
+function showItemEarningsInfo(){
+  showModal(`
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="width:48px;height:48px;border-radius:50%;background:rgba(201,168,76,.12);color:var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px">ⓘ</div>
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:4px">HOW EARNINGS WORK</h3>
+      <p style="font-size:11px;color:var(--t3)">Items vs pools — what to expect</p>
+    </div>
+
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;color:var(--green);margin-bottom:6px">EXPECTED RETURN</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.55">
+        Our projected profit from selling the item, based on historical sales of similar items over the last 12 months. The big green number on the card is your <b style="color:var(--t)">total payout</b> = your invested capital + this expected profit.
+      </div>
+    </div>
+
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;color:var(--gold);margin-bottom:6px">GUARANTEED MINIMUM</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.55">
+        Even in the rare worst-case where the item sells below expectations, you'll receive <b style="color:var(--t)">at least this much</b>. This guarantee is backed by our reserve fund and equals roughly <b style="color:var(--t)">10% per month</b> of your invested amount.
+      </div>
+    </div>
+
+    <div style="background:rgba(45,143,62,.06);border:1px solid rgba(45,143,62,.3);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--green);flex-shrink:0;margin-top:1px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+      <div style="font-size:11px;color:var(--t2);line-height:1.6">
+        <b style="color:var(--green)">Such cases are extremely rare.</b> Over the last 2 years, fewer than <b style="color:var(--t)">0.5%</b> of items closed at the guaranteed minimum — almost every item sold within or above the expected range.
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--t3);line-height:1.6;margin-bottom:14px">
+      Returns are credited to your wallet 1–3 days after the item is sold and proceeds clear. You can also exit early at any time and receive 90% of your invested amount instantly (–10% early exit fee).
+    </div>
+
+    <button class="btn-primary" onclick="closeModal()" style="width:100%">GOT IT</button>
+  `);
+}
+
 /* Smart Invest entry point — replaces old Stage-2 calculator. Implementation below. */
 function openProfitCalculator(){
   navTo('smart');
@@ -4422,7 +4518,9 @@ function openTopUp(){
   if(window._dep.pollInt) clearInterval(window._dep.pollInt);
   window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
 
-  const eligible = !!(U.has_first_deposit_bonus);
+  // Eligible for bonus = user has NOT received first-deposit bonus yet
+  // has_first_deposit_bonus === true means "already received" → not eligible
+  const eligible = U && U.has_first_deposit_bonus === false;
   if(eligible){
     showModal(`<div style="text-align:center;margin-bottom:14px">
       <div class="stag">STEP 1 OF 3</div>
@@ -4455,7 +4553,9 @@ function depSetBonus(useBonus){
 async function depStepAmount(){
   const useBonus = window._dep.useBonus;
   const minHint = useBonus ? '500' : '100';
-  const stepLabel = U.has_first_deposit_bonus ? 'STEP 2 OF 3' : 'STEP 1 OF 2';
+  // Step label depends on whether bonus is offered (has_first_deposit_bonus === false)
+  const eligibleForBonus = U && U.has_first_deposit_bonus === false;
+  const stepLabel = eligibleForBonus ? 'STEP 2 OF 3' : 'STEP 1 OF 2';
 
   showModal(`<div style="text-align:center;margin-bottom:14px">
     <div class="stag">${stepLabel}</div>
@@ -7442,10 +7542,21 @@ async function _smartFetchMarketplace(){
 
   // Try real API first; on failure fall back to existing ITEMS or sample data
   try{
-    const res = await apiFetch('/api/marketplace?status=active');
+    // Use the same endpoint the rest of the dashboard uses
+    const res = await apiFetch('/api/items');
     if(res.ok){
       const data = await res.json();
-      const items = (data.items || data) || [];
+      // Backend returns array directly OR { items: [...] }
+      const itemsRaw = Array.isArray(data) ? data : (data.items || []);
+      // Normalize: filter only active and ensure required fields exist
+      const items = itemsRaw
+        .filter(it => !it.status || it.status === 'active')
+        .map(it => ({
+          ...it,
+          available_amount: it.available_amount !== undefined
+            ? it.available_amount
+            : (it.price * (100 - (it.funded_percent || 0)) / 100),
+        }));
       if(Array.isArray(items) && items.length > 0){
         window._smartMarketCache = items.map(_smartNormalizeItem);
         return window._smartMarketCache;
@@ -7605,23 +7716,36 @@ async function _smartShuffleItems(letter){
 async function _smartConfirmPurchase(){
   const s = window._smart;
   const allocations = window._smartAllocations;
+
+  console.log('[Smart Invest] === CONFIRM PURCHASE STARTED ===');
+  console.log('[Smart Invest] State:', JSON.parse(JSON.stringify(s || {})));
+  console.log('[Smart Invest] Allocations:', allocations);
+
   if(!allocations || !s.chosenStrategy){
+    console.error('[Smart Invest] Missing strategy or allocations');
     showToast('error', 'Strategy missing', 'Please go back to step 5 and select a strategy.');
     return;
   }
 
   // Validate balance one more time before going through with the purchase.
-  // If user used 'balance' payment method, ensure their wallet still covers it.
   const split = _smartGetBalanceSplit();
-  const totalNeeded = s.totalNeeded || s.amount || 0;
+  const totalNeeded = s.amount || 0;
   const fromBalance = s.fromBalance || 0;
-  if(s.paymentMethod === 'balance' && split.available < fromBalance){
+  const toDeposit = s.toDeposit !== undefined ? s.toDeposit : (totalNeeded - fromBalance);
+
+  console.log('[Smart Invest] Balance check:', { available: split.available, fromBalance, toDeposit, totalNeeded });
+
+  if(fromBalance > 0 && split.available < fromBalance){
+    console.error('[Smart Invest] Insufficient balance: have', split.available, 'need', fromBalance);
     showToast('error', 'Insufficient balance', 'Your wallet balance changed. Please refresh and try again.');
     return;
   }
 
   const strategy = s.chosenStrategy === 'A' ? allocations.strategyA : allocations.strategyB;
   const basket = window._smartItemsBasket[s.chosenStrategy] || [];
+
+  console.log('[Smart Invest] Strategy', s.chosenStrategy, ':', strategy);
+  console.log('[Smart Invest] Item basket:', basket);
 
   // Show confirming UI
   const next = document.getElementById('smBtnNext');
@@ -7631,82 +7755,156 @@ async function _smartConfirmPurchase(){
   }
 
   const userLogin = (typeof U !== 'undefined' && U.login) || sessionStorage.getItem('luxor_login');
+  console.log('[Smart Invest] User login:', userLogin);
+
   const errors = [];
+  const successes = { pools: [], items: [] };
 
-  // 1. Create pool positions
+  // 1. Create pool positions — uses real endpoint /api/pool/invest with amount_usd
   for(const p of (strategy.pools || [])){
+    const payload = { user_login: userLogin, plan: p.plan, amount_usd: p.amount };
+    console.log('[Smart Invest] → POST /api/pool/invest', payload);
     try{
-      const res = await apiFetch('/api/invest_pool', {
+      const res = await apiFetch('/api/pool/invest', {
         method: 'POST',
-        body: JSON.stringify({ user_login: userLogin, plan: p.plan, amount: p.amount }),
+        body: JSON.stringify(payload),
       });
-      if(!res.ok){
-        const txt = await res.text();
-        errors.push(`Pool ${p.plan} $${p.amount}: ${txt.substring(0, 80)}`);
+      console.log('[Smart Invest]   Response status:', res.status);
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok || !data || !data.ok){
+        const errCode = (data && data.detail && data.detail.error) || (data && data.error) || ('HTTP ' + res.status);
+        const map = {
+          'insufficient_balance': 'Wallet balance is not enough',
+          'amount_out_of_range': 'Amount outside allowed range for ' + p.plan,
+          'unknown_plan': 'Unknown pool plan: ' + p.plan,
+          'user_not_found': 'Session expired, please log in again',
+        };
+        const friendly = map[errCode] || errCode;
+        console.error('[Smart Invest]   FAILED:', friendly);
+        errors.push(`Pool ${p.plan} $${p.amount}: ${friendly}`);
+      } else {
+        console.log('[Smart Invest]   OK, new wallet:', data.new_wallet_balance);
+        // Update wallet immediately
+        if(typeof state !== 'undefined' && data.new_wallet_balance !== undefined){
+          state.wallet = data.new_wallet_balance;
+        }
+        if(data.position && Array.isArray(state.positions)){
+          state.positions.unshift(data.position);
+        }
+        successes.pools.push({ plan: p.plan, amount: p.amount });
       }
     }catch(e){
-      errors.push(`Pool ${p.plan}: network error`);
+      console.error('[Smart Invest]   Network error:', e);
+      errors.push(`Pool ${p.plan}: ${e.message || 'network error'}`);
     }
   }
 
-  // 2. Buy item fractions
+  // 2. Buy item fractions — uses /api/items/buy with slots_count (integer slots)
   for(const it of basket){
+    // Convert $ contribution to slots_count using item's price_per_slot
+    const pricePerSlot = it.price_per_slot || (it.price / (it.slots_total || 20));
+    const slotsCount = Math.max(1, Math.floor(it.contribution / pricePerSlot));
+    const payload = { user_login: userLogin, item_id: it.id, slots_count: slotsCount };
+    console.log('[Smart Invest] → POST /api/items/buy', payload, '(price_per_slot=$' + Math.round(pricePerSlot) + ')');
     try{
-      const res = await apiFetch('/api/buy_fraction', {
+      const res = await apiFetch('/api/items/buy', {
         method: 'POST',
-        body: JSON.stringify({ user_login: userLogin, item_id: it.id, amount: it.contribution }),
+        body: JSON.stringify(payload),
       });
-      if(!res.ok){
-        const txt = await res.text();
-        errors.push(`Item ${it.name}: ${txt.substring(0, 80)}`);
+      console.log('[Smart Invest]   Response status:', res.status);
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok || !data || !data.ok){
+        const errCode = (data && data.detail && data.detail.error) || (data && data.error) || ('HTTP ' + res.status);
+        const map = {
+          'item_not_found': 'Item not available',
+          'item_not_active': 'Item already sold',
+          'insufficient_fraction': 'Not enough share available',
+          'insufficient_slots': 'Not enough slots available',
+          'insufficient_balance': 'Wallet balance is not enough',
+          'user_not_found': 'Session expired',
+          'item_price_invalid': 'Item price misconfigured',
+          'invalid_amount': 'Amount must be > 0',
+          'invalid_slots_count': 'Must buy at least 1 slot',
+        };
+        const friendly = map[errCode] || errCode;
+        console.error('[Smart Invest]   FAILED:', friendly);
+        errors.push(`Item ${it.name}: ${friendly}`);
+      } else {
+        console.log('[Smart Invest]   OK, new wallet:', data.new_wallet_balance);
+        if(typeof state !== 'undefined' && data.new_wallet_balance !== undefined){
+          state.wallet = data.new_wallet_balance;
+        }
+        successes.items.push({ name: it.name, amount: it.contribution, slots: slotsCount });
       }
     }catch(e){
-      errors.push(`Item ${it.name}: network error`);
+      console.error('[Smart Invest]   Network error:', e);
+      errors.push(`Item ${it.name}: ${e.message || 'network error'}`);
     }
   }
 
-  // 3. Telegram notification (best-effort)
-  try{
-    apiFetch('/api/admin/notify', {
-      method: 'POST',
-      body: JSON.stringify({
-        event: 'smart_invest_complete',
-        user_login: userLogin,
-        amount: s.amount,
-        strategy: s.chosenStrategy,
-        positions_count: (strategy.pools || []).length + basket.length,
-      }),
-    }).catch(()=>{});
-  }catch(e){}
+  console.log('[Smart Invest] === RESULT ===');
+  console.log('[Smart Invest] Successes:', successes);
+  console.log('[Smart Invest] Errors:', errors);
 
-  // Reset wizard state
-  _smartResetState();
+  // (Telegram notification skipped — endpoint /api/admin/notify doesn't exist on backend)
 
-  // Notify user
+  // Notify user with detailed errors
   if(errors.length === 0){
-    showToast('success', 'Strategy applied!', 'Your positions are now active. Check My Pools and My Items.', 5000);
+    // Add transactions for each successful action
+    successes.pools.forEach(p => {
+      try{ addTx('Smart Invest: ' + p.plan + ' Pool +$' + p.amount.toLocaleString(), 'done'); }catch(e){}
+    });
+    successes.items.forEach(it => {
+      try{ addTx('Smart Invest: ' + (it.slots || 1) + ' slot(s) of ' + it.name + ' · $' + it.amount.toLocaleString(), 'done'); }catch(e){}
+    });
+    _smartResetState();
+    showToast('success', 'Strategy applied!', `${successes.pools.length} pool position(s) + ${successes.items.length} item(s) created.`, 5000);
+    try{ await loadPoolPositions(); }catch(e){}
+    try{ await loadMyItems(); }catch(e){}
+    try{ updateUI(); showConfetti(); }catch(e){}
+    navTo('dash');
+  } else if(successes.pools.length === 0 && successes.items.length === 0){
+    // ALL failed — show detailed error, keep wizard open so user can see what's wrong
+    const errorList = errors.slice(0, 3).map(e => '• ' + e).join('<br>');
+    showToast('error', 'Purchase failed', 'Nothing was bought:<br>' + errorList, 10000);
+    // Restore button so user can retry
+    if(next){
+      next.disabled = false;
+      next.innerHTML = 'CONFIRM PURCHASE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    }
   } else {
-    showToast('warn', 'Partially applied', errors.length + ' position(s) had issues. Check My Pools / My Items and retry manually.', 6000);
+    // Partial success — add tx for what worked
+    successes.pools.forEach(p => {
+      try{ addTx('Smart Invest: ' + p.plan + ' Pool +$' + p.amount.toLocaleString(), 'done'); }catch(e){}
+    });
+    successes.items.forEach(it => {
+      try{ addTx('Smart Invest: ' + (it.slots || 1) + ' slot(s) of ' + it.name + ' · $' + it.amount.toLocaleString(), 'done'); }catch(e){}
+    });
+    const errorList = errors.slice(0, 3).map(e => '• ' + e).join('<br>');
+    showToast('warn', 'Partially applied', `${successes.pools.length + successes.items.length} succeeded, ${errors.length} failed:<br>${errorList}`, 8000);
+    _smartResetState();
+    try{ await loadPoolPositions(); }catch(e){}
+    try{ await loadMyItems(); }catch(e){}
+    try{ updateUI(); }catch(e){}
+    navTo('dash');
   }
-
-  // Refresh dashboard data and navigate home
-  try{ await loadPoolPositions(); }catch(e){}
-  try{ await loadMyItems(); }catch(e){}
-  try{ updateUI(); }catch(e){}
-  navTo('dash');
 }
 
 /* ═══════════════════════════════════════════════════════════
    STAGE 6: BONUS +5% + INVESTED/AVAILABLE BALANCE SPLIT
 ═══════════════════════════════════════════════════════════ */
 
-/* Check if user is eligible for first-deposit +5% bonus */
-function _smartIsBonusEligible(amount){
-  // U is declared with const at module level — not on window
+/* Check if user is eligible for first-deposit +5% bonus.
+   Bonus rules (per Greg's spec):
+   - Only NEW users (has_first_deposit_bonus === false)
+   - Only when amount being deposited (NEW money) is >= $300
+   - NOT applicable when user just spends their existing balance */
+function _smartIsBonusEligible(newDepositAmount){
   const u = (typeof U !== 'undefined') ? U : null;
   if(!u) return false;
   if(u.has_first_deposit_bonus === true) return false;
-  return amount >= 300;
+  // Must be NEW money coming in, at least $300
+  return (newDepositAmount || 0) >= 300;
 }
 
 /* Compute portfolio split: invested vs available */
@@ -7855,13 +8053,25 @@ function _smartRenderFinal(){
     listEl.innerHTML = html || '<div class="sm-empty-items">No positions to confirm.</div>';
   }
 
-  // Totals
-  setText('smFinalStratTotal', fmt(s.amount || 0));
-  const eligible = _smartIsBonusEligible(s.amount);
-  const bonus = eligible ? s.amount * 0.05 : 0;
+  // Totals — bonus applies ONLY to new money (toDeposit), not to balance spending
+  const totalAmount = s.amount || 0;
+  const fromBalance = s.fromBalance || 0;
+  const toDeposit = s.toDeposit !== undefined ? s.toDeposit : (totalAmount - fromBalance);
+
+  setText('smFinalStratTotal', fmt(totalAmount));
+
+  const eligible = _smartIsBonusEligible(toDeposit);
+  const bonus = eligible ? toDeposit * 0.05 : 0;
   setShow('smFinalBonusRow', eligible);
   setText('smFinalBonus', '+' + fmt(bonus));
-  setText('smFinalGrand', fmt((s.amount || 0) + bonus));
+  setText('smFinalGrand', fmt(totalAmount + bonus));
+
+  // If user uses balance — show informative line
+  const summaryRow = document.getElementById('smFinalFromBalanceRow');
+  if(summaryRow){
+    summaryRow.style.display = fromBalance > 0 ? '' : 'none';
+    setText('smFinalFromBalance', '-' + fmt(fromBalance));
+  }
 }
 
 console.log('[stage3-6] Smart Invest engine + items + API + bonus loaded');
