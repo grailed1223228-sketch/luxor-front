@@ -3249,9 +3249,14 @@ function updateUI(){
   // Update banner amounts (mobile + desktop)
   const $ = id => document.getElementById(id);
 
-  // Total balance shown in big number
-  $('dBalAmount') && ($('dBalAmount').textContent = fmt(total));
-  $('mBalAmount') && ($('mBalAmount').textContent = fmt(total));
+  // Total balance shown in big number — with smooth animation
+  if(typeof animateById === 'function'){
+    animateById('dBalAmount', total);
+    animateById('mBalAmount', total);
+  } else {
+    $('dBalAmount') && ($('dBalAmount').textContent = fmt(total));
+    $('mBalAmount') && ($('mBalAmount').textContent = fmt(total));
+  }
 
   // Delta line — earned all-time
   const pct = poolsPrincipal + itemsInvested > 0 ? (realEarned / (poolsPrincipal + itemsInvested) * 100) : 0;
@@ -3267,11 +3272,24 @@ function updateUI(){
     $('mBalDelta').className = 'delta' + (realEarned < 0 ? ' neg' : '');
   }
 
-  // Summary tiles: EARNED / EXPECTED / APY
-  $('dStatEarned') && ($('dStatEarned').textContent = fmt(realEarned, { sign: true }));
-  $('mStatEarned') && ($('mStatEarned').textContent = fmt(realEarned, { sign: true }));
-  $('dStatExpected') && ($('dStatExpected').textContent = fmt(annualFromPools + itemsMaxProfit, { sign: true }));
-  $('mStatExpected') && ($('mStatExpected').textContent = fmt(annualFromPools + itemsMaxProfit, { sign: true }));
+  // Summary tiles: EARNED / EXPECTED / APY — with smooth animation
+  const _animSum = (typeof animateBalanceTo === 'function');
+  const _earnedExpected = annualFromPools + itemsMaxProfit;
+  if(_animSum){
+    ['dStatEarned','mStatEarned'].forEach(id => {
+      const el = $(id);
+      if(el) animateBalanceTo(el, realEarned, { fmtOpts: { sign: true } });
+    });
+    ['dStatExpected','mStatExpected'].forEach(id => {
+      const el = $(id);
+      if(el) animateBalanceTo(el, _earnedExpected, { fmtOpts: { sign: true } });
+    });
+  } else {
+    $('dStatEarned') && ($('dStatEarned').textContent = fmt(realEarned, { sign: true }));
+    $('mStatEarned') && ($('mStatEarned').textContent = fmt(realEarned, { sign: true }));
+    $('dStatExpected') && ($('dStatExpected').textContent = fmt(_earnedExpected, { sign: true }));
+    $('mStatExpected') && ($('mStatExpected').textContent = fmt(_earnedExpected, { sign: true }));
+  }
   // APY weighted across pool positions
   const principalSum = poolsPrincipal;
   const annualEarn = state.positions.reduce((s,p)=>{
@@ -3282,8 +3300,19 @@ function updateUI(){
     return s + amt * (rate/100) * annualMult;
   }, 0);
   const apy = principalSum > 0 ? (annualEarn / principalSum * 100) : 0;
-  $('dStatAPY') && ($('dStatAPY').textContent = apy.toFixed(0) + '%');
-  $('mStatAPY') && ($('mStatAPY').textContent = apy.toFixed(0) + '%');
+  // APY: используем кастомный formatter (просто число + %)
+  if(_animSum){
+    ['dStatAPY','mStatAPY'].forEach(id => {
+      const el = $(id);
+      if(el) animateBalanceTo(el, apy, {
+        formatter: v => v.toFixed(0) + '%',
+        duration: 700
+      });
+    });
+  } else {
+    $('dStatAPY') && ($('dStatAPY').textContent = apy.toFixed(0) + '%');
+    $('mStatAPY') && ($('mStatAPY').textContent = apy.toFixed(0) + '%');
+  }
 
   // Greet name + plan badge
   const fname = (U.fn || U.login || 'User');
@@ -8650,13 +8679,20 @@ function _luxorUpdateBalanceSplit(){
 
   // Use fmtMoney (currency-aware) if available, else fallback to USD
   const fmt = (typeof fmtMoney === 'function') ? fmtMoney : v => '$' + Math.round(v).toLocaleString();
+  const _animate = (typeof animateBalanceTo === 'function');
   ['dInvAmt','mInvAmt'].forEach(id => {
     const el = document.getElementById(id);
-    if(el) el.textContent = fmt(invested);
+    if(el){
+      if(_animate) animateBalanceTo(el, invested);
+      else el.textContent = fmt(invested);
+    }
   });
   ['dAvailAmt','mAvailAmt'].forEach(id => {
     const el = document.getElementById(id);
-    if(el) el.textContent = fmt(wallet);
+    if(el){
+      if(_animate) animateBalanceTo(el, wallet);
+      else el.textContent = fmt(wallet);
+    }
   });
 
   // Show/hide pending column based on whether there are pending tx
@@ -8668,7 +8704,10 @@ function _luxorUpdateBalanceSplit(){
   if(showPending){
     ['dPendAmt','mPendAmt'].forEach(id => {
       const el = document.getElementById(id);
-      if(el) el.textContent = fmt(pendingTotal);
+      if(el){
+        if(_animate) animateBalanceTo(el, pendingTotal);
+        else el.textContent = fmt(pendingTotal);
+      }
     });
     // Description: explain what's pending
     let desc = '';
@@ -9011,6 +9050,89 @@ function fmtMoney(usdAmount, opts){
     : Math.round(abs).toLocaleString();
   return sign + sym + formatted;
 }
+
+// ─── Smooth balance animation (count-up with easing) ───────────────────────
+// Анимирует число в DOM-элементе от текущего значения до target
+// используя ease-out cubic для плавного "приземления"
+// Если установлено data-skip-anim или элемент не виден — присваивает мгновенно
+window._balanceAnimRafs = window._balanceAnimRafs || new WeakMap();
+
+function animateBalanceTo(el, targetUsd, opts){
+  if(!el) return;
+  opts = opts || {};
+  const formatter = opts.formatter || (typeof fmtMoney === 'function'
+    ? (v) => fmtMoney(v, opts.fmtOpts || {})
+    : (v) => '$' + Math.round(v).toLocaleString());
+  const duration = opts.duration !== undefined ? opts.duration : 900;  // ms
+  const targetVal = Number(targetUsd) || 0;
+
+  // Cancel previous animation на этом элементе
+  const prevRaf = window._balanceAnimRafs.get(el);
+  if(prevRaf){
+    cancelAnimationFrame(prevRaf);
+    window._balanceAnimRafs.delete(el);
+  }
+
+  // Парсим текущее значение из textContent
+  // Ищем число (с поддержкой - и .) внутри текста
+  const cur = el.textContent || '';
+  let startVal = 0;
+  // Сначала ищем _animBaseVal (если был ранее установлен), потом парсим
+  if(el.dataset && el.dataset.animBaseVal !== undefined){
+    startVal = parseFloat(el.dataset.animBaseVal) || 0;
+  } else {
+    const m = cur.replace(/,/g, '').match(/-?\d+(?:\.\d+)?/);
+    if(m) startVal = parseFloat(m[0]) || 0;
+  }
+
+  // Если значения совпадают — ничего не делаем
+  if(Math.abs(startVal - targetVal) < 0.005){
+    el.textContent = formatter(targetVal);
+    el.dataset.animBaseVal = String(targetVal);
+    return;
+  }
+
+  // Если duration <= 0 или элемент скрыт — мгновенно
+  const skip = (duration <= 0)
+    || (el.dataset && el.dataset.skipAnim === '1')
+    || (el.offsetParent === null && !el.closest('.show'));   // не в DOM/невидимый
+  if(skip){
+    el.textContent = formatter(targetVal);
+    el.dataset.animBaseVal = String(targetVal);
+    return;
+  }
+
+  const startT = performance.now();
+  const ease = (t) => 1 - Math.pow(1 - t, 3);   // easeOutCubic
+
+  const step = (now) => {
+    const elapsed = now - startT;
+    const t = Math.min(1, elapsed / duration);
+    const eased = ease(t);
+    const cur = startVal + (targetVal - startVal) * eased;
+    el.textContent = formatter(cur);
+    if(t < 1){
+      const raf = requestAnimationFrame(step);
+      window._balanceAnimRafs.set(el, raf);
+    } else {
+      el.textContent = formatter(targetVal);
+      el.dataset.animBaseVal = String(targetVal);
+      window._balanceAnimRafs.delete(el);
+    }
+  };
+  const raf = requestAnimationFrame(step);
+  window._balanceAnimRafs.set(el, raf);
+}
+
+// Helper: animate by ID (короткая запись)
+function animateById(id, targetUsd, opts){
+  const el = document.getElementById(id);
+  if(el) animateBalanceTo(el, targetUsd, opts);
+}
+
+// Expose globally (для Playwright тестов и для manual debugging в консоли)
+window.animateBalanceTo = animateBalanceTo;
+window.animateById = animateById;
 
 /**
  * Convert input by user (in display currency) to USD for backend.
