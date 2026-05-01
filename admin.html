@@ -177,6 +177,7 @@ textarea.inp{resize:vertical;min-height:60px;}
   <button class="nav-btn" onclick="switchTab('deposits')">💰 Deposits</button>
   <button class="nav-btn" onclick="switchTab('users')">👥 Users</button>
   <button class="nav-btn" onclick="switchTab('reftree')">🌳 Referrals Tree</button>
+  <button class="nav-btn" onclick="switchTab('coupons')">💎 Coupons</button>
   <button class="nav-btn" onclick="switchTab('items')">🏷️ Marketplace</button>
   <button class="nav-btn" onclick="switchTab('wallets')">💳 Wallets</button>
   <button class="nav-btn" onclick="switchTab('rates')">⚙️ Pool Rates</button>
@@ -290,6 +291,87 @@ textarea.inp{resize:vertical;min-height:60px;}
       <div style="color:var(--t3);text-align:center;padding:40px">Loading tree...</div>
     </div>
     <div id="rtTooltip" style="position:fixed;background:var(--bg);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:12px;pointer-events:none;z-index:9999;max-width:260px;box-shadow:0 4px 16px rgba(0,0,0,.5);display:none"></div>
+  </div>
+</div>
+
+<!-- COUPONS -->
+<div id="tab-coupons" class="tab">
+  <div style="max-width:1400px;margin:0 auto">
+    <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+      <h3 style="font-size:18px;font-weight:800;margin:0">💎 Promo Coupons</h3>
+      <button class="btn btn-g" onclick="openCreateBatchModal()" style="padding:9px 16px;font-size:13px;margin-left:auto">➕ CREATE BATCH</button>
+      <button class="btn btn-b" onclick="loadCouponBatches()" style="padding:9px 14px;font-size:12px">🔄 Refresh</button>
+    </div>
+    <p style="color:var(--t3);font-size:12px;margin-bottom:14px">Generate promo coupon codes (LUX-XXXX-XXXX format). Users redeem via Bonuses tab — money goes to <strong>locked_balance</strong> with the same unlock conditions as welcome bonus (deposit ≥ $50 + invest ≥ 24h, OR 3 qualified referrals + invest).</p>
+    <div id="couponBatchesList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px">
+      <div style="color:var(--t3);text-align:center;padding:30px;grid-column:1/-1">Loading batches...</div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE BATCH MODAL -->
+<div class="modal-bg" id="createBatchModal">
+  <div class="modal" style="max-width:480px">
+    <button class="mc" onclick="closeModal('createBatchModal')">✕</button>
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:14px">➕ Create Coupon Batch</h3>
+    <div class="inp-row">
+      <label>Label (optional)</label>
+      <input class="inp" id="cbLabel" type="text" placeholder="e.g. New Year promo, Black Friday...">
+    </div>
+    <div class="form-grid">
+      <div class="inp-row">
+        <label>Amount per coupon ($)</label>
+        <input class="inp" id="cbAmount" type="number" step="0.01" min="0.01" max="10000" placeholder="10" value="10">
+      </div>
+      <div class="inp-row">
+        <label>Number of coupons</label>
+        <input class="inp" id="cbCount" type="number" min="1" max="5000" placeholder="100" value="100">
+      </div>
+    </div>
+    <div class="inp-row">
+      <label>Expires at (optional, leave empty for no expiry)</label>
+      <input class="inp" id="cbExpires" type="datetime-local">
+    </div>
+    <div style="background:rgba(201,168,76,.08);border-left:3px solid var(--gold);border-radius:6px;padding:10px 12px;margin:10px 0;font-size:11px;color:var(--t2);line-height:1.5">
+      ⓘ Each coupon will have a unique code (LUX-XXXX-XXXX). Users get money in <strong style="color:var(--t)">locked_balance</strong> on redeem. Limit: <strong style="color:var(--t)">1 coupon per user account.</strong>
+    </div>
+    <button class="btn btn-g" onclick="submitCreateBatch()" style="width:100%;padding:11px;font-size:13px;font-weight:700">CREATE BATCH</button>
+  </div>
+</div>
+
+<!-- ISSUED CODE MODAL -->
+<div class="modal-bg" id="issuedCodeModal">
+  <div class="modal" style="max-width:420px">
+    <button class="mc" onclick="closeModal('issuedCodeModal')">✕</button>
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:6px">✅ Coupon Issued</h3>
+    <p style="color:var(--t3);font-size:12px;margin-bottom:14px">Send this code to the user. They redeem it in dashboard → Bonuses.</p>
+    <div style="background:var(--bg);border:2px solid var(--gold);border-radius:8px;padding:18px;text-align:center;margin-bottom:12px">
+      <div style="font-family:'SF Mono',Menlo,monospace;font-size:22px;font-weight:800;color:var(--gold);letter-spacing:2px" id="issuedCode">—</div>
+      <div style="font-size:12px;color:var(--t3);margin-top:6px">Worth <strong id="issuedAmount" style="color:var(--green)">$0</strong></div>
+    </div>
+    <button class="btn btn-g" onclick="copyIssuedCode()" style="width:100%;padding:10px;font-size:13px">📋 COPY CODE</button>
+  </div>
+</div>
+
+<!-- LIST CODES MODAL -->
+<div class="modal-bg" id="listCodesModal">
+  <div class="modal" style="max-width:600px">
+    <button class="mc" onclick="closeModal('listCodesModal')">✕</button>
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:6px">📋 All Codes</h3>
+    <div id="listCodesHeader" style="color:var(--t3);font-size:12px;margin-bottom:10px">—</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-b" onclick="copyAllCodes('plain')" style="padding:8px 12px;font-size:12px">📋 Copy plain</button>
+      <button class="btn btn-b" onclick="copyAllCodes('csv')" style="padding:8px 12px;font-size:12px">📋 Copy CSV</button>
+      <select class="inp" id="listCodesFilter" onchange="reloadListCodes()" style="padding:7px 10px;font-size:12px;flex:1;min-width:140px">
+        <option value="all">All statuses</option>
+        <option value="unused" selected>Unused only</option>
+        <option value="issued">Issued only</option>
+        <option value="redeemed">Redeemed only</option>
+      </select>
+    </div>
+    <div id="listCodesContent" style="background:var(--bg);border-radius:6px;padding:10px;max-height:400px;overflow-y:auto;font-family:'SF Mono',Menlo,monospace;font-size:12px;line-height:1.7">
+      Loading...
+    </div>
   </div>
 </div>
 
@@ -770,6 +852,7 @@ function switchTab(name){
   if(name==='deposits') loadDeposits();
   if(name==='users') loadUsers();
   if(name==='reftree') loadReftree();
+  if(name==='coupons') loadCouponBatches();
   if(name==='items') loadItems();
   if(name==='wallets') loadWallets();
   if(name==='rates') loadRates();
@@ -1123,10 +1206,38 @@ async function rejectWd(id){
 // DEPOSITS
 // ============================================================
 async function loadDeposits(){
+  // Prefetch users чтобы знать кто чей referral (для подсветки)
+  if(!Array.isArray(allUsers) || !allUsers.length){
+    try { await loadUsers(); } catch(e) {}
+  }
   const txs = await api('/api/admin/transactions?type=deposit');
   const c = document.getElementById('depositsList');
   if(!txs||!txs.length){ c.innerHTML='<div style="color:var(--t3);text-align:center;padding:40px">No deposits yet</div>'; return; }
-  c.innerHTML = txs.map(t=>`
+  // Параллельно подгружаем кто чей реферал — для подсветки
+  // Используем уже загруженный allUsers, если есть
+  const refMap = {};   // login → referred_by
+  if(Array.isArray(allUsers) && allUsers.length){
+    allUsers.forEach(u => { if(u.referred_by_login || u.referred_by) refMap[u.login] = u.referred_by_login || u.referred_by; });
+  }
+  c.innerHTML = txs.map(t => {
+    const referredBy = refMap[t.user_login];
+    let refBadge = '';
+    if(referredBy){
+      // Подсветка: депозит реферала
+      // Найдём tier реферера если он в allUsers
+      const referrer = (Array.isArray(allUsers) ? allUsers : []).find(u => u.login === referredBy);
+      const tier = (referrer && referrer.ref_tier) ? referrer.ref_tier.toLowerCase() : 'bronze';
+      const tierRate = {bronze:3, silver:5, gold:7, platinum:10}[tier] || 3;
+      const tierColor = {bronze:'#cd7f32', silver:'#c0c0c0', gold:'#ffd700', platinum:'#e5e4e2'}[tier] || '#cd7f32';
+      const cashback = (Number(t.amount) * tierRate / 100).toFixed(2);
+      refBadge = `
+        <div style="margin-top:8px;padding:6px 10px;background:rgba(155,89,182,.1);border-left:3px solid var(--purple);border-radius:4px;font-size:11px">
+          ↗️ Referred by <strong style="color:var(--gold);cursor:pointer" onclick="showUserDetail('${referredBy}')">@${referredBy}</strong>
+          → +$${cashback} (${tierRate}%, <span style="color:${tierColor};font-weight:700">${tier.charAt(0).toUpperCase()+tier.slice(1)}</span> tier)
+        </div>
+      `;
+    }
+    return `
     <div class="item-card dep">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
@@ -1140,8 +1251,9 @@ async function loadDeposits(){
           <div style="font-size:10px;color:var(--t3)">${t.status}</div>
         </div>
       </div>
-    </div>
-  `).join('');
+      ${refBadge}
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
@@ -1326,6 +1438,27 @@ async function showUserDetail(login){
         <div style="font-size:18px;font-weight:700;color:${(sm.total_profit_items_realized||0)>=0?'var(--green)':'var(--red)'}">${fmt(sm.total_profit_items_realized||0)}</div>
         <div style="font-size:10px;color:var(--t3)">PROFIT (items, realized)</div>
       </div>
+      ${(u.locked_balance||0) > 0 ? `
+      <div style="background:rgba(241,196,15,.1);border:1px solid rgba(241,196,15,.4);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:18px;font-weight:700;color:#f1c40f">${fmt(u.locked_balance||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">🔒 LOCKED ${u.locked_unlocked_at ? '<br>(was '+(u.locked_unlock_reason||'?')+')' : ''}</div>
+      </div>` : ''}
+      ${(u.referral_balance||0) > 0 ? `
+      <div style="background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.4);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--purple)">${fmt(u.referral_balance||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">REF BALANCE (pending)</div>
+      </div>` : ''}
+      ${(() => {
+        const tier = (u.ref_tier || 'bronze').toLowerCase();
+        const tierColor = {bronze:'#cd7f32', silver:'#c0c0c0', gold:'#ffd700', platinum:'#e5e4e2'}[tier] || '#cd7f32';
+        const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+        const tierRate = {bronze:3, silver:5, gold:7, platinum:10}[tier] || 3;
+        return `<div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center;border-top:3px solid ${tierColor}">
+          <div style="font-size:14px;font-weight:700;color:${tierColor}">${tierName}</div>
+          <div style="font-size:10px;color:var(--t3)">REF TIER · ${tierRate}% rate</div>
+          <div style="font-size:10px;color:var(--green);margin-top:2px">Earned $${(u.ref_total_earned_lifetime||0).toFixed(2)} lifetime</div>
+        </div>`;
+      })()}
     </div>
 
     <!-- REFERRER + REFERRALS -->
@@ -1415,11 +1548,31 @@ async function showUserDetail(login){
       }
     </div>
 
+    <!-- REFERRAL EARNINGS (lazy-loaded) -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">🌳 REFERRAL EARNINGS</div>
+      <div id="dossierRefEarnings" style="background:var(--bg2);border-radius:6px;padding:8px;font-size:12px;color:var(--t3);text-align:center">
+        <button class="btn btn-b btn-sm" onclick="loadRefEarningsForDossier('${u.login}')">📊 Load earnings history</button>
+      </div>
+    </div>
+
+    <!-- BONUS ACTIONS (admin) -->
+    ${(u.locked_balance||0) > 0 && !u.locked_unlocked_at ? `
+    <div style="background:rgba(241,196,15,.08);border:1px solid rgba(241,196,15,.3);padding:10px 12px;border-radius:6px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="font-size:12px">
+        <strong style="color:#f1c40f">🔒 Locked: ${fmt(u.locked_balance||0)}</strong>
+        <div style="color:var(--t3);font-size:11px;margin-top:2px">User must complete unlock conditions, or admin can force-unlock</div>
+      </div>
+      <button class="btn btn-sm" style="background:#f1c40f;color:#000;font-weight:700" onclick="forceUnlockBonus('${u.login}')">🔓 FORCE UNLOCK</button>
+    </div>` : ''}
+
     <!-- META -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;font-size:12px">
-      <div style="color:var(--t3)">Referral code: <strong style="color:var(--gold)">${u.ref_code||'—'}</strong></div>
-      <div style="color:var(--t3)">Referral earned total: <strong style="color:var(--green)">${fmt(sm.referral_earned_total||0)}</strong></div>
+      <div style="color:var(--t3)">Referral code: <strong style="color:var(--gold)">${u.ref_code||'—'}</strong> <span style="color:var(--t3);font-size:10px">(or use @${u.login})</span></div>
+      <div style="color:var(--t3)">Referral earned total: <strong style="color:var(--green)">${fmt(u.ref_total_earned_lifetime||sm.referral_earned_total||0)}</strong></div>
       <div style="color:var(--t3)">First-deposit bonus used: <strong style="color:var(--t)">${u.has_first_deposit_bonus?'NO (eligible)':'YES (used)'}</strong></div>
+      <div style="color:var(--t3)">Welcome bonus: <strong style="color:var(--t)">${u.welcome_bonus_received?'received':'never'}</strong></div>
+      <div style="color:var(--t3)">Coupon: <strong style="color:var(--t)">${u.coupon_redeemed_id?'redeemed (#'+u.coupon_redeemed_id+')':'available'}</strong></div>
       <div style="color:var(--t3)">Email: <strong style="color:var(--t)">${u.email||'—'}</strong></div>
       ${u.note?`<div style="grid-column:1/-1;color:var(--t3)">Note: <strong style="color:var(--gold)">${u.note}</strong></div>`:''}
     </div>
@@ -2644,6 +2797,11 @@ function rtRenderMindMap(){
     const badgeColor = node.banned ? '#e74c3c' : (node.referral_qualified ? '#27ae60' : '#f1c40f');
     const dispName = fullName.length > 20 ? fullName.substring(0, 19) + '…' : fullName;
     const childCount = (node.children||[]).length;
+    // Tier badge (Bronze/Silver/Gold/Platinum) — показываем только если есть рефералы
+    const tier = (node.ref_tier || 'bronze').toLowerCase();
+    const tierColor = {bronze:'#cd7f32', silver:'#c0c0c0', gold:'#ffd700', platinum:'#e5e4e2'}[tier] || '#cd7f32';
+    const tierLabel = tier.charAt(0).toUpperCase();   // B/S/G/P
+    const showTierBadge = childCount > 0;   // показываем только если есть рефералы
 
     svgContent += `
       <g class="rt-mm-node" data-login="${node.login}" transform="translate(${x},${y})" opacity="${opacity}" style="cursor:pointer">
@@ -2653,6 +2811,10 @@ function rtRenderMindMap(){
         <text x="34" y="22" font-size="13" font-weight="700" fill="${color}" style="pointer-events:none">@${rtEscapeXML(node.login)}</text>
         <text x="34" y="38" font-size="11" fill="#b8b8b8" style="pointer-events:none">${rtEscapeXML(dispName)}</text>
         <text x="34" y="50" font-size="10" fill="#6b6b6b" style="pointer-events:none">$${(node.wallet_balance||0).toFixed(0)} · ${rtLastSeen(node.last_seen)}</text>
+        ${showTierBadge ? `
+          <rect x="${RT_NODE_W - 28}" y="3" width="22" height="14" rx="3" fill="${tierColor}" opacity="0.85" />
+          <text x="${RT_NODE_W - 17}" y="13" font-size="9" font-weight="800" fill="#000" text-anchor="middle" style="pointer-events:none">${tierLabel}</text>
+        ` : ''}
         ${childCount > 0 ? `
           <circle cx="${RT_NODE_W - 14}" cy="${RT_NODE_H/2}" r="11" fill="#9b59b6" />
           <text x="${RT_NODE_W - 14}" y="${RT_NODE_H/2 + 4}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" style="pointer-events:none">${childCount}</text>
@@ -2911,6 +3073,263 @@ function filterReftree(){
   } else {
     // mindmap — re-render to apply opacity
     rtRenderMindMap();
+  }
+}
+
+// ============================================================
+// DOSSIER ADD-ONS: ref earnings + force unlock
+// ============================================================
+async function loadRefEarningsForDossier(login){
+  const c = document.getElementById('dossierRefEarnings');
+  if(!c) return;
+  c.innerHTML = '<div style="color:var(--t3);padding:8px">Loading...</div>';
+  const r = await api(`/api/user/${encodeURIComponent(login)}/referral-earnings`);
+  if(!r || !r.ok){
+    c.innerHTML = '<div style="color:var(--red);padding:8px">Failed to load. Backend may not have endpoint yet.</div>';
+    return;
+  }
+  const earnings = r.earnings || [];
+  if(!earnings.length){
+    c.innerHTML = `<div style="color:var(--t3);padding:14px;text-align:center">No referral earnings yet. Total lifetime: <strong style="color:var(--green)">$${(r.total_earned_lifetime||0).toFixed(2)}</strong></div>`;
+    return;
+  }
+  // Group by source_login
+  const bySource = {};
+  earnings.forEach(e => {
+    if(!bySource[e.source_login]) bySource[e.source_login] = {count:0, total:0};
+    bySource[e.source_login].count++;
+    bySource[e.source_login].total += Number(e.earned_usd) || 0;
+  });
+  const sources = Object.entries(bySource).sort((a,b) => b[1].total - a[1].total);
+  c.innerHTML = `
+    <div style="font-size:11px;color:var(--t3);padding:6px 8px;display:flex;justify-content:space-between">
+      <span>Total lifetime: <strong style="color:var(--green)">$${(r.total_earned_lifetime||0).toFixed(2)}</strong></span>
+      <span>Events: <strong style="color:var(--t)">${earnings.length}</strong></span>
+    </div>
+    <div style="background:var(--bg);border-radius:4px;padding:6px;margin:4px 0">
+      <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:4px">BY SOURCE (top 10):</div>
+      ${sources.slice(0, 10).map(([login, stats]) => `
+        <div style="display:flex;justify-content:space-between;padding:3px 6px;font-size:12px">
+          <span><strong style="color:var(--gold);cursor:pointer" onclick="showUserDetail('${login}')">@${login}</strong> · ${stats.count}x</span>
+          <strong style="color:var(--green)">+$${stats.total.toFixed(2)}</strong>
+        </div>
+      `).join('')}
+    </div>
+    <div style="background:var(--bg);border-radius:4px;padding:6px">
+      <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:4px">RECENT EVENTS:</div>
+      ${earnings.slice(0, 15).map(e => `
+        <div style="display:flex;justify-content:space-between;padding:3px 6px;font-size:11px;border-bottom:1px solid var(--bd)">
+          <span style="color:var(--t)"><strong style="color:var(--gold)">@${e.source_login}</strong> ${e.source_event} $${(e.source_amount_usd||0).toFixed(0)}</span>
+          <span style="color:var(--green)">+$${(e.earned_usd||0).toFixed(2)} <span style="color:var(--t3);font-size:10px">(${(e.percentage||0).toFixed(0)}%, ${e.beneficiary_tier||'?'})</span></span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+async function forceUnlockBonus(login){
+  if(!confirm(`Force unlock locked_balance for @${login}?\n\nThis bypasses normal conditions (deposit + invest, OR 3 referrals).\nUse only for special cases (compensation, manual handling).`)) return;
+  const r = await post(`/api/admin/users/${encodeURIComponent(login)}/unlock-bonus`, {});
+  if(r && r.ok){
+    notify(`✓ Unlocked $${(r.unlocked_amount_usd||0).toFixed(2)} for @${login}`);
+    closeModal('userDetailModal');
+    setTimeout(() => showUserDetail(login), 200);   // re-open with updated data
+  } else {
+    const err = (r && r.detail && r.detail.error) || (r && r.error) || 'unknown';
+    notify('Failed to unlock: ' + err, false);
+  }
+}
+
+// ============================================================
+// COUPONS — generate batches, issue codes, list, delete
+// ============================================================
+let _couponBatches = [];
+let _currentListBatchId = null;
+let _currentListCodes = [];
+
+async function loadCouponBatches(){
+  const c = document.getElementById('couponBatchesList');
+  if(!c) return;
+  c.innerHTML = '<div style="color:var(--t3);text-align:center;padding:30px;grid-column:1/-1">Loading batches...</div>';
+  const data = await api('/api/admin/coupons/batches');
+  if(!data || !data.ok){
+    c.innerHTML = '<div style="color:var(--red);text-align:center;padding:30px;grid-column:1/-1">Failed to load batches.<br><span style="font-size:11px">Backend may not have /api/admin/coupons endpoints yet.</span></div>';
+    return;
+  }
+  _couponBatches = data.batches || [];
+  renderCouponBatches();
+}
+
+function renderCouponBatches(){
+  const c = document.getElementById('couponBatchesList');
+  if(!c) return;
+  if(!_couponBatches.length){
+    c.innerHTML = '<div style="color:var(--t3);text-align:center;padding:30px;grid-column:1/-1">No batches yet. Click <strong>+ CREATE BATCH</strong> to make your first promo.</div>';
+    return;
+  }
+  c.innerHTML = _couponBatches.map(b => renderBatchCard(b)).join('');
+}
+
+function renderBatchCard(b){
+  const total = b.total_count || 0;
+  const unused = b.unused_count || 0;
+  const issued = b.issued_count || 0;
+  const redeemed = b.redeemed_count || 0;
+  const expired = b.expired_count || 0;
+  const used = issued + redeemed + expired;
+  const pctUsed = total > 0 ? (used / total * 100) : 0;
+  const expiresLabel = b.expires_at
+    ? (new Date(b.expires_at) < new Date() ? '🔴 Expired' : '🕐 Expires ' + new Date(b.expires_at).toLocaleDateString())
+    : '∞ No expiry';
+  const totalValue = (Number(b.amount_usd) * total).toLocaleString();
+  const canDelete = redeemed === 0;
+  return `
+    <div class="panel">
+      <div class="ph" style="justify-content:space-between">
+        <span style="font-size:13px">💎 ${b.label || 'Untitled batch #' + b.id}</span>
+        <span class="badge" style="background:var(--gold)">${b.amount_usd}$ × ${total}</span>
+      </div>
+      <div class="pb">
+        <div class="metric"><span class="ml">Total value</span><span class="mv" style="color:var(--gold)">$${totalValue}</span></div>
+        <div class="metric"><span class="ml">Per coupon</span><span class="mv" style="color:var(--green)">$${Number(b.amount_usd).toFixed(2)}</span></div>
+        <div class="metric"><span class="ml">Status</span><span class="mv" style="font-size:11px">${expiresLabel}</span></div>
+        <div class="metric"><span class="ml">Created</span><span class="mv" style="font-size:11px;color:var(--t3)">${b.created_at ? new Date(b.created_at).toLocaleDateString() : '—'}</span></div>
+        <div style="margin:12px 0 8px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px">
+            <span>Unused: <strong style="color:var(--green)">${unused}</strong></span>
+            <span>Issued: <strong style="color:var(--gold)">${issued}</strong></span>
+            <span>Redeemed: <strong style="color:var(--blue)">${redeemed}</strong></span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pctUsed.toFixed(1)}%"></div></div>
+          <div style="font-size:10px;color:var(--t3);margin-top:3px;text-align:right">${used}/${total} used</div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          ${unused > 0 ? `<button class="btn btn-g btn-sm" onclick="issueOneCode(${b.id})">📤 ISSUE 1</button>` : ''}
+          <button class="btn btn-b btn-sm" onclick="openListCodes(${b.id}, '${(b.label || '').replace(/'/g, '&#39;')}')">📋 LIST ALL</button>
+          ${canDelete ? `<button class="btn btn-r btn-sm" onclick="deleteBatch(${b.id}, '${(b.label || '').replace(/'/g, '&#39;')}')">🗑️ DELETE</button>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openCreateBatchModal(){
+  document.getElementById('cbLabel').value = '';
+  document.getElementById('cbAmount').value = '10';
+  document.getElementById('cbCount').value = '100';
+  document.getElementById('cbExpires').value = '';
+  document.getElementById('createBatchModal').classList.add('show');
+}
+
+async function submitCreateBatch(){
+  const label = document.getElementById('cbLabel').value.trim();
+  const amount = parseFloat(document.getElementById('cbAmount').value);
+  const count = parseInt(document.getElementById('cbCount').value, 10);
+  const expiresStr = document.getElementById('cbExpires').value;
+  if(!amount || amount <= 0){ notify('Amount must be > 0', false); return; }
+  if(!count || count < 1 || count > 5000){ notify('Count must be 1-5000', false); return; }
+  const body = { label, amount_usd: amount, count };
+  if(expiresStr){
+    body.expires_at = new Date(expiresStr).toISOString();
+  }
+  const r = await post('/api/admin/coupons/batches', body);
+  if(r && r.ok){
+    notify(`✓ Batch created: ${count} coupons × $${amount}`);
+    closeModal('createBatchModal');
+    loadCouponBatches();
+  } else {
+    const err = (r && r.detail && r.detail.error) || (r && r.error) || 'unknown';
+    notify('Error creating batch: ' + err, false);
+  }
+}
+
+async function issueOneCode(batchId){
+  const r = await post(`/api/admin/coupons/batches/${batchId}/issue-one`, {});
+  if(r && r.ok){
+    document.getElementById('issuedCode').textContent = r.code;
+    document.getElementById('issuedAmount').textContent = '$' + (r.amount_usd || 0).toFixed(2);
+    document.getElementById('issuedCodeModal').classList.add('show');
+    // Refresh list to update counters
+    loadCouponBatches();
+  } else {
+    const err = (r && r.detail && r.detail.error) || (r && r.error) || 'unknown';
+    notify('Failed to issue code: ' + err, false);
+  }
+}
+
+function copyIssuedCode(){
+  const code = document.getElementById('issuedCode').textContent;
+  if(!code || code === '—') return;
+  navigator.clipboard.writeText(code).then(() => {
+    notify('✓ Code copied to clipboard');
+  }, () => {
+    notify('Failed to copy', false);
+  });
+}
+
+async function openListCodes(batchId, label){
+  _currentListBatchId = batchId;
+  document.getElementById('listCodesHeader').textContent = `Batch: ${label || '#' + batchId}`;
+  document.getElementById('listCodesFilter').value = 'unused';
+  document.getElementById('listCodesContent').innerHTML = 'Loading...';
+  document.getElementById('listCodesModal').classList.add('show');
+  reloadListCodes();
+}
+
+async function reloadListCodes(){
+  if(!_currentListBatchId) return;
+  const filter = document.getElementById('listCodesFilter').value;
+  const r = await api(`/api/admin/coupons/batches/${_currentListBatchId}/codes?status=${filter}`);
+  if(!r || !r.ok){
+    document.getElementById('listCodesContent').innerHTML = '<span style="color:var(--red)">Failed to load codes</span>';
+    return;
+  }
+  _currentListCodes = r.codes || [];
+  if(!_currentListCodes.length){
+    document.getElementById('listCodesContent').innerHTML = '<span style="color:var(--t3)">No codes match filter</span>';
+    return;
+  }
+  document.getElementById('listCodesContent').innerHTML = _currentListCodes.map(c => {
+    const statusColor = c.status === 'unused' ? 'var(--green)'
+                      : c.status === 'issued' ? 'var(--gold)'
+                      : c.status === 'redeemed' ? 'var(--blue)' : 'var(--t3)';
+    return `<div style="padding:3px 0;border-bottom:1px solid var(--bd)">
+      <span style="color:var(--gold);font-weight:600">${c.code}</span>
+      <span style="color:${statusColor};font-size:10px;margin-left:8px;text-transform:uppercase">${c.status}</span>
+      ${c.redeemed_by ? `<span style="color:var(--t3);font-size:11px;margin-left:8px">→ @${c.redeemed_by}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function copyAllCodes(format){
+  if(!_currentListCodes.length) return;
+  let text;
+  if(format === 'csv'){
+    text = 'code,status,redeemed_by\n' + _currentListCodes.map(c =>
+      `${c.code},${c.status},${c.redeemed_by || ''}`
+    ).join('\n');
+  } else {
+    text = _currentListCodes.map(c => c.code).join('\n');
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    notify(`✓ ${_currentListCodes.length} codes copied (${format})`);
+  }, () => {
+    notify('Failed to copy', false);
+  });
+}
+
+async function deleteBatch(batchId, label){
+  if(!confirm(`Delete batch "${label}"?\n\nThis is allowed only if no coupons have been redeemed.\nUnused/issued codes will be permanently deleted.`)) return;
+  const r = await fetch(API_URL + `/api/admin/coupons/batches/${batchId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + (sessionStorage.getItem('luxor_admin_token') || '') }
+  }).then(r => r.json()).catch(e => ({ok: false, error: e.message}));
+  if(r && r.ok){
+    notify('✓ Batch deleted');
+    loadCouponBatches();
+  } else {
+    const err = (r && r.detail && r.detail.error) || (r && r.error) || 'unknown';
+    notify('Failed to delete: ' + err, false);
   }
 }
 
