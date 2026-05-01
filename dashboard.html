@@ -1192,6 +1192,7 @@ button{font-family:inherit}
 <symbol id="i-fav" viewBox="0 0 24 24"><path d="M12 2 L15 8.5 L22 9.5 L17 14.5 L18 21.5 L12 18 L6 21.5 L7 14.5 L2 9.5 L9 8.5 Z"/></symbol>
 <symbol id="i-trade" viewBox="0 0 24 24"><path d="M3 20 V4 M3 20 H21 M7 16 L11 12 L14 14 L20 7 M16 7 L20 7 L20 11"/></symbol>
 <symbol id="i-ref" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20 C3 16 6 14 9 14 C12 14 15 16 15 20"/><path d="M16 11 L18 13 L22 9"/></symbol>
+<symbol id="i-bonus" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M2 8 H22 M12 8 V21 M12 8 C12 6 10 3 8 3 C6 3 5 4.5 5 6 C5 7.5 7 8 8 8 M12 8 C12 6 14 3 16 3 C18 3 19 4.5 19 6 C19 7.5 17 8 16 8"/></symbol>
 <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2 L13 5 L16 4 L17 7 L20 8 L19 11 L22 12 L19 13 L20 16 L17 17 L16 20 L13 19 L12 22 L11 19 L8 20 L7 17 L4 16 L5 13 L2 12 L5 11 L4 8 L7 7 L8 4 L11 5 Z"/></symbol>
 <symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16 L21 21"/></symbol>
@@ -1237,6 +1238,7 @@ button{font-family:inherit}
 <a class="nav-item" data-target="favs"><svg class="lx"><use href="#i-fav"/></svg>Favorites</a>
 <a class="nav-item" data-target="trade"><svg class="lx"><use href="#i-trade"/></svg>Secondary Market</a>
 <a class="nav-item" data-target="referral"><svg class="lx"><use href="#i-ref"/></svg>Referral Program</a>
+<a class="nav-item" data-target="bonus"><svg class="lx"><use href="#i-bonus"/></svg>Bonuses <span class="nav-unread" id="dBonusBadge" style="display:none;background:#f1c40f;color:#000">$</span></a>
 <a class="nav-item" data-target="support"><svg class="lx"><use href="#i-chat"/></svg>Support <span class="nav-unread" id="dSupportBadge" style="display:none">0</span></a>
 <a class="nav-item" data-target="settings"><svg class="lx"><use href="#i-settings"/></svg>Settings</a>
 
@@ -1297,6 +1299,14 @@ button{font-family:inherit}
       <div class="bal-split-d" id="dPendDesc">processing</div>
     </div>
   </div>
+</div>
+<div id="dLockedBanner" style="display:none;margin-top:14px;padding:12px 16px;background:linear-gradient(135deg,rgba(241,196,15,.12) 0%,rgba(241,196,15,.04) 100%);border:1px solid rgba(241,196,15,.5);border-radius:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap" onclick="navTo('bonus')" role="button">
+  <div style="font-size:24px">🔒</div>
+  <div style="flex:1;min-width:160px">
+    <div style="font-size:11px;color:var(--t3);letter-spacing:1px">LOCKED BALANCE</div>
+    <div style="font-size:18px;font-weight:700;color:#f1c40f"><span id="dLockedAmt">$0</span> <span style="font-size:11px;color:var(--t3);font-weight:400">awaiting unlock</span></div>
+  </div>
+  <button class="btn btn-secondary" style="background:#f1c40f;color:#000;font-weight:700;padding:9px 16px;font-size:12px;border:none;border-radius:6px;cursor:pointer" onclick="event.stopPropagation();showLockedDetailsModal()">DETAILS →</button>
 </div>
 <div class="dual-banners">
 <button class="calc-banner" onclick="navTo('calc')">
@@ -1613,7 +1623,20 @@ button{font-family:inherit}
 <div class="d-screen" id="ds-referral">
 <div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>REFERRAL PROGRAM</b></div>
 <h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:6px">Referral Program</h2>
-<p style="font-size:13px;color:var(--t3);margin-bottom:18px">Earn <strong style="color:var(--gold)">5–10% of all profit</strong> your friends generate on Luxor — pool accruals and item sales. Lifetime.</p>
+<p style="font-size:13px;color:var(--t3);margin-bottom:18px">Earn <strong style="color:var(--gold)">3–10% of every deposit</strong> your friends make on Luxor. Tier scales with your active referrals — invite more, earn more. Lifetime.</p>
+
+<!-- Referral pending balance + withdraw button -->
+<div id="dRefPendingCard" class="card" style="display:none;margin-bottom:14px;background:linear-gradient(135deg,rgba(155,89,182,.12) 0%,rgba(155,89,182,.04) 100%);border:1px solid rgba(155,89,182,.4)">
+  <div style="padding:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div style="font-size:24px">💰</div>
+    <div style="flex:1;min-width:160px">
+      <div style="font-size:11px;color:var(--t3);letter-spacing:1px">REFERRAL BALANCE (PENDING)</div>
+      <div style="font-size:22px;font-weight:800;color:var(--purple)" id="dRefPendingAmt">$0</div>
+      <div style="font-size:11px;color:var(--t3);margin-top:2px">Earned from your friends' deposits</div>
+    </div>
+    <button onclick="withdrawRefBalanceToMain()" style="padding:11px 16px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;letter-spacing:1px">WITHDRAW TO MAIN →</button>
+  </div>
+</div>
 
 <div class="ref-hero">
 <div class="l">YOUR REFERRAL CODE</div>
@@ -1669,12 +1692,68 @@ button{font-family:inherit}
 <div class="d-panel">
 <div class="head"><h5>HOW IT WORKS</h5></div>
 <div style="font-size:13px;color:var(--t2);line-height:1.8">
-<p style="margin-bottom:6px"><strong>1.</strong> Share your code or referral link with friends</p>
-<p style="margin-bottom:6px"><strong>2.</strong> They register using your code (or click the link)</p>
-<p style="margin-bottom:6px"><strong>3.</strong> Friend makes a deposit of <strong style="color:var(--gold)">$100 or more</strong> — they become an active referral</p>
-<p style="margin-bottom:6px"><strong>4.</strong> You earn <strong style="color:var(--gold)">5–10%</strong> of every profit they generate</p>
-<p><strong>5.</strong> Bonuses are credited to your wallet automatically</p>
+<p style="margin-bottom:6px"><strong>1.</strong> Share your referral code (your username) with friends</p>
+<p style="margin-bottom:6px"><strong>2.</strong> They register using your code → <strong style="color:var(--gold)">they get $50 welcome bonus</strong> (locked)</p>
+<p style="margin-bottom:6px"><strong>3.</strong> When friend deposits, you earn a percentage based on your tier:</p>
+<p style="margin-bottom:4px;padding-left:14px;color:var(--t3);font-size:12px">• Bronze (0-2 active): <strong style="color:#cd7f32">3%</strong></p>
+<p style="margin-bottom:4px;padding-left:14px;color:var(--t3);font-size:12px">• Silver (3-9): <strong style="color:#c0c0c0">5%</strong></p>
+<p style="margin-bottom:4px;padding-left:14px;color:var(--t3);font-size:12px">• Gold (10-29): <strong style="color:#ffd700">7%</strong></p>
+<p style="margin-bottom:6px;padding-left:14px;color:var(--t3);font-size:12px">• Platinum (30+): <strong style="color:#e5e4e2">10%</strong></p>
+<p><strong>4.</strong> Earnings accumulate in your <strong style="color:var(--purple)">Referral Balance</strong> — withdraw to main wallet anytime</p>
 </div>
+</div>
+</div>
+
+<!-- ──────── DESKTOP: BONUSES ──────── -->
+<div class="d-screen" id="ds-bonus">
+<div class="d-bc"><a onclick="navTo('dash')">DASHBOARD</a> · <b>BONUSES</b></div>
+<h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:6px">🎁 Bonuses</h2>
+<p style="font-size:13px;color:var(--t3);margin-bottom:24px">Redeem promo codes to get bonus money on your account. Bonuses are locked until you complete unlock conditions.</p>
+
+<!-- Locked balance card -->
+<div class="card" id="dBonusLockedCard" style="margin-bottom:18px;display:none;background:linear-gradient(135deg,rgba(241,196,15,.1) 0%,rgba(241,196,15,.04) 100%);border:1px solid rgba(241,196,15,.4)">
+  <div style="padding:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:#f1c40f;margin-bottom:4px">🔒 LOCKED BALANCE</div>
+        <div style="font-size:32px;font-weight:800;color:#f1c40f" id="dBonusLockedAmount">$0</div>
+      </div>
+      <div style="text-align:right;flex:1;min-width:180px">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:6px">Complete <strong style="color:#f1c40f">ANY</strong> condition below to unlock:</div>
+      </div>
+    </div>
+    <div id="dBonusUnlockProgress">
+      <!-- filled dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- Coupon redeem -->
+<div class="card" style="margin-bottom:18px">
+  <div style="padding:18px">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--gold);margin-bottom:4px">💎 PROMO CODE</div>
+    <div style="font-size:13px;color:var(--t3);margin-bottom:12px">Got a coupon code? Enter it below to receive bonus money.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input id="dBonusCouponInput" type="text" maxlength="32" placeholder="LUX-XXXX-XXXX"
+             style="flex:1;min-width:240px;padding:12px 14px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;color:var(--t);font-size:14px;font-family:'SF Mono',Menlo,monospace;letter-spacing:1px;text-transform:uppercase;outline:none"
+             oninput="this.value = this.value.toUpperCase()">
+      <button class="btn btn-primary" onclick="bonusRedeemCoupon('d')" style="padding:12px 20px;font-size:13px">REDEEM</button>
+    </div>
+    <div id="dBonusCouponMsg" style="margin-top:10px;font-size:12px;display:none"></div>
+    <div style="margin-top:14px;padding:10px 12px;background:rgba(155,89,182,.06);border-left:3px solid var(--purple);border-radius:6px;font-size:11px;color:var(--t3);line-height:1.6">
+      ⓘ <strong>1 coupon per account</strong>. Money goes to your locked balance — same unlock conditions as welcome bonus.
+    </div>
+  </div>
+</div>
+
+<!-- Bonus history -->
+<div class="card">
+  <div style="padding:18px">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--gold);margin-bottom:14px">📜 BONUS HISTORY</div>
+    <div id="dBonusHistory" style="font-size:13px">
+      <div style="color:var(--t3);text-align:center;padding:20px">No bonuses yet</div>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -1883,6 +1962,16 @@ button{font-family:inherit}
       <div class="bal-split-l">PENDING</div>
       <div class="bal-split-v" id="mPendAmt" style="color:#e0a020">$0</div>
     </div>
+  </div>
+</div>
+<div id="mLockedBanner" style="display:none;margin-top:12px;padding:10px 12px;background:linear-gradient(135deg,rgba(241,196,15,.12) 0%,rgba(241,196,15,.04) 100%);border:1px solid rgba(241,196,15,.5);border-radius:10px;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer" onclick="navTo('bonus')">
+  <div style="display:flex;align-items:center;gap:10px;width:100%">
+    <div style="font-size:20px">🔒</div>
+    <div style="flex:1">
+      <div style="font-size:10px;color:var(--t3);letter-spacing:1px">LOCKED BALANCE</div>
+      <div style="font-size:16px;font-weight:700;color:#f1c40f"><span id="mLockedAmt">$0</span></div>
+    </div>
+    <span style="font-size:11px;color:#f1c40f;font-weight:700">DETAILS →</span>
   </div>
 </div>
 <div class="ch"><canvas id="mPortCanvas" width="380" height="100"></canvas></div>
@@ -2171,7 +2260,19 @@ button{font-family:inherit}
 <div class="m-screen" id="ms-referral">
 <div class="m-content">
 <div class="m-back" onclick="navTo('more')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl">REFERRALS</span><span style="width:18px"></span></div>
-<p style="font-size:11px;color:var(--t3);margin-bottom:14px;text-align:center">Earn <strong style="color:var(--gold)">5–10%</strong> from your friends' profits. Lifetime.</p>
+<p style="font-size:11px;color:var(--t3);margin-bottom:14px;text-align:center">Earn <strong style="color:var(--gold)">3–10%</strong> from each friend's deposit. Lifetime.</p>
+
+<!-- Mobile referral pending -->
+<div id="mRefPendingCard" style="display:none;margin-bottom:14px;padding:14px;background:linear-gradient(135deg,rgba(155,89,182,.12) 0%,rgba(155,89,182,.04) 100%);border:1px solid rgba(155,89,182,.4);border-radius:10px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:22px">💰</div>
+    <div style="flex:1">
+      <div style="font-size:10px;color:var(--t3);letter-spacing:1px">REFERRAL BALANCE (PENDING)</div>
+      <div style="font-size:18px;font-weight:800;color:var(--purple)" id="mRefPendingAmt">$0</div>
+    </div>
+  </div>
+  <button onclick="withdrawRefBalanceToMain()" style="width:100%;margin-top:10px;padding:11px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;letter-spacing:1px">WITHDRAW TO MAIN →</button>
+</div>
 
 <div class="ref-hero" style="padding:20px">
 <div class="l">YOUR CODE</div>
@@ -2218,6 +2319,49 @@ button{font-family:inherit}
 <div id="mRefListContainer"><div class="empty-state">No referrals yet.</div></div>
 </div>
 
+</div>
+</div>
+
+<!-- ──────── MOBILE: BONUSES ──────── -->
+<div class="m-screen" id="ms-bonus">
+<div class="m-content">
+<div class="m-back" onclick="navTo('more')"><svg class="lx"><use href="#i-back"/></svg><span class="ttl">BONUSES</span><span style="width:18px"></span></div>
+
+<!-- Locked balance card -->
+<div class="card" id="mBonusLockedCard" style="margin-bottom:14px;display:none;background:linear-gradient(135deg,rgba(241,196,15,.1) 0%,rgba(241,196,15,.04) 100%);border:1px solid rgba(241,196,15,.4)">
+  <div style="padding:16px">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#f1c40f;margin-bottom:4px">🔒 LOCKED BALANCE</div>
+    <div style="font-size:30px;font-weight:800;color:#f1c40f" id="mBonusLockedAmount">$0</div>
+    <div style="font-size:11px;color:var(--t3);margin:10px 0 6px">Complete <strong style="color:#f1c40f">ANY</strong> condition to unlock:</div>
+    <div id="mBonusUnlockProgress"></div>
+  </div>
+</div>
+
+<!-- Coupon redeem -->
+<div class="card" style="margin-bottom:14px">
+  <div style="padding:16px">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);margin-bottom:4px">💎 PROMO CODE</div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:12px">Got a coupon code? Enter it below.</div>
+    <input id="mBonusCouponInput" type="text" maxlength="32" placeholder="LUX-XXXX-XXXX"
+           style="width:100%;padding:14px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;color:var(--t);font-size:15px;font-family:'SF Mono',Menlo,monospace;letter-spacing:1px;text-transform:uppercase;outline:none;margin-bottom:10px"
+           oninput="this.value = this.value.toUpperCase()">
+    <button class="btn btn-primary" onclick="bonusRedeemCoupon('m')" style="width:100%;padding:13px;font-size:14px;font-weight:700">REDEEM</button>
+    <div id="mBonusCouponMsg" style="margin-top:10px;font-size:12px;display:none"></div>
+    <div style="margin-top:12px;padding:9px 11px;background:rgba(155,89,182,.06);border-left:3px solid var(--purple);border-radius:6px;font-size:10px;color:var(--t3);line-height:1.5">
+      ⓘ <strong>1 coupon per account</strong>. Same unlock conditions as welcome bonus.
+    </div>
+  </div>
+</div>
+
+<!-- History -->
+<div class="card">
+  <div style="padding:16px">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);margin-bottom:12px">📜 BONUS HISTORY</div>
+    <div id="mBonusHistory" style="font-size:12px">
+      <div style="color:var(--t3);text-align:center;padding:14px">No bonuses yet</div>
+    </div>
+  </div>
+</div>
 </div>
 </div>
 
@@ -2377,6 +2521,10 @@ button{font-family:inherit}
 <a class="set-card" style="margin-bottom:0;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="navTo('referral')">
 <svg class="lx" style="font-size:24px;color:var(--gold)"><use href="#i-ref"/></svg>
 <div style="flex:1"><div style="font-size:14px;font-weight:600">Referrals</div><div style="font-size:11px;color:var(--t3);margin-top:2px">Earn 5–10% from friends</div></div>
+</a>
+<a class="set-card" style="margin-bottom:0;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="navTo('bonus')">
+<svg class="lx" style="font-size:24px;color:#f1c40f"><use href="#i-bonus"/></svg>
+<div style="flex:1"><div style="font-size:14px;font-weight:600">Bonuses <span id="mBonusBadgeMore" style="display:none;background:#f1c40f;color:#000;padding:1px 6px;border-radius:8px;font-size:10px;margin-left:4px;font-weight:700">$</span></div><div style="font-size:11px;color:var(--t3);margin-top:2px">Redeem coupons & unlock bonuses</div></div>
 </a>
 <a class="set-card" style="margin-bottom:0;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="navTo('insights')">
 <svg class="lx" style="font-size:24px;color:var(--gold)"><use href="#i-trade"/></svg>
@@ -2567,6 +2715,15 @@ try{
 
 state.wallet = 0; state.balance = 0;
 state.positions = []; state.myItems = []; state.closedItems = [];
+// NEW Etap 6 fields
+state.lockedBalance = 0;
+state.lockedUnlockedAt = null;
+state.referralBalance = 0;
+state.refTier = 'bronze';
+state.refTotalLifetime = 0;
+state.welcomeBonusReceived = false;
+state.couponRedeemedId = null;
+state.unlockProgress = null;
 
 function saveState(){
   try{ sessionStorage.setItem('luxor_state2', JSON.stringify(state)); }catch(e){}
@@ -2628,6 +2785,15 @@ function _favResolve(favEntry){
         state.wallet = Number(data.user.wallet_balance) || 0;
         state.balance = Number(data.user.balance) || 0;
         U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
+        // NEW: Etap 6 fields
+        state.lockedBalance = Number(data.user.locked_balance) || 0;
+        state.lockedUnlockedAt = data.user.locked_unlocked_at || null;
+        state.referralBalance = Number(data.user.referral_balance) || 0;
+        state.refTier = (data.user.ref_tier || 'bronze').toLowerCase();
+        state.refTotalLifetime = Number(data.user.ref_total_earned_lifetime) || 0;
+        state.welcomeBonusReceived = !!data.user.welcome_bonus_received;
+        state.couponRedeemedId = data.user.coupon_redeemed_id || null;
+        state.unlockProgress = data.user.unlock_progress || null;
         if(data.user.ref_code){
           U.ref_code = data.user.ref_code;
           try{ sessionStorage.setItem('luxor_user', JSON.stringify(U)); }catch(e){}
@@ -2637,8 +2803,10 @@ function _favResolve(favEntry){
           }catch(e){}
         }
         sessionStorage.setItem('luxor_login', userLogin);
-        console.log('[balance] loaded — wallet:', state.wallet);
+        console.log('[balance] loaded — wallet:', state.wallet, 'locked:', state.lockedBalance, 'refBal:', state.referralBalance, 'tier:', state.refTier);
         try{ updateUI(); }catch(e){ console.warn('[balance] updateUI failed:', e); }
+        try{ if(typeof updateBonusUI === 'function') updateBonusUI(); }catch(e){}
+        try{ if(typeof updateReferralPendingUI === 'function') updateReferralPendingUI(); }catch(e){}
         saveState();
       } else {
         console.warn('[balance] response missing ok/user:', data);
@@ -4647,6 +4815,9 @@ async function loadReferrals(){
       }
     }
   }catch(e){ console.warn('loadReferrals failed:', e); }
+  // After loadReferrals: re-apply our tier UI (use state.refTier from /api/user)
+  // This ensures our new system (3/5/7/10%) wins over legacy refTier display
+  try { if(typeof updateReferralPendingUI === 'function') updateReferralPendingUI(); } catch(e){}
 }
 
 function copyRefCode(){
@@ -9186,6 +9357,300 @@ setTimeout(() => { try{ _fxInit(); }catch(e){ console.warn('FX init failed', e);
 setInterval(() => { try{ _fxLoadRates(true).then(_fxApplyToUI); }catch(e){} }, FX_CACHE_TTL_MS);
 
 console.log('[stage9] Currency switcher (USD/EUR/GBP) loaded');
+
+// ═══════════════════════════════════════════════════════════════════════
+// [stage10] BONUSES + REFERRAL TIER (Etap 8)
+// ═══════════════════════════════════════════════════════════════════════
+
+// ─── Update bonus UI (called after balance reload) ────────────────────
+function updateBonusUI(){
+  const locked = Number(state.lockedBalance) || 0;
+  const showBanner = locked > 0;
+
+  // Dashboard banners
+  const dBanner = document.getElementById('dLockedBanner');
+  const mBanner = document.getElementById('mLockedBanner');
+  if(dBanner) dBanner.style.display = showBanner ? 'flex' : 'none';
+  if(mBanner) mBanner.style.display = showBanner ? 'block' : 'none';
+
+  // Animate locked amount
+  if(typeof animateById === 'function'){
+    animateById('dLockedAmt', locked);
+    animateById('mLockedAmt', locked);
+  }
+
+  // Sidebar badge
+  const dBadge = document.getElementById('dBonusBadge');
+  const mBadgeMore = document.getElementById('mBonusBadgeMore');
+  if(dBadge) dBadge.style.display = showBanner ? '' : 'none';
+  if(mBadgeMore) mBadgeMore.style.display = showBanner ? '' : 'none';
+
+  // Bonuses page locked card
+  const dBonCard = document.getElementById('dBonusLockedCard');
+  const mBonCard = document.getElementById('mBonusLockedCard');
+  if(dBonCard) dBonCard.style.display = showBanner ? 'block' : 'none';
+  if(mBonCard) mBonCard.style.display = showBanner ? 'block' : 'none';
+  if(typeof animateById === 'function'){
+    animateById('dBonusLockedAmount', locked);
+    animateById('mBonusLockedAmount', locked);
+  }
+
+  // Render unlock progress on Bonuses page
+  renderUnlockProgress();
+}
+
+function renderUnlockProgress(){
+  const prog = state.unlockProgress;
+  const html = (function buildHTML(){
+    if(!prog || !state.lockedBalance){
+      return '<div style="color:var(--t3);text-align:center;padding:14px">Conditions data unavailable</div>';
+    }
+    const t1 = prog.trigger_1 || {};
+    const t2 = prog.trigger_2 || {};
+    function checkbox(done){
+      return done
+        ? '<span style="color:var(--green);font-size:16px;margin-right:6px">✓</span>'
+        : '<span style="color:var(--t3);font-size:16px;margin-right:6px">○</span>';
+    }
+    const depDone = !!t1.deposit_ok;
+    const invDone = !!t1.invest_ok;
+    const refsDone = (t2.qualified_referrals || 0) >= (t2.required_referrals || 3);
+    const t1Done = !!t1.completed;
+    const t2Done = !!t2.completed;
+    const trigger1Done = depDone && invDone;
+    const t1bg = trigger1Done ? 'rgba(39,174,96,.08)' : 'rgba(255,255,255,.02)';
+    const t2bg = t2Done ? 'rgba(39,174,96,.08)' : 'rgba(255,255,255,.02)';
+    return `
+      <div style="display:grid;gap:10px">
+        <div style="padding:12px;border-radius:8px;background:${t1bg};border:1px solid var(--bd)">
+          <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:${trigger1Done?'var(--green)':'var(--t)'}">Path 1: Deposit + Investment</div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.7">
+            <div>${checkbox(depDone)}Deposit ≥ <strong>$${(t1.deposit_required||50).toFixed(0)}</strong> <span style="color:var(--t3)">(current: $${(t1.deposit_current||0).toFixed(0)})</span></div>
+            <div>${checkbox(invDone)}Hold investment ≥ $50 for <strong>${t1.invest_hours_required||24}h</strong> <span style="color:var(--t3)">(${(t1.invest_hours_held||0).toFixed(1)}h held)</span></div>
+          </div>
+        </div>
+        <div style="text-align:center;color:var(--t3);font-size:11px;font-weight:700;letter-spacing:2px">— OR —</div>
+        <div style="padding:12px;border-radius:8px;background:${t2bg};border:1px solid var(--bd)">
+          <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:${t2Done?'var(--green)':'var(--t)'}">Path 2: 3 Qualified Referrals</div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.7">
+            <div>${checkbox(refsDone)}Invite <strong>${t2.required_referrals||3}</strong> qualified friends <span style="color:var(--t3)">(${t2.qualified_referrals||0}/${t2.required_referrals||3})</span></div>
+            <div>${checkbox(invDone)}Plus your own investment held ≥ <strong>${t1.invest_hours_required||24}h</strong></div>
+          </div>
+          ${!refsDone ? `<button onclick="navTo('referral')" style="margin-top:8px;padding:7px 12px;background:var(--purple);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">→ INVITE FRIENDS</button>` : ''}
+        </div>
+      </div>
+    `;
+  })();
+  ['dBonusUnlockProgress','mBonusUnlockProgress'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = html;
+  });
+}
+
+function showLockedDetailsModal(){
+  // Простая навигация в Bonuses (там видны условия)
+  navTo('bonus');
+}
+
+// ─── Coupon redeem ──────────────────────────────────────────────────
+async function bonusRedeemCoupon(prefix){
+  const inputId = (prefix === 'm' ? 'mBonusCouponInput' : 'dBonusCouponInput');
+  const msgId = (prefix === 'm' ? 'mBonusCouponMsg' : 'dBonusCouponMsg');
+  const code = (document.getElementById(inputId).value || '').trim().toUpperCase();
+  const msg = document.getElementById(msgId);
+  if(!code){
+    if(msg){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Please enter a code'; }
+    return;
+  }
+  try {
+    const r = await apiFetch('/api/coupons/redeem', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({code: code})
+    });
+    const data = await r.json().catch(() => ({}));
+    if(r.ok && data.ok){
+      if(msg){
+        msg.style.display='block';
+        msg.style.color='var(--green)';
+        msg.innerHTML = `✓ <strong>$${(data.amount_usd||0).toFixed(2)}</strong> added to locked balance${data.auto_unlocked?' and AUTO-UNLOCKED!':''}`;
+      }
+      try { showToast('Coupon redeemed: +$' + (data.amount_usd||0).toFixed(2), 'success'); } catch(e) {}
+      document.getElementById(inputId).value = '';
+      // Reload balance to show new locked + unlocked status
+      setTimeout(() => { try{ window.location.reload === undefined ? null : null; loadBalanceFromBackend(); }catch(e){} }, 600);
+      try { loadBalanceFromBackend(); } catch(e){}
+    } else {
+      const err = (data.detail && data.detail.error) || data.error || 'unknown';
+      const errMsgs = {
+        'coupon_already_used': 'You have already redeemed a coupon. Limit: 1 per account.',
+        'code_not_found': 'Invalid code. Please check and try again.',
+        'code_already_redeemed': 'This code has already been used.',
+        'code_expired': 'This code has expired.',
+        'invalid_code': 'Code format is invalid.',
+        'banned': 'Account is restricted.',
+      };
+      if(msg){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent = errMsgs[err] || ('Error: ' + err); }
+    }
+  } catch(e) {
+    if(msg){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Network error. Try again.'; }
+    console.error('redeem failed:', e);
+  }
+}
+
+// ─── Refresh loadBalanceFromBackend wrapper ─────────────────────────
+async function loadBalanceFromBackend(){
+  // Re-run the IIFE that was loaded at startup — fetch user data
+  try {
+    const userLogin = sessionStorage.getItem('luxor_login') || U.login;
+    if(!userLogin) return;
+    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin));
+    if(!r.ok) return;
+    const data = await r.json().catch(() => ({}));
+    if(data.ok && data.user){
+      state.wallet = Number(data.user.wallet_balance) || 0;
+      state.lockedBalance = Number(data.user.locked_balance) || 0;
+      state.lockedUnlockedAt = data.user.locked_unlocked_at || null;
+      state.referralBalance = Number(data.user.referral_balance) || 0;
+      state.refTier = (data.user.ref_tier || 'bronze').toLowerCase();
+      state.refTotalLifetime = Number(data.user.ref_total_earned_lifetime) || 0;
+      state.unlockProgress = data.user.unlock_progress || null;
+      state.couponRedeemedId = data.user.coupon_redeemed_id || null;
+      try{ updateUI(); }catch(e){}
+      try{ updateBonusUI(); }catch(e){}
+      try{ updateReferralPendingUI(); }catch(e){}
+    }
+  } catch(e){ console.warn('reloadBalance:', e); }
+}
+
+// ─── Update Referral Pending Card + Tier UI ─────────────────────────
+function updateReferralPendingUI(){
+  const refBal = Number(state.referralBalance) || 0;
+  const showCard = refBal > 0.005;
+  ['dRefPendingCard','mRefPendingCard'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = showCard ? '' : 'none';
+  });
+  if(typeof animateById === 'function'){
+    animateById('dRefPendingAmt', refBal);
+    animateById('mRefPendingAmt', refBal);
+  }
+  // Update tier display in referral page
+  const tier = state.refTier || 'bronze';
+  const tierInfo = {
+    bronze:   {name:'Bronze',   rate:3,  color:'#cd7f32', next:'Silver',   needed:3},
+    silver:   {name:'Silver',   rate:5,  color:'#c0c0c0', next:'Gold',     needed:10},
+    gold:     {name:'Gold',     rate:7,  color:'#ffd700', next:'Platinum', needed:30},
+    platinum: {name:'Platinum', rate:10, color:'#e5e4e2', next:null,       needed:null},
+  }[tier] || {name:'Bronze', rate:3, color:'#cd7f32'};
+  ['refTierName','mRefTierName'].forEach(id => {
+    const el = document.getElementById(id); if(el){ el.textContent = tierInfo.name; el.style.color = tierInfo.color; }
+  });
+  ['refTierPct','mRefTierPct'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent = tierInfo.rate + '% from each deposit';
+  });
+  ['refStatPct'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent = tierInfo.rate + '%';
+  });
+  ['refStatEarned'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el && typeof animateBalanceTo === 'function') animateBalanceTo(el, state.refTotalLifetime || 0);
+    else if(el) el.textContent = '$' + (state.refTotalLifetime || 0).toFixed(2);
+  });
+}
+
+async function withdrawRefBalanceToMain(){
+  if(!confirm('Transfer your referral balance to main wallet?')) return;
+  try {
+    const r = await apiFetch('/api/referral/withdraw-to-main', {method:'POST'});
+    const data = await r.json().catch(() => ({}));
+    if(r.ok && data.ok){
+      try { showToast('Transferred to main wallet', 'success'); } catch(e){}
+      // Reload balance
+      try { loadBalanceFromBackend(); } catch(e){}
+    } else {
+      try { showToast('Failed to transfer', 'error'); } catch(e){}
+    }
+  } catch(e){
+    try { showToast('Network error', 'error'); } catch(_){}
+  }
+}
+
+// ─── Hook updateBonusUI/updateReferralPendingUI into existing updateUI ───
+// Patch updateUI на лету чтобы вызывать новые UI обновления
+(function hookUpdateUI(){
+  const origUpdate = window.updateUI;
+  if(typeof origUpdate !== 'function') return;
+  window.updateUI = function(){
+    const r = origUpdate.apply(this, arguments);
+    try{ updateBonusUI(); }catch(e){ console.warn('updateBonusUI:', e); }
+    try{ updateReferralPendingUI(); }catch(e){ console.warn('updateRefPending:', e); }
+    return r;
+  };
+})();
+
+// Expose globals
+window.updateBonusUI = updateBonusUI;
+window.bonusRedeemCoupon = bonusRedeemCoupon;
+window.withdrawRefBalanceToMain = withdrawRefBalanceToMain;
+window.showLockedDetailsModal = showLockedDetailsModal;
+window.updateReferralPendingUI = updateReferralPendingUI;
+window.loadBalanceFromBackend = loadBalanceFromBackend;
+
+// Show welcome bonus popup if just registered (sessionStorage flag set by index.html)
+(function checkWelcomeBonusPopup(){
+  try {
+    const flag = sessionStorage.getItem('luxor_welcome_bonus');
+    if(flag){
+      const data = JSON.parse(flag);
+      sessionStorage.removeItem('luxor_welcome_bonus');
+      setTimeout(() => showWelcomeBonusModal(data), 800);
+    }
+  } catch(e){}
+})();
+
+function showWelcomeBonusModal(data){
+  const referrer = data.referrer || 'a friend';
+  const amount = data.amount || 50;
+  const html = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px"
+         onclick="if(event.target===this){this.remove()}">
+      <div style="background:var(--bg2);border:2px solid var(--gold);border-radius:14px;max-width:400px;padding:32px 24px;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)">
+        <div style="font-size:54px;margin-bottom:14px">🎉</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);letter-spacing:1.5px;margin-bottom:8px">Welcome Bonus!</div>
+        <div style="font-size:15px;color:var(--t);margin-bottom:6px">
+          <strong style="color:var(--gold)">@${referrer}</strong> just gave you
+        </div>
+        <div style="font-size:46px;font-weight:800;color:var(--green);margin:14px 0">$${amount}</div>
+        <div style="font-size:12px;color:var(--t3);line-height:1.6;margin-bottom:18px">
+          Money is added to your locked balance.<br>Complete unlock conditions to use it.
+        </div>
+        <button onclick="this.closest('div[style*=fixed]').remove();navTo('bonus')"
+                style="width:100%;padding:13px;background:var(--gold);color:#000;border:none;border-radius:9px;font-size:13px;font-weight:800;letter-spacing:1px;cursor:pointer">
+          SHOW ME UNLOCK CONDITIONS →
+        </button>
+        <button onclick="this.closest('div[style*=fixed]').remove()"
+                style="width:100%;margin-top:8px;padding:9px;background:transparent;color:var(--t3);border:none;font-size:11px;cursor:pointer">
+          Close
+        </button>
+      </div>
+    </div>
+    <style>@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}</style>
+  `;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  document.body.appendChild(div);
+}
+window.showWelcomeBonusModal = showWelcomeBonusModal;
+
+console.log('[stage10] Bonuses + Referral tier system loaded');
+
+// Перезапускаем UI обновления через 1 сек чтобы захватить state.refTier который был
+// загружен раньше (когда эти функции ещё не были определены)
+setTimeout(() => {
+  try { if(typeof updateBonusUI === 'function') updateBonusUI(); } catch(e){}
+  try { if(typeof updateReferralPendingUI === 'function') updateReferralPendingUI(); } catch(e){}
+}, 1500);
 
 </script>
 </body>
