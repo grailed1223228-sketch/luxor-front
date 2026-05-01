@@ -176,6 +176,7 @@ textarea.inp{resize:vertical;min-height:60px;}
   <button class="nav-btn" onclick="switchTab('withdrawals')">💸 Withdrawals</button>
   <button class="nav-btn" onclick="switchTab('deposits')">💰 Deposits</button>
   <button class="nav-btn" onclick="switchTab('users')">👥 Users</button>
+  <button class="nav-btn" onclick="switchTab('reftree')">🌳 Referrals Tree</button>
   <button class="nav-btn" onclick="switchTab('items')">🏷️ Marketplace</button>
   <button class="nav-btn" onclick="switchTab('wallets')">💳 Wallets</button>
   <button class="nav-btn" onclick="switchTab('rates')">⚙️ Pool Rates</button>
@@ -254,6 +255,41 @@ textarea.inp{resize:vertical;min-height:60px;}
       <button class="btn btn-b" onclick="loadUsers()" style="padding:10px 20px;font-size:13px">🔄 REFRESH</button>
     </div>
     <div id="usersList"></div>
+  </div>
+</div>
+
+<!-- REFERRALS TREE -->
+<div id="tab-reftree" class="tab">
+  <div style="max-width:1800px;margin:0 auto">
+    <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+      <h3 style="font-size:18px;font-weight:800;margin:0">🌳 Referrals Tree</h3>
+      <input type="text" class="inp" placeholder="🔍 Search by login or name..." id="reftreeSearch" oninput="filterReftree()" style="flex:1;min-width:200px">
+      <div style="display:inline-flex;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:3px;gap:2px">
+        <button id="rtModeMM" class="btn" style="padding:7px 14px;font-size:12px;background:var(--gold);color:#000;border-color:var(--gold)" onclick="rtSwitchMode('mindmap')">🌳 Mind-Map</button>
+        <button id="rtModeList" class="btn" style="padding:7px 14px;font-size:12px;background:transparent;border:none;color:var(--t3)" onclick="rtSwitchMode('list')">📋 List</button>
+      </div>
+      <button class="btn btn-b" onclick="reftreeExpandAll(true)" style="padding:8px 14px;font-size:12px" id="rtBtnExpand">⊞ Expand all</button>
+      <button class="btn btn-b" onclick="reftreeExpandAll(false)" style="padding:8px 14px;font-size:12px" id="rtBtnCollapse">⊟ Collapse</button>
+      <button class="btn btn-b" onclick="loadReftree()" style="padding:8px 14px;font-size:12px">🔄 Refresh</button>
+    </div>
+    <div id="reftreeStats" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="background:var(--bg2);padding:10px 14px;border-radius:8px"><span style="color:var(--t3);font-size:11px">TOTAL</span> <strong id="rtStatTotal" style="color:var(--gold);font-size:16px;margin-left:6px">—</strong></div>
+      <div style="background:var(--bg2);padding:10px 14px;border-radius:8px"><span style="color:var(--t3);font-size:11px">QUALIFIED</span> <strong id="rtStatQual" style="color:var(--green);font-size:16px;margin-left:6px">—</strong></div>
+      <div style="background:var(--bg2);padding:10px 14px;border-radius:8px"><span style="color:var(--t3);font-size:11px">PENDING</span> <strong id="rtStatPending" style="color:var(--gold);font-size:16px;margin-left:6px">—</strong></div>
+      <div style="background:var(--bg2);padding:10px 14px;border-radius:8px"><span style="color:var(--t3);font-size:11px">BANNED</span> <strong id="rtStatBanned" style="color:var(--red);font-size:16px;margin-left:6px">—</strong></div>
+      <div style="background:var(--bg2);padding:10px 14px;border-radius:8px"><span style="color:var(--t3);font-size:11px">TOTAL DEPOSITED</span> <strong id="rtStatDeposited" style="color:var(--green);font-size:16px;margin-left:6px">—</strong></div>
+    </div>
+    <div style="display:flex;gap:14px;font-size:11px;color:var(--t3);margin-bottom:14px;flex-wrap:wrap">
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--gold);border-radius:50%;margin-right:4px"></span>Root (no referrer)</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--green);border-radius:50%;margin-right:4px"></span>Qualified</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#f1c40f;border-radius:50%;margin-right:4px"></span>Pending</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--red);border-radius:50%;margin-right:4px"></span>Banned</span>
+      <span id="rtModeHint" style="color:var(--gold)">Click node → highlight chain · Drag to pan · Wheel to zoom</span>
+    </div>
+    <div id="reftreeContainer" style="background:var(--bg2);border-radius:10px;min-height:500px;height:calc(100vh - 320px);overflow:auto;position:relative">
+      <div style="color:var(--t3);text-align:center;padding:40px">Loading tree...</div>
+    </div>
+    <div id="rtTooltip" style="position:fixed;background:var(--bg);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:12px;pointer-events:none;z-index:9999;max-width:260px;box-shadow:0 4px 16px rgba(0,0,0,.5);display:none"></div>
   </div>
 </div>
 
@@ -465,6 +501,24 @@ textarea.inp{resize:vertical;min-height:60px;}
           <option value="paused">Paused</option>
           <option value="sold">Sold</option>
         </select>
+      </div>
+    </div>
+
+    <!-- COUNTDOWN TIMER -->
+    <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:12px;margin-bottom:14px">
+      <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:8px">🕐 POOL TIMER</div>
+      <div class="form-grid">
+        <div class="inp-row">
+          <label>Pool duration (days)</label>
+          <input class="inp" id="iCountdownDays" type="number" min="1" max="365" placeholder="5" value="5">
+        </div>
+        <div class="inp-row">
+          <label>Estimated sale (days after close)</label>
+          <input class="inp" id="iSaleDaysAfter" type="number" min="1" max="365" placeholder="10" value="10">
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-top:6px;line-height:1.4">
+        ⓘ Pool starts immediately on creation. After <strong style="color:var(--t)">duration</strong> days, pool auto-closes — platform absorbs any unsold fraction. Sale of the actual item is expected ~<strong style="color:var(--t)">sale-days</strong> after that.
       </div>
     </div>
 
@@ -715,6 +769,7 @@ function switchTab(name){
   if(name==='withdrawals') loadWithdrawals();
   if(name==='deposits') loadDeposits();
   if(name==='users') loadUsers();
+  if(name==='reftree') loadReftree();
   if(name==='items') loadItems();
   if(name==='wallets') loadWallets();
   if(name==='rates') loadRates();
@@ -1209,74 +1264,191 @@ async function sendMsgPrompt(login){
 async function showUserDetail(login){
   const modal = document.getElementById('userDetailModal');
   const content = document.getElementById('userDetailContent');
-  content.innerHTML = '<div style="color:var(--t3);padding:20px;text-align:center">Loading...</div>';
+  content.innerHTML = '<div style="color:var(--t3);padding:20px;text-align:center">Loading dossier...</div>';
   modal.classList.add('show');
 
-  const [userArr, txs] = await Promise.all([
-    api('/api/user/'+login),
-    api('/api/user/'+login+'/transactions')
-  ]);
+  // Зовём новый dossier endpoint — он собирает ВСЁ одним запросом
+  const data = await api('/api/admin/users/'+encodeURIComponent(login)+'/dossier');
+  if(!data || !data.ok){
+    content.innerHTML = '<p style="color:var(--red);padding:20px">Failed to load user dossier. Backend may not have new endpoints yet — please redeploy.</p>';
+    return;
+  }
 
-  const u = Array.isArray(userArr) ? userArr[0] : userArr;
-  if(!u){ content.innerHTML='<p style="color:var(--red)">User not found</p>'; return; }
+  const u = data.user || {};
+  const positions = data.pool_positions || [];
+  const purchases = data.item_purchases || [];
+  const txs = data.transactions || [];
+  const referrer = data.referrer;
+  const referrals = data.referrals || [];
+  const sm = data.summary || {};
 
-  const deps = (txs||[]).filter(t=>t.type==='deposit');
-  const wds = (txs||[]).filter(t=>t.type==='withdrawal');
-  const bonuses = (txs||[]).filter(t=>t.type==='bonus');
-  const totalDep = deps.reduce((s,t)=>s+t.amount,0);
-  const totalWd = wds.reduce((s,t)=>s+t.amount,0);
-  const totalBonus = bonuses.reduce((s,t)=>s+t.amount,0);
+  const fmtDate = (iso) => iso ? new Date(iso).toLocaleString() : '—';
+  const fmtDateShort = (iso) => iso ? new Date(iso).toLocaleDateString() : '—';
 
-  // Referrals
-  const refs = allUsers.filter(au=>au.referred_by_login===login);
+  // Last seen — давность
+  let lastSeenLabel = '—';
+  if(u.last_seen){
+    const ms = Date.now() - new Date(u.last_seen).getTime();
+    const mins = Math.floor(ms/60000);
+    if(mins < 1) lastSeenLabel = 'just now';
+    else if(mins < 60) lastSeenLabel = mins + ' min ago';
+    else if(mins < 60*24) lastSeenLabel = Math.floor(mins/60) + ' h ago';
+    else lastSeenLabel = Math.floor(mins/60/24) + ' d ago';
+  }
 
   content.innerHTML = `
-    <h3 style="font-size:20px;font-weight:800;margin-bottom:16px">👤 ${u.first_name||''} ${u.last_name||''}</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+    <h3 style="font-size:20px;font-weight:800;margin-bottom:6px">👤 ${u.first_name||''} ${u.last_name||''} <span style="color:var(--t3);font-weight:500;font-size:14px">@${u.login}</span> ${u.banned?'<span style="background:var(--red);color:#fff;padding:2px 8px;border-radius:6px;font-size:10px;margin-left:6px">BANNED</span>':''}</h3>
+    <div style="color:var(--t3);font-size:12px;margin-bottom:16px">${u.email||''} · Plan: <strong style="color:var(--t)">${u.plan||'—'}</strong> · Registered: ${fmtDateShort(u.created_at)} · Last seen: <strong style="color:var(--t)">${lastSeenLabel}</strong></div>
+
+    <!-- TOP STATS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px">
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
-        <div style="font-size:18px;font-weight:700;color:var(--gold)">${fmt(u.wallet_balance||0)}</div>
-        <div style="font-size:10px;color:var(--t3)">CURRENT BALANCE</div>
+        <div style="font-size:18px;font-weight:700;color:var(--gold)">${fmt(sm.wallet_balance||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">AVAILABLE BALANCE</div>
       </div>
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
-        <div style="font-size:18px;font-weight:700;color:var(--green)">${fmt(totalDep)}</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green)">${fmt(sm.total_deposited||0)}</div>
         <div style="font-size:10px;color:var(--t3)">TOTAL DEPOSITED</div>
       </div>
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
-        <div style="font-size:18px;font-weight:700;color:var(--red)">${fmt(totalWd)}</div>
-        <div style="font-size:10px;color:var(--t3)">TOTAL WITHDRAWN</div>
+        <div style="font-size:18px;font-weight:700;color:var(--blue)">${fmt(sm.total_in_pools_active||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">IN POOLS (active)</div>
+      </div>
+      <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--purple)">${fmt(sm.total_in_items_active||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">IN ITEMS (active)</div>
+      </div>
+      <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--green)">${fmt(sm.total_earned_pools||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">EARNED (pools)</div>
+      </div>
+      <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:18px;font-weight:700;color:${(sm.total_profit_items_realized||0)>=0?'var(--green)':'var(--red)'}">${fmt(sm.total_profit_items_realized||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">PROFIT (items, realized)</div>
       </div>
     </div>
+
+    <!-- REFERRER + REFERRALS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:var(--bg2);padding:12px;border-radius:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:6px">⬆️ REFERRED BY</div>
+        ${referrer
+          ? `<div style="font-size:13px"><strong style="color:var(--gold);cursor:pointer" onclick="showUserDetail('${referrer.login}')">@${referrer.login}</strong> — ${referrer.first_name||''} ${referrer.last_name||''}</div><div style="font-size:11px;color:var(--t3);margin-top:3px">Balance: ${fmt(referrer.wallet_balance||0)} · Deposited: ${fmt(referrer.total_deposited||0)}</div>`
+          : `<div style="color:var(--t3);font-size:13px;padding:6px 0">Direct (no referral)</div>`
+        }
+      </div>
+      <div style="background:var(--bg2);padding:12px;border-radius:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:6px">⬇️ BROUGHT REFERRALS (${referrals.length}, qualified: ${sm.qualified_referrals||0})</div>
+        ${referrals.length === 0
+          ? `<div style="color:var(--t3);font-size:13px;padding:6px 0">No referrals yet</div>`
+          : `<div style="max-height:120px;overflow-y:auto">${referrals.map(r=>`
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--bd);font-size:12px">
+                <span>${r.referral_qualified?'✓':'○'} <strong style="color:var(--gold);cursor:pointer" onclick="showUserDetail('${r.login}')">@${r.login}</strong> ${r.banned?'<span style="color:var(--red);font-size:10px">BAN</span>':''}</span>
+                <span style="color:var(--t3)">${fmt(r.wallet_balance||0)} / ${fmt(r.total_deposited||0)}</span>
+              </div>
+            `).join('')}</div>`
+        }
+      </div>
+    </div>
+
+    <!-- POOL POSITIONS -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">💼 POOL POSITIONS (${positions.length})</div>
+      ${positions.length === 0
+        ? `<div style="color:var(--t3);font-size:12px;padding:8px;background:var(--bg2);border-radius:6px;text-align:center">No pool investments</div>`
+        : `<div style="background:var(--bg2);border-radius:6px;overflow:hidden;max-height:200px;overflow-y:auto">
+             <table style="width:100%;border-collapse:collapse;font-size:12px">
+               <thead style="background:var(--bg);color:var(--t3);font-size:10px;font-weight:700"><tr>
+                 <th style="text-align:left;padding:8px">PLAN</th>
+                 <th style="text-align:right;padding:8px">INVESTED</th>
+                 <th style="text-align:right;padding:8px">EARNED</th>
+                 <th style="text-align:center;padding:8px">STATUS</th>
+                 <th style="text-align:left;padding:8px">CREATED</th>
+               </tr></thead>
+               <tbody>${positions.map(p=>`
+                 <tr style="border-top:1px solid var(--bd)">
+                   <td style="padding:8px;font-weight:600;color:${p.plan==='platinum'?'var(--purple)':p.plan==='gold'?'var(--gold)':'#bbb'}">${(p.plan||'—').toUpperCase()}</td>
+                   <td style="padding:8px;text-align:right">${fmt(p.amount_usd||0)}</td>
+                   <td style="padding:8px;text-align:right;color:var(--green)">+${fmt(p.earned_usd||0)}</td>
+                   <td style="padding:8px;text-align:center"><span style="background:${p.status==='active'?'var(--green)':'var(--t3)'};color:#fff;padding:2px 8px;border-radius:4px;font-size:10px">${(p.status||'').toUpperCase()}</span></td>
+                   <td style="padding:8px;color:var(--t3);font-size:11px">${fmtDateShort(p.created_at)}</td>
+                 </tr>`).join('')}
+               </tbody>
+             </table>
+           </div>`
+      }
+    </div>
+
+    <!-- ITEM PURCHASES -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">🏷️ ITEM PURCHASES (${purchases.length})</div>
+      ${purchases.length === 0
+        ? `<div style="color:var(--t3);font-size:12px;padding:8px;background:var(--bg2);border-radius:6px;text-align:center">No item purchases</div>`
+        : `<div style="background:var(--bg2);border-radius:6px;overflow:hidden;max-height:240px;overflow-y:auto">
+             <table style="width:100%;border-collapse:collapse;font-size:12px">
+               <thead style="background:var(--bg);color:var(--t3);font-size:10px;font-weight:700"><tr>
+                 <th style="text-align:left;padding:8px">ITEM</th>
+                 <th style="text-align:right;padding:8px">FRACTION</th>
+                 <th style="text-align:right;padding:8px">PAID</th>
+                 <th style="text-align:right;padding:8px">PAYOUT</th>
+                 <th style="text-align:right;padding:8px">P/L</th>
+                 <th style="text-align:center;padding:8px">STATUS</th>
+                 <th style="text-align:left;padding:8px">BOUGHT</th>
+               </tr></thead>
+               <tbody>${purchases.map(p=>{
+                 const pl = p.profit_loss_usd;
+                 const plStr = pl===null||pl===undefined ? '—' : (pl>=0?'+':'') + fmt(pl);
+                 const plColor = pl===null||pl===undefined ? 'var(--t3)' : (pl>=0?'var(--green)':'var(--red)');
+                 return `<tr style="border-top:1px solid var(--bd)">
+                   <td style="padding:8px;font-weight:600">${p.item_name||'item #'+p.item_id}</td>
+                   <td style="padding:8px;text-align:right">${(p.fraction_pct||0).toFixed(2)}%</td>
+                   <td style="padding:8px;text-align:right">${fmt(p.amount_paid_usd||0)}</td>
+                   <td style="padding:8px;text-align:right;color:var(--gold)">${p.payout_usd?fmt(p.payout_usd):'—'}</td>
+                   <td style="padding:8px;text-align:right;color:${plColor};font-weight:600">${plStr}</td>
+                   <td style="padding:8px;text-align:center"><span style="background:${p.status==='active'?'var(--green)':p.status==='sold'?'var(--blue)':'var(--t3)'};color:#fff;padding:2px 8px;border-radius:4px;font-size:10px">${(p.status||'').toUpperCase()}</span></td>
+                   <td style="padding:8px;color:var(--t3);font-size:11px">${fmtDateShort(p.bought_at)}</td>
+                 </tr>`;
+               }).join('')}
+               </tbody>
+             </table>
+           </div>`
+      }
+    </div>
+
+    <!-- META -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;font-size:12px">
-      <div style="color:var(--t3)">Plan: <strong style="color:var(--t)">${u.plan||'—'}</strong></div>
-      <div style="color:var(--t3)">KYC: <strong style="color:var(--t)">${u.kyc_status||'pending'}</strong></div>
-      <div style="color:var(--t3)">Registered: <strong style="color:var(--t)">${u.created_at?new Date(u.created_at).toLocaleDateString():'—'}</strong></div>
-      <div style="color:var(--t3)">Last seen: <strong style="color:var(--t)">${u.last_seen?new Date(u.last_seen).toLocaleString():'—'}</strong></div>
-      <div style="color:var(--t3)">Referral code: <strong style="color:var(--gold)">${u.referral_code||'—'}</strong></div>
-      <div style="color:var(--t3)">Referred by: <strong style="color:var(--purple)">${u.referred_by_login||'—'}</strong></div>
-      <div style="color:var(--t3)">Bonuses received: <strong style="color:var(--green)">${fmt(totalBonus)}</strong></div>
-      <div style="color:var(--t3)">Referral earnings: <strong style="color:var(--green)">${fmt(u.referral_earnings||0)}</strong></div>
+      <div style="color:var(--t3)">Referral code: <strong style="color:var(--gold)">${u.ref_code||'—'}</strong></div>
+      <div style="color:var(--t3)">Referral earned total: <strong style="color:var(--green)">${fmt(sm.referral_earned_total||0)}</strong></div>
+      <div style="color:var(--t3)">First-deposit bonus used: <strong style="color:var(--t)">${u.has_first_deposit_bonus?'NO (eligible)':'YES (used)'}</strong></div>
+      <div style="color:var(--t3)">Email: <strong style="color:var(--t)">${u.email||'—'}</strong></div>
+      ${u.note?`<div style="grid-column:1/-1;color:var(--t3)">Note: <strong style="color:var(--gold)">${u.note}</strong></div>`:''}
     </div>
-    ${refs.length>0?`
-    <div style="margin-bottom:14px">
-      <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:6px">🔗 REFERRALS (${refs.length} people)</div>
-      ${refs.map(r=>`<div style="font-size:11px;color:var(--t3);padding:4px 0;border-bottom:1px solid var(--bd)">👤 ${r.first_name} ${r.last_name} (${r.login}) · ${fmt(r.wallet_balance||0)}</div>`).join('')}
-    </div>`:''}
-    <div style="font-size:12px;font-weight:700;margin-bottom:8px">TRANSACTION HISTORY (${(txs||[]).length})</div>
-    <div style="max-height:220px;overflow-y:auto">
-      ${(txs||[]).map(t=>`
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px">
-          <div>
-            <span style="color:${t.type==='deposit'?'var(--green)':t.type==='withdrawal'?'var(--red)':'var(--gold)'}">${t.type==='deposit'?'💰':t.type==='withdrawal'?'💸':'🎁'} ${t.type}</span>
-            ${t.wallet_address_used?`<span style="color:var(--t3);font-size:10px;margin-left:6px">→ ${t.wallet_address_used.substring(0,16)}...</span>`:''}
-            <div style="font-size:10px;color:var(--t3)">${new Date(t.created_at).toLocaleString()}</div>
-          </div>
-          <div style="font-weight:700;color:${t.type==='withdrawal'?'var(--red)':'var(--green)'}">${t.type==='withdrawal'?'-':'+'}${fmt(t.amount)}</div>
-        </div>
-      `).join('')}
-      ${!txs||!txs.length?'<div style="color:var(--t3);text-align:center;padding:16px">No transactions</div>':''}
+
+    <!-- TRANSACTIONS -->
+    <div style="font-size:12px;font-weight:700;margin-bottom:8px">TRANSACTION HISTORY (${txs.length})</div>
+    <div style="max-height:200px;overflow-y:auto;background:var(--bg2);border-radius:6px;padding:6px">
+      ${txs.length === 0
+        ? `<div style="color:var(--t3);text-align:center;padding:16px">No transactions</div>`
+        : txs.map(t=>{
+            const isW = t.type==='withdrawal';
+            const isD = t.type==='deposit';
+            const color = isD?'var(--green)':isW?'var(--red)':'var(--gold)';
+            const sign = isW?'-':'+';
+            return `<div style="display:flex;justify-content:space-between;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:12px">
+              <div>
+                <span style="color:${color}">${isD?'💰':isW?'💸':'🎁'} ${t.type}</span>
+                <span style="background:var(--bg);color:var(--t3);padding:1px 6px;border-radius:4px;font-size:10px;margin-left:4px">${(t.status||'').toUpperCase()}</span>
+                <div style="font-size:10px;color:var(--t3)">${fmtDate(t.created_at)}</div>
+              </div>
+              <div style="font-weight:700;color:${color}">${sign}${fmt(t.amount_usd||0)}</div>
+            </div>`;
+          }).join('')
+      }
     </div>
+
+    <!-- ACTIONS -->
     <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="btn btn-g" onclick="addBalancePrompt('${login}','${u.first_name} ${u.last_name}')" style="flex:1">+ ADD BALANCE</button>
+      <button class="btn btn-g" onclick="addBalancePrompt('${login}','${(u.first_name||'')+' '+(u.last_name||'')}')" style="flex:1">+ ADD BALANCE</button>
       <button class="btn btn-b" onclick="sendMsgPrompt('${login}')" style="flex:1">SEND MSG</button>
     </div>
   `;
@@ -1310,10 +1482,15 @@ async function loadItems(){
 
     // Кнопки в зависимости от статуса
     let actionButtons = '';
+    const canClosePool = (item.status === 'active') && !item.is_pool_closed;
+    const closePoolBtn = canClosePool
+      ? `<button class="btn btn-sm" style="background:#e67e22;color:#fff" onclick="confirmClosePool('${item.id}','${safeName}')">🔒 CLOSE POOL</button>`
+      : '';
     if(item.status === 'active'){
       actionButtons = `
         <button class="btn btn-b btn-sm" onclick="editItem('${item.id}')">EDIT</button>
         <button class="btn btn-sm" style="background:#3498db;color:#fff" onclick="toggleItemStatus('${item.id}','active')">PAUSE</button>
+        ${closePoolBtn}
         <button class="btn btn-sm" style="background:var(--green);color:#000" onclick="openSellModal('${item.id}','${safeName}',${gRet},${eRet})">MARK AS SOLD</button>
         <button class="btn btn-r btn-sm" onclick="deleteItem('${item.id}')">DELETE</button>`;
     } else if(item.status === 'sold'){
@@ -1345,6 +1522,30 @@ async function loadItems(){
         <div class="metric"><span class="ml">Return Period</span><span class="mv">${periodDays} days</span></div>
         <div class="metric"><span class="ml">Available</span><span class="mv">${availFrac.toFixed(1)}%</span></div>
         <div class="metric"><span class="ml">Total Raised</span><span class="mv" style="color:var(--gold)">${fmt(totalRaised)}</span></div>
+        ${(() => {
+          // COUNTDOWN BADGE
+          const isClosed = !!item.is_pool_closed;
+          const remaining = item.time_remaining_sec;
+          const platformPct = Number(item.platform_fill_pct || 0);
+          if(isClosed){
+            return `<div style="margin:10px 0;padding:8px 10px;background:rgba(231,76,60,.12);border-left:3px solid var(--red);border-radius:4px;font-size:11px">
+              🔒 <strong style="color:var(--red)">POOL CLOSED</strong> · users filled ${pctFilled.toFixed(1)}% · platform absorbed ${platformPct.toFixed(1)}%
+            </div>`;
+          } else if(remaining !== null && remaining !== undefined){
+            const d = Math.floor(remaining/86400);
+            const h = Math.floor((remaining%86400)/3600);
+            const m = Math.floor((remaining%3600)/60);
+            const label = d>0 ? `${d}d ${h}h` : (h>0 ? `${h}h ${m}m` : `${m}m`);
+            return `<div style="margin:10px 0;padding:8px 10px;background:rgba(201,168,76,.1);border-left:3px solid var(--gold);border-radius:4px;font-size:11px;display:flex;justify-content:space-between;align-items:center">
+              <span>🕐 <strong style="color:var(--gold)">Pool closes in ${label}</strong></span>
+              <span style="color:var(--t3)">~${item.expected_sale_days_after_close||10}d to sale after close</span>
+            </div>`;
+          } else {
+            return `<div style="margin:10px 0;padding:6px 10px;background:var(--bg);border-radius:4px;font-size:11px;color:var(--t3)">
+              ⓘ No countdown set
+            </div>`;
+          }
+        })()}
         <div style="margin:10px 0">
           <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px">
             <span>Sold: ${pctFilled.toFixed(1)}% of 100%</span>
@@ -1434,6 +1635,9 @@ async function editItem(id){
   document.getElementById('iPeriod').value = item.return_period_days||'';
   document.getElementById('iStatus').value = item.status||'active';
   document.getElementById('iImageUrl').value = item.image_url||'';
+  // COUNTDOWN
+  document.getElementById('iCountdownDays').value = item.countdown_days || 5;
+  document.getElementById('iSaleDaysAfter').value = item.expected_sale_days_after_close || 10;
   // FIX: показываем preview существующего фото (если есть)
   selectedPhoto = null;   // никакого нового файла не выбрано пока
   const photoPreviewEl = document.getElementById('photoPreview');
@@ -1516,6 +1720,9 @@ async function saveItem(){
     return_period_days: +document.getElementById('iPeriod').value || 30,
     status: document.getElementById('iStatus').value,
     image_url: imageUrl,
+    // ─── COUNTDOWN ──────────────────────────────────────────
+    countdown_days: +document.getElementById('iCountdownDays').value || 5,
+    expected_sale_days_after_close: +document.getElementById('iSaleDaysAfter').value || 10,
   };
   // total_slots: при создании — отправляем (0 если пустое → бэк применит 20)
   // при редактировании — отправляем только если юзер реально вписал значение
@@ -1540,6 +1747,19 @@ async function saveItem(){
   } else {
     const err = (r && r.detail && r.detail.error) || (r && r.error) || 'unknown';
     notify('Error saving item: ' + err, false);
+  }
+}
+
+async function confirmClosePool(itemId, itemName){
+  const ok = confirm(`Close pool for "${itemName}" NOW?\n\nPlatform will absorb the unsold fraction.\nUsers will no longer be able to buy shares.\n\nThis cannot be undone.`);
+  if(!ok) return;
+  const r = await post('/api/admin/items/'+itemId+'/close-pool', {});
+  if(r && r.ok){
+    notify(`✓ Pool closed. Platform absorbed ${(r.platform_fill_pct||0).toFixed(1)}%`);
+    loadItems();
+  } else {
+    const err = (r && r.detail && r.detail.error) || (r && r.error) || 'unknown';
+    notify('Error closing pool: ' + err, false);
   }
 }
 
@@ -1746,6 +1966,9 @@ function openAddItem() {
   document.getElementById('iPeriod').value = '';
   document.getElementById('iStatus').value = 'active';
   document.getElementById('iImageUrl').value = '';
+  // COUNTDOWN — defaults
+  document.getElementById('iCountdownDays').value = 5;
+  document.getElementById('iSaleDaysAfter').value = 10;
   
   // Сброс price history: select'ы в дефолтные периоды, цены очищаются
   const defaults = ['1 year ago', '6 months ago', '3 months ago', '1 month ago', 'Now'];
@@ -2168,7 +2391,530 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-console.log('✅ LUXOR Admin Panel - Drag & Drop Photo Upload Enabled');
+// ============================================================
+// REFERRALS TREE — Mind-Map + List view
+// ============================================================
+let _reftreeData = null;
+let _reftreeExpanded = new Set();           // logins что развёрнуты (list mode)
+let _rtMode = 'mindmap';                    // 'mindmap' | 'list'
+let _rtHighlightChain = new Set();          // подсветка цепочки до root
+// Pan/zoom state (mind-map)
+let _rtZoom = 1, _rtPanX = 0, _rtPanY = 0;
+let _rtIsDragging = false;
+let _rtDragStartX = 0, _rtDragStartY = 0;
+let _rtVx = 0, _rtVy = 0;
+let _rtLastMoveX = 0, _rtLastMoveY = 0, _rtLastMoveT = 0;
+let _rtRafId = null;
+let _rtSmoothMode = false;
+const RT_ZOOM_MIN = 0.15, RT_ZOOM_MAX = 4;
+const RT_PAN_FRICTION = 0.92;
+const RT_VEL_THRESHOLD = 0.05;
+
+async function loadReftree(){
+  const c = document.getElementById('reftreeContainer');
+  if(c) c.innerHTML = '<div style="color:var(--t3);text-align:center;padding:40px">Loading tree...</div>';
+  const data = await api('/api/admin/referrals/tree');
+  if(!data || !data.ok){
+    if(c) c.innerHTML = '<div style="color:var(--red);text-align:center;padding:40px">Failed to load referrals tree.<br><span style="font-size:11px">Backend may not have /api/admin/referrals/tree yet — please redeploy main.py.</span></div>';
+    return;
+  }
+  _reftreeData = data;
+  // Stats
+  const s = data.stats || {};
+  document.getElementById('rtStatTotal').textContent = s.total || 0;
+  document.getElementById('rtStatQual').textContent = s.qualified || 0;
+  document.getElementById('rtStatPending').textContent = s.pending || 0;
+  document.getElementById('rtStatBanned').textContent = s.banned || 0;
+  document.getElementById('rtStatDeposited').textContent = '$' + (s.total_deposited||0).toLocaleString();
+  // Building flat index for quick lookup
+  rtBuildIndex();
+  // Default expanded в list режиме — только roots
+  _reftreeExpanded = new Set();
+  (data.roots || []).forEach(r => _reftreeExpanded.add(r.login));
+  // Reset zoom для mindmap
+  _rtZoom = 1; _rtPanX = 0; _rtPanY = 0;
+  _rtHighlightChain = new Set();
+  rtRender();
+}
+
+function rtBuildIndex(){
+  // _reftreeData.roots → строим nodesById для всех потомков
+  _rtNodesById = {};
+  function walk(node){
+    _rtNodesById[node.login] = node;
+    (node.children||[]).forEach(walk);
+  }
+  (_reftreeData.roots||[]).forEach(walk);
+}
+let _rtNodesById = {};
+
+function reftreeNodeColor(node){
+  if(node.banned) return 'var(--red)';
+  if(!node.referred_by) return 'var(--gold)';
+  if(node.referral_qualified) return 'var(--green)';
+  return '#f1c40f';
+}
+function rtNodeColorHex(node){
+  if(node.banned) return '#e74c3c';
+  if(!node.referred_by) return '#c9a84c';
+  if(node.referral_qualified) return '#27ae60';
+  return '#f1c40f';
+}
+
+function rtLastSeen(iso){
+  if(!iso) return '—';
+  const m = Math.floor((Date.now() - new Date(iso).getTime())/60000);
+  if(m<1) return 'now';
+  if(m<60) return m+'m';
+  if(m<1440) return Math.floor(m/60)+'h';
+  return Math.floor(m/1440)+'d';
+}
+
+function rtSwitchMode(mode){
+  _rtMode = mode;
+  document.getElementById('rtModeMM').style.background = (mode==='mindmap') ? 'var(--gold)' : 'transparent';
+  document.getElementById('rtModeMM').style.color = (mode==='mindmap') ? '#000' : 'var(--t3)';
+  document.getElementById('rtModeMM').style.border = (mode==='mindmap') ? '1px solid var(--gold)' : 'none';
+  document.getElementById('rtModeList').style.background = (mode==='list') ? 'var(--gold)' : 'transparent';
+  document.getElementById('rtModeList').style.color = (mode==='list') ? '#000' : 'var(--t3)';
+  document.getElementById('rtModeList').style.border = (mode==='list') ? '1px solid var(--gold)' : 'none';
+  // Hide expand/collapse buttons in mindmap (они не используются)
+  document.getElementById('rtBtnExpand').style.display = (mode==='list') ? '' : 'none';
+  document.getElementById('rtBtnCollapse').style.display = (mode==='list') ? '' : 'none';
+  // Hint text
+  const hint = document.getElementById('rtModeHint');
+  if(hint) hint.textContent = (mode==='mindmap')
+    ? 'Click node → highlight chain · Drag to pan · Wheel to zoom (smooth)'
+    : 'Click row to expand/collapse · Click @login to open profile';
+  // Reset zoom
+  if(mode === 'mindmap'){ _rtZoom = 1; _rtPanX = 0; _rtPanY = 0; }
+  rtRender();
+}
+
+function rtRender(){
+  if(!_reftreeData) return;
+  if(_rtMode === 'mindmap') rtRenderMindMap();
+  else rtRenderList();
+}
+
+// ─── LIST RENDER (старый) ────────────────────────────────────────────────
+function reftreeRenderNode(node, depth){
+  const hasChildren = (node.children && node.children.length > 0);
+  const isExpanded = _reftreeExpanded.has(node.login);
+  const color = reftreeNodeColor(node);
+  const badge = node.banned ? 'BAN' : (node.referral_qualified ? '✓' : '○');
+  const badgeColor = node.banned ? 'var(--red)' : (node.referral_qualified ? 'var(--green)' : '#f1c40f');
+  return `
+    <div class="rt-node" data-login="${node.login.toLowerCase()}" data-name="${((node.first_name||'')+' '+(node.last_name||'')).toLowerCase()}" style="margin-left:${depth*22}px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-left:3px solid ${color};border-radius:6px;cursor:pointer" onclick="reftreeToggle('${node.login}')">
+        ${hasChildren
+          ? `<span style="display:inline-block;width:16px;color:var(--t3);font-size:11px">${isExpanded?'▼':'▶'}</span>`
+          : `<span style="display:inline-block;width:16px"></span>`
+        }
+        <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${badgeColor};color:#000;font-size:10px;font-weight:700;text-align:center;line-height:18px">${badge}</span>
+        <strong style="color:var(--gold);font-size:13px;cursor:pointer" onclick="event.stopPropagation();showUserDetail('${node.login}')">@${node.login}</strong>
+        <span style="color:var(--t);font-size:12px">${node.first_name||''} ${node.last_name||''}</span>
+        ${hasChildren?`<span style="background:var(--purple);color:#fff;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700">${node.children.length}</span>`:''}
+        <span style="margin-left:auto;color:var(--t3);font-size:11px">$${(node.wallet_balance||0).toFixed(0)} / dep $${(node.total_deposited||0).toFixed(0)} · ${rtLastSeen(node.last_seen)}</span>
+      </div>
+      ${hasChildren && isExpanded
+        ? `<div class="rt-children">${node.children.map(c => reftreeRenderNode(c, depth+1)).join('')}</div>`
+        : ''
+      }
+    </div>
+  `;
+}
+
+function rtRenderList(){
+  const c = document.getElementById('reftreeContainer');
+  if(!c) return;
+  c.style.padding = '16px';
+  const roots = _reftreeData.roots || [];
+  if(roots.length === 0){
+    c.innerHTML = '<div style="color:var(--t3);text-align:center;padding:40px">No users yet.<br><span style="font-size:11px">Tree will populate as users register.</span></div>';
+    return;
+  }
+  c.innerHTML = roots.map(r => reftreeRenderNode(r, 0)).join('');
+  filterReftree();
+}
+
+// ─── MIND-MAP RENDER ─────────────────────────────────────────────────────
+const RT_NODE_W = 180, RT_NODE_H = 56, RT_GAP_X = 60, RT_GAP_Y = 14;
+
+function rtComputeLayout(roots){
+  let totalY = 0;
+  const allLaid = [];
+  function layoutSubtree(node, depth){
+    node._depth = depth;
+    if(!node.children || node.children.length === 0){
+      node._y = 0; node._height = RT_NODE_H;
+      return RT_NODE_H;
+    }
+    let h = 0;
+    node.children.forEach((ch, i) => {
+      const ch_h = layoutSubtree(ch, depth+1);
+      ch._y = h;
+      h += ch_h;
+      if(i < node.children.length - 1) h += RT_GAP_Y;
+    });
+    node._height = h;
+    return h;
+  }
+  function assignAbsolute(node, baseX, baseY){
+    node._x = baseX;
+    if(!node.children || node.children.length === 0){
+      node._absY = baseY;
+    } else {
+      const totalChildrenHeight = node._height;
+      let cy = baseY - totalChildrenHeight/2 + RT_NODE_H/2;
+      node.children.forEach(ch => {
+        const subH = ch._height || RT_NODE_H;
+        assignAbsolute(ch, baseX + RT_NODE_W + RT_GAP_X, cy + subH/2 - RT_NODE_H/2);
+        cy += subH + RT_GAP_Y;
+      });
+      const firstY = node.children[0]._absY;
+      const lastY = node.children[node.children.length-1]._absY;
+      node._absY = (firstY + lastY) / 2;
+    }
+    allLaid.push(node);
+  }
+  roots.forEach(root => {
+    const treeH = layoutSubtree(root, 0);
+    assignAbsolute(root, 20, totalY + treeH/2);
+    totalY += treeH + 40;
+  });
+  return { nodes: allLaid, totalHeight: totalY };
+}
+
+function rtEscapeXML(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function rtRenderMindMap(){
+  const c = document.getElementById('reftreeContainer');
+  if(!c) return;
+  c.style.padding = '0';
+  const roots = _reftreeData.roots || [];
+  if(roots.length === 0){
+    c.innerHTML = '<div style="color:var(--t3);text-align:center;padding:40px">No users yet.</div>';
+    return;
+  }
+
+  const layout = rtComputeLayout(roots);
+  const filter = (document.getElementById('reftreeSearch')?.value || '').toLowerCase().trim();
+
+  let maxX = 0, maxY = 0;
+  layout.nodes.forEach(n => {
+    if(n._x + RT_NODE_W > maxX) maxX = n._x + RT_NODE_W;
+    if(n._absY + RT_NODE_H/2 > maxY) maxY = n._absY + RT_NODE_H/2;
+  });
+  const W = Math.max(maxX + 40, c.clientWidth);
+  const H = Math.max(maxY + 40, 600);
+
+  let svgContent = `<g id="rtMmGroup" transform="translate(${_rtPanX},${_rtPanY}) scale(${_rtZoom})">`;
+
+  // Links
+  layout.nodes.forEach(parent => {
+    (parent.children||[]).forEach(child => {
+      const x1 = parent._x + RT_NODE_W;
+      const y1 = parent._absY + RT_NODE_H/2;
+      const x2 = child._x;
+      const y2 = child._absY + RT_NODE_H/2;
+      const midX = (x1 + x2) / 2;
+      const path = `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`;
+      const isHL = _rtHighlightChain.has(parent.login) && _rtHighlightChain.has(child.login);
+      const stroke = isHL ? '#c9a84c' : '#2a2a2a';
+      const sw = isHL ? 2.5 : 1.5;
+      svgContent += `<path d="${path}" fill="none" stroke="${stroke}" stroke-width="${sw}" />`;
+    });
+  });
+
+  // Nodes
+  layout.nodes.forEach(node => {
+    const x = node._x;
+    const y = node._absY;
+    const color = rtNodeColorHex(node);
+    const fullName = `${node.first_name||''} ${node.last_name||''}`.trim();
+    const matchesFilter = !filter ||
+      node.login.toLowerCase().includes(filter) ||
+      fullName.toLowerCase().includes(filter);
+    const opacity = (filter && !matchesFilter) ? 0.25 : 1;
+    const strokeWidth = _rtHighlightChain.has(node.login) ? 3 : 2;
+    const badge = node.banned ? 'BAN' : (node.referral_qualified ? '✓' : '○');
+    const badgeColor = node.banned ? '#e74c3c' : (node.referral_qualified ? '#27ae60' : '#f1c40f');
+    const dispName = fullName.length > 20 ? fullName.substring(0, 19) + '…' : fullName;
+    const childCount = (node.children||[]).length;
+
+    svgContent += `
+      <g class="rt-mm-node" data-login="${node.login}" transform="translate(${x},${y})" opacity="${opacity}" style="cursor:pointer">
+        <rect width="${RT_NODE_W}" height="${RT_NODE_H}" rx="8" fill="#0a0a0a" stroke="${color}" stroke-width="${strokeWidth}" class="rt-mm-bg" />
+        <circle cx="16" cy="${RT_NODE_H/2}" r="10" fill="${badgeColor}" />
+        <text x="16" y="${RT_NODE_H/2 + 4}" font-size="11" font-weight="700" fill="#000" text-anchor="middle" style="pointer-events:none">${badge}</text>
+        <text x="34" y="22" font-size="13" font-weight="700" fill="${color}" style="pointer-events:none">@${rtEscapeXML(node.login)}</text>
+        <text x="34" y="38" font-size="11" fill="#b8b8b8" style="pointer-events:none">${rtEscapeXML(dispName)}</text>
+        <text x="34" y="50" font-size="10" fill="#6b6b6b" style="pointer-events:none">$${(node.wallet_balance||0).toFixed(0)} · ${rtLastSeen(node.last_seen)}</text>
+        ${childCount > 0 ? `
+          <circle cx="${RT_NODE_W - 14}" cy="${RT_NODE_H/2}" r="11" fill="#9b59b6" />
+          <text x="${RT_NODE_W - 14}" y="${RT_NODE_H/2 + 4}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" style="pointer-events:none">${childCount}</text>
+        ` : ''}
+      </g>
+    `;
+  });
+
+  svgContent += `</g>`;
+
+  c.innerHTML = `
+    <div style="position:sticky;top:8px;left:8px;z-index:10;display:flex;gap:6px;margin:8px;width:fit-content">
+      <button onclick="rtZoomBy(1.2)" title="Zoom in" style="width:32px;height:32px;background:var(--bg);border:1px solid var(--bd);border-radius:6px;color:var(--t);cursor:pointer;font-size:14px">+</button>
+      <button onclick="rtZoomBy(0.8)" title="Zoom out" style="width:32px;height:32px;background:var(--bg);border:1px solid var(--bd);border-radius:6px;color:var(--t);cursor:pointer;font-size:14px">−</button>
+      <button onclick="rtFitToView()" title="Fit" style="width:32px;height:32px;background:var(--bg);border:1px solid var(--bd);border-radius:6px;color:var(--t);cursor:pointer;font-size:14px">⊡</button>
+    </div>
+    <svg id="rtMmSvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;cursor:grab">${svgContent}</svg>
+  `;
+
+  // Attach events
+  rtAttachPanZoom();
+  // Click handlers
+  c.querySelectorAll('.rt-mm-node').forEach(g => {
+    g.addEventListener('click', (e) => {
+      e.stopPropagation();
+      rtOnNodeClick(g.dataset.login);
+    });
+    g.addEventListener('mouseenter', (e) => rtShowTooltip(g.dataset.login, e));
+    g.addEventListener('mousemove', (e) => rtMoveTooltip(e));
+    g.addEventListener('mouseleave', () => rtHideTooltip());
+  });
+}
+
+function rtOnNodeClick(login){
+  if(_rtHighlightChain.has(login) && _rtHighlightChain.size > 0){
+    // Already highlighted — open profile
+    rtHideTooltip();
+    showUserDetail(login);
+    return;
+  }
+  _rtHighlightChain = new Set();
+  let cur = _rtNodesById[login];
+  while(cur){
+    _rtHighlightChain.add(cur.login);
+    cur = cur.referred_by ? _rtNodesById[cur.referred_by] : null;
+  }
+  // also direct children
+  const node = _rtNodesById[login];
+  if(node) (node.children||[]).forEach(c => _rtHighlightChain.add(c.login));
+  rtRenderMindMap();
+}
+
+function rtShowTooltip(login, ev){
+  const u = _rtNodesById[login];
+  if(!u) return;
+  const tip = document.getElementById('rtTooltip');
+  if(!tip) return;
+  tip.innerHTML = `
+    <strong style="color:var(--gold)">@${u.login}</strong> ${u.banned?'<span style="color:var(--red);margin-left:4px">BANNED</span>':''}<br>
+    <span style="color:var(--t)">${(u.first_name||'')} ${(u.last_name||'')}</span>
+    <div style="margin-top:6px;color:var(--t2)">Balance: <strong style="color:var(--gold)">$${(u.wallet_balance||0).toFixed(2)}</strong></div>
+    <div style="color:var(--t2)">Deposited: <strong style="color:var(--green)">$${(u.total_deposited||0).toFixed(2)}</strong></div>
+    <div style="color:var(--t2)">Status: <strong>${u.banned?'Banned':(u.referral_qualified?'Qualified':'Pending')}</strong></div>
+    <div style="color:var(--t2)">Referred by: <strong>${u.referred_by||'— (root)'}</strong></div>
+    <div style="color:var(--t2)">Direct children: <strong>${(u.children||[]).length}</strong></div>
+    <div style="color:var(--t2)">Last seen: <strong>${rtLastSeen(u.last_seen)}</strong></div>
+    <div style="margin-top:6px;color:var(--gold);font-size:10px">Click → highlight chain · Click again → open profile</div>
+  `;
+  tip.style.display = 'block';
+  rtMoveTooltip(ev);
+}
+function rtMoveTooltip(ev){
+  const tip = document.getElementById('rtTooltip');
+  if(!tip || tip.style.display === 'none') return;
+  const x = ev.clientX + 16;
+  const y = ev.clientY + 16;
+  tip.style.left = Math.min(x, window.innerWidth - 280) + 'px';
+  tip.style.top = Math.min(y, window.innerHeight - 220) + 'px';
+}
+function rtHideTooltip(){
+  const tip = document.getElementById('rtTooltip');
+  if(tip) tip.style.display = 'none';
+}
+
+// ─── Smooth pan/zoom ──────────────────────────────────────────────────────
+function rtApplyTransform(){
+  const g = document.getElementById('rtMmGroup');
+  if(!g) return;
+  if(_rtSmoothMode){
+    g.style.transition = 'transform 0.18s cubic-bezier(0.25, 0.1, 0.25, 1.0)';
+  } else {
+    g.style.transition = 'none';
+  }
+  g.setAttribute('transform', `translate(${_rtPanX},${_rtPanY}) scale(${_rtZoom})`);
+}
+
+function rtAttachPanZoom(){
+  const svg = document.getElementById('rtMmSvg');
+  if(!svg) return;
+
+  const onDown = (e) => {
+    if(e.target.closest('.rt-mm-node')) return;
+    if(e.target.closest('button')) return;
+    _rtIsDragging = true;
+    _rtSmoothMode = false;
+    rtCancelInertia();
+    const ev = e.touches ? e.touches[0] : e;
+    _rtDragStartX = ev.clientX - _rtPanX;
+    _rtDragStartY = ev.clientY - _rtPanY;
+    _rtLastMoveX = ev.clientX;
+    _rtLastMoveY = ev.clientY;
+    _rtLastMoveT = performance.now();
+    _rtVx = 0; _rtVy = 0;
+    svg.style.cursor = 'grabbing';
+    e.preventDefault();
+  };
+  const onMove = (e) => {
+    if(!_rtIsDragging) return;
+    const ev = e.touches ? e.touches[0] : e;
+    const newPanX = ev.clientX - _rtDragStartX;
+    const newPanY = ev.clientY - _rtDragStartY;
+    const now = performance.now();
+    const dt = Math.max(1, now - _rtLastMoveT);
+    _rtVx = (ev.clientX - _rtLastMoveX) / dt * 16;
+    _rtVy = (ev.clientY - _rtLastMoveY) / dt * 16;
+    _rtLastMoveX = ev.clientX; _rtLastMoveY = ev.clientY; _rtLastMoveT = now;
+    _rtPanX = newPanX; _rtPanY = newPanY;
+    rtApplyTransform();
+  };
+  const onUp = () => {
+    if(!_rtIsDragging) return;
+    _rtIsDragging = false;
+    if(svg) svg.style.cursor = 'grab';
+    if(Math.abs(_rtVx) > RT_VEL_THRESHOLD || Math.abs(_rtVy) > RT_VEL_THRESHOLD){
+      rtStartInertia();
+    }
+  };
+
+  // Remove any pre-existing handlers (idempotent)
+  if(svg._rtHandlersAttached){
+    svg.removeEventListener('mousedown', svg._rtOnDown);
+    document.removeEventListener('mousemove', svg._rtOnMove);
+    document.removeEventListener('mouseup', svg._rtOnUp);
+    svg.removeEventListener('wheel', svg._rtOnWheel);
+  }
+  svg._rtOnDown = onDown;
+  svg._rtOnMove = onMove;
+  svg._rtOnUp = onUp;
+  svg._rtHandlersAttached = true;
+
+  svg.addEventListener('mousedown', onDown);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+
+  // Wheel zoom
+  const onWheel = (e) => {
+    e.preventDefault();
+    rtCancelInertia();
+    let delta = e.deltaY;
+    if(e.deltaMode === 1) delta *= 16;
+    if(e.deltaMode === 2) delta *= 100;
+    const factor = Math.exp(-delta * 0.0015);
+    rtZoomToPoint(factor, e.clientX, e.clientY, false);
+  };
+  svg._rtOnWheel = onWheel;
+  svg.addEventListener('wheel', onWheel, { passive: false });
+}
+
+function rtStartInertia(){
+  rtCancelInertia();
+  const step = () => {
+    _rtPanX += _rtVx;
+    _rtPanY += _rtVy;
+    _rtVx *= RT_PAN_FRICTION;
+    _rtVy *= RT_PAN_FRICTION;
+    rtApplyTransform();
+    if(Math.abs(_rtVx) > RT_VEL_THRESHOLD || Math.abs(_rtVy) > RT_VEL_THRESHOLD){
+      _rtRafId = requestAnimationFrame(step);
+    } else {
+      _rtRafId = null;
+    }
+  };
+  _rtRafId = requestAnimationFrame(step);
+}
+function rtCancelInertia(){
+  if(_rtRafId){ cancelAnimationFrame(_rtRafId); _rtRafId = null; }
+}
+
+function rtZoomToPoint(factor, clientX, clientY, smooth){
+  const svg = document.getElementById('rtMmSvg');
+  if(!svg) return;
+  const newZoom = Math.max(RT_ZOOM_MIN, Math.min(RT_ZOOM_MAX, _rtZoom * factor));
+  const realFactor = newZoom / _rtZoom;
+  if(realFactor === 1) return;
+  const rect = svg.getBoundingClientRect();
+  const cx = clientX - rect.left;
+  const cy = clientY - rect.top;
+  const worldX = (cx - _rtPanX) / _rtZoom;
+  const worldY = (cy - _rtPanY) / _rtZoom;
+  _rtZoom = newZoom;
+  _rtPanX = cx - worldX * _rtZoom;
+  _rtPanY = cy - worldY * _rtZoom;
+  _rtSmoothMode = !!smooth;
+  rtApplyTransform();
+  if(smooth){
+    setTimeout(() => { _rtSmoothMode = false; }, 200);
+  }
+}
+
+function rtZoomBy(factor){
+  rtCancelInertia();
+  const svg = document.getElementById('rtMmSvg');
+  if(!svg) return;
+  const rect = svg.getBoundingClientRect();
+  rtZoomToPoint(factor, rect.left + rect.width/2, rect.top + rect.height/2, true);
+}
+
+function rtFitToView(){
+  rtCancelInertia();
+  _rtZoom = 1; _rtPanX = 0; _rtPanY = 0;
+  _rtSmoothMode = true;
+  rtApplyTransform();
+  setTimeout(() => { _rtSmoothMode = false; }, 200);
+}
+
+// ─── List mode controls (unchanged) ──────────────────────────────────────
+function reftreeToggle(login){
+  if(_reftreeExpanded.has(login)) _reftreeExpanded.delete(login);
+  else _reftreeExpanded.add(login);
+  rtRenderList();
+}
+
+function reftreeExpandAll(expand){
+  if(!_reftreeData) return;
+  function walk(node){
+    if(node.children && node.children.length > 0){
+      if(expand) _reftreeExpanded.add(node.login);
+      else _reftreeExpanded.delete(node.login);
+      node.children.forEach(walk);
+    }
+  }
+  (_reftreeData.roots || []).forEach(walk);
+  rtRenderList();
+}
+
+function filterReftree(){
+  const q = (document.getElementById('reftreeSearch')?.value || '').toLowerCase().trim();
+  if(_rtMode === 'list'){
+    const nodes = document.querySelectorAll('#reftreeContainer .rt-node');
+    if(!q){ nodes.forEach(n => n.style.display = ''); return; }
+    nodes.forEach(n => {
+      const login = n.dataset.login || '';
+      const name = n.dataset.name || '';
+      n.style.display = (login.includes(q) || name.includes(q)) ? '' : 'none';
+    });
+  } else {
+    // mindmap — re-render to apply opacity
+    rtRenderMindMap();
+  }
+}
+
+console.log('✅ LUXOR Admin Panel - Mind-Map Tree + Drag & Drop Photo Upload');
 </script>
 </body>
 </html>
