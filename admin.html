@@ -549,7 +549,11 @@ textarea.inp{resize:vertical;min-height:60px;}
     </div>
     
     <div class="form-grid">
-      <div class="inp-row"><label>Item Name *</label><input class="inp" id="iName" placeholder="Rolex Daytona 2023"></div>
+      <div class="inp-row"><label>Item Name *</label><input class="inp" id="iName" placeholder="Daytona 2023 Yellow Gold"></div>
+      <div class="inp-row"><label>Brand</label><input class="inp" id="iBrand" placeholder="Rolex" list="brand-suggestions"><datalist id="brand-suggestions"><option value="Rolex"><option value="Patek Philippe"><option value="Audemars Piguet"><option value="Hermès"><option value="Louis Vuitton"><option value="Chanel"><option value="Cartier"><option value="Omega"><option value="Tudor"></datalist></div>
+    </div>
+    
+    <div class="form-grid">
       <div class="inp-row"><label>Category</label>
         <select class="inp" id="iCategory">
           <option value="watches">⌚ Watches</option>
@@ -1663,7 +1667,7 @@ async function loadItems(){
     return `
     <div class="panel">
       <div class="ph" style="justify-content:space-between">
-        <span>${catIcon[item.category] || '📦'} ${item.name || 'Untitled'}</span>
+        <span>${catIcon[item.category] || '📦'} ${item.brand ? `<strong style="color:var(--gold)">${item.brand}</strong> · ` : ''}${item.name || 'Untitled'}</span>
         <span class="badge" style="background:${item.status === 'active' ? 'var(--green)' : item.status === 'sold' ? 'var(--t3)' : 'var(--orange)'}">${item.status || 'active'}</span>
       </div>
       <div class="pb">
@@ -1779,6 +1783,7 @@ async function editItem(id){
   document.getElementById('itemModalTitle').textContent = '✏️ EDIT ITEM';
   document.getElementById('editItemId').value = item.id;
   document.getElementById('iName').value = item.name||'';
+  const bField = document.getElementById('iBrand'); if(bField) bField.value = item.brand || '';
   document.getElementById('iCategory').value = item.category||'other';
   document.getElementById('iDesc').value = item.description||'';
   document.getElementById('iPrice').value = item.purchase_price||'';
@@ -1864,6 +1869,7 @@ async function saveItem(){
 
   const data = {
     name,
+    brand: (document.getElementById('iBrand')?.value || '').trim(),
     price_history: history,
     category: document.getElementById('iCategory').value,
     description: document.getElementById('iDesc').value,
@@ -2110,6 +2116,7 @@ function openAddItem() {
   // Clear form
   document.getElementById('editItemId').value = '';
   document.getElementById('iName').value = '';
+  const bf = document.getElementById('iBrand'); if(bf) bf.value = '';
   document.getElementById('iCategory').value = 'watches';
   document.getElementById('iDesc').value = '';
   document.getElementById('iPrice').value = '';
