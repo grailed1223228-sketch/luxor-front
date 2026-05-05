@@ -553,121 +553,142 @@ button{font-family:inherit}
 /* ═══════════════════════════════════════════════════════════
    ITEM DETAIL
 ═══════════════════════════════════════════════════════════ */
-/* ════════ ITEM DETAIL — MOBILE (premium) ════════ */
-.vc-id-img{aspect-ratio:1;background:linear-gradient(135deg,var(--bg4) 0%,var(--bg) 100%);border-radius:18px;display:flex;align-items:center;justify-content:center;color:var(--gold);position:relative;margin-bottom:18px;border:1px solid var(--bd);overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.32), inset 0 0 0 1px rgba(255,255,255,.02)}
-.vc-id-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.45) 100%);pointer-events:none;border-radius:18px}
-.vc-id-img img{width:100%;height:100%;object-fit:cover;display:block}
-.vc-id-img .emoji{font-size:140px;opacity:.5}
-.vc-id-img .fav{position:absolute;top:14px;right:14px;width:40px;height:40px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;font-size:17px;z-index:3;border:1px solid rgba(255,255,255,.06);transition:all .2s}
-.vc-id-img .fav:hover{background:rgba(0,0,0,.75);transform:scale(1.05)}
-.vc-id-img .fav.on{color:var(--gold);background:rgba(0,0,0,.78);border-color:rgba(201,168,76,.35)}
-.vc-id-img .ret-pill{position:absolute;bottom:14px;left:14px;background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:#0a0a0a;font-family:'Bebas Neue',sans-serif;font-size:14px;padding:6px 13px;border-radius:6px;font-weight:700;letter-spacing:1px;z-index:3;box-shadow:0 4px 14px rgba(201,168,76,.35)}
-.vc-id-cat{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2.5px;color:var(--gold);margin-bottom:8px;font-weight:700;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.22);border-radius:4px}
-.vc-id-cat::before{content:'';width:5px;height:5px;background:var(--gold);border-radius:50%;display:inline-block}
-.vc-id-name{font-family:'Bebas Neue',sans-serif;font-size:30px;font-weight:400;line-height:1.05;margin:10px 0 18px;letter-spacing:.5px}
+/* ════════════════════════════════════════════════════════════
+   ITEM DETAIL — VARIANT F (Premium Cards / iOS-style)
+   Same content as before, just restyled.
+   Used for both mobile (.f-mobile) and desktop (.f-desktop) wrappers.
+   ═══════════════════════════════════════════════════════════ */
 
-/* Price history chart card */
-.id-chart{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px 16px 14px;margin-bottom:14px;position:relative;overflow:hidden}
-.id-chart::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.35}
-.id-chart .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.id-chart .h .l{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);font-weight:700}
-.id-chart .h .pts{font-size:10px;color:var(--t3);font-family:'Space Mono',monospace;font-weight:600}
-.id-chart canvas{width:100%;height:140px;display:block;border-radius:6px}
-.id-chart .empty{padding:38px;text-align:center;color:var(--t3);font-size:11px;letter-spacing:.5px}
+/* Wrapper — mobile is single column ~480px max, desktop has 2-column hero+stack */
+.f-mobile{font-family:Inter,system-ui,sans-serif;color:var(--t);max-width:520px;margin:0 auto;padding:0 4px}
+.f-desktop{font-family:Inter,system-ui,sans-serif;color:var(--t);display:grid;grid-template-columns:1.05fr .95fr;gap:32px;align-items:start}
+.f-desktop > .f-hero-col{position:sticky;top:24px}
+.f-desktop > .f-stack-col{min-width:0}
 
-/* V5 invest card — mobile */
-.v5-card{padding:22px 20px 20px;background:linear-gradient(180deg,var(--card) 0%,var(--bg2) 100%);border:1px solid var(--gold);border-radius:18px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.25), inset 0 0 0 1px rgba(201,168,76,.12)}
-.v5-card::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-.v5-card::after{content:'';position:absolute;top:-100px;right:-100px;width:240px;height:240px;background:radial-gradient(circle,rgba(201,168,76,.18) 0%,transparent 65%);pointer-events:none}
-.v5-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;position:relative;z-index:1}
-.v5-head .l{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700}
-.v5-head .v{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1}
-.v5-head .v small{font-size:13px;color:var(--t3);margin-left:6px;letter-spacing:1px}
-.v5-bar{height:48px;background:rgba(0,0,0,.35);border:1px solid var(--bd);border-radius:24px;position:relative;cursor:pointer;overflow:hidden;margin-bottom:8px;z-index:1}
-.v5-bar .fill{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 100%);border-radius:24px;transition:width .15s;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;min-width:48px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 0 14px rgba(201,168,76,.3)}
-.v5-bar .fill .label{font-family:'Bebas Neue',sans-serif;font-size:16px;color:#0a0a0a;letter-spacing:1px;font-weight:700;white-space:nowrap;opacity:1;transition:opacity .15s}
-.v5-bar input[type="number"]{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:60px;background:rgba(0,0,0,.5);border:1px solid var(--bd2);border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;text-align:center;padding:5px;outline:none;z-index:2}
-.v5-bar-marks{display:flex;justify-content:space-between;margin-top:6px;padding:0 4px;font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px}
-.v5-result{margin-top:18px;padding-top:18px;border-top:1px solid var(--bd);position:relative;z-index:1}
-.v5-result .arrow-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2.5px;color:var(--gold);margin-bottom:10px;font-weight:700;text-align:center;opacity:.85}
-.v5-result .big-flow{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px;padding:14px 6px;background:rgba(0,0,0,.18);border-radius:12px;border:1px solid rgba(201,168,76,.1)}
-.v5-result .big-flow .from{text-align:right;flex:1}
-.v5-result .big-flow .from .l{font-size:9px;color:var(--t3);margin-bottom:3px;font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;font-weight:700}
-.v5-result .big-flow .from .v{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--t);letter-spacing:.5px}
-.v5-result .big-flow .arr{font-family:'Space Mono',monospace;font-size:22px;color:var(--gold);line-height:1;flex-shrink:0;animation:arrowPulse 2s ease-in-out infinite}
-@keyframes arrowPulse{0%,100%{transform:translateX(0);opacity:1}50%{transform:translateX(3px);opacity:.7}}
-.v5-result .big-flow .to{text-align:left;flex:1}
-.v5-result .big-flow .to .l{font-size:9px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:1.5px;margin-bottom:3px;font-weight:700;text-transform:uppercase}
-.v5-result .big-flow .to .v{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--gold);line-height:1;letter-spacing:.5px;text-shadow:0 0 18px rgba(201,168,76,.35)}
-.v5-fineprint{text-align:center;font-size:10px;color:var(--t3);margin-top:12px;padding-top:10px;border-top:1px dotted var(--bd2);letter-spacing:.3px;line-height:1.5}
-.v5-fineprint b{color:var(--gold);font-weight:700}
+/* HERO image card with badges */
+.f-hero{position:relative;aspect-ratio:1;border-radius:24px;overflow:hidden;margin-bottom:16px;background:linear-gradient(135deg,var(--bg4) 0%,var(--bg) 100%);box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04) inset;border:1px solid var(--bd)}
+.f-hero img,.f-hero .f-thumb-emoji{width:100%;height:100%;object-fit:cover;display:block}
+.f-hero .f-thumb-emoji{display:flex;align-items:center;justify-content:center;font-size:160px;opacity:.55;color:var(--gold)}
+.f-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.6) 100%);pointer-events:none;border-radius:24px}
+.f-hero-top{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;z-index:2;gap:10px}
+.f-hero-badge{padding:7px 12px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);border-radius:14px;font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px}
+.f-hero-badge::before{content:'';width:5px;height:5px;background:var(--gold);border-radius:50%}
+.f-hero-fav{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;font-size:17px;transition:all .2s;flex-shrink:0}
+.f-hero-fav:hover{background:rgba(0,0,0,.78);transform:scale(1.05)}
+.f-hero-fav.on{color:var(--gold);background:rgba(0,0,0,.82);border-color:rgba(201,168,76,.4)}
+.f-hero-bottom{position:absolute;bottom:18px;left:18px;right:18px;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.f-hero-bottom-text{flex:1;min-width:0}
+.f-hero-name{font-family:'Bebas Neue',sans-serif;font-size:34px;color:#fff;line-height:1;letter-spacing:1px;margin-bottom:4px;text-shadow:0 2px 12px rgba(0,0,0,.7);word-break:break-word}
+.f-hero-meta{font-size:12px;color:rgba(255,255,255,.85);letter-spacing:.3px;text-shadow:0 1px 4px rgba(0,0,0,.6);line-height:1.3}
+.f-hero-ret{padding:7px 13px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;font-weight:700;flex-shrink:0;box-shadow:0 6px 18px rgba(201,168,76,.4)}
 
-/* V5 SLIDER (desktop) — premium */
-.v5d-card{padding:30px 28px;background:linear-gradient(180deg,var(--card) 0%,var(--bg2) 100%);border:1px solid var(--gold);border-radius:20px;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.28), inset 0 0 0 1px rgba(201,168,76,.12)}
-.v5d-card::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-.v5d-card::after{content:'';position:absolute;top:-140px;right:-140px;width:340px;height:340px;background:radial-gradient(circle,rgba(201,168,76,.16) 0%,transparent 65%);pointer-events:none}
-.v5d-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px;position:relative;z-index:1}
-.v5d-head .l{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2.5px;color:var(--gold);font-weight:700}
-.v5d-head .v{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1;letter-spacing:.5px}
-.v5d-head .v small{font-size:15px;color:var(--t3);margin-left:6px;letter-spacing:1px}
-.v5d-bar{height:56px;background:rgba(0,0,0,.35);border:1px solid var(--bd);border-radius:28px;position:relative;cursor:pointer;overflow:hidden;margin-bottom:8px;z-index:1}
-.v5d-bar .fill{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 100%);border-radius:28px;transition:width .15s;display:flex;align-items:center;justify-content:flex-end;padding-right:18px;min-width:56px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 0 18px rgba(201,168,76,.3)}
-.v5d-bar .fill .label{font-family:'Bebas Neue',sans-serif;font-size:20px;color:#0a0a0a;letter-spacing:1px;font-weight:700;white-space:nowrap}
-.v5d-bar input[type="number"]{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:70px;background:rgba(0,0,0,.5);border:1px solid var(--bd2);border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;text-align:center;padding:6px;outline:none;z-index:2}
-.v5d-result{margin-top:24px;padding-top:24px;border-top:1px solid var(--bd);position:relative;z-index:1}
-.v5d-result .arrow-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);margin-bottom:16px;font-weight:700;text-align:center;opacity:.85}
-.v5d-result .big-flow{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:12px;padding:20px 12px;background:rgba(0,0,0,.18);border-radius:14px;border:1px solid rgba(201,168,76,.1)}
-.v5d-result .big-flow .from{text-align:right;flex:1}
-.v5d-result .big-flow .from .l{font-size:10px;color:var(--t3);margin-bottom:4px;font-family:'Space Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
-.v5d-result .big-flow .from .v{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--t);line-height:1;letter-spacing:.5px}
-.v5d-result .big-flow .arr{font-family:'Space Mono',monospace;font-size:26px;color:var(--gold);flex-shrink:0;animation:arrowPulse 2s ease-in-out infinite}
-.v5d-result .big-flow .to{text-align:left;flex:1}
-.v5d-result .big-flow .to .l{font-size:10px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:1.8px;margin-bottom:4px;font-weight:700;text-transform:uppercase}
-.v5d-result .big-flow .to .v{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--gold);line-height:1;letter-spacing:.8px;text-shadow:0 0 24px rgba(201,168,76,.4)}
+/* Glass card base */
+.f-card{background:rgba(20,20,20,.75);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.f-card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.f-card-h .t{font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.f-card-h .m{font-size:11px;color:var(--t3);letter-spacing:.3px}
 
-/* Item detail tabs (DETAILS / DESCRIPTION) */
-.id-tabs{display:flex;gap:4px;margin:18px 0 14px;border-bottom:1px solid var(--bd);padding:0 2px}
-.id-tabs .tab{padding:12px 20px;color:var(--t3);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.8px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:700;transition:all .2s}
-.id-tabs .tab:hover{color:var(--t2)}
-.id-tabs .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.id-content{padding:18px 20px;background:var(--card);border:1px solid var(--bd);border-radius:14px;margin-bottom:14px;font-size:13px;color:var(--t2);line-height:1.7;position:relative;overflow:hidden}
-.id-content::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),transparent);opacity:.5}
-.id-content .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd);font-size:13px;gap:16px}
-.id-content .row:first-child{padding-top:2px}
-.id-content .row:last-child{border-bottom:none;padding-bottom:0}
-.id-content .row .l{color:var(--t3);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
-.id-content .row .v{font-weight:700;color:var(--t);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.5px;text-align:right}
-.id-content .row .v.green{color:var(--green)}
-.id-content .row .v.gold{color:var(--gold)}
+/* Quick-stat pills inside card */
+.f-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.f-stat{padding:11px 14px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.04);transition:border .2s}
+.f-stat:hover{border-color:rgba(201,168,76,.2)}
+.f-stat .l{font-size:9px;color:var(--t3);letter-spacing:1.5px;font-weight:700;text-transform:uppercase;margin-bottom:3px}
+.f-stat .v{font-family:'Bebas Neue',sans-serif;font-size:21px;color:var(--t);line-height:1;letter-spacing:.5px}
+.f-stat .v.gold{color:var(--gold)}
+.f-stat .v.green{color:var(--green)}
 
-/* ════════ ITEM DETAIL — DESKTOP (premium) ════════ */
-.did-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:46px;margin-bottom:30px}
-.did-img{aspect-ratio:1;background:linear-gradient(135deg,var(--bg4) 0%,var(--bg) 100%);border-radius:20px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;color:var(--gold);position:relative;overflow:hidden;box-shadow:0 22px 50px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.02)}
-.did-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.5) 100%);pointer-events:none;border-radius:20px}
-.did-img img{width:100%;height:100%;object-fit:cover}
-.did-img .emoji{font-size:240px;opacity:.5}
-.did-img .fav{position:absolute;top:18px;right:18px;width:46px;height:46px;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;z-index:3;font-size:19px;border:1px solid rgba(255,255,255,.07);transition:all .2s}
-.did-img .fav:hover{background:rgba(0,0,0,.78);transform:scale(1.05)}
-.did-img .fav.on{color:var(--gold);background:rgba(0,0,0,.82);border-color:rgba(201,168,76,.4)}
-.did-img .ret-big{position:absolute;bottom:18px;left:18px;background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:#0a0a0a;font-family:'Bebas Neue',sans-serif;font-size:20px;padding:9px 18px;border-radius:8px;font-weight:700;letter-spacing:1px;z-index:3;box-shadow:0 6px 20px rgba(201,168,76,.4)}
-.did-cat{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;font-weight:700;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.22);border-radius:5px}
-.did-cat::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;display:inline-block}
-.did-name{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:.5px;line-height:1;margin:14px 0 18px;font-weight:400}
+/* Slots progress inline (under stats) */
+.f-progress{padding:14px 16px;background:rgba(255,255,255,.03);border-radius:14px;margin-top:12px;border:1px solid rgba(255,255,255,.04)}
+.f-progress-h{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:8px;font-weight:600}
+.f-progress-h b{color:var(--t)}
+.f-progress-h .g{color:var(--green)}
+.f-progress-bar{height:8px;background:rgba(0,0,0,.4);border-radius:6px;overflow:hidden;position:relative}
+.f-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:6px;transition:width .35s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 0 12px rgba(201,168,76,.3)}
 
-/* Quick-stat block under name (mobile + desktop) */
-.id-quickstat{margin-bottom:14px}
-.id-qs-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
-.id-qs-i{padding:10px 12px;background:var(--card);border:1px solid var(--bd);border-radius:10px;text-align:left;position:relative;overflow:hidden;transition:border .2s}
-.id-qs-i:hover{border-color:rgba(201,168,76,.35)}
-.id-qs-i .l{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.2px;color:var(--t3);font-weight:700;margin-bottom:4px}
-.id-qs-i .v{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--t);line-height:1;letter-spacing:.5px}
-.id-qs-i .v.gold{color:var(--gold)}
-.id-qs-i .v.gr{color:var(--green)}
-.id-qs-bar{padding:10px 14px 12px;background:var(--card);border:1px solid var(--bd);border-radius:10px}
-.id-qs-bh{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--t3);font-weight:600;margin-bottom:6px;letter-spacing:.3px}
-.id-qs-bh .g{color:var(--green)}
-.id-qs-pb{height:5px;background:rgba(0,0,0,.35);border-radius:3px;overflow:hidden;border:1px solid var(--bd)}
-.id-qs-pf{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 100%);border-radius:3px;transition:width .3s;box-shadow:0 0 10px rgba(201,168,76,.4)}
+/* Chart card */
+.f-chart canvas{width:100%;height:170px;display:block;border-radius:10px}
+.f-chart .empty{padding:38px;text-align:center;color:var(--t3);font-size:11px;letter-spacing:.5px}
+
+/* Invest card — the core */
+.f-invest{padding:24px 22px}
+.f-invest-label{text-align:center;font-size:11px;color:var(--gold);letter-spacing:2.5px;font-weight:700;text-transform:uppercase;margin-bottom:6px;opacity:.85}
+.f-invest-amt{font-family:'Bebas Neue',sans-serif;font-size:54px;color:var(--gold);line-height:1;text-align:center;margin-bottom:4px;letter-spacing:1px;text-shadow:0 0 30px rgba(201,168,76,.35)}
+.f-invest-sub{text-align:center;font-size:11px;color:var(--t3);margin-bottom:24px;letter-spacing:.5px}
+
+/* The slider — Apple/iOS style */
+.f-slider-wrap{position:relative;height:40px;margin-bottom:8px;cursor:pointer;touch-action:none}
+.f-slider-track{position:absolute;top:50%;transform:translateY(-50%);left:0;right:0;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;pointer-events:none}
+.f-slider-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px;transition:width .12s;box-shadow:0 0 12px rgba(201,168,76,.45)}
+.f-slider-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:30px;height:30px;background:#fff;border-radius:50%;cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.05);transition:left .12s,transform .15s;z-index:2}
+.f-slider-thumb:hover{transform:translate(-50%,-50%) scale(1.1)}
+.f-slider-thumb:active,.f-slider-thumb.dragging{cursor:grabbing;transform:translate(-50%,-50%) scale(1.15);box-shadow:0 6px 20px rgba(0,0,0,.6),0 0 0 4px rgba(201,168,76,.25)}
+.f-slider-marks{display:flex;justify-content:space-between;font-size:10px;color:var(--t3);font-weight:600;margin-top:6px;letter-spacing:.5px;font-family:'Space Mono',monospace}
+.f-slider-marks span:nth-child(2){color:var(--t2)}
+
+/* Manual input near slider — small and subtle */
+.f-slider-manual{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;font-size:11px;color:var(--t3);letter-spacing:.3px}
+.f-slider-manual input{width:60px;background:rgba(0,0,0,.4);border:1px solid var(--bd2);border-radius:8px;color:var(--t);font-family:'Space Mono',monospace;font-size:12px;font-weight:700;text-align:center;padding:5px 6px;outline:none}
+.f-slider-manual input:focus{border-color:var(--gold)}
+
+/* The flow under slider — both numbers side by side */
+.f-flow{margin-top:20px;padding:16px;background:rgba(0,0,0,.28);border-radius:14px;border:1px solid rgba(201,168,76,.08);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.f-flow .col{flex:1;text-align:center;min-width:0}
+.f-flow .col .l{font-size:9px;color:var(--t3);letter-spacing:1.5px;font-weight:700;text-transform:uppercase;margin-bottom:5px}
+.f-flow .col .v{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;line-height:1;display:block}
+.f-flow .col .extra{font-size:10px;color:var(--green);margin-top:3px;font-weight:600;letter-spacing:.3px}
+.f-flow .col.from .v{color:var(--t)}
+.f-flow .col.to .v{color:var(--gold);font-size:30px;text-shadow:0 0 18px rgba(201,168,76,.45)}
+.f-flow .col.to .l{color:var(--gold)}
+.f-flow .arr{padding:0 4px;color:var(--gold);font-size:18px;animation:fArrPulse 2s ease-in-out infinite;font-family:'Space Mono',monospace;flex-shrink:0}
+@keyframes fArrPulse{0%,100%{transform:translateX(0);opacity:1}50%{transform:translateX(3px);opacity:.7}}
+
+/* Fineprint under flow */
+.f-fineprint{margin-top:12px;font-size:10px;color:var(--t3);text-align:center;line-height:1.55;letter-spacing:.2px;padding:0 4px}
+.f-fineprint b{color:var(--gold);font-weight:600}
+
+/* Big CTA */
+.f-cta{display:block;width:100%;margin-top:18px;padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;border:none;border-radius:14px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:3px;cursor:pointer;font-weight:700;box-shadow:0 8px 22px rgba(201,168,76,.4),inset 0 1px 0 rgba(255,255,255,.3);transition:all .2s}
+.f-cta:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(201,168,76,.5)}
+.f-cta:active{transform:translateY(0)}
+.f-cta:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Sold out fallback */
+.f-soldout{padding:32px 18px;text-align:center;background:rgba(255,255,255,.03);border:1px dashed var(--bd);border-radius:18px;color:var(--t3);font-size:13px}
+.f-soldout h3{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red);letter-spacing:2px;margin-bottom:6px;font-weight:700}
+
+/* Tabs DETAILS / DESCRIPTION (inside a card) */
+.f-tabs{display:flex;background:rgba(255,255,255,.03);border-radius:12px;padding:4px;margin-bottom:14px;gap:2px}
+.f-tabs .tab{flex:1;padding:9px 12px;text-align:center;font-size:11px;color:var(--t2);letter-spacing:1.5px;font-weight:700;cursor:pointer;border-radius:8px;text-transform:uppercase;transition:all .2s;border:none;background:transparent}
+.f-tabs .tab:hover{color:var(--t)}
+.f-tabs .tab.active{background:rgba(201,168,76,.16);color:var(--gold);box-shadow:inset 0 0 0 1px rgba(201,168,76,.2)}
+
+/* Info rows inside tab */
+.f-rows .row{display:flex;justify-content:space-between;align-items:baseline;padding:11px 4px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;gap:14px}
+.f-rows .row:last-child{border-bottom:none}
+.f-rows .row .l{color:var(--t3);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;flex-shrink:0}
+.f-rows .row .v{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--t);letter-spacing:.5px;text-align:right}
+.f-rows .row .v.gold{color:var(--gold)}
+.f-rows .row .v.green{color:var(--green)}
+.f-rows .descr{font-size:13px;line-height:1.65;color:var(--t2);padding:4px 4px 6px;font-family:Inter,sans-serif}
+
+/* Light-theme tweaks (re-color glass) */
+body.light-theme .f-card,
+.light-theme .f-card{background:rgba(255,255,255,.7);border-color:rgba(0,0,0,.08);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.light-theme .f-stat,.light-theme .f-progress,.light-theme .f-flow{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.05)}
+.light-theme .f-slider-track{background:rgba(0,0,0,.08)}
+.light-theme .f-slider-thumb{background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.08)}
+.light-theme .f-tabs{background:rgba(0,0,0,.04)}
+
+/* Responsive — desktop becomes single column on small screens */
+@media (max-width:980px){
+  .f-desktop{grid-template-columns:1fr;gap:0}
+  .f-desktop > .f-hero-col{position:static}
+}
+@media (max-width:540px){
+  .f-hero-name{font-size:28px}
+  .f-invest-amt{font-size:46px}
+  .f-flow .col.to .v{font-size:26px}
+}
 
 /* ═══════════════════════════════════════════════════════════
    MY ITEMS
@@ -4445,165 +4466,91 @@ function openItemDetail(id){
   if(mDetail){
     document.getElementById('mDetailBC').textContent = i.name.toUpperCase();
     mDetail.innerHTML = `
-      <div class="vc-id-img">${_itemThumbHTML(i)}
-        <div class="fav ${isFav?'on':''}" onclick="toggleFav(${i.id},this)">${isFav?'♥':'♡'}</div>
-        ${ret?`<div class="ret-pill">${ret}</div>`:''}
-      </div>
-      <div class="vc-id-cat">${i.cat || 'COLLECTIBLE'}</div>
-      <div class="vc-id-name">${i.name}</div>
-
-      <!-- Slots progress + quick stats -->
-      <div class="id-quickstat">
-        <div class="id-qs-row">
-          <div class="id-qs-i">
-            <div class="l">PRICE</div>
-            <div class="v">$${i.price.toLocaleString()}</div>
+      <div class="f-mobile">
+        <!-- Hero with badges -->
+        <div class="f-hero">${_itemThumbHTML(i)}
+          <div class="f-hero-top">
+            <div class="f-hero-badge">${i.cat || 'COLLECTIBLE'}</div>
+            <div class="f-hero-fav ${isFav?'on':''}" onclick="toggleFav(${i.id},this)">${isFav?'♥':'♡'}</div>
           </div>
-          <div class="id-qs-i">
-            <div class="l">PER SLOT</div>
-            <div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div>
-          </div>
-          <div class="id-qs-i">
-            <div class="l">PERIOD</div>
-            <div class="v">${periodTxt}</div>
+          <div class="f-hero-bottom">
+            <div class="f-hero-bottom-text">
+              <div class="f-hero-name">${i.name}</div>
+              <div class="f-hero-meta">${(i.cat||'').toUpperCase()} · ${slotsTotal} slots · ${periodTxt}</div>
+            </div>
+            ${ret?`<div class="f-hero-ret">${ret}</div>`:''}
           </div>
         </div>
-        <div class="id-qs-bar">
-          <div class="id-qs-bh"><span>${slotsSold} of ${slotsTotal} slots sold</span><span class="g">${slotsAvail} left</span></div>
-          <div class="id-qs-pb"><div class="id-qs-pf" style="width:${(slotsSold/slotsTotal)*100}%"></div></div>
-        </div>
-      </div>
 
-      <!-- Q9-final B: price-history chart placed UNDER name, BEFORE V5 slider -->
-      <div class="id-chart">
-        <div class="h"><span class="l">PRICE HISTORY</span><span class="pts">${phLen} data points</span></div>
-        ${phLen >= 2
-          ? `<canvas id="mItemChart" width="600" height="280"></canvas>`
-          : `<div class="empty">Not enough price data yet</div>`}
-      </div>
-
-      ${canBuy ? `
-      <div class="v5-card">
-        <div class="v5-head"><span class="l">YOU INVEST</span><span class="v" id="mV5Invest">$${Math.round(pricePerSlot).toLocaleString()}<small>USD</small></span></div>
-        <div class="v5-bar" id="mV5Bar" onclick="barClickItem(event,'mobile',${i.id})">
-          <div class="fill" id="mV5Fill" style="width:${100/slotsAvail}%"><span class="label" id="mV5FillLabel">1 SLOT</span></div>
-          <input type="number" id="mV5Manual" value="1" min="1" max="${slotsAvail}" step="1" onclick="event.stopPropagation()" oninput="manualItem(this.value,'mobile',${i.id})">
+        <!-- AT A GLANCE — quick stats + slots progress -->
+        <div class="f-card">
+          <div class="f-card-h"><div class="t">at a glance</div><div class="m">${slotsAvail} of ${slotsTotal} left</div></div>
+          <div class="f-stats">
+            <div class="f-stat"><div class="l">Item price</div><div class="v">$${i.price.toLocaleString()}</div></div>
+            <div class="f-stat"><div class="l">Per slot</div><div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
+            <div class="f-stat"><div class="l">Sale period</div><div class="v">${periodTxt}</div></div>
+            <div class="f-stat"><div class="l">Guaranteed</div><div class="v green">+${i.ret[0]}%</div></div>
+          </div>
+          <div class="f-progress">
+            <div class="f-progress-h"><span><b>${slotsSold}</b> of ${slotsTotal} sold</span><span class="g">${slotsAvail} left</span></div>
+            <div class="f-progress-bar"><div class="f-progress-fill" style="width:${(slotsSold/slotsTotal)*100}%"></div></div>
+          </div>
         </div>
-        <div class="v5-bar-marks"><span>1</span><span>${Math.ceil(slotsAvail/2)}</span><span>${slotsAvail}</span></div>
-        <div class="v5-result">
-          <div class="arrow-label">→ YOUR EXPECTED RETURN ←</div>
-          <div class="big-flow">
-            <div class="from"><div class="l">YOU PAY</div><div class="v" id="mV5Pay">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
+
+        <!-- PRICE HISTORY -->
+        <div class="f-card f-chart">
+          <div class="f-card-h"><div class="t">price history</div><div class="m">${phLen} data points</div></div>
+          ${phLen >= 2
+            ? `<canvas id="mItemChart" width="600" height="280"></canvas>`
+            : `<div class="empty">Not enough price data yet</div>`}
+        </div>
+
+        ${canBuy ? `
+        <!-- INVEST CARD -->
+        <div class="f-card f-invest">
+          <div class="f-invest-label">Expected return</div>
+          <div class="f-invest-amt" id="mFAmt">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div>
+          <div class="f-invest-sub"><span id="mFSub">at 1 slot · $${Math.round(pricePerSlot).toLocaleString()} invested</span></div>
+
+          <div class="f-slider-wrap" id="mFSlider" data-id="${i.id}" data-mode="mobile" data-max="${slotsAvail}" data-per="${Math.round(pricePerSlot)}" data-rmax="${i.ret[1]||0}" data-rmin="${i.ret[0]||0}">
+            <div class="f-slider-track"><div class="f-slider-fill" id="mFFill" style="width:0%"></div></div>
+            <div class="f-slider-thumb" id="mFThumb" style="left:0%"></div>
+          </div>
+          <div class="f-slider-marks"><span>1</span><span>${Math.ceil(slotsAvail/2)}</span><span>${slotsAvail} max</span></div>
+          <div class="f-slider-manual">slots: <input type="number" id="mFManual" value="1" min="1" max="${slotsAvail}" step="1" oninput="fSliderManual(this,'mobile')"></div>
+
+          <div class="f-flow">
+            <div class="col from"><div class="l">You invest</div><div class="v" id="mFPay">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
             <div class="arr">→</div>
-            <div class="to"><div class="l">YOU GET BACK</div><div class="v" id="mV5Get">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div></div>
+            <div class="col to">
+              <div class="l">Expected</div>
+              <div class="v" id="mFGet">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div>
+              <div class="extra" id="mFProfit">+$${Math.round(pricePerSlot * (i.ret[1]||0)/100).toLocaleString()} profit</div>
+            </div>
           </div>
-          <div class="v5-fineprint">Guaranteed minimum: <b id="mV5GuarBack">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt}</div>
+
+          <div class="f-fineprint">Guaranteed minimum: <b id="mFGuar">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt}</div>
+
+          <button class="f-cta" id="mBuyBtn" onclick="buyFraction(${i.id})">BUY 1 SLOT — $${Math.round(pricePerSlot).toLocaleString()}</button>
+          <input type="hidden" id="mFSlots" value="1">
         </div>
-      </div>
-      <button class="btn-primary" id="mBuyBtn" onclick="buyFraction(${i.id})">BUY 1 SLOT — $${Math.round(pricePerSlot).toLocaleString()}</button>
-      <input type="hidden" id="mV5Slots" value="1">
-      ` : `
-      <div class="placeholder"><svg class="lx"><use href="#i-items"/></svg><h3>SOLD OUT</h3><p>All slots have been sold for this item.</p></div>
-      `}
-
-      <div class="id-tabs">
-        <div class="tab active" onclick="switchIdTab('details','mobile')" id="mTabDetails">DETAILS</div>
-        <div class="tab" onclick="switchIdTab('description','mobile')" id="mTabDesc">DESCRIPTION</div>
-      </div>
-      <div class="id-content" id="mIdContent">
-        <div class="row"><span class="l">Item price</span><span class="v">$${i.price.toLocaleString()}</span></div>
-        <div class="row"><span class="l">Price per slot</span><span class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
-        <div class="row"><span class="l">Slots</span><span class="v">${slotsSold} of ${slotsTotal} sold</span></div>
-        <div class="row"><span class="l">Slots available</span><span class="v ${slotsAvail>0?'green':''}">${slotsAvail}</span></div>
-        <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[0]}% — +${i.ret[1]}%</span></div>
-        <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${i.ret[0]}%</span></div>
-        <div class="row"><span class="l">Sale period</span><span class="v">${periodTxt}</span></div>
-        <div class="row"><span class="l">Category</span><span class="v">${(i.cat||'').toUpperCase()}</span></div>
-      </div>
-    `;
-    if(phLen >= 2) setTimeout(() => drawItemAreaChart('mItemChart', i), 80);
-  }
-
-  // === Desktop detail ===
-  const dDetail = document.getElementById('dDetailContent');
-  if(dDetail){
-    document.getElementById('dDetailBC').textContent = i.name.toUpperCase();
-    dDetail.innerHTML = `
-      <div class="did-grid">
-        <div class="did-img">${_itemThumbHTML(i)}
-          <div class="fav ${isFav?'on':''}" onclick="toggleFav(${i.id},this)">${isFav?'♥':'♡'}</div>
-          ${ret?`<div class="ret-big">${ret}</div>`:''}
+        ` : `
+        <div class="f-soldout">
+          <h3>SOLD OUT</h3>
+          <div>All slots have been sold for this item.</div>
         </div>
-        <div class="did-right">
-          <div class="did-cat">${i.cat || 'COLLECTIBLE'}</div>
-          <h1 class="did-name">${i.name}</h1>
+        `}
 
-          <!-- Slots progress + quick stats -->
-          <div class="id-quickstat">
-            <div class="id-qs-row">
-              <div class="id-qs-i">
-                <div class="l">ITEM PRICE</div>
-                <div class="v">$${i.price.toLocaleString()}</div>
-              </div>
-              <div class="id-qs-i">
-                <div class="l">PER SLOT</div>
-                <div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div>
-              </div>
-              <div class="id-qs-i">
-                <div class="l">SALE PERIOD</div>
-                <div class="v">${periodTxt}</div>
-              </div>
-              <div class="id-qs-i">
-                <div class="l">GUARANTEED</div>
-                <div class="v gr">+${i.ret[0]}%</div>
-              </div>
-            </div>
-            <div class="id-qs-bar">
-              <div class="id-qs-bh"><span>${slotsSold} of ${slotsTotal} slots sold</span><span class="g">${slotsAvail} left</span></div>
-              <div class="id-qs-pb"><div class="id-qs-pf" style="width:${(slotsSold/slotsTotal)*100}%"></div></div>
-            </div>
+        <!-- TABS / INFO -->
+        <div class="f-card">
+          <div class="f-tabs">
+            <button class="tab active" onclick="switchIdTab('details','mobile')" id="mTabDetails">DETAILS</button>
+            <button class="tab" onclick="switchIdTab('description','mobile')" id="mTabDesc">DESCRIPTION</button>
           </div>
-
-          <!-- Q9-final B: price chart under name, before V5 slider -->
-          <div class="id-chart">
-            <div class="h"><span class="l">PRICE HISTORY</span><span class="pts">${phLen} data points</span></div>
-            ${phLen >= 2
-              ? `<canvas id="dItemChart" width="700" height="280"></canvas>`
-              : `<div class="empty">Not enough price data yet</div>`}
-          </div>
-
-          ${canBuy ? `
-          <div class="v5d-card">
-            <div class="v5d-head"><span class="l">YOU INVEST</span><span class="v" id="dV5Invest">$${Math.round(pricePerSlot).toLocaleString()}<small>USD</small></span></div>
-            <div class="v5d-bar" id="dV5Bar" onclick="barClickItem(event,'desktop',${i.id})">
-              <div class="fill" id="dV5Fill" style="width:${100/slotsAvail}%"><span class="label" id="dV5FillLabel">1 SLOT</span></div>
-              <input type="number" id="dV5Manual" value="1" min="1" max="${slotsAvail}" step="1" onclick="event.stopPropagation()" oninput="manualItem(this.value,'desktop',${i.id})">
-            </div>
-            <div class="v5-bar-marks"><span>1</span><span>${Math.ceil(slotsAvail/2)}</span><span>${slotsAvail}</span></div>
-            <div class="v5d-result">
-              <div class="arrow-label">→ YOUR EXPECTED RETURN ←</div>
-              <div class="big-flow">
-                <div class="from"><div class="l">YOU PAY</div><div class="v" id="dV5Pay">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
-                <div class="arr">→</div>
-                <div class="to"><div class="l">YOU GET BACK</div><div class="v" id="dV5Get">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div></div>
-              </div>
-              <div class="v5-fineprint">Guaranteed minimum: <b id="dV5GuarBack">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt}</div>
-            </div>
-          </div>
-          <button class="btn-primary" id="dBuyBtn" onclick="buyFraction(${i.id})" style="max-width:520px">BUY 1 SLOT — $${Math.round(pricePerSlot).toLocaleString()}</button>
-          <input type="hidden" id="dV5Slots" value="1">
-          ` : `
-          <div class="placeholder"><svg class="lx"><use href="#i-items"/></svg><h3>SOLD OUT</h3><p>All slots have been sold for this item.</p></div>
-          `}
-
-          <div class="id-tabs" style="margin-top:24px">
-            <div class="tab active" onclick="switchIdTab('details','desktop')" id="dTabDetails">DETAILS</div>
-            <div class="tab" onclick="switchIdTab('description','desktop')" id="dTabDesc">DESCRIPTION</div>
-          </div>
-          <div class="id-content" id="dIdContent">
+          <div class="f-rows" id="mIdContent">
             <div class="row"><span class="l">Item price</span><span class="v">$${i.price.toLocaleString()}</span></div>
             <div class="row"><span class="l">Price per slot</span><span class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
-            <div class="row"><span class="l">Slots</span><span class="v">${slotsSold} of ${slotsTotal} sold</span></div>
+            <div class="row"><span class="l">Slots sold</span><span class="v">${slotsSold} of ${slotsTotal}</span></div>
             <div class="row"><span class="l">Slots available</span><span class="v ${slotsAvail>0?'green':''}">${slotsAvail}</span></div>
             <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[0]}% — +${i.ret[1]}%</span></div>
             <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${i.ret[0]}%</span></div>
@@ -4613,11 +4560,218 @@ function openItemDetail(id){
         </div>
       </div>
     `;
+    if(phLen >= 2) setTimeout(() => drawItemAreaChart('mItemChart', i), 80);
+    if(canBuy) setTimeout(() => fSliderInit('mobile'), 100);
+  }
+
+  // === Desktop detail ===
+  const dDetail = document.getElementById('dDetailContent');
+  if(dDetail){
+    document.getElementById('dDetailBC').textContent = i.name.toUpperCase();
+    dDetail.innerHTML = `
+      <div class="f-desktop">
+        <!-- LEFT — Hero (sticky) -->
+        <div class="f-hero-col">
+          <div class="f-hero">${_itemThumbHTML(i)}
+            <div class="f-hero-top">
+              <div class="f-hero-badge">${i.cat || 'COLLECTIBLE'}</div>
+              <div class="f-hero-fav ${isFav?'on':''}" onclick="toggleFav(${i.id},this)">${isFav?'♥':'♡'}</div>
+            </div>
+            <div class="f-hero-bottom">
+              <div class="f-hero-bottom-text">
+                <div class="f-hero-name">${i.name}</div>
+                <div class="f-hero-meta">${(i.cat||'').toUpperCase()} · ${slotsTotal} slots · ${periodTxt}</div>
+              </div>
+              ${ret?`<div class="f-hero-ret">${ret}</div>`:''}
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT — Stack of cards -->
+        <div class="f-stack-col">
+          <!-- AT A GLANCE -->
+          <div class="f-card">
+            <div class="f-card-h"><div class="t">at a glance</div><div class="m">${slotsAvail} of ${slotsTotal} left</div></div>
+            <div class="f-stats">
+              <div class="f-stat"><div class="l">Item price</div><div class="v">$${i.price.toLocaleString()}</div></div>
+              <div class="f-stat"><div class="l">Per slot</div><div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
+              <div class="f-stat"><div class="l">Sale period</div><div class="v">${periodTxt}</div></div>
+              <div class="f-stat"><div class="l">Guaranteed</div><div class="v green">+${i.ret[0]}%</div></div>
+            </div>
+            <div class="f-progress">
+              <div class="f-progress-h"><span><b>${slotsSold}</b> of ${slotsTotal} sold</span><span class="g">${slotsAvail} left</span></div>
+              <div class="f-progress-bar"><div class="f-progress-fill" style="width:${(slotsSold/slotsTotal)*100}%"></div></div>
+            </div>
+          </div>
+
+          <!-- PRICE HISTORY -->
+          <div class="f-card f-chart">
+            <div class="f-card-h"><div class="t">price history</div><div class="m">${phLen} data points</div></div>
+            ${phLen >= 2
+              ? `<canvas id="dItemChart" width="700" height="280"></canvas>`
+              : `<div class="empty">Not enough price data yet</div>`}
+          </div>
+
+          ${canBuy ? `
+          <!-- INVEST CARD -->
+          <div class="f-card f-invest">
+            <div class="f-invest-label">Expected return</div>
+            <div class="f-invest-amt" id="dFAmt">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div>
+            <div class="f-invest-sub"><span id="dFSub">at 1 slot · $${Math.round(pricePerSlot).toLocaleString()} invested</span></div>
+
+            <div class="f-slider-wrap" id="dFSlider" data-id="${i.id}" data-mode="desktop" data-max="${slotsAvail}" data-per="${Math.round(pricePerSlot)}" data-rmax="${i.ret[1]||0}" data-rmin="${i.ret[0]||0}">
+              <div class="f-slider-track"><div class="f-slider-fill" id="dFFill" style="width:0%"></div></div>
+              <div class="f-slider-thumb" id="dFThumb" style="left:0%"></div>
+            </div>
+            <div class="f-slider-marks"><span>1</span><span>${Math.ceil(slotsAvail/2)}</span><span>${slotsAvail} max</span></div>
+            <div class="f-slider-manual">slots: <input type="number" id="dFManual" value="1" min="1" max="${slotsAvail}" step="1" oninput="fSliderManual(this,'desktop')"></div>
+
+            <div class="f-flow">
+              <div class="col from"><div class="l">You invest</div><div class="v" id="dFPay">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
+              <div class="arr">→</div>
+              <div class="col to">
+                <div class="l">Expected</div>
+                <div class="v" id="dFGet">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div>
+                <div class="extra" id="dFProfit">+$${Math.round(pricePerSlot * (i.ret[1]||0)/100).toLocaleString()} profit</div>
+              </div>
+            </div>
+
+            <div class="f-fineprint">Guaranteed minimum: <b id="dFGuar">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt}</div>
+
+            <button class="f-cta" id="dBuyBtn" onclick="buyFraction(${i.id})">BUY 1 SLOT — $${Math.round(pricePerSlot).toLocaleString()}</button>
+            <input type="hidden" id="dFSlots" value="1">
+          </div>
+          ` : `
+          <div class="f-soldout">
+            <h3>SOLD OUT</h3>
+            <div>All slots have been sold for this item.</div>
+          </div>
+          `}
+
+          <!-- TABS / INFO -->
+          <div class="f-card">
+            <div class="f-tabs">
+              <button class="tab active" onclick="switchIdTab('details','desktop')" id="dTabDetails">DETAILS</button>
+              <button class="tab" onclick="switchIdTab('description','desktop')" id="dTabDesc">DESCRIPTION</button>
+            </div>
+            <div class="f-rows" id="dIdContent">
+              <div class="row"><span class="l">Item price</span><span class="v">$${i.price.toLocaleString()}</span></div>
+              <div class="row"><span class="l">Price per slot</span><span class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
+              <div class="row"><span class="l">Slots sold</span><span class="v">${slotsSold} of ${slotsTotal}</span></div>
+              <div class="row"><span class="l">Slots available</span><span class="v ${slotsAvail>0?'green':''}">${slotsAvail}</span></div>
+              <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[0]}% — +${i.ret[1]}%</span></div>
+              <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${i.ret[0]}%</span></div>
+              <div class="row"><span class="l">Sale period</span><span class="v">${periodTxt}</span></div>
+              <div class="row"><span class="l">Category</span><span class="v">${(i.cat||'').toUpperCase()}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
     if(phLen >= 2) setTimeout(() => drawItemAreaChart('dItemChart', i), 80);
+    if(canBuy) setTimeout(() => fSliderInit('desktop'), 100);
   }
 
   navTo('detail');
 }
+
+// ─── Variant F slider — Apple/iOS-style drag ────────────────────────────────
+// Полностью заменяет старые barClickItem/manualItem для items detail.
+// Старые функции остаются на случай если где-то ещё используются.
+function _fGetSliderEls(mode){
+  const p = mode === 'mobile' ? 'm' : 'd';
+  return {
+    wrap:   document.getElementById(p + 'FSlider'),
+    fill:   document.getElementById(p + 'FFill'),
+    thumb:  document.getElementById(p + 'FThumb'),
+    manual: document.getElementById(p + 'FManual'),
+    amt:    document.getElementById(p + 'FAmt'),
+    sub:    document.getElementById(p + 'FSub'),
+    pay:    document.getElementById(p + 'FPay'),
+    get:    document.getElementById(p + 'FGet'),
+    profit: document.getElementById(p + 'FProfit'),
+    guar:   document.getElementById(p + 'FGuar'),
+    btn:    document.getElementById(p + 'BuyBtn'),
+    slots:  document.getElementById(p + 'FSlots'),
+  };
+}
+function _fmtUSD(n){ return '$' + Math.round(n).toLocaleString(); }
+function _fApply(mode, qty){
+  const els = _fGetSliderEls(mode);
+  if(!els.wrap) return;
+  const max  = Number(els.wrap.dataset.max)  || 1;
+  const per  = Number(els.wrap.dataset.per)  || 0;
+  const rmax = Number(els.wrap.dataset.rmax) || 0;
+  const rmin = Number(els.wrap.dataset.rmin) || 0;
+  qty = Math.max(1, Math.min(max, Math.round(qty || 1)));
+
+  const pct = max <= 1 ? 100 : ((qty - 1) / (max - 1)) * 100;
+  if(els.fill)  els.fill.style.width = pct + '%';
+  if(els.thumb) els.thumb.style.left = pct + '%';
+
+  const invest      = qty * per;
+  const expected    = Math.round(invest * (1 + rmax / 100));
+  const profit      = expected - invest;
+  const guaranteed  = Math.round(invest * (1 + rmin / 100));
+
+  if(els.amt)    els.amt.textContent    = _fmtUSD(expected);
+  if(els.sub)    els.sub.textContent    = `at ${qty} slot${qty>1?'s':''} · ${_fmtUSD(invest)} invested`;
+  if(els.pay)    els.pay.textContent    = _fmtUSD(invest);
+  if(els.get)    els.get.textContent    = _fmtUSD(expected);
+  if(els.profit) els.profit.textContent = '+' + _fmtUSD(profit) + ' profit';
+  if(els.guar)   els.guar.textContent   = _fmtUSD(guaranteed);
+  if(els.btn)    els.btn.textContent    = `BUY ${qty} SLOT${qty>1?'S':''} — ${_fmtUSD(invest)}`;
+  if(els.slots)  els.slots.value        = String(qty);
+  if(els.manual && document.activeElement !== els.manual) els.manual.value = String(qty);
+}
+
+function fSliderInit(mode){
+  const els = _fGetSliderEls(mode);
+  if(!els.wrap || els.wrap.dataset.fInit === '1') return;
+  els.wrap.dataset.fInit = '1';
+
+  const max = Number(els.wrap.dataset.max) || 1;
+
+  function pickFromEvent(e){
+    const r = els.wrap.getBoundingClientRect();
+    const cx = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    if(cx === undefined) return;
+    const ratio = Math.max(0, Math.min(1, (cx - r.left) / r.width));
+    const qty = max <= 1 ? 1 : (1 + ratio * (max - 1));
+    _fApply(mode, qty);
+  }
+
+  let dragging = false;
+  const onDown = e => {
+    dragging = true;
+    if(els.thumb) els.thumb.classList.add('dragging');
+    pickFromEvent(e);
+    e.preventDefault();
+  };
+  const onMove = e => { if(dragging) pickFromEvent(e); };
+  const onUp   = () => {
+    dragging = false;
+    if(els.thumb) els.thumb.classList.remove('dragging');
+  };
+
+  els.wrap.addEventListener('mousedown',  onDown);
+  document.addEventListener('mousemove',  onMove);
+  document.addEventListener('mouseup',    onUp);
+  els.wrap.addEventListener('touchstart', onDown, {passive:false});
+  document.addEventListener('touchmove',  onMove, {passive:true});
+  document.addEventListener('touchend',   onUp);
+
+  // Initial render at qty=1
+  _fApply(mode, 1);
+}
+
+function fSliderManual(input, mode){
+  const v = parseInt(input.value, 10);
+  if(isNaN(v)) return;
+  _fApply(mode, v);
+}
+window.fSliderInit   = fSliderInit;
+window.fSliderManual = fSliderManual;
 
 function switchIdTab(tab, mode){
   const isMobile = mode === 'mobile';
@@ -4677,13 +4831,20 @@ function manualItem(val, mode, itemId){
   _updateItemSlots(n, mode, i);
 }
 function _updateItemSlots(n, mode, i){
+  // Variant F: use centralized _fApply if F slider exists, else fallback to legacy V5 selectors
+  const prefix = mode === 'mobile' ? 'm' : 'd';
+  const fSlider = document.getElementById(prefix + 'FSlider');
+  if(fSlider){
+    _fApply(mode, n);
+    return;
+  }
+  // Legacy V5 fallback
   const slotsAvail = i.slots_available !== undefined ? i.slots_available : (i.slots_total || 20);
   const pricePerSlot = i.price_per_slot || (i.price / (i.slots_total || 20));
   const totalUSD = Math.round(n * pricePerSlot);
   const expectedMax = Math.round(totalUSD * (1 + (i.ret[1] || 0) / 100));
   const expectedMin = Math.round(totalUSD * (1 + (i.ret[0] || 0) / 100));
   const fillPct = (n / slotsAvail) * 100;
-  const prefix = mode === 'mobile' ? 'm' : 'd';
   const get = id => document.getElementById(prefix + id);
   if(get('V5Fill')) get('V5Fill').style.width = fillPct + '%';
   if(get('V5FillLabel')) get('V5FillLabel').textContent = n + ' SLOT' + (n>1?'S':'');
@@ -4701,9 +4862,17 @@ function _updateItemSlots(n, mode, i){
 async function buyFraction(id){
   const i = ITEMS.find(x => x.id === Number(id));
   if(!i){ showToast('error', 'Not found', 'Item not available.'); return; }
-  // Get slots count from either mobile or desktop input
-  const mSlots = parseInt(document.getElementById('mV5Slots')?.value || '0');
-  const dSlots = parseInt(document.getElementById('dV5Slots')?.value || '0');
+  // Get slots count — F-style (mFSlots/dFSlots) with legacy fallback (mV5Slots/dV5Slots)
+  const mSlots = parseInt(
+    document.getElementById('mFSlots')?.value
+    || document.getElementById('mV5Slots')?.value
+    || '0'
+  );
+  const dSlots = parseInt(
+    document.getElementById('dFSlots')?.value
+    || document.getElementById('dV5Slots')?.value
+    || '0'
+  );
   const slotsN = Math.max(mSlots, dSlots) || 1;
   if(slotsN < 1){ showToast('warn', 'Invalid amount', 'Minimum 1 slot.'); return; }
   const pricePerSlot = i.price_per_slot || (i.price / (i.slots_total || 20));
@@ -5659,12 +5828,23 @@ async function depSubmitStart(){
 function depShowPaymentScreen(d){
   const cur = d.crypto_currency || d.currency;
   const m = COIN_META[cur] || {name:cur, network:cur, sym:'●', warn:cur};
-  const addr = d.address;
+  // Backend returns `wallet_address` (snake_case). Keep `address` as alias for resilience.
+  const addr = d.wallet_address || d.address || '';
   const cryptoAmt = d.amount_crypto;
   const rate = d.exchange_rate;
   const usdAmt = d.amount_usd;
-  const bonus = d.bonus_amount || 0;
-  const expiresAt = d.rate_locked_until_ts ? d.rate_locked_until_ts * 1000 : (Date.now() + 15*60*1000);
+  // Backend returns `bonus_amount_usd` (current spec) — keep `bonus_amount` alias for older payloads.
+  const bonus = Number(d.bonus_amount_usd ?? d.bonus_amount ?? 0) || 0;
+  // Backend returns `rate_locked_until` as ISO string. We also accept legacy `rate_locked_until_ts` (seconds).
+  let expiresAt;
+  if(d.rate_locked_until){
+    const parsed = Date.parse(d.rate_locked_until);
+    expiresAt = isNaN(parsed) ? (Date.now() + 15*60*1000) : parsed;
+  } else if(d.rate_locked_until_ts){
+    expiresAt = d.rate_locked_until_ts * 1000;
+  } else {
+    expiresAt = Date.now() + 15*60*1000;
+  }
 
   const qrData = cur.startsWith('BTC') ? `bitcoin:${addr}?amount=${cryptoAmt}` : (cur === 'ETH' || cur.startsWith('USDT-ERC')) ? `ethereum:${addr}` : addr;
 
@@ -7185,8 +7365,9 @@ function _onDetailItemChanged(change){
   const item = ITEMS.find(x => x.id === change.id);
   if(!item) return;
 
-  const mSlotsInput = document.getElementById('mV5Slots');
-  const dSlotsInput = document.getElementById('dV5Slots');
+  // Try F-style first, then legacy V5
+  const mSlotsInput = document.getElementById('mFSlots') || document.getElementById('mV5Slots');
+  const dSlotsInput = document.getElementById('dFSlots') || document.getElementById('dV5Slots');
   const currentSlots = Math.max(
     parseInt(mSlotsInput?.value || '0'),
     parseInt(dSlotsInput?.value || '0')
@@ -7198,8 +7379,9 @@ function _onDetailItemChanged(change){
     _showDetailBanner('SOLD OUT — All slots have been sold while you were viewing.', 'red');
     const buyBtns = ['mBuyBtn', 'dBuyBtn'].map(id => document.getElementById(id)).filter(Boolean);
     buyBtns.forEach(b => { b.disabled = true; b.style.opacity = '.5'; b.textContent = 'SOLD OUT'; });
-    const bars = ['mV5Bar', 'dV5Bar'].map(id => document.getElementById(id)).filter(Boolean);
-    bars.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '.5'; });
+    // F-style sliders + legacy V5 bars
+    const sliders = ['mFSlider', 'dFSlider', 'mV5Bar', 'dV5Bar'].map(id => document.getElementById(id)).filter(Boolean);
+    sliders.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '.5'; });
     return;
   }
 
@@ -7208,10 +7390,15 @@ function _onDetailItemChanged(change){
     _showDetailBanner(`${soldDelta} slot${soldDelta>1?'s':''} sold while you were viewing — your selection adjusted to max ${newAvail}.`, 'gold');
     if(mSlotsInput){ try{ _updateItemSlots(newAvail, 'mobile', item); }catch(e){} }
     if(dSlotsInput){ try{ _updateItemSlots(newAvail, 'desktop', item); }catch(e){} }
-    const mManual = document.getElementById('mV5Manual');
-    const dManual = document.getElementById('dV5Manual');
-    if(mManual) mManual.max = newAvail;
-    if(dManual) dManual.max = newAvail;
+    // Update both F manual inputs and legacy V5 manual inputs (max)
+    const fInputs = ['mFManual','dFManual'].map(id => document.getElementById(id)).filter(Boolean);
+    const vInputs = ['mV5Manual','dV5Manual'].map(id => document.getElementById(id)).filter(Boolean);
+    [...fInputs, ...vInputs].forEach(el => { el.max = newAvail; });
+    // Update F slider data-max so future drags clamp correctly
+    ['mFSlider','dFSlider'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.dataset.max = String(newAvail);
+    });
   } else {
     const soldDelta = change.soldDelta;
     _showDetailBanner(`${soldDelta} slot${soldDelta>1?'s':''} just sold · ${newAvail} remaining`, 'gold');
@@ -9998,8 +10185,9 @@ function renderCalculator(){
 }
 
 function _pcGetPortfolio(){
-  // Агрегируем pools по plan, items по item_id — несколько вложений в одну сущность = одна карточка
-  const poolMap = {};
+  // POOLS: каждая позиция = отдельная карточка (по запросу пользователя — не агрегируем).
+  // ITEMS: агрегируем по item_id — 3 покупки одной вещи = одна карточка с суммой.
+  const pools = [];
   const itemMap = {};
 
   if(typeof state !== 'undefined'){
@@ -10009,9 +10197,11 @@ function _pcGetPortfolio(){
           const plan = p.plan || p.pool_plan || 'Silver';
           const amount = Number(p.amount || p.amount_usd) || 0;
           if(amount > 0){
-            if(!poolMap[plan]) poolMap[plan] = { plan, amount: 0, count: 0 };
-            poolMap[plan].amount += amount;
-            poolMap[plan].count += 1;
+            // Дата нужна чтобы различать одинаковые позиции одного плана
+            const dateStr = p.created_at
+              ? new Date(p.created_at).toLocaleDateString(undefined, {month:'short', day:'numeric'})
+              : (p.date ? new Date(p.date).toLocaleDateString(undefined, {month:'short', day:'numeric'}) : '');
+            pools.push({ plan, amount, id: p.id, dateStr });
           }
         }
       });
@@ -10020,8 +10210,7 @@ function _pcGetPortfolio(){
       state.myItems.filter(i => i.status === 'active').forEach(i => {
         const id = i.id || i.item_id || i.name;
         const inv = Number(i.invested) || 0;
-        const pct = Number(i.pct) || 0; // share of item owned
-        // Ожидаемая прибыль: используем guaranteed (10%) как минимум, ret/retMax — как макс
+        const pct = Number(i.pct) || 0;
         const retPct = Number(i.ret) || Number(i.retMax) || Number(i.guaranteed) || 10;
         const days = Number(i.daysTotal) || 90;
         if(inv <= 0) return;
@@ -10031,12 +10220,10 @@ function _pcGetPortfolio(){
         itemMap[id].invested += inv;
         itemMap[id].pct += pct;
         itemMap[id].count += 1;
-        // максимум days, retPct остаётся первый (один и тот же item)
       });
     }
   }
 
-  const pools = Object.values(poolMap);
   const items = Object.values(itemMap);
   const itemsInvested = items.reduce((s,i) => s + i.invested, 0);
   const itemsCount = items.length;
@@ -10157,8 +10344,8 @@ function _pcUpdate(months){
       const profit = p.amount * (meta.monthlyPct / 100) * months;
       totalInvested += p.amount;
       totalProfit += profit;
-      const subtitle = p.count > 1
-        ? `${fmt(p.amount)} invested across ${p.count} positions · ${meta.monthlyPct.toFixed(1)}%/mo`
+      const subtitle = p.dateStr
+        ? `${fmt(p.amount)} invested · ${meta.monthlyPct.toFixed(1)}%/mo · since ${p.dateStr}`
         : `${fmt(p.amount)} invested · ${meta.monthlyPct.toFixed(1)}%/mo fixed`;
       return `
         <div class="pc-pool-row">
