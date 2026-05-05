@@ -189,10 +189,44 @@ textarea.inp{resize:vertical;min-height:60px;}
   <div class="grid-3">
     <div class="stat" style="border-left-color:var(--green)"><div class="val" style="color:var(--green)" id="sTotalDep">$0</div><div class="lbl">Total Deposits</div></div>
     <div class="stat" style="border-left-color:var(--blue)"><div class="val" style="color:var(--blue)" id="sTotalUsers">0</div><div class="lbl">Total Users</div></div>
-    <div class="stat" style="border-left-color:var(--gold)"><div class="val" style="color:var(--gold)" id="sTotalBal">$0</div><div class="lbl">Total Balance</div></div>
+    <div class="stat" style="border-left-color:var(--gold)" title="Total user funds = wallets + active pools + active items"><div class="val" style="color:var(--gold)" id="sTotalBal">$0</div><div class="lbl">Total User Funds</div></div>
     <div class="stat" style="border-left-color:var(--orange)"><div class="val" style="color:var(--orange)" id="sPendWd">0 / $0</div><div class="lbl">Pending Withdrawals</div></div>
     <div class="stat" style="border-left-color:var(--purple)"><div class="val" style="color:var(--purple)" id="sNewToday">0</div><div class="lbl">New Today</div></div>
     <div class="stat" style="border-left-color:var(--red)"><div class="val" style="color:var(--red)" id="sDepToday">$0</div><div class="lbl">Deposits Today</div></div>
+  </div>
+
+  <!-- Funds breakdown — где конкретно лежат деньги юзеров -->
+  <div class="panel" style="margin-top:14px">
+    <div class="ph">💼 USER FUNDS — BREAKDOWN</div>
+    <div class="pb">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+        <div style="background:var(--bg2);padding:14px;border-radius:8px;border-left:3px solid var(--gold)">
+          <div style="font-size:10px;color:var(--t3);letter-spacing:1px;font-weight:600">ON HAND (WALLETS)</div>
+          <div style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px" id="sFundsWallets">$0</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">Available to withdraw</div>
+        </div>
+        <div style="background:var(--bg2);padding:14px;border-radius:8px;border-left:3px solid var(--blue)">
+          <div style="font-size:10px;color:var(--t3);letter-spacing:1px;font-weight:600">IN ACTIVE POOLS</div>
+          <div style="font-size:20px;font-weight:700;color:var(--blue);margin-top:4px" id="sFundsPools">$0</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">Principal locked</div>
+        </div>
+        <div style="background:var(--bg2);padding:14px;border-radius:8px;border-left:3px solid var(--green)">
+          <div style="font-size:10px;color:var(--t3);letter-spacing:1px;font-weight:600">POOL EARNED</div>
+          <div style="font-size:20px;font-weight:700;color:var(--green);margin-top:4px" id="sFundsEarned">$0</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">Accrued interest (debt)</div>
+        </div>
+        <div style="background:var(--bg2);padding:14px;border-radius:8px;border-left:3px solid var(--purple)">
+          <div style="font-size:10px;color:var(--t3);letter-spacing:1px;font-weight:600">IN ACTIVE ITEMS</div>
+          <div style="font-size:20px;font-weight:700;color:var(--purple);margin-top:4px" id="sFundsItems">$0</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">Locked in fractions</div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(201,168,76,.14),rgba(201,168,76,.04));padding:14px;border-radius:8px;border:1px solid var(--gold)">
+          <div style="font-size:10px;color:var(--gold);letter-spacing:1px;font-weight:700">═ TOTAL OBLIGATIONS</div>
+          <div style="font-size:22px;font-weight:700;color:var(--gold);margin-top:4px" id="sFundsTotal">$0</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">Sum of all 4 above</div>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="grid">
     <div class="panel">
@@ -1066,8 +1100,14 @@ async function loadOverview(){
       // Фолбэк на демо данные
       stats = {
         total_users: 156,
-        total_balance: 487250,
-        deposits_total_amount: 892450,
+        total_balance: 487250,            // legacy alias
+        total_in_wallets: 487250,
+        total_in_pools: 1245000,
+        total_pool_earned: 78500,
+        total_in_items: 320000,
+        total_user_funds_simple: 2052250, // 487250 + 1245000 + 320000
+        total_user_funds: 2130750,        // + 78500 earned
+        deposits_total_amount: 2245000,
         withdrawals_pending_count: 3,
         withdrawals_pending_amount: 15600,
         new_today: 8,
@@ -1086,7 +1126,26 @@ async function loadOverview(){
   
   document.getElementById('sTotalDep').textContent = fmt(stats.deposits_total_amount);
   document.getElementById('sTotalUsers').textContent = stats.total_users||0;
-  document.getElementById('sTotalBal').textContent = fmt(stats.total_balance);
+  // sTotalBal теперь = Total User Funds (wallets + pools + items, без accrued earned)
+  // С fallback на старое поле total_balance для обратной совместимости.
+  const totalUserFunds = (stats.total_user_funds_simple !== undefined)
+    ? stats.total_user_funds_simple
+    : (stats.total_balance || 0);
+  document.getElementById('sTotalBal').textContent = fmt(totalUserFunds);
+
+  // Funds breakdown panel
+  const inWallets = stats.total_in_wallets ?? stats.total_balance ?? 0;
+  const inPools   = stats.total_in_pools   ?? 0;
+  const earned    = stats.total_pool_earned ?? 0;
+  const inItems   = stats.total_in_items   ?? 0;
+  const totalAll  = stats.total_user_funds ?? (inWallets + inPools + earned + inItems);
+  const setIf = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = fmt(v); };
+  setIf('sFundsWallets', inWallets);
+  setIf('sFundsPools',   inPools);
+  setIf('sFundsEarned',  earned);
+  setIf('sFundsItems',   inItems);
+  setIf('sFundsTotal',   totalAll);
+
   document.getElementById('sPendWd').textContent = (stats.withdrawals_pending_count||0)+' / '+fmt(stats.withdrawals_pending_amount);
   document.getElementById('sNewToday').textContent = stats.new_today||0;
   document.getElementById('sDepToday').textContent = fmt(stats.deposits_today_amount);
