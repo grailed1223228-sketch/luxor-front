@@ -836,6 +836,144 @@ button{font-family:inherit}
    SMART INVEST WIZARD STYLES
 ═══════════════════════════════════════════════════════════ */
 
+/* ═════════════ TIME MACHINE v2 ═════════════ */
+.tm-wrap{max-width:920px;margin:0 auto;padding-bottom:60px;position:relative;
+  background:var(--bg2);border-radius:24px;overflow:hidden;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 30px 60px -20px rgba(0,0,0,.6)}
+.tm-head{padding:18px 28px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)}
+.tm-head-l{font-size:14px;color:#fff;font-weight:600;letter-spacing:-.2px}
+.tm-head-r{font-family:'DM Mono',monospace;font-size:11px;color:#6b7280;letter-spacing:.5px}
+.tm-page{display:none;animation:tmEnter .6s cubic-bezier(.32,.72,0,1)}
+.tm-page.active{display:flex;flex-direction:column;flex:1;min-height:600px}
+@keyframes tmEnter{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.tm-body{padding:36px 32px;flex:1;display:flex;flex-direction:column}
+.tm-pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.tm-h{font-size:36px;font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:10px;color:#fff;font-family:'Inter',sans-serif}
+.tm-h em{font-style:normal;color:var(--gold)}
+.tm-sub{font-size:15px;color:#9ca3af;margin-bottom:36px;line-height:1.55;max-width:580px;font-family:'Inter',sans-serif;font-weight:400}
+.tm-choices{display:flex;flex-direction:column;gap:12px;margin-bottom:auto}
+.tm-choice{display:flex;align-items:center;gap:18px;padding:22px 24px;background:#1a1a1a;
+  border:2px solid transparent;border-radius:16px;cursor:pointer;transition:all .25s cubic-bezier(.32,.72,0,1)}
+.tm-choice:hover{background:#222;transform:translateY(-2px)}
+.tm-choice.selected{border-color:var(--gold);background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.02))}
+.tm-choice-icon{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:#9ca3af;flex-shrink:0;transition:all .25s;letter-spacing:.5px;font-family:'Inter',sans-serif}
+.tm-choice.selected .tm-choice-icon{background:var(--gold);color:#000}
+.tm-choice-body{flex:1}
+.tm-choice-name{font-size:17px;font-weight:600;color:#fff;margin-bottom:3px;letter-spacing:-.2px;font-family:'Inter',sans-serif}
+.tm-choice-meta{font-size:13px;color:#6b7280;line-height:1.5;font-family:'Inter',sans-serif}
+.tm-choice-arr{color:#6b7280;font-size:20px;transition:all .3s cubic-bezier(.32,.72,0,1)}
+.tm-choice.selected .tm-choice-arr{color:var(--gold);transform:translateX(4px)}
+.tm-amt-display{padding:30px 0 14px;text-align:center}
+.tm-amt-pre{font-size:32px;font-weight:600;color:#9ca3af;vertical-align:top;margin-top:14px;display:inline-block;font-family:'Inter',sans-serif}
+.tm-amt-num{font-size:88px;font-weight:700;letter-spacing:-3px;line-height:.95;color:#fff;font-feature-settings:"tnum";display:inline-block;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);font-family:'Inter',sans-serif}
+.tm-amt-cents{font-size:36px;font-weight:600;color:#9ca3af;letter-spacing:-1px;margin-left:4px;font-family:'Inter',sans-serif}
+.tm-presets{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px;max-width:480px;margin-left:auto;margin-right:auto}
+.tm-preset{padding:14px 0;background:#1a1a1a;border:none;border-radius:12px;color:#fff;font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:600;cursor:pointer;transition:all .2s cubic-bezier(.32,.72,0,1)}
+.tm-preset:hover{background:#222}
+.tm-preset:active{transform:scale(.96)}
+.tm-items-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:auto}
+.tm-item-card{background:#1a1a1a;border-radius:16px;padding:18px 20px;border:2px solid transparent;cursor:pointer;
+  transition:all .25s cubic-bezier(.32,.72,0,1);position:relative;display:flex;align-items:center;gap:14px}
+.tm-item-card:hover{background:#222;transform:translateY(-2px)}
+.tm-item-card.selected{border-color:var(--gold);background:linear-gradient(135deg,rgba(201,168,76,.06),rgba(201,168,76,.01))}
+.tm-item-card.selected::after{content:'';position:absolute;top:14px;right:14px;width:18px;height:18px;background:var(--gold);border-radius:50%;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 12 10 18 20 6'/></svg>");
+  background-size:14px;background-position:center;background-repeat:no-repeat}
+.tm-item-thumb{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,#2a2a2a,#1a1a1a);display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:1px;font-family:'Inter',sans-serif}
+.tm-item-info{flex:1;min-width:0}
+.tm-item-brand{font-size:11px;color:var(--gold);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;font-family:'Inter',sans-serif}
+.tm-item-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:4px;line-height:1.2;font-family:'Inter',sans-serif}
+.tm-item-meta{display:flex;gap:10px;font-size:12px;color:#6b7280;align-items:center;font-family:'Inter',sans-serif}
+.tm-item-meta .price{color:#fff;font-weight:600}
+.tm-item-meta .ret{color:#00d4a3;font-weight:600;font-feature-settings:"tnum"}
+.tm-items-summary{padding:14px 18px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);border-radius:12px;
+  margin-top:14px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#9ca3af;font-family:'Inter',sans-serif}
+.tm-items-summary strong{color:#fff}
+.tm-items-leftover{color:var(--gold);font-weight:600}
+.tm-top-row{display:grid;grid-template-columns:1fr 1px 1fr;gap:32px;align-items:center;
+  padding:28px;background:linear-gradient(135deg,#0e0e0e 0%,#0a0a0a 100%);border:1px solid rgba(255,255,255,.08);border-radius:20px;margin-bottom:24px}
+.tm-top-divider{width:1px;background:rgba(255,255,255,.08);height:80px;margin:0 auto}
+.tm-top-cell-l{font-size:11px;color:#6b7280;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;font-family:'Inter',sans-serif}
+.tm-top-cell-amt{display:flex;align-items:baseline;gap:6px}
+.tm-top-cell-pre{font-size:24px;font-weight:600;color:#9ca3af;font-family:'Inter',sans-serif}
+.tm-top-cell-num{font-size:48px;font-weight:700;letter-spacing:-1.5px;color:#fff;line-height:1;font-feature-settings:"tnum";font-family:'Inter',sans-serif}
+.tm-top-cell-num.future{color:#00d4a3}
+.tm-top-cell-meta{font-size:12px;color:#6b7280;margin-top:8px;font-family:'Inter',sans-serif}
+.tm-top-cell-meta strong{color:#00d4a3;font-weight:600}
+.tm-graph-wrap{position:relative;background:#0a0a0a;border-radius:20px;padding:24px;border:1px solid rgba(255,255,255,.08);overflow:hidden;margin-bottom:18px}
+.tm-graph-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.tm-graph-tag{padding:4px 10px;border-radius:12px;background:rgba(0,212,163,.12);color:#00d4a3;font-size:11px;font-weight:600;letter-spacing:.4px;font-family:'Inter',sans-serif}
+.tm-graph-pct{display:flex;align-items:baseline;gap:6px}
+.tm-graph-pct-v{font-size:22px;font-weight:700;color:#00d4a3;letter-spacing:-.5px;font-feature-settings:"tnum";font-family:'Inter',sans-serif}
+.tm-graph-pct-l{font-size:12px;color:#6b7280;font-family:'Inter',sans-serif}
+.tm-graph{height:200px;position:relative;margin:0 -8px}
+.tm-graph svg{width:100%;height:100%;display:block;overflow:visible}
+.tm-graph-line{fill:none;stroke:#00d4a3;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;
+  filter:drop-shadow(0 4px 12px rgba(0,212,163,.4));stroke-dasharray:1500;stroke-dashoffset:1500;animation:tmDrawLine 1.6s cubic-bezier(.32,.72,0,1) .2s forwards}
+@keyframes tmDrawLine{to{stroke-dashoffset:0}}
+.tm-graph-fill{fill:url(#tm-grad);opacity:0;animation:tmFillFade 1.2s cubic-bezier(.32,.72,0,1) 1s forwards}
+@keyframes tmFillFade{to{opacity:1}}
+.tm-graph-cursor{stroke:#00d4a3;stroke-width:1;stroke-dasharray:4 4}
+.tm-graph-thumb{fill:#00d4a3;stroke:#000;stroke-width:3}
+.tm-graph-thumb-glow{fill:#00d4a3;opacity:.3;filter:blur(8px)}
+.tm-graph-cycle{stroke:var(--gold);stroke-width:1;stroke-dasharray:2 3;opacity:.4}
+.tm-graph-cycle-dot{fill:var(--gold);opacity:.7}
+.tm-time-marks{display:flex;justify-content:space-between;margin-top:12px;font-size:11px;color:#6b7280;font-weight:500;font-family:'Inter',sans-serif}
+.tm-slider-wrap{padding:8px 0;margin-top:14px}
+.tm-slider{width:100%;-webkit-appearance:none;appearance:none;height:4px;
+  background:linear-gradient(90deg,#00d4a3 0%,#00d4a3 var(--pct,30%),rgba(255,255,255,.1) var(--pct,30%),rgba(255,255,255,.1) 100%);
+  border-radius:2px;outline:none;cursor:pointer}
+.tm-slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:#00d4a3;border-radius:50%;
+  border:3px solid #0a0a0a;cursor:pointer;box-shadow:0 0 0 1px #00d4a3, 0 0 20px rgba(0,212,163,.5)}
+.tm-strat-note{padding:14px 18px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);border-radius:12px;
+  margin-top:14px;display:flex;gap:14px;align-items:flex-start;font-family:'Inter',sans-serif}
+.tm-note-icon{width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:var(--gold);font-weight:700;font-size:13px}
+.tm-note-body{flex:1;font-size:13px;color:#9ca3af;line-height:1.6}
+.tm-note-body strong{color:var(--gold);font-weight:600}
+.tm-note-warn .tm-note-icon{background:rgba(245,158,11,.15);color:#f59e0b}
+.tm-cta-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:18px 24px;
+  background:linear-gradient(135deg,rgba(201,168,76,.06) 0%,rgba(201,168,76,.02) 100%);
+  border:1px solid rgba(201,168,76,.2);border-radius:16px;margin-top:auto;font-family:'Inter',sans-serif}
+.tm-cta-info-l{font-size:11px;color:#6b7280;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
+.tm-cta-info-v{font-size:16px;font-weight:600;color:#fff}
+.tm-cta-info-v strong{color:#00d4a3}
+.tm-cta-btn{padding:14px 28px;background:linear-gradient(180deg,#dcc26a,#c9a84c);color:#000;border:none;border-radius:12px;
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .25s cubic-bezier(.32,.72,0,1);letter-spacing:-.1px;font-family:'Inter',sans-serif}
+.tm-cta-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(201,168,76,.4)}
+.tm-nav-row{display:flex;gap:10px;margin-top:24px;padding-top:24px;border-top:1px solid rgba(255,255,255,.08)}
+.tm-nav-back{padding:14px 24px;background:transparent;border:1px solid rgba(255,255,255,.08);color:#fff;border-radius:12px;
+  font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s cubic-bezier(.32,.72,0,1)}
+.tm-nav-back:hover{background:#1a1a1a;border-color:rgba(255,255,255,.16)}
+.tm-nav-next{flex:1;padding:14px;background:linear-gradient(180deg,#dcc26a,#c9a84c);color:#000;border:none;border-radius:12px;
+  font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s cubic-bezier(.32,.72,0,1);letter-spacing:-.1px}
+.tm-nav-next:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,.35)}
+.tm-nav-next:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Mobile responsive */
+@media(max-width:768px){
+  .tm-body{padding:24px 18px}
+  .tm-h{font-size:28px}
+  .tm-amt-num{font-size:64px;letter-spacing:-2px}
+  .tm-amt-pre{font-size:24px;margin-top:10px}
+  .tm-amt-cents{font-size:28px}
+  .tm-top-row{grid-template-columns:1fr;gap:16px;padding:20px}
+  .tm-top-divider{display:none}
+  .tm-top-cell-num{font-size:36px}
+  .tm-items-grid{grid-template-columns:1fr}
+  .tm-presets{grid-template-columns:repeat(3,1fr)}
+  .tm-cta-row{grid-template-columns:1fr;gap:10px}
+  .tm-graph{height:160px}
+  .tm-time-marks{font-size:10px}
+  .tm-time-marks span:nth-child(2),
+  .tm-time-marks span:nth-child(3){display:none}
+}
+
+/* Old smart wizard CSS — DEPRECATED but kept for compat */
 .sm-wrap{max-width:920px;margin:0 auto;padding-bottom:140px;position:relative}
 
 /* Header */
@@ -1193,6 +1331,7 @@ button{font-family:inherit}
 <symbol id="i-trade" viewBox="0 0 24 24"><path d="M3 20 V4 M3 20 H21 M7 16 L11 12 L14 14 L20 7 M16 7 L20 7 L20 11"/></symbol>
 <symbol id="i-ref" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20 C3 16 6 14 9 14 C12 14 15 16 15 20"/><path d="M16 11 L18 13 L22 9"/></symbol>
 <symbol id="i-bonus" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M2 8 H22 M12 8 V21 M12 8 C12 6 10 3 8 3 C6 3 5 4.5 5 6 C5 7.5 7 8 8 8 M12 8 C12 6 14 3 16 3 C18 3 19 4.5 19 6 C19 7.5 17 8 16 8"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 5h18 M6 12h12 M10 19h4"/></symbol>
 <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2 L13 5 L16 4 L17 7 L20 8 L19 11 L22 12 L19 13 L20 16 L17 17 L16 20 L13 19 L12 22 L11 19 L8 20 L7 17 L4 16 L5 13 L2 12 L5 11 L4 8 L7 7 L8 4 L11 5 Z"/></symbol>
 <symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16 L21 21"/></symbol>
@@ -1542,6 +1681,13 @@ button{font-family:inherit}
 <span class="cat" data-cat="fashion">Fashion</span>
 </div>
 
+<div id="dBrandChips" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0 14px;padding:10px 12px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:8px">
+  <svg class="lx" style="width:14px;height:14px;color:var(--gold)"><use href="#i-filter"/></svg>
+  <span style="font-size:10px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-right:4px">BRAND</span>
+  <span class="brand-chip active" data-brand="all" onclick="setBrandFilter('all')" style="padding:5px 11px;background:var(--gold);color:#000;border-radius:14px;font-size:11px;cursor:pointer;font-weight:600">All</span>
+  <!-- dynamically populated -->
+</div>
+
 <div class="dmp-h">
 <span>SHOP ALL</span>
 <span class="count" id="dMkCount">0 ITEMS</span>
@@ -1641,7 +1787,11 @@ button{font-family:inherit}
 <div class="ref-hero">
 <div class="l">YOUR REFERRAL CODE</div>
 <div class="code" id="refCode">Loading...</div>
-<div class="btns">
+<div style="margin-top:8px;font-size:11px;color:var(--t3);font-family:'SF Mono',Menlo,monospace;word-break:break-all" id="refLinkDisplay">
+  <span style="color:var(--t3);letter-spacing:1px;text-transform:uppercase;font-size:10px">REFERRAL LINK</span><br>
+  <span id="refLinkText" style="color:var(--gold)">https://luxor.invest/?ref=loading</span>
+</div>
+<div class="btns" style="margin-top:10px">
 <button class="btn-copy" onclick="copyRefCode()">COPY CODE</button>
 <button class="btn-link" onclick="copyRefLink()">COPY LINK</button>
 </div>
@@ -2184,6 +2334,11 @@ button{font-family:inherit}
 <span class="cat" data-cat="fashion">Fashion</span>
 </div>
 
+<div id="mBrandChips" style="display:none;align-items:center;gap:5px;flex-wrap:wrap;margin:6px 12px 10px;padding:8px 10px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:8px;overflow-x:auto">
+  <span style="font-size:10px;color:var(--t3);letter-spacing:1px;margin-right:4px;flex-shrink:0">BRAND:</span>
+  <span class="brand-chip active" data-brand="all" onclick="setBrandFilter('all')" style="padding:4px 9px;background:var(--gold);color:#000;border-radius:12px;font-size:10px;cursor:pointer;font-weight:600;flex-shrink:0">All</span>
+</div>
+
 <div class="vc-m-h">
 <h3>SHOP ALL</h3>
 <span class="count" id="mMkCount">0 ITEMS</span>
@@ -2277,7 +2432,11 @@ button{font-family:inherit}
 <div class="ref-hero" style="padding:20px">
 <div class="l">YOUR CODE</div>
 <div class="code" id="mRefCode" style="font-size:22px">Loading...</div>
-<div class="btns">
+<div style="margin-top:8px;font-size:10px;color:var(--t3);font-family:'SF Mono',Menlo,monospace;word-break:break-all">
+  <span style="color:var(--t3);letter-spacing:1px;text-transform:uppercase">REFERRAL LINK</span><br>
+  <span id="mRefLinkText" style="color:var(--gold)">https://luxor.invest/?ref=loading</span>
+</div>
+<div class="btns" style="margin-top:10px">
 <button class="btn-copy" onclick="copyRefCode()">COPY CODE</button>
 <button class="btn-link" onclick="copyRefLink()">COPY LINK</button>
 </div>
@@ -2647,6 +2806,7 @@ function _mapServerItem(srv){
     id: Number(srv.id),
     cat: cat, ico: ico,
     name: srv.name || 'Item',
+    brand: srv.brand || '',
     desc: srv.description || '',
     image_url: srv.image_url || '',
     price: price, funded: funded,
@@ -2659,6 +2819,10 @@ function _mapServerItem(srv){
     badge: badge, likes: 0, views: 0,
     closes: periodDays * 24,
     price_history: Array.isArray(srv.price_history) ? srv.price_history : [],
+    // D5 NEW: countdown fields для UI badges
+    countdown_ends_at: srv.countdown_ends_at || null,
+    pool_closed_at: srv.pool_closed_at || null,
+    countdown_days: srv.countdown_days || null,
   };
 }
 
@@ -3780,21 +3944,47 @@ function renderMyItems(){
   // Update count badges
   const soldStatuses = ['sold_guaranteed', 'sold_profit'];
   const exitedStatuses = ['early_exit'];
-  const cAll = state.myItems.length;
-  const cActive = state.myItems.filter(i => i.status === 'active').length;
-  const cSelling = state.myItems.filter(i => exitedStatuses.includes(i.status)).length;
-  const cSold = state.myItems.filter(i => soldStatuses.includes(i.status)).length;
+  
+  // ─── ETAP 9.4: Группировка покупок одного и того же item ──────────────
+  // Если юзер купил 3 фракции айтема X — показываем ОДНУ карточку с суммированными значениями
+  // (но только для одного и того же status — sold/active не мерджим)
+  const _grouped = (() => {
+    const groupKey = (i) => `${i.item_id || i.id}_${i.status}`;
+    const groups = {};
+    state.myItems.forEach(i => {
+      const k = groupKey(i);
+      if(!groups[k]){
+        groups[k] = { ...i, _purchase_ids: [i.id], _count: 1 };
+      } else {
+        const g = groups[k];
+        // Суммируем числовые поля
+        g.invested = (Number(g.invested) || 0) + (Number(i.invested) || 0);
+        g.pct = (Number(g.pct) || 0) + (Number(i.pct) || 0);
+        if(i.payout_usd != null){
+          g.payout_usd = (Number(g.payout_usd) || 0) + (Number(i.payout_usd) || 0);
+        }
+        g._purchase_ids.push(i.id);
+        g._count++;
+      }
+    });
+    return Object.values(groups);
+  })();
+  
+  const cAll = _grouped.length;
+  const cActive = _grouped.filter(i => i.status === 'active').length;
+  const cSelling = _grouped.filter(i => exitedStatuses.includes(i.status)).length;
+  const cSold = _grouped.filter(i => soldStatuses.includes(i.status)).length;
   const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = '(' + v + ')'; };
   set('cntAll', cAll); set('cntActive', cActive); set('cntSelling', cSelling); set('cntSold', cSold);
   set('cntAllM', cAll); set('cntActiveM', cActive); set('cntSellingM', cSelling); set('cntSoldM', cSold);
 
   // Filter
   const filter = window._itemsFilter || 'all';
-  const filtered = filter === 'all' ? state.myItems
-    : filter === 'active' ? state.myItems.filter(i => i.status === 'active')
-    : filter === 'sold' ? state.myItems.filter(i => soldStatuses.includes(i.status))
-    : filter === 'selling' ? state.myItems.filter(i => exitedStatuses.includes(i.status))
-    : state.myItems.filter(i => i.status === filter);
+  const filtered = filter === 'all' ? _grouped
+    : filter === 'active' ? _grouped.filter(i => i.status === 'active')
+    : filter === 'sold' ? _grouped.filter(i => soldStatuses.includes(i.status))
+    : filter === 'selling' ? _grouped.filter(i => exitedStatuses.includes(i.status))
+    : _grouped.filter(i => i.status === filter);
 
   const html = filtered.length ? filtered.map(i => {
     const e = getItemEarnings(i);
@@ -3815,9 +4005,11 @@ function renderMyItems(){
       : (investedAmt + expectedReturnUsd);
     const earningsSubtext = isClosed ? 'Sold — already credited' : 'When item is sold';
     const ev = '$' + Math.round(earningsValue).toLocaleString();
-    // Breakdown explanation: "$5,325 + $3,717"
+    // Breakdown explanation: "$5,325 + $3,717" with green plus
     const breakdownProfit = isClosed ? actualProfitUsd : expectedReturnUsd;
-    const breakdownTxt = `$${Math.round(investedAmt).toLocaleString()} + $${Math.round(breakdownProfit).toLocaleString()}`;
+    const profitSign = (breakdownProfit >= 0) ? '+' : '−';
+    const profitColor = (breakdownProfit >= 0) ? 'var(--green)' : 'var(--red)';
+    const breakdownTxt = `$${Math.round(investedAmt).toLocaleString()} <span style="color:${profitColor};font-weight:700">${profitSign}$${Math.round(Math.abs(breakdownProfit)).toLocaleString()}</span>`;
     const vNumCls = isClosed && actualProfitUsd < 0 ? 'red' : '';
     // Label for second meta row: "Actual return" for closed, "Expected return" for active
     const returnRowLabel = isClosed ? 'Actual return' : 'Expected return';
@@ -3831,8 +4023,8 @@ function renderMyItems(){
       <div class="top-row">
         <div class="pic">${thumbInner}</div>
         <div class="info">
-          <div class="n">${i.name || 'Item'}</div>
-          <div class="s">${i.pct}% share · invested $${(+i.invested).toLocaleString()}</div>
+          <div class="n">${i.name || 'Item'}${i._count > 1 ? ` <span style="display:inline-block;background:rgba(201,168,76,.18);color:var(--gold);padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;margin-left:6px;letter-spacing:.5px">×${i._count} BUYS</span>` : ''}</div>
+          <div class="s">${(+i.pct).toFixed(2)}% share · invested $${(+i.invested).toLocaleString()}</div>
           <span class="stat ${stCls[i.status] || 'active'}">${stLabel[i.status] || i.status}</span>
         </div>
       </div>
@@ -4028,7 +4220,42 @@ function filterMk(cat){
 function renderMarketplace(cat){
   cat = cat || 'all';
   window._currentCat = cat;
-  const items = cat === 'all' ? ITEMS : ITEMS.filter(i => i.cat === cat);
+  let items = cat === 'all' ? ITEMS : ITEMS.filter(i => i.cat === cat);
+  
+  // Apply brand filter (window._currentBrand)
+  const curBrand = window._currentBrand || 'all';
+  if(curBrand !== 'all'){
+    items = items.filter(i => (i.brand || '').toLowerCase() === curBrand.toLowerCase());
+  }
+  
+  // Update brand chips (only show brands that exist in current category)
+  try { _updateBrandChips(cat); } catch(e){}
+
+  // Helper: countdown badge для карточки item
+  // Использует i.countdown_ends_at (ISO) или i.pool_closed_at
+  const _countdownBadge = (i) => {
+    // Если pool закрыт — показываем "POOL CLOSED"
+    if(i.pool_closed_at){
+      return `<div class="ctdn closed" style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,.85);color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;z-index:5">🔒 POOL CLOSED</div>`;
+    }
+    if(!i.countdown_ends_at) return '';
+    const endsAt = new Date(i.countdown_ends_at).getTime();
+    const now = Date.now();
+    const ms = endsAt - now;
+    if(ms <= 0){
+      return `<div class="ctdn expired" style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,.85);color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;z-index:5">⏰ ENDED</div>`;
+    }
+    const days = Math.floor(ms / 86400000);
+    const hours = Math.floor((ms % 86400000) / 3600000);
+    const mins = Math.floor((ms % 3600000) / 60000);
+    let label;
+    if(days > 0) label = `${days}d ${hours}h`;
+    else if(hours > 0) label = `${hours}h ${mins}m`;
+    else label = `${mins}m`;
+    // Цвет: зелёный если >24h, желтый если <24h, оранжевый <2h
+    const urgency = ms < 7200000 ? '#e67e22' : ms < 86400000 ? '#f1c40f' : '#27ae60';
+    return `<div class="ctdn" style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,.85);color:${urgency};border:1px solid ${urgency};padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.5px;z-index:5;font-family:'SF Mono',Menlo,monospace">🕐 ${label}</div>`;
+  };
 
   // Desktop grid
   const dGrid = document.getElementById('dMkGrid');
@@ -4044,14 +4271,21 @@ function renderMarketplace(cat){
         const slotsTotal = i.slots_total || 20;
         const slotsSold = i.slots_sold || 0;
         const isFav = _favIncludes(i.id);
+        // NEW: brand сверху крупно, name мелко снизу
+        const brandLine = i.brand && i.brand.trim() ? i.brand : (i.name || 'Item');
+        const subLine = (i.brand && i.brand.trim()) ? i.name : '';
+        // Compact return only %max — для зелёной плашки
+        const retShort = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : '';
         return `<div class="dmp-card" data-mk-id="${i.id}" onclick="openItemDetail(${i.id})">
           <div class="img">${_itemThumbHTML(i)}
+            ${_countdownBadge(i)}
             <div class="fav ${isFav?'on':''}" onclick="event.stopPropagation();toggleFav(${i.id},this)">${isFav?'♥':'♡'}</div>
-            ${ret?`<div class="ret">${ret}</div>`:''}
+            ${retShort?`<div class="ret" style="background:rgba(39,174,96,.92);color:#fff">${retShort}</div>`:''}
           </div>
           <div class="body">
             <div class="cat">${i.cat || ''}</div>
-            <div class="name">${i.name}</div>
+            <div class="name" style="font-weight:800">${brandLine}</div>
+            ${subLine?`<div style="font-size:11px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${subLine}</div>`:''}
             <div class="pr">
               <div><div class="l">PRICE</div><div class="v gold">$${(+i.price||0).toLocaleString()}</div></div>
               <div style="text-align:right"><div class="l">PER SLOT</div><div class="v t-light">$${Math.round(i.price_per_slot||0).toLocaleString()}</div></div>
@@ -4076,14 +4310,19 @@ function renderMarketplace(cat){
         const slotsTotal = i.slots_total || 20;
         const slotsSold = i.slots_sold || 0;
         const isFav = _favIncludes(i.id);
+        const brandLine = i.brand && i.brand.trim() ? i.brand : (i.name || 'Item');
+        const subLine = (i.brand && i.brand.trim()) ? i.name : '';
+        const retShort = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : '';
         return `<div class="vc-m-card" data-mk-id="${i.id}" onclick="openItemDetail(${i.id})">
           <div class="pic">${_itemThumbHTML(i)}
+            ${_countdownBadge(i)}
             <div class="fav ${isFav?'on':''}" onclick="event.stopPropagation();toggleFav(${i.id},this)">${isFav?'♥':'♡'}</div>
-            ${ret?`<div class="ret">${ret}</div>`:''}
+            ${retShort?`<div class="ret" style="background:rgba(39,174,96,.92);color:#fff">${retShort}</div>`:''}
           </div>
           <div class="body">
             <div class="cat">${i.cat || ''}</div>
-            <div class="name">${i.name}</div>
+            <div class="name" style="font-weight:800">${brandLine}</div>
+            ${subLine?`<div style="font-size:10px;color:var(--t3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${subLine}</div>`:''}
             <div class="price">$${(+i.price||0).toLocaleString()}</div>
             <div class="price-sub">$${Math.round(i.price_per_slot||0).toLocaleString()}/slot</div>
             <div class="slots"><span data-slots-count>${slotsSold}/${slotsTotal}</span><div class="pb"><div class="f" data-funded-bar style="width:${i.funded||0}%;transition:width .6s ease-out"></div></div></div>
@@ -4488,10 +4727,11 @@ function drawGraph(){
     const poolsInvested = state.positions.reduce((s,p)=>s+(+p.amount||+p.amount_usd||0),0);
     const poolsEarned = state.positions.reduce((s,p)=>s+getLiveEarned(p), 0);
     const itemsActiveInvested = state.myItems.filter(i => i.status === 'active').reduce((s,i)=>s+(+i.invested||0),0);
-    const itemsClosedProfit = state.myItems
-      .filter(i => i.status !== 'active' && i.payout_usd !== undefined && i.payout_usd !== null)
-      .reduce((s,i) => s + (Number(i.payout_usd) - Number(i.invested)), 0);
-    const invested = poolsInvested + itemsActiveInvested;
+    const itemsClosedItems = state.myItems.filter(i => i.status !== 'active' && i.payout_usd !== undefined && i.payout_usd !== null);
+    const itemsClosedInvested = itemsClosedItems.reduce((s,i) => s + Number(i.invested || 0), 0);
+    const itemsClosedProfit = itemsClosedItems.reduce((s,i) => s + (Number(i.payout_usd) - Number(i.invested)), 0);
+    // FIX D1: invested должен включать closed items для корректного % при убытке
+    const invested = poolsInvested + itemsActiveInvested + itemsClosedInvested;
     const earned = poolsEarned + itemsClosedProfit;
     const pct = invested > 0 ? (earned / invested * 100) : 0;
 
@@ -4517,8 +4757,21 @@ function drawGraph(){
     }
     const n = 30;
     const padT = 10;
-    const baseY = h - 10;
-    const targetY = padT + (1 - Math.min(0.9, Math.abs(pct)/30)) * (baseY - padT);
+    const padB = 10;
+    // FIX D1: midline = середина canvas. График ИДЁТ ВВЕРХ при прибыли, ВНИЗ при убытке.
+    // pct > 0 → targetY < midY (вверх на canvas)
+    // pct < 0 → targetY > midY (вниз на canvas)
+    const midY = (h - padT - padB) / 2 + padT;
+    const baseY = midY;
+    const intensity = Math.min(0.9, Math.abs(pct) / 30);  // от 0 до 0.9
+    let targetY;
+    if(pct >= 0){
+      // вверх: уменьшаем Y от midY до padT
+      targetY = midY - intensity * (midY - padT);
+    } else {
+      // вниз: увеличиваем Y от midY до (h - padB)
+      targetY = midY + intensity * (h - padB - midY);
+    }
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.moveTo(0, baseY);
@@ -6990,7 +7243,711 @@ function _smartInitState(){
 
 /* ═════════════ MAIN RENDER ═════════════ */
 
+/* ═════════════ TIME MACHINE v2 — NEW SMART INVEST ═════════════ */
+
+// State for Time Machine
+window._tm = {
+  step: 1,
+  type: 'mixed',       // 'pools' | 'items' | 'mixed'
+  capital: 5000,
+  selectedItems: [],   // [{id, brand, name, price, retMin, retMax, days}]
+  days: 90,
+};
+
 function renderSmartInvest(){
+  // Reset state
+  window._tm = { step: 1, type: 'mixed', capital: 5000, selectedItems: [], days: 90 };
+  
+  const html = _tmShellHTML();
+  const dCt = document.getElementById('dSmartContent');
+  const mCt = document.getElementById('mSmartContent');
+  const isMobile = window.innerWidth <= 768;
+  if(dCt) dCt.innerHTML = isMobile ? '' : html;
+  if(mCt) mCt.innerHTML = isMobile ? html : '';
+  _tmShowPage(1);
+}
+
+function _tmShellHTML(){
+  return `
+  <div class="tm-wrap">
+    <div class="tm-head">
+      <span class="tm-head-l" id="tm-head-title">Smart Invest · Time Machine</span>
+      <span class="tm-head-r" id="tm-head-meta">STEP 1 OF 4</span>
+    </div>
+    
+    <!-- PAGE 1: TYPE -->
+    <div class="tm-page active" data-tm-step="1">
+      <div class="tm-body">
+        <div class="tm-pre">Step 1</div>
+        <h2 class="tm-h">Where do you want<br>your <em>capital</em>?</h2>
+        <p class="tm-sub">Three paths. Each behaves differently — pools work continuously, objects sell in cycles, mixed combines both.</p>
+        
+        <div class="tm-choices">
+          <div class="tm-choice" onclick="_tmChooseType(this,'pools')">
+            <div class="tm-choice-icon">P</div>
+            <div class="tm-choice-body">
+              <div class="tm-choice-name">Pools only</div>
+              <div class="tm-choice-meta">Continuous compound · steady, predictable yield<br>Silver / Gold / Platinum tiers depending on capital</div>
+            </div>
+            <div class="tm-choice-arr">→</div>
+          </div>
+          <div class="tm-choice" onclick="_tmChooseType(this,'items')">
+            <div class="tm-choice-icon">O</div>
+            <div class="tm-choice-body">
+              <div class="tm-choice-name">Objects only</div>
+              <div class="tm-choice-meta">Cycles of ~30 days · we curate items that fit your capital<br>Sold at market, then you can reinvest</div>
+            </div>
+            <div class="tm-choice-arr">→</div>
+          </div>
+          <div class="tm-choice selected" onclick="_tmChooseType(this,'mixed')">
+            <div class="tm-choice-icon">M</div>
+            <div class="tm-choice-body">
+              <div class="tm-choice-name">Mixed</div>
+              <div class="tm-choice-meta">60% pools (continuous yield) + 40% objects (cycles)<br>Best balance of stability and upside</div>
+            </div>
+            <div class="tm-choice-arr">→</div>
+          </div>
+        </div>
+        
+        <div class="tm-nav-row">
+          <button class="tm-nav-back" disabled style="visibility:hidden">Back</button>
+          <button class="tm-nav-next" onclick="_tmNext()">Continue →</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- PAGE 2: AMOUNT -->
+    <div class="tm-page" data-tm-step="2">
+      <div class="tm-body">
+        <div class="tm-pre">Step 2</div>
+        <h2 class="tm-h" id="tm-step2-h">How much?</h2>
+        <p class="tm-sub" id="tm-step2-sub">Your initial commitment.</p>
+        
+        <div class="tm-amt-display">
+          <span class="tm-amt-pre">$</span>
+          <span class="tm-amt-num" id="tm-amt-num">5,000</span>
+          <span class="tm-amt-cents">.00</span>
+        </div>
+        
+        <div class="tm-presets">
+          <button class="tm-preset" onclick="_tmSetAmt(1000)">$1K</button>
+          <button class="tm-preset" onclick="_tmSetAmt(5000)">$5K</button>
+          <button class="tm-preset" onclick="_tmSetAmt(10000)">$10K</button>
+          <button class="tm-preset" onclick="_tmSetAmt(25000)">$25K</button>
+          <button class="tm-preset" onclick="_tmSetAmt(50000)">$50K</button>
+        </div>
+        
+        <div class="tm-strat-note" id="tm-amt-note" style="margin-top:24px;display:none">
+          <div class="tm-note-icon">i</div>
+          <div class="tm-note-body" id="tm-amt-note-text"></div>
+        </div>
+        
+        <div style="flex:1"></div>
+        
+        <div class="tm-nav-row">
+          <button class="tm-nav-back" onclick="_tmBack()">← Back</button>
+          <button class="tm-nav-next" onclick="_tmNext()">Continue →</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- PAGE 3: ITEM PICK -->
+    <div class="tm-page" data-tm-step="3">
+      <div class="tm-body">
+        <div class="tm-pre">Step 3</div>
+        <h2 class="tm-h" id="tm-step3-h">Pick objects</h2>
+        <p class="tm-sub" id="tm-step3-sub">Tap to select. Total selected price should fit your budget.</p>
+        
+        <div class="tm-items-grid" id="tm-items-grid"></div>
+        
+        <div class="tm-items-summary" id="tm-items-summary">
+          <span>Selected: <strong id="tm-items-count">0</strong> · allocated <strong id="tm-items-allocated">$0</strong> of <strong id="tm-items-budget">$0</strong></span>
+          <span class="tm-items-leftover" id="tm-items-leftover"></span>
+        </div>
+        
+        <div style="flex:1"></div>
+        
+        <div class="tm-nav-row">
+          <button class="tm-nav-back" onclick="_tmBack()">← Back</button>
+          <button class="tm-nav-next" onclick="_tmNext()">See projection →</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- PAGE 4: GRAPH -->
+    <div class="tm-page" data-tm-step="4">
+      <div class="tm-body">
+        <div class="tm-top-row">
+          <div>
+            <div class="tm-top-cell-l" id="tm-today-label">TODAY</div>
+            <div class="tm-top-cell-amt"><span class="tm-top-cell-pre">$</span><span class="tm-top-cell-num" id="tm-today">5,000</span></div>
+            <div class="tm-top-cell-meta">Capital deployed</div>
+          </div>
+          <div class="tm-top-divider"></div>
+          <div>
+            <div class="tm-top-cell-l" id="tm-future-label">+ 90 DAYS</div>
+            <div class="tm-top-cell-amt"><span class="tm-top-cell-pre">$</span><span class="tm-top-cell-num future" id="tm-future">5,900</span></div>
+            <div class="tm-top-cell-meta">Projected · <strong id="tm-gain">+$900 (+18.0%)</strong></div>
+          </div>
+        </div>
+        
+        <div class="tm-graph-wrap">
+          <div class="tm-graph-h">
+            <span class="tm-graph-tag" id="tm-graph-tag">PROJECTED GROWTH</span>
+            <div class="tm-graph-pct">
+              <span class="tm-graph-pct-v" id="tm-graph-pct">+18.0%</span>
+              <span class="tm-graph-pct-l">at <span id="tm-graph-time">90 days</span></span>
+            </div>
+          </div>
+          <div class="tm-graph">
+            <svg viewBox="0 0 600 200" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="tm-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00d4a3" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#00d4a3" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path class="tm-graph-fill" id="tm-fill"/>
+              <path class="tm-graph-line" id="tm-line"/>
+              <g id="tm-cycles"></g>
+              <line class="tm-graph-cursor" id="tm-cursor" x1="180" y1="0" x2="180" y2="200"/>
+              <circle class="tm-graph-thumb-glow" id="tm-thumb-glow" cx="180" cy="100" r="14"/>
+              <circle class="tm-graph-thumb" id="tm-thumb" cx="180" cy="100" r="8"/>
+            </svg>
+          </div>
+          <div class="tm-time-marks">
+            <span>Today</span><span>30d</span><span>60d</span><span>90d</span><span>180d</span><span>1 year</span>
+          </div>
+          <div class="tm-slider-wrap">
+            <input class="tm-slider" id="tm-slider" type="range" min="7" max="365" value="90" 
+                   style="--pct:25%" oninput="_tmSlide(this.value)">
+          </div>
+        </div>
+        
+        <div class="tm-strat-note" id="tm-graph-note">
+          <div class="tm-note-icon">i</div>
+          <div class="tm-note-body" id="tm-graph-note-body"></div>
+        </div>
+        <div class="tm-strat-note tm-note-warn" id="tm-graph-warn" style="display:none;margin-top:8px">
+          <div class="tm-note-icon">!</div>
+          <div class="tm-note-body" id="tm-graph-warn-body"></div>
+        </div>
+        
+        <div class="tm-cta-row" style="margin-top:18px">
+          <div>
+            <div class="tm-cta-info-l">DEPLOYING</div>
+            <div class="tm-cta-info-v">$<span id="tm-cta-cap">5,000</span> · projected <strong>+$<span id="tm-cta-gain">900</span> in <span id="tm-cta-days">90 days</span></strong></div>
+          </div>
+          <button class="tm-cta-btn" onclick="_tmDeploy()">Deploy now →</button>
+        </div>
+        
+        <div class="tm-nav-row">
+          <button class="tm-nav-back" onclick="_tmBack()">← Edit selection</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+// Item catalog — populated from real /api/items at runtime
+function _tmGetCatalog(){
+  // Use real items from ITEMS global if available
+  const items = (typeof ITEMS !== 'undefined' && Array.isArray(ITEMS)) ? ITEMS : [];
+  if(items.length > 0){
+    return items.filter(i => (i.slots_available || 20) > 0).map(i => ({
+      id: i.id,
+      brand: (i.brand || i.name || 'Item').toUpperCase(),
+      name: i.name || '',
+      price: +i.price_per_slot || 500,
+      retMin: i.ret ? i.ret[0] : 10,
+      retMax: i.ret ? i.ret[1] : 25,
+      days: i.days ? i.days[1] : 30,
+      ico: ((i.brand || i.name || 'X').substring(0,2)).toUpperCase()
+    }));
+  }
+  // Fallback static catalog
+  return [
+    { id:1, brand:'ROLEX',         name:'Daytona 116500',    price:1500, retMin:15, retMax:30, days:30, ico:'RX' },
+    { id:2, brand:'PATEK',         name:'Nautilus 5711',     price:4000, retMin:20, retMax:40, days:35, ico:'PK' },
+    { id:3, brand:'HERMÈS',        name:'Birkin 30 Black',   price:600,  retMin:10, retMax:18, days:45, ico:'HM' },
+    { id:4, brand:'AUDEMARS',      name:'Royal Oak',         price:2250, retMin:18, retMax:35, days:30, ico:'AP' },
+    { id:5, brand:'CARTIER',       name:'Tank Louis',        price:800,  retMin:12, retMax:22, days:40, ico:'CT' },
+    { id:6, brand:'LOUIS VUITTON', name:'Trunk Monogram',    price:500,  retMin:8,  retMax:16, days:50, ico:'LV' },
+    { id:7, brand:'CHANEL',        name:'Classic Flap',      price:700,  retMin:10, retMax:20, days:45, ico:'CH' },
+    { id:8, brand:'BVLGARI',       name:'Serpenti Gold',     price:1200, retMin:14, retMax:28, days:35, ico:'BV' },
+  ];
+}
+
+function _tmShowPage(n){
+  document.querySelectorAll('.tm-page').forEach(p => p.classList.remove('active'));
+  const target = document.querySelector(`.tm-page[data-tm-step="${n}"]`);
+  if(target) target.classList.add('active');
+  window._tm.step = n;
+  
+  // Header — pools has 3 steps, items/mixed have 4
+  const totalSteps = (window._tm.type === 'pools') ? 3 : 4;
+  let displayStep = n;
+  if(window._tm.type === 'pools' && n === 4) displayStep = 3;
+  const meta = document.getElementById('tm-head-meta');
+  if(meta) meta.textContent = `STEP ${displayStep} OF ${totalSteps}`;
+  
+  if(n === 2) _tmSetupAmount();
+  if(n === 3 && window._tm.type === 'pools'){
+    setTimeout(() => _tmShowPage(4), 50);
+    return;
+  }
+  if(n === 3) _tmSetupItems();
+  if(n === 4) _tmSetupGraph();
+}
+
+function _tmNext(){
+  if(window._tm.step === 2){
+    const el = document.getElementById('tm-amt-num');
+    if(el) window._tm.capital = +(el.textContent.replace(/[^0-9]/g,'')) || 5000;
+  }
+  if(window._tm.step === 3 && (window._tm.type === 'items' || window._tm.type === 'mixed')){
+    if(window._tm.selectedItems.length === 0){
+      try { showToast && showToast('warn', 'Select items', 'Pick at least one object'); } catch(e){ alert('Select at least one item'); }
+      return;
+    }
+  }
+  if(window._tm.type === 'pools' && window._tm.step === 2){ _tmShowPage(4); return; }
+  _tmShowPage(window._tm.step + 1);
+}
+
+function _tmBack(){
+  if(window._tm.type === 'pools' && window._tm.step === 4){ _tmShowPage(2); return; }
+  if(window._tm.step > 1) _tmShowPage(window._tm.step - 1);
+}
+
+function _tmChooseType(el, type){
+  document.querySelectorAll('.tm-page[data-tm-step="1"] .tm-choice').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+  window._tm.type = type;
+  // Reset items selection if switching to pools
+  if(type === 'pools') window._tm.selectedItems = [];
+}
+
+function _tmSetupAmount(){
+  const h = document.getElementById('tm-step2-h');
+  const sub = document.getElementById('tm-step2-sub');
+  if(!h || !sub) return;
+  if(window._tm.type === 'pools'){
+    h.innerHTML = `How much in <em>pools</em>?`;
+    sub.textContent = 'Capital decides which compound rhythm we use. Less than $10K → weekly. More than $10K → monthly.';
+  } else if(window._tm.type === 'items'){
+    h.innerHTML = `Your <em>budget</em>?`;
+    sub.textContent = "We'll curate objects from our catalog that fit this amount. The remainder stays liquid.";
+  } else {
+    h.innerHTML = `How much?`;
+    sub.textContent = 'Mixed split — about 60% to pools, 40% across objects we curate for you.';
+  }
+  _tmUpdateAmtNote();
+}
+
+function _tmSetAmt(v){
+  const el = document.getElementById('tm-amt-num');
+  if(!el) return;
+  const start = +(el.textContent.replace(/[^0-9]/g, '')) || 0;
+  const end = v;
+  const dur = 600;
+  const t0 = performance.now();
+  const animate = (now) => {
+    const r = Math.min((now - t0) / dur, 1);
+    const eased = 1 - Math.pow(1 - r, 3);
+    const cur = Math.round(start + (end - start) * eased);
+    el.textContent = cur.toLocaleString();
+    if(r < 1) requestAnimationFrame(animate);
+    else {
+      el.style.transform = 'scale(1.06)';
+      setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
+    }
+  };
+  requestAnimationFrame(animate);
+  window._tm.capital = +v;
+  setTimeout(_tmUpdateAmtNote, 700);
+}
+
+function _tmUpdateAmtNote(){
+  const noteEl = document.getElementById('tm-amt-note');
+  const txt = document.getElementById('tm-amt-note-text');
+  if(!noteEl || !txt) return;
+  noteEl.style.display = '';
+  let html = '';
+  const cap = window._tm.capital;
+  if(window._tm.type === 'pools'){
+    if(cap < 10000){
+      html = `<strong>Weekly compound mode.</strong> With $${cap.toLocaleString()}, we use Silver/Gold pools at ~3% per week. You'll need to <strong>re-enter positions weekly</strong> to compound — we'll send a reminder.`;
+    } else {
+      html = `<strong>Monthly compound mode.</strong> With $${cap.toLocaleString()}, you qualify for Platinum tier at ~15% per month. Auto-rolls each month — no manual re-entry needed.`;
+    }
+  } else if(window._tm.type === 'items'){
+    const matched = _tmGetCatalog().filter(i => i.price <= cap).length;
+    html = `Found <strong>${matched} objects</strong> that fit your $${cap.toLocaleString()} budget. Average return per cycle: ~18-22% over 30 days. After sale, capital + profit can be reinvested into the next cycle.`;
+  } else {
+    const poolsAmt = Math.round(cap * 0.6);
+    const itemsAmt = cap - poolsAmt;
+    html = `<strong>Mixed allocation:</strong> $${poolsAmt.toLocaleString()} → pools (continuous compound) + $${itemsAmt.toLocaleString()} → objects (cycles). Pools work non-stop while objects sell in ~30-45 day cycles.`;
+  }
+  txt.innerHTML = html;
+}
+
+function _tmSetupItems(){
+  const h = document.getElementById('tm-step3-h');
+  const sub = document.getElementById('tm-step3-sub');
+  const grid = document.getElementById('tm-items-grid');
+  if(!h || !sub || !grid) return;
+  
+  const cap = window._tm.capital;
+  const budget = (window._tm.type === 'mixed') ? Math.round(cap * 0.4) : cap;
+  
+  if(window._tm.type === 'mixed'){
+    h.innerHTML = `Pick objects (~40% of <em>$${cap.toLocaleString()}</em>)`;
+    sub.textContent = `Around $${budget.toLocaleString()} goes to objects, the rest to pools. Pick items totaling near this budget.`;
+  } else {
+    h.innerHTML = `Items that fit <em>$${cap.toLocaleString()}</em>`;
+    sub.textContent = "Tap to select. Total selected price should fit your budget.";
+  }
+  
+  const catalog = _tmGetCatalog();
+  const eligible = catalog.filter(i => i.price <= budget);
+  
+  // Auto-select if empty
+  if(window._tm.selectedItems.length === 0){
+    let total = 0;
+    for(const item of eligible){
+      if(total + item.price <= budget){
+        window._tm.selectedItems.push(item);
+        total += item.price;
+      }
+      if(window._tm.selectedItems.length >= 3) break;
+    }
+  }
+  
+  grid.innerHTML = eligible.map(item => {
+    const sel = window._tm.selectedItems.find(s => s.id === item.id);
+    return `
+      <div class="tm-item-card ${sel ? 'selected' : ''}" data-tm-id="${item.id}" onclick="_tmToggleItem(${item.id})">
+        <div class="tm-item-thumb">${item.ico}</div>
+        <div class="tm-item-info">
+          <div class="tm-item-brand">${item.brand}</div>
+          <div class="tm-item-name">${item.name}</div>
+          <div class="tm-item-meta">
+            <span class="price">$${item.price.toLocaleString()}</span>
+            <span>·</span>
+            <span class="ret">+${item.retMin}-${item.retMax}%</span>
+            <span>·</span>
+            <span>${item.days}d</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  _tmUpdateItemsSummary();
+}
+
+function _tmToggleItem(id){
+  const catalog = _tmGetCatalog();
+  const item = catalog.find(i => i.id === id);
+  if(!item) return;
+  const idx = window._tm.selectedItems.findIndex(s => s.id === id);
+  if(idx >= 0) window._tm.selectedItems.splice(idx, 1);
+  else window._tm.selectedItems.push(item);
+  
+  document.querySelectorAll('#tm-items-grid .tm-item-card').forEach(c => {
+    const cId = +c.dataset.tmId;
+    if(window._tm.selectedItems.find(s => s.id === cId)) c.classList.add('selected');
+    else c.classList.remove('selected');
+  });
+  _tmUpdateItemsSummary();
+}
+
+function _tmUpdateItemsSummary(){
+  const allocated = window._tm.selectedItems.reduce((s,i) => s + i.price, 0);
+  const cap = window._tm.capital;
+  document.getElementById('tm-items-count').textContent = window._tm.selectedItems.length;
+  document.getElementById('tm-items-allocated').textContent = '$' + allocated.toLocaleString();
+  document.getElementById('tm-items-budget').textContent = '$' + cap.toLocaleString();
+  
+  const leftover = cap - allocated;
+  const leftoverEl = document.getElementById('tm-items-leftover');
+  if(leftoverEl){
+    if(window._tm.type === 'items'){
+      leftoverEl.textContent = leftover > 0 ? `$${leftover.toLocaleString()} liquid` : 'fully allocated';
+    } else {
+      leftoverEl.textContent = `$${leftover.toLocaleString()} → pools`;
+    }
+  }
+}
+
+function _tmCalcProjection(days){
+  const points = [];
+  const capital = window._tm.capital;
+  const itemsCapital = window._tm.selectedItems.reduce((s,i) => s + i.price, 0);
+  const poolsCapital = capital - itemsCapital;
+  
+  let avgItemDays = 0, avgItemRet = 0;
+  if(window._tm.selectedItems.length > 0){
+    avgItemDays = window._tm.selectedItems.reduce((s,i) => s + i.days, 0) / window._tm.selectedItems.length;
+    avgItemRet = window._tm.selectedItems.reduce((s,i) => s + (i.retMin + i.retMax)/2, 0) / window._tm.selectedItems.length;
+  }
+  
+  const stepSize = Math.max(1, Math.floor(days / 60));
+  for(let d = 0; d <= days; d += stepSize){
+    let value = 0;
+    if(window._tm.type === 'pools'){
+      if(capital < 10000){
+        value = capital * Math.pow(1.03, d/7);
+      } else {
+        value = capital * Math.pow(1.15, d/30);
+      }
+    } else if(window._tm.type === 'items'){
+      const cycleLen = avgItemDays || 30;
+      const cycleRet = avgItemRet/100 || 0.18;
+      const cyclesCompleted = Math.floor(d / cycleLen);
+      const partialProgress = (d % cycleLen) / cycleLen;
+      let v = itemsCapital * Math.pow(1 + cycleRet, cyclesCompleted);
+      v = v + (v * cycleRet * partialProgress);
+      value = v + (capital - itemsCapital);  // liquid
+    } else {
+      // mixed
+      let poolValue;
+      if(poolsCapital < 10000){
+        poolValue = poolsCapital * Math.pow(1.03, d/7);
+      } else {
+        poolValue = poolsCapital * Math.pow(1.15, d/30);
+      }
+      let itemValue = 0;
+      if(window._tm.selectedItems.length > 0){
+        const cycleLen = avgItemDays;
+        const cycleRet = avgItemRet/100;
+        const cyclesCompleted = Math.floor(d / cycleLen);
+        const partialProgress = (d % cycleLen) / cycleLen;
+        itemValue = itemsCapital * Math.pow(1 + cycleRet, cyclesCompleted);
+        itemValue = itemValue + (itemValue * cycleRet * partialProgress);
+      } else {
+        itemValue = capital - poolsCapital;
+      }
+      value = poolValue + itemValue;
+    }
+    points.push({ day: d, value });
+  }
+  return points;
+}
+
+function _tmBuildPath(points, w, h){
+  if(!points.length) return { path:'', toX:()=>0, toY:()=>0 };
+  const xMax = points[points.length-1].day || 1;
+  const yMin = Math.min(...points.map(p => p.value));
+  const yMax = Math.max(...points.map(p => p.value));
+  const yRange = Math.max(yMax - yMin, 1);
+  const padTop = 20, padBottom = 20;
+  const usableH = h - padTop - padBottom;
+  const toX = d => (d / xMax) * w;
+  const toY = v => h - padBottom - ((v - yMin) / yRange) * usableH;
+  let path = `M ${toX(points[0].day)} ${toY(points[0].value)}`;
+  for(let i = 1; i < points.length; i++) path += ` L ${toX(points[i].day)} ${toY(points[i].value)}`;
+  return { path, toX, toY };
+}
+
+function _tmSetupGraph(){
+  document.getElementById('tm-today').textContent = window._tm.capital.toLocaleString();
+  document.getElementById('tm-cta-cap').textContent = window._tm.capital.toLocaleString();
+  window._tm.days = 90;
+  const slider = document.getElementById('tm-slider');
+  if(slider) slider.value = 90;
+  _tmDrawGraph();
+  _tmUpdateGraphInfo();
+  _tmUpdateNote();
+}
+
+function _tmDrawGraph(){
+  const points = _tmCalcProjection(365);
+  const built = _tmBuildPath(points, 600, 200);
+  const lineEl = document.getElementById('tm-line');
+  const fillEl = document.getElementById('tm-fill');
+  if(lineEl) lineEl.setAttribute('d', built.path);
+  if(fillEl) fillEl.setAttribute('d', built.path + ` L ${built.toX(points[points.length-1].day)} 200 L ${built.toX(points[0].day)} 200 Z`);
+  
+  // Cycle markers
+  const cyclesG = document.getElementById('tm-cycles');
+  if(cyclesG){
+    cyclesG.innerHTML = '';
+    if(window._tm.selectedItems.length > 0 && (window._tm.type === 'items' || window._tm.type === 'mixed')){
+      const avgDays = window._tm.selectedItems.reduce((s,i) => s + i.days, 0) / window._tm.selectedItems.length;
+      let d = avgDays;
+      let html = '';
+      while(d <= 365){
+        const x = built.toX(d);
+        const closestPoint = points.find(p => p.day >= d) || points[points.length-1];
+        html += `<line class="tm-graph-cycle" x1="${x}" y1="20" x2="${x}" y2="180"/>`;
+        html += `<circle class="tm-graph-cycle-dot" cx="${x}" cy="${built.toY(closestPoint.value)}" r="3"/>`;
+        d += avgDays;
+      }
+      cyclesG.innerHTML = html;
+    }
+  }
+  _tmPositionThumb();
+}
+
+function _tmPositionThumb(){
+  const points = _tmCalcProjection(365);
+  const built = _tmBuildPath(points, 600, 200);
+  const closest = points.reduce((best, p) => Math.abs(p.day - window._tm.days) < Math.abs(best.day - window._tm.days) ? p : best, points[0]);
+  const x = built.toX(closest.day);
+  const y = built.toY(closest.value);
+  const cursor = document.getElementById('tm-cursor');
+  if(cursor){ cursor.setAttribute('x1', x); cursor.setAttribute('x2', x); }
+  ['tm-thumb','tm-thumb-glow'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.setAttribute('cx', x); el.setAttribute('cy', y); }
+  });
+}
+
+function _tmUpdateGraphInfo(){
+  const points = _tmCalcProjection(window._tm.days);
+  const futureValue = points[points.length - 1].value;
+  const gain = futureValue - window._tm.capital;
+  const pct = (gain / window._tm.capital) * 100;
+  document.getElementById('tm-future').textContent = Math.round(futureValue).toLocaleString();
+  document.getElementById('tm-gain').textContent = `+$${Math.round(gain).toLocaleString()} (+${pct.toFixed(1)}%)`;
+  document.getElementById('tm-graph-pct').textContent = `+${pct.toFixed(1)}%`;
+  document.getElementById('tm-cta-gain').textContent = Math.round(gain).toLocaleString();
+  document.getElementById('tm-cta-days').textContent = window._tm.days + ' days';
+  let timeStr = window._tm.days + ' days';
+  if(window._tm.days >= 365) timeStr = '1 year';
+  document.getElementById('tm-graph-time').textContent = timeStr;
+  
+  const today = new Date();
+  const future_date = new Date(today.getTime() + window._tm.days * 24 * 60 * 60 * 1000);
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('tm-future-label').textContent = `+ ${window._tm.days} DAYS · ${future_date.getDate()} ${months[future_date.getMonth()]} ${future_date.getFullYear()}`;
+  document.getElementById('tm-today-label').textContent = `TODAY · ${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+  
+  const sliderPct = ((window._tm.days - 7) / (365 - 7)) * 100;
+  const slider = document.getElementById('tm-slider');
+  if(slider) slider.style.setProperty('--pct', sliderPct + '%');
+}
+
+function _tmSlide(days){
+  window._tm.days = +days;
+  _tmPositionThumb();
+  _tmUpdateGraphInfo();
+}
+
+function _tmUpdateNote(){
+  const noteBody = document.getElementById('tm-graph-note-body');
+  const warn = document.getElementById('tm-graph-warn');
+  const warnBody = document.getElementById('tm-graph-warn-body');
+  const tag = document.getElementById('tm-graph-tag');
+  if(!noteBody || !tag) return;
+  
+  const cap = window._tm.capital;
+  if(window._tm.type === 'pools'){
+    if(cap < 10000){
+      tag.textContent = 'WEEKLY COMPOUND';
+      noteBody.innerHTML = `<strong>Pools-only · weekly compound.</strong> Your $${cap.toLocaleString()} grows at ~3% per week, geometrically compounded. The curve is exponential — gains accelerate over time.`;
+      if(warn){ warn.style.display = ''; warnBody.innerHTML = `<strong>Manual reinvest required.</strong> Each week you'll need to re-enter positions to compound returns. We'll send a reminder.`; }
+    } else {
+      tag.textContent = 'MONTHLY COMPOUND';
+      noteBody.innerHTML = `<strong>Pools-only · monthly compound.</strong> $${cap.toLocaleString()} qualifies for Platinum tier at ~15% per month. Compounds geometrically.`;
+      if(warn){ warn.style.display = ''; warnBody.innerHTML = `<strong>Auto-rolls each month.</strong> No manual re-entry. Capital + earned interest both work next month.`; }
+    }
+  } else if(window._tm.type === 'items'){
+    const cycleAvg = Math.round(window._tm.selectedItems.reduce((s,i) => s+i.days, 0) / Math.max(window._tm.selectedItems.length,1));
+    const retAvg = Math.round(window._tm.selectedItems.reduce((s,i) => s+(i.retMin+i.retMax)/2, 0) / Math.max(window._tm.selectedItems.length,1));
+    tag.textContent = 'OBJECT CYCLES';
+    noteBody.innerHTML = `<strong>${window._tm.selectedItems.length} objects · ~${cycleAvg}-day cycles.</strong> Each object sells in ~${cycleAvg} days at +${retAvg}% on average. Capital + profit roll into the next cycle. Vertical gold lines on the graph mark expected sale dates.`;
+    if(warn){ warn.style.display = ''; warnBody.innerHTML = `<strong>Reinvest after each cycle.</strong> When objects sell, capital returns to your wallet — you can reinvest into new objects to compound the cycle gains.`; }
+  } else {
+    const poolsAmt = Math.round(cap * 0.6);
+    const itemsAmt = cap - poolsAmt;
+    const cycleAvg = window._tm.selectedItems.length > 0 ? Math.round(window._tm.selectedItems.reduce((s,i) => s+i.days, 0)/window._tm.selectedItems.length) : 30;
+    if(poolsAmt < 10000){
+      tag.textContent = 'MIXED · WEEKLY POOLS';
+      noteBody.innerHTML = `<strong>Mixed strategy.</strong> $${poolsAmt.toLocaleString()} in Gold pools (~3% weekly compound) + $${itemsAmt.toLocaleString()} across ${window._tm.selectedItems.length} objects (~${cycleAvg}-day cycles). Pools work continuously, objects in cycles.`;
+      if(warn){ warn.style.display = ''; warnBody.innerHTML = `<strong>Pools require weekly reinvest</strong> to compound. Items auto-sell in cycles — proceeds return to wallet for reinvest.`; }
+    } else {
+      tag.textContent = 'MIXED · MONTHLY POOLS';
+      noteBody.innerHTML = `<strong>Mixed strategy.</strong> $${poolsAmt.toLocaleString()} in Platinum pools (~15% monthly auto-roll) + $${itemsAmt.toLocaleString()} across ${window._tm.selectedItems.length} objects (~${cycleAvg}-day cycles).`;
+      if(warn) warn.style.display = 'none';
+    }
+  }
+}
+
+// ─── DEPLOY: hits backend ──────────────────────────────────────────────
+async function _tmDeploy(){
+  const userLogin = (U.login || sessionStorage.getItem('luxor_login') || '').trim();
+  if(!userLogin){ try { showToast && showToast('error', 'Not signed in'); } catch(e){} return; }
+  
+  // Show confirmation
+  const cap = window._tm.capital;
+  const itemsCap = window._tm.selectedItems.reduce((s,i) => s+i.price, 0);
+  const poolsCap = cap - itemsCap;
+  
+  if((state.wallet || 0) < cap){
+    try { showToast && showToast('warn', 'Insufficient balance', `Available: $${(state.wallet||0).toFixed(0)}, needed: $${cap}`); } catch(e){ alert('Not enough balance'); }
+    return;
+  }
+  
+  const summary = window._tm.type === 'pools'
+    ? `Deploy $${cap.toLocaleString()} to ${cap < 10000 ? 'Gold' : 'Platinum'} pool?`
+    : window._tm.type === 'items'
+      ? `Deploy $${itemsCap.toLocaleString()} to ${window._tm.selectedItems.length} object${window._tm.selectedItems.length>1?'s':''}?`
+      : `Deploy $${poolsCap.toLocaleString()} to pool + $${itemsCap.toLocaleString()} to ${window._tm.selectedItems.length} object${window._tm.selectedItems.length>1?'s':''}?`;
+  
+  if(!confirm(summary)) return;
+  
+  let success = 0, errors = 0;
+  
+  // Deploy pools portion
+  if(window._tm.type === 'pools' || window._tm.type === 'mixed'){
+    const poolAmt = window._tm.type === 'pools' ? cap : poolsCap;
+    if(poolAmt > 0){
+      const plan = poolAmt < 10000 ? 'gold' : 'platinum';
+      try {
+        const r = await apiFetch('/api/pool/invest', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ user_login: userLogin, plan: plan, amount_usd: poolAmt })
+        });
+        if(r.ok) success++;
+        else errors++;
+      } catch(e){ errors++; console.error('Pool deploy failed:', e); }
+    }
+  }
+  
+  // Deploy items
+  if(window._tm.type === 'items' || window._tm.type === 'mixed'){
+    for(const item of window._tm.selectedItems){
+      try {
+        const r = await apiFetch('/api/items/buy', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ user_login: userLogin, item_id: item.id, slots_count: 1 })
+        });
+        if(r.ok) success++;
+        else errors++;
+      } catch(e){ errors++; console.error('Item buy failed:', e); }
+    }
+  }
+  
+  if(success > 0){
+    try { showToast && showToast('success', 'Deployed!', `${success} position${success>1?'s':''} opened`); } catch(e){}
+    try { loadBalanceFromBackend && loadBalanceFromBackend(); } catch(e){}
+    try { navTo && navTo('dash'); } catch(e){}
+  } else {
+    try { showToast && showToast('error', 'Deploy failed', `${errors} error${errors>1?'s':''}. Check balance.`); } catch(e){}
+  }
+}
+
+// Override old _smartShowStep to no-op (compat with old buttons that may still exist)
+function _smartShowStep(n){ /* deprecated — TM v2 now */ }
+
+/* ═════════════ END TIME MACHINE v2 ═════════════ */
+
+function renderSmartInvestOLD_DEPRECATED(){
   _smartInitState();
   const html = _smartShellHTML();
   const dCt = document.getElementById('dSmartContent');
@@ -9091,12 +10048,13 @@ function _pcUpdate(months){
       // Items expected ~10%/month minimum guarantee per spec
       const itemsMinProfit = portfolio.itemsInvested * 0.10 * months;
       noteEl.innerHTML = `
-        <div class="pc-items-note">
+        <div class="pc-items-note" onclick="navTo('items')" style="cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background=''">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H18 L22 9 L12 22 L2 9 Z"/></svg>
-          <div>
-            <div class="t">PLUS YOUR ITEMS</div>
-            <div class="d">You also have <b>${itemsCount} active item${itemsCount > 1 ? 's' : ''}</b> totaling <b>${fmt(portfolio.itemsInvested)}</b>. Items are not included in pool calculations above — they earn separately based on individual sale outcomes (10%/month minimum guarantee, ~15%/week expected average). Conservative estimate over ${monthsTxt}: <b>+${fmt(itemsMinProfit)} more</b>.</div>
+          <div style="flex:1">
+            <div class="t">PLUS YOUR LUXURY ITEMS</div>
+            <div class="d">You have <b>${itemsCount} active item${itemsCount > 1 ? 's' : ''}</b> totaling <b>${fmt(portfolio.itemsInvested)}</b>. Item returns depend on individual sale outcomes — see expected payouts in <b style="color:var(--gold)">My Items →</b></div>
           </div>
+          <span style="color:var(--gold);font-size:18px;margin-left:8px">→</span>
         </div>
       `;
     } else {
@@ -9420,6 +10378,25 @@ function renderUnlockProgress(){
     const trigger1Done = depDone && invDone;
     const t1bg = trigger1Done ? 'rgba(39,174,96,.08)' : 'rgba(255,255,255,.02)';
     const t2bg = t2Done ? 'rgba(39,174,96,.08)' : 'rgba(255,255,255,.02)';
+    
+    // ETAP 9: показываем "осталось Xh Ym" таймер если qualifying_investment_at установлен но 24h ещё нет
+    let timerHtml = '';
+    if(t1.invest_hours_held > 0 && !invDone){
+      const remaining = (t1.invest_hours_required || 24) - t1.invest_hours_held;
+      const hours = Math.floor(remaining);
+      const mins = Math.floor((remaining - hours) * 60);
+      timerHtml = `<div style="margin-top:8px;padding:8px 12px;background:rgba(241,196,15,.08);border-radius:6px;font-size:11px;color:#f1c40f"><strong>⏱ Осталось: ${hours}h ${mins}m</strong> до разблокировки по Path 1</div>`;
+    }
+    
+    // CLAIM BUTTON: если any path completed → большая зелёная кнопка
+    const canClaim = (trigger1Done || t2Done);
+    const claimButton = canClaim ? `
+      <button onclick="claimLockedBonus()" style="margin-top:14px;width:100%;padding:14px;background:linear-gradient(135deg,var(--green),#1e8449);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;letter-spacing:1.5px;cursor:pointer;box-shadow:0 6px 16px rgba(39,174,96,.3);animation:pulse 1.5s infinite">
+        🎉 ЗАБРАТЬ $${(state.lockedBalance||0).toFixed(2)} БОНУС
+      </button>
+      <style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}</style>
+    ` : '';
+    
     return `
       <div style="display:grid;gap:10px">
         <div style="padding:12px;border-radius:8px;background:${t1bg};border:1px solid var(--bd)">
@@ -9428,6 +10405,7 @@ function renderUnlockProgress(){
             <div>${checkbox(depDone)}Deposit ≥ <strong>$${(t1.deposit_required||50).toFixed(0)}</strong> <span style="color:var(--t3)">(current: $${(t1.deposit_current||0).toFixed(0)})</span></div>
             <div>${checkbox(invDone)}Hold investment ≥ $50 for <strong>${t1.invest_hours_required||24}h</strong> <span style="color:var(--t3)">(${(t1.invest_hours_held||0).toFixed(1)}h held)</span></div>
           </div>
+          ${timerHtml}
         </div>
         <div style="text-align:center;color:var(--t3);font-size:11px;font-weight:700;letter-spacing:2px">— OR —</div>
         <div style="padding:12px;border-radius:8px;background:${t2bg};border:1px solid var(--bd)">
@@ -9438,6 +10416,7 @@ function renderUnlockProgress(){
           </div>
           ${!refsDone ? `<button onclick="navTo('referral')" style="margin-top:8px;padding:7px 12px;background:var(--purple);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">→ INVITE FRIENDS</button>` : ''}
         </div>
+        ${claimButton}
       </div>
     `;
   })();
@@ -9446,6 +10425,36 @@ function renderUnlockProgress(){
     if(el) el.innerHTML = html;
   });
 }
+
+// === ETAP 9: Claim button handler — manual unlock ====================
+async function claimLockedBonus(){
+  try {
+    const r = await apiFetch('/api/bonuses/claim', {method:'POST'});
+    const data = await r.json().catch(() => ({}));
+    if(r.ok && data.ok){
+      if(data.unlocked){
+        try { showToast('🎉 Bonus claimed: $' + (data.amount_usd || 0).toFixed(2), 'success'); } catch(e){}
+        // Анимация: показываем вспышку, потом перезагружаем баланс
+        try { loadBalanceFromBackend(); } catch(e){}
+        // Скрываем locked плашку через 500мс
+        setTimeout(() => {
+          ['dLockedBanner','mLockedBanner','dBonusLockedCard','mBonusLockedCard'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.style.display = 'none';
+          });
+        }, 500);
+      } else {
+        try { showToast('Conditions not met yet — keep investing!', 'warn'); } catch(e){}
+      }
+    } else {
+      const err = (data.detail && data.detail.error) || data.error || 'unknown';
+      try { showToast('Claim failed: ' + err, 'error'); } catch(e){}
+    }
+  } catch(e){
+    console.error('claimLockedBonus failed:', e);
+  }
+}
+window.claimLockedBonus = claimLockedBonus;
 
 function showLockedDetailsModal(){
   // Простая навигация в Bonuses (там видны условия)
@@ -9557,6 +10566,17 @@ function updateReferralPendingUI(){
     if(el && typeof animateBalanceTo === 'function') animateBalanceTo(el, state.refTotalLifetime || 0);
     else if(el) el.textContent = '$' + (state.refTotalLifetime || 0).toFixed(2);
   });
+  
+  // ETAP 9: Update ref link display (using login as new ref code)
+  const userLogin = (U.login || sessionStorage.getItem('luxor_login') || '').trim();
+  const baseURL = 'https://grailed1223228-sketch.github.io/luxor-front/?ref=';
+  if(userLogin){
+    const linkText = baseURL + userLogin;
+    ['refLinkText', 'mRefLinkText'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = linkText;
+    });
+  }
 }
 
 async function withdrawRefBalanceToMain(){
@@ -9644,6 +10664,185 @@ function showWelcomeBonusModal(data){
 window.showWelcomeBonusModal = showWelcomeBonusModal;
 
 console.log('[stage10] Bonuses + Referral tier system loaded');
+
+// === ETAP 9: SALE NOTIFICATIONS ==========================================
+let _saleNotifications = [];
+
+async function loadSaleNotifications(){
+  try {
+    const r = await apiFetch('/api/sale-notifications/unread');
+    if(!r.ok) return;
+    const data = await r.json().catch(() => ({}));
+    if(!data.ok || !Array.isArray(data.notifications)) return;
+    _saleNotifications = data.notifications;
+    if(_saleNotifications.length > 0){
+      // Show modal first time on this session
+      const seenKey = 'luxor_sales_seen_' + (U.login || sessionStorage.getItem('luxor_login') || 'x');
+      const seen = sessionStorage.getItem(seenKey);
+      if(!seen){
+        sessionStorage.setItem(seenKey, '1');
+        // Show modal for the most recent notification
+        showSaleNotificationModal(_saleNotifications[0]);
+      } else {
+        // Tost + badge на My Items
+        try { showToast(`💎 ${_saleNotifications.length} item${_saleNotifications.length>1?'s':''} sold! Tap My Items.`, 'success'); } catch(e){}
+      }
+      // Update My Items badge
+      updateMyItemsSalesBadge(_saleNotifications.length);
+    }
+  } catch(e) { console.warn('loadSaleNotifications:', e); }
+}
+
+function updateMyItemsSalesBadge(count){
+  // Add a badge to "My Items" sidebar item
+  const navItem = document.querySelector('a.nav-item[data-target="items"]');
+  if(navItem && count > 0){
+    let badge = navItem.querySelector('.sales-unread-badge');
+    if(!badge){
+      badge = document.createElement('span');
+      badge.className = 'nav-unread sales-unread-badge';
+      badge.style.cssText = 'background:var(--green);color:#fff;margin-left:auto;font-weight:700';
+      navItem.appendChild(badge);
+    }
+    badge.textContent = count;
+    badge.style.display = '';
+  }
+}
+
+function showSaleNotificationModal(notif){
+  if(!notif) return;
+  const profit = (Number(notif.payout_usd) || 0) - (Number(notif.principal_usd) || 0);
+  const profitSign = profit >= 0 ? '+' : '−';
+  const profitColor = profit >= 0 ? 'var(--green)' : 'var(--red)';
+  const belowMarket = !!notif.sold_below_market;
+  
+  const subText = belowMarket
+    ? '⚠️ Item was sold below market expectations, but you still earned profit thanks to our guaranteed minimum.'
+    : '🎉 Item sold at a great price! Profit credited to your wallet.';
+  
+  const html = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .3s"
+         onclick="if(event.target===this){closeSaleModal(${notif.id})}">
+      <div style="background:linear-gradient(135deg,var(--bg2) 0%,var(--bg) 100%);border:2px solid var(--green);border-radius:14px;max-width:430px;width:100%;padding:30px 24px;text-align:center;box-shadow:0 20px 60px rgba(39,174,96,.4);animation:popIn .4s cubic-bezier(.34,1.56,.64,1)">
+        <div style="font-size:54px;margin-bottom:14px">💎</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--green);letter-spacing:1.5px;margin-bottom:6px">YOUR ITEM SOLD!</div>
+        <div style="font-size:14px;color:var(--t);margin-bottom:18px">
+          <strong style="color:var(--gold)">${notif.item_name || 'Item'}</strong>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px;text-align:left">
+          <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span style="color:var(--t3)">You invested</span><span><strong>$${Math.round(notif.principal_usd||0).toLocaleString()}</strong></span></div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span style="color:var(--t3)">Profit (${(notif.return_percent||0).toFixed(1)}%)</span><span><strong style="color:${profitColor}">${profitSign}$${Math.round(Math.abs(profit)).toLocaleString()}</strong></span></div>
+          <div style="border-top:1px solid var(--bd);margin:6px 0;padding-top:8px;display:flex;justify-content:space-between;font-size:14px"><span><strong>Total credited</strong></span><span><strong style="color:var(--green);font-size:18px">$${Math.round(notif.payout_usd||0).toLocaleString()}</strong></span></div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:18px;line-height:1.5">${subText}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <button onclick="closeSaleModal(${notif.id});navTo('market')" style="padding:13px;background:var(--gold);color:#000;border:none;border-radius:9px;font-size:12px;font-weight:800;letter-spacing:1px;cursor:pointer">INVEST AGAIN →</button>
+          <button onclick="closeSaleModal(${notif.id});navTo('items')" style="padding:13px;background:transparent;color:var(--t);border:1px solid var(--bd);border-radius:9px;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer">VIEW DETAILS</button>
+        </div>
+        <button onclick="closeSaleModal(${notif.id})" style="width:100%;margin-top:6px;padding:9px;background:transparent;color:var(--t3);border:none;font-size:11px;cursor:pointer">Close</button>
+      </div>
+    </div>
+    <style>@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}</style>
+  `;
+  const div = document.createElement('div');
+  div.id = 'saleNotifModal';
+  div.innerHTML = html;
+  document.body.appendChild(div);
+}
+
+async function closeSaleModal(notifId){
+  const m = document.getElementById('saleNotifModal');
+  if(m) m.remove();
+  // Mark read on backend
+  try {
+    await apiFetch('/api/sale-notifications/' + notifId + '/mark-read', {method:'POST'});
+  } catch(e){}
+  // Show next unread if exists
+  _saleNotifications = _saleNotifications.filter(n => n.id !== notifId);
+  if(_saleNotifications.length > 0){
+    setTimeout(() => showSaleNotificationModal(_saleNotifications[0]), 400);
+  } else {
+    // No more — hide badge
+    const badge = document.querySelector('.sales-unread-badge');
+    if(badge) badge.style.display = 'none';
+  }
+}
+window.closeSaleModal = closeSaleModal;
+
+// Run on dashboard load (after balance loaded)
+setTimeout(() => {
+  try { if(typeof loadSaleNotifications === 'function') loadSaleNotifications(); } catch(e){}
+}, 2500);
+
+// === BRAND FILTER (Etap 9.3) ===========================================
+window._currentBrand = 'all';
+
+function _updateBrandChips(cat){
+  // Get unique brands in current category
+  const sourceItems = cat === 'all' ? ITEMS : ITEMS.filter(i => i.cat === cat);
+  const brandSet = new Set();
+  sourceItems.forEach(i => {
+    if(i.brand && i.brand.trim()) brandSet.add(i.brand.trim());
+  });
+  const brands = Array.from(brandSet).sort();
+  
+  ['dBrandChips', 'mBrandChips'].forEach(containerId => {
+    const c = document.getElementById(containerId);
+    if(!c) return;
+    if(!brands.length){
+      c.style.display = 'none';
+      return;
+    }
+    c.style.display = 'flex';
+    // Keep label + "All" chip, replace the rest
+    const isMobile = containerId === 'mBrandChips';
+    const labelHtml = isMobile
+      ? '<span style="font-size:10px;color:var(--t3);letter-spacing:1px;margin-right:4px;flex-shrink:0">BRAND:</span>'
+      : '<svg class="lx" style="width:14px;height:14px;color:var(--gold)"><use href="#i-filter"/></svg><span style="font-size:10px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-right:4px">BRAND</span>';
+    const padSm = isMobile ? '4px 9px' : '5px 11px';
+    const fontSm = isMobile ? '10px' : '11px';
+    const radSm = isMobile ? '12px' : '14px';
+    
+    let html = labelHtml;
+    const allActive = (window._currentBrand === 'all');
+    html += `<span class="brand-chip ${allActive?'active':''}" data-brand="all" onclick="setBrandFilter('all')" style="padding:${padSm};background:${allActive?'var(--gold)':'var(--bg)'};color:${allActive?'#000':'var(--t2)'};border:1px solid ${allActive?'var(--gold)':'var(--bd)'};border-radius:${radSm};font-size:${fontSm};cursor:pointer;font-weight:${allActive?'700':'500'};flex-shrink:0">All</span>`;
+    brands.forEach(br => {
+      const active = (window._currentBrand && window._currentBrand.toLowerCase() === br.toLowerCase());
+      html += `<span class="brand-chip ${active?'active':''}" data-brand="${br}" onclick="setBrandFilter('${br.replace(/'/g,'\\\'')}')" style="padding:${padSm};background:${active?'var(--gold)':'var(--bg)'};color:${active?'#000':'var(--t2)'};border:1px solid ${active?'var(--gold)':'var(--bd)'};border-radius:${radSm};font-size:${fontSm};cursor:pointer;font-weight:${active?'700':'500'};flex-shrink:0">${br}</span>`;
+    });
+    c.innerHTML = html;
+  });
+}
+
+function setBrandFilter(brand){
+  window._currentBrand = brand;
+  try { renderMarketplace(window._currentCat || 'all'); } catch(e){}
+}
+window.setBrandFilter = setBrandFilter;
+
+// Reset brand filter when category changes
+(function hookCategoryChange(){
+  // Listen on dCats and mCats
+  ['dCats', 'mCats'].forEach(id => {
+    const wrap = document.getElementById(id);
+    if(!wrap) return;
+    wrap.addEventListener('click', e => {
+      const target = e.target.closest('[data-cat]');
+      if(!target) return;
+      // Reset brand filter on cat change
+      window._currentBrand = 'all';
+    });
+  });
+})();
+
+// D5: Auto-refresh countdown badges каждые 60s
+setInterval(() => {
+  try {
+    if(typeof renderMarketplace === 'function' && Array.isArray(window.ITEMS) && window.ITEMS.some(i => i.countdown_ends_at || i.pool_closed_at)){
+      renderMarketplace(window._currentCat || 'all');
+    }
+  } catch(e){}
+}, 60000);
 
 // Перезапускаем UI обновления через 1 сек чтобы захватить state.refTier который был
 // загружен раньше (когда эти функции ещё не были определены)
