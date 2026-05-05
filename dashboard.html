@@ -261,11 +261,20 @@ button{font-family:inherit}
 .pc-summary > div:last-child{border-right:none}
 .pc-summary .l{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;font-weight:700;margin-bottom:4px;opacity:.75}
 .pc-summary .v{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;font-weight:700}
+
+/* v2 — invested + profit = final */
+.pc-summary-v2{grid-template-columns:1fr auto 1fr auto 1fr;align-items:center}
+.pc-summary-v2 > div{border-right:none}
+.pc-summary-v2 .pc-sum-op{font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1;font-weight:700;color:rgba(0,0,0,.45);padding:0}
+.pc-summary-v2 > div:last-child .v{color:#0a0a0a}
+
 @media (max-width:768px){
   .pc-summary{grid-template-columns:1fr;gap:8px}
   .pc-summary > div{border-right:none;border-bottom:1px solid rgba(0,0,0,.12);padding-bottom:8px}
   .pc-summary > div:last-child{border-bottom:none;padding-bottom:0}
   .pc-summary .v{font-size:22px}
+  .pc-summary-v2{grid-template-columns:1fr;gap:6px}
+  .pc-summary-v2 .pc-sum-op{font-size:18px;text-align:center;padding:2px 0;border-bottom:none !important}
 }
 
 .pc-items-note{margin-top:14px;padding:14px 16px;background:rgba(45,143,62,.06);border:1px solid rgba(45,143,62,.3);border-radius:10px;display:flex;gap:10px;align-items:flex-start}
@@ -544,90 +553,121 @@ button{font-family:inherit}
 /* ═══════════════════════════════════════════════════════════
    ITEM DETAIL
 ═══════════════════════════════════════════════════════════ */
-/* Mobile detail */
-.vc-id-img{aspect-ratio:1;background:linear-gradient(135deg,var(--bg4) 0%,var(--bg) 100%);border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--gold);position:relative;margin-bottom:14px;border:1px solid var(--bd);overflow:hidden}
-.vc-id-img img{width:100%;height:100%;object-fit:cover}
+/* ════════ ITEM DETAIL — MOBILE (premium) ════════ */
+.vc-id-img{aspect-ratio:1;background:linear-gradient(135deg,var(--bg4) 0%,var(--bg) 100%);border-radius:18px;display:flex;align-items:center;justify-content:center;color:var(--gold);position:relative;margin-bottom:18px;border:1px solid var(--bd);overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.32), inset 0 0 0 1px rgba(255,255,255,.02)}
+.vc-id-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.45) 100%);pointer-events:none;border-radius:18px}
+.vc-id-img img{width:100%;height:100%;object-fit:cover;display:block}
 .vc-id-img .emoji{font-size:140px;opacity:.5}
-.vc-id-img .fav{position:absolute;top:14px;right:14px;width:38px;height:38px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;font-size:16px;z-index:2}
-.vc-id-img .fav.on{color:var(--gold);background:rgba(0,0,0,.8)}
-.vc-id-img .ret-pill{position:absolute;bottom:14px;left:14px;background:var(--gold);color:#0a0a0a;font-family:'Bebas Neue',sans-serif;font-size:13px;padding:5px 12px;border-radius:5px;font-weight:700}
-.vc-id-cat{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:6px;font-weight:600}
-.vc-id-name{font-size:24px;font-weight:600;line-height:1.2;margin-bottom:14px}
+.vc-id-img .fav{position:absolute;top:14px;right:14px;width:40px;height:40px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;font-size:17px;z-index:3;border:1px solid rgba(255,255,255,.06);transition:all .2s}
+.vc-id-img .fav:hover{background:rgba(0,0,0,.75);transform:scale(1.05)}
+.vc-id-img .fav.on{color:var(--gold);background:rgba(0,0,0,.78);border-color:rgba(201,168,76,.35)}
+.vc-id-img .ret-pill{position:absolute;bottom:14px;left:14px;background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:#0a0a0a;font-family:'Bebas Neue',sans-serif;font-size:14px;padding:6px 13px;border-radius:6px;font-weight:700;letter-spacing:1px;z-index:3;box-shadow:0 4px 14px rgba(201,168,76,.35)}
+.vc-id-cat{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2.5px;color:var(--gold);margin-bottom:8px;font-weight:700;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.22);border-radius:4px}
+.vc-id-cat::before{content:'';width:5px;height:5px;background:var(--gold);border-radius:50%;display:inline-block}
+.vc-id-name{font-family:'Bebas Neue',sans-serif;font-size:30px;font-weight:400;line-height:1.05;margin:10px 0 18px;letter-spacing:.5px}
 
-/* Price history chart inside item detail */
-.id-chart{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px}
-.id-chart .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.id-chart .h .l{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--t3);font-weight:700}
-.id-chart .h .pts{font-size:10px;color:var(--gold);font-family:'Space Mono',monospace}
+/* Price history chart card */
+.id-chart{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px 16px 14px;margin-bottom:14px;position:relative;overflow:hidden}
+.id-chart::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.35}
+.id-chart .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.id-chart .h .l{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);font-weight:700}
+.id-chart .h .pts{font-size:10px;color:var(--t3);font-family:'Space Mono',monospace;font-weight:600}
 .id-chart canvas{width:100%;height:140px;display:block;border-radius:6px}
-.id-chart .empty{padding:30px;text-align:center;color:var(--t3);font-size:11px}
+.id-chart .empty{padding:38px;text-align:center;color:var(--t3);font-size:11px;letter-spacing:.5px}
 
-/* V5 SLIDER (mobile) */
-.v5-card{padding:22px;background:var(--card);border:1px solid var(--gold);border-radius:14px;margin-bottom:14px}
-.v5-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+/* V5 invest card — mobile */
+.v5-card{padding:22px 20px 20px;background:linear-gradient(180deg,var(--card) 0%,var(--bg2) 100%);border:1px solid var(--gold);border-radius:18px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.25), inset 0 0 0 1px rgba(201,168,76,.12)}
+.v5-card::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.v5-card::after{content:'';position:absolute;top:-100px;right:-100px;width:240px;height:240px;background:radial-gradient(circle,rgba(201,168,76,.18) 0%,transparent 65%);pointer-events:none}
+.v5-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;position:relative;z-index:1}
 .v5-head .l{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700}
-.v5-head .v{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);line-height:1}
-.v5-head .v small{font-size:13px;color:var(--t3);margin-left:4px}
-.v5-bar{height:48px;background:var(--bg3);border:1px solid var(--bd);border-radius:24px;position:relative;cursor:pointer;overflow:hidden;margin-bottom:8px}
-.v5-bar .fill{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 100%);border-radius:24px;transition:width .15s;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;min-width:48px;overflow:hidden}
+.v5-head .v{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1}
+.v5-head .v small{font-size:13px;color:var(--t3);margin-left:6px;letter-spacing:1px}
+.v5-bar{height:48px;background:rgba(0,0,0,.35);border:1px solid var(--bd);border-radius:24px;position:relative;cursor:pointer;overflow:hidden;margin-bottom:8px;z-index:1}
+.v5-bar .fill{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 100%);border-radius:24px;transition:width .15s;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;min-width:48px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 0 14px rgba(201,168,76,.3)}
 .v5-bar .fill .label{font-family:'Bebas Neue',sans-serif;font-size:16px;color:#0a0a0a;letter-spacing:1px;font-weight:700;white-space:nowrap;opacity:1;transition:opacity .15s}
-.v5-bar input[type="number"]{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:60px;background:rgba(0,0,0,.4);border:1px solid var(--bd2);border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;text-align:center;padding:5px;outline:none;z-index:2}
-.v5-bar-marks{display:flex;justify-content:space-between;margin-top:6px;padding:0 4px;font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);font-weight:700}
-.v5-result{margin-top:18px;padding-top:18px;border-top:1px solid var(--bd)}
-.v5-result .arrow-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:8px;font-weight:700;text-align:center}
-.v5-result .big-flow{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px}
-.v5-result .big-flow .from{text-align:right}
-.v5-result .big-flow .from .l{font-size:10px;color:var(--t3);margin-bottom:2px}
-.v5-result .big-flow .from .v{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--t)}
-.v5-result .big-flow .arr{font-family:'Space Mono',monospace;font-size:24px;color:var(--gold);line-height:1}
-.v5-result .big-flow .to{text-align:left}
-.v5-result .big-flow .to .l{font-size:10px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:1.5px;margin-bottom:2px;font-weight:700}
-.v5-result .big-flow .to .v{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1;letter-spacing:1px}
-.v5-fineprint{text-align:center;font-size:10px;color:var(--t3);margin-top:14px;padding-top:12px;border-top:1px dotted var(--bd2);font-style:italic;letter-spacing:.3px}
-.v5-fineprint b{color:var(--t2);font-style:normal;font-weight:600}
+.v5-bar input[type="number"]{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:60px;background:rgba(0,0,0,.5);border:1px solid var(--bd2);border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;text-align:center;padding:5px;outline:none;z-index:2}
+.v5-bar-marks{display:flex;justify-content:space-between;margin-top:6px;padding:0 4px;font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.5px}
+.v5-result{margin-top:18px;padding-top:18px;border-top:1px solid var(--bd);position:relative;z-index:1}
+.v5-result .arrow-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2.5px;color:var(--gold);margin-bottom:10px;font-weight:700;text-align:center;opacity:.85}
+.v5-result .big-flow{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px;padding:14px 6px;background:rgba(0,0,0,.18);border-radius:12px;border:1px solid rgba(201,168,76,.1)}
+.v5-result .big-flow .from{text-align:right;flex:1}
+.v5-result .big-flow .from .l{font-size:9px;color:var(--t3);margin-bottom:3px;font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.v5-result .big-flow .from .v{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--t);letter-spacing:.5px}
+.v5-result .big-flow .arr{font-family:'Space Mono',monospace;font-size:22px;color:var(--gold);line-height:1;flex-shrink:0;animation:arrowPulse 2s ease-in-out infinite}
+@keyframes arrowPulse{0%,100%{transform:translateX(0);opacity:1}50%{transform:translateX(3px);opacity:.7}}
+.v5-result .big-flow .to{text-align:left;flex:1}
+.v5-result .big-flow .to .l{font-size:9px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:1.5px;margin-bottom:3px;font-weight:700;text-transform:uppercase}
+.v5-result .big-flow .to .v{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--gold);line-height:1;letter-spacing:.5px;text-shadow:0 0 18px rgba(201,168,76,.35)}
+.v5-fineprint{text-align:center;font-size:10px;color:var(--t3);margin-top:12px;padding-top:10px;border-top:1px dotted var(--bd2);letter-spacing:.3px;line-height:1.5}
+.v5-fineprint b{color:var(--gold);font-weight:700}
 
-/* V5 SLIDER (desktop) */
-.v5d-card{padding:26px;background:var(--card);border:1px solid var(--gold);border-radius:18px;margin-bottom:16px}
-.v5d-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px}
-.v5d-head .l{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:700}
-.v5d-head .v{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--gold);line-height:1}
-.v5d-head .v small{font-size:15px;color:var(--t3);margin-left:6px}
-.v5d-bar{height:56px;background:var(--bg3);border:1px solid var(--bd);border-radius:28px;position:relative;cursor:pointer;overflow:hidden;margin-bottom:8px}
-.v5d-bar .fill{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 100%);border-radius:28px;transition:width .15s;display:flex;align-items:center;justify-content:flex-end;padding-right:18px;min-width:56px}
+/* V5 SLIDER (desktop) — premium */
+.v5d-card{padding:30px 28px;background:linear-gradient(180deg,var(--card) 0%,var(--bg2) 100%);border:1px solid var(--gold);border-radius:20px;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.28), inset 0 0 0 1px rgba(201,168,76,.12)}
+.v5d-card::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.v5d-card::after{content:'';position:absolute;top:-140px;right:-140px;width:340px;height:340px;background:radial-gradient(circle,rgba(201,168,76,.16) 0%,transparent 65%);pointer-events:none}
+.v5d-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px;position:relative;z-index:1}
+.v5d-head .l{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2.5px;color:var(--gold);font-weight:700}
+.v5d-head .v{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1;letter-spacing:.5px}
+.v5d-head .v small{font-size:15px;color:var(--t3);margin-left:6px;letter-spacing:1px}
+.v5d-bar{height:56px;background:rgba(0,0,0,.35);border:1px solid var(--bd);border-radius:28px;position:relative;cursor:pointer;overflow:hidden;margin-bottom:8px;z-index:1}
+.v5d-bar .fill{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 100%);border-radius:28px;transition:width .15s;display:flex;align-items:center;justify-content:flex-end;padding-right:18px;min-width:56px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 0 18px rgba(201,168,76,.3)}
 .v5d-bar .fill .label{font-family:'Bebas Neue',sans-serif;font-size:20px;color:#0a0a0a;letter-spacing:1px;font-weight:700;white-space:nowrap}
-.v5d-bar input[type="number"]{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:70px;background:rgba(0,0,0,.4);border:1px solid var(--bd2);border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;text-align:center;padding:6px;outline:none;z-index:2}
-.v5d-result{margin-top:22px;padding-top:22px;border-top:1px solid var(--bd)}
-.v5d-result .arrow-label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2.5px;color:var(--gold);margin-bottom:14px;font-weight:700;text-align:center}
-.v5d-result .big-flow{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:14px}
-.v5d-result .big-flow .from{text-align:right}
-.v5d-result .big-flow .from .l{font-size:11px;color:var(--t3);margin-bottom:3px}
-.v5d-result .big-flow .from .v{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--t);line-height:1}
-.v5d-result .big-flow .arr{font-family:'Space Mono',monospace;font-size:28px;color:var(--gold)}
-.v5d-result .big-flow .to{text-align:left}
-.v5d-result .big-flow .to .l{font-size:11px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:1.5px;margin-bottom:3px;font-weight:700}
-.v5d-result .big-flow .to .v{font-family:'Bebas Neue',sans-serif;font-size:56px;color:var(--gold);line-height:1;letter-spacing:1px}
+.v5d-bar input[type="number"]{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:70px;background:rgba(0,0,0,.5);border:1px solid var(--bd2);border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;text-align:center;padding:6px;outline:none;z-index:2}
+.v5d-result{margin-top:24px;padding-top:24px;border-top:1px solid var(--bd);position:relative;z-index:1}
+.v5d-result .arrow-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);margin-bottom:16px;font-weight:700;text-align:center;opacity:.85}
+.v5d-result .big-flow{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:12px;padding:20px 12px;background:rgba(0,0,0,.18);border-radius:14px;border:1px solid rgba(201,168,76,.1)}
+.v5d-result .big-flow .from{text-align:right;flex:1}
+.v5d-result .big-flow .from .l{font-size:10px;color:var(--t3);margin-bottom:4px;font-family:'Space Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
+.v5d-result .big-flow .from .v{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--t);line-height:1;letter-spacing:.5px}
+.v5d-result .big-flow .arr{font-family:'Space Mono',monospace;font-size:26px;color:var(--gold);flex-shrink:0;animation:arrowPulse 2s ease-in-out infinite}
+.v5d-result .big-flow .to{text-align:left;flex:1}
+.v5d-result .big-flow .to .l{font-size:10px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:1.8px;margin-bottom:4px;font-weight:700;text-transform:uppercase}
+.v5d-result .big-flow .to .v{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--gold);line-height:1;letter-spacing:.8px;text-shadow:0 0 24px rgba(201,168,76,.4)}
 
 /* Item detail tabs (DETAILS / DESCRIPTION) */
-.id-tabs{display:flex;gap:0;margin:18px 0 14px;border-bottom:1px solid var(--bd)}
-.id-tabs .tab{padding:11px 18px;color:var(--t3);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:700}
+.id-tabs{display:flex;gap:4px;margin:18px 0 14px;border-bottom:1px solid var(--bd);padding:0 2px}
+.id-tabs .tab{padding:12px 20px;color:var(--t3);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.8px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:700;transition:all .2s}
+.id-tabs .tab:hover{color:var(--t2)}
 .id-tabs .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.id-content{padding:14px 16px;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;margin-bottom:14px;font-size:13px;color:var(--t2);line-height:1.7}
-.id-content .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px}
-.id-content .row:last-child{border-bottom:none}
-.id-content .row .l{color:var(--t3)}
-.id-content .row .v{font-weight:600;color:var(--t)}
+.id-content{padding:18px 20px;background:var(--card);border:1px solid var(--bd);border-radius:14px;margin-bottom:14px;font-size:13px;color:var(--t2);line-height:1.7;position:relative;overflow:hidden}
+.id-content::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),transparent);opacity:.5}
+.id-content .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd);font-size:13px;gap:16px}
+.id-content .row:first-child{padding-top:2px}
+.id-content .row:last-child{border-bottom:none;padding-bottom:0}
+.id-content .row .l{color:var(--t3);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+.id-content .row .v{font-weight:700;color:var(--t);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.5px;text-align:right}
 .id-content .row .v.green{color:var(--green)}
 .id-content .row .v.gold{color:var(--gold)}
 
+/* ════════ ITEM DETAIL — DESKTOP (premium) ════════ */
 .did-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:46px;margin-bottom:30px}
-.did-img{aspect-ratio:1;background:linear-gradient(135deg,var(--bg4) 0%,var(--bg) 100%);border-radius:14px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;color:var(--gold);position:relative;overflow:hidden}
+.did-img{aspect-ratio:1;background:linear-gradient(135deg,var(--bg4) 0%,var(--bg) 100%);border-radius:20px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;color:var(--gold);position:relative;overflow:hidden;box-shadow:0 22px 50px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.02)}
+.did-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.5) 100%);pointer-events:none;border-radius:20px}
 .did-img img{width:100%;height:100%;object-fit:cover}
 .did-img .emoji{font-size:240px;opacity:.5}
-.did-img .fav{position:absolute;top:18px;right:18px;width:42px;height:42px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;z-index:2;font-size:18px}
-.did-img .fav.on{color:var(--gold);background:rgba(0,0,0,.8)}
-.did-img .ret-big{position:absolute;bottom:18px;left:18px;background:var(--gold);color:#0a0a0a;font-family:'Bebas Neue',sans-serif;font-size:18px;padding:8px 16px;border-radius:6px;font-weight:700}
-.did-cat{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--gold);margin-bottom:10px;font-weight:600}
-.did-name{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.5px;line-height:1;margin-bottom:14px}
+.did-img .fav{position:absolute;top:18px;right:18px;width:46px;height:46px;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;z-index:3;font-size:19px;border:1px solid rgba(255,255,255,.07);transition:all .2s}
+.did-img .fav:hover{background:rgba(0,0,0,.78);transform:scale(1.05)}
+.did-img .fav.on{color:var(--gold);background:rgba(0,0,0,.82);border-color:rgba(201,168,76,.4)}
+.did-img .ret-big{position:absolute;bottom:18px;left:18px;background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:#0a0a0a;font-family:'Bebas Neue',sans-serif;font-size:20px;padding:9px 18px;border-radius:8px;font-weight:700;letter-spacing:1px;z-index:3;box-shadow:0 6px 20px rgba(201,168,76,.4)}
+.did-cat{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;font-weight:700;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.22);border-radius:5px}
+.did-cat::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;display:inline-block}
+.did-name{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:.5px;line-height:1;margin:14px 0 18px;font-weight:400}
+
+/* Quick-stat block under name (mobile + desktop) */
+.id-quickstat{margin-bottom:14px}
+.id-qs-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
+.id-qs-i{padding:10px 12px;background:var(--card);border:1px solid var(--bd);border-radius:10px;text-align:left;position:relative;overflow:hidden;transition:border .2s}
+.id-qs-i:hover{border-color:rgba(201,168,76,.35)}
+.id-qs-i .l{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.2px;color:var(--t3);font-weight:700;margin-bottom:4px}
+.id-qs-i .v{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--t);line-height:1;letter-spacing:.5px}
+.id-qs-i .v.gold{color:var(--gold)}
+.id-qs-i .v.gr{color:var(--green)}
+.id-qs-bar{padding:10px 14px 12px;background:var(--card);border:1px solid var(--bd);border-radius:10px}
+.id-qs-bh{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--t3);font-weight:600;margin-bottom:6px;letter-spacing:.3px}
+.id-qs-bh .g{color:var(--green)}
+.id-qs-pb{height:5px;background:rgba(0,0,0,.35);border-radius:3px;overflow:hidden;border:1px solid var(--bd)}
+.id-qs-pf{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 100%);border-radius:3px;transition:width .3s;box-shadow:0 0 10px rgba(201,168,76,.4)}
 
 /* ═══════════════════════════════════════════════════════════
    MY ITEMS
@@ -770,14 +810,18 @@ button{font-family:inherit}
 
 /* Pay methods grid (deposit modal) */
 .pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.pay-m{padding:12px 8px;background:var(--bg2);border:1px solid var(--bd);text-align:center;cursor:pointer;border-radius:8px;transition:all .15s;font-size:11px;font-weight:600;color:var(--t2)}
-.pay-m:hover{border-color:var(--gold);transform:translateY(-1px)}
-.pay-m.selected{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-d)}
-.pay-m .symbol{font-size:18px;display:block;margin-bottom:3px;color:var(--gold)}
-.pay-m .coin-icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:0 auto 6px}
-.pay-m .coin-icon svg{width:32px;height:32px;display:block}
-.pay-m .coin-name{font-size:12px;color:var(--t);margin-bottom:2px;font-weight:700}
-.pay-m .net-name{font-size:8px;color:var(--t3);margin-top:2px}
+.pay-m{padding:14px 8px 12px;background:var(--bg2);border:1px solid var(--bd);text-align:center;cursor:pointer;border-radius:12px;transition:all .18s;font-size:11px;font-weight:600;color:var(--t2);position:relative;overflow:hidden}
+.pay-m::before{content:'';position:absolute;inset:0;border-radius:12px;background:radial-gradient(circle at 50% 0%, var(--coin-c, var(--gold)) 0%, transparent 70%);opacity:0;transition:opacity .2s;pointer-events:none}
+.pay-m:hover{border-color:var(--coin-c, var(--gold));transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.pay-m:hover::before{opacity:.08}
+.pay-m.selected{border-color:var(--coin-c, var(--gold));box-shadow:0 0 0 2px rgba(255,255,255,.04), 0 0 0 3px var(--coin-c, var(--gold)),0 8px 22px rgba(0,0,0,.3)}
+.pay-m.selected::before{opacity:.12}
+.pay-m .symbol{font-size:18px;display:block;margin-bottom:3px;color:var(--coin-c, var(--gold))}
+.pay-m .coin-icon{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin:0 auto 8px;border-radius:50%;background:rgba(255,255,255,.04);box-shadow:0 4px 12px rgba(0,0,0,.18), inset 0 0 0 1px rgba(255,255,255,.04);position:relative;z-index:1}
+.pay-m .coin-icon svg{width:38px;height:38px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+.pay-m .coin-name{font-size:13px;color:var(--t);margin-bottom:2px;font-weight:700;letter-spacing:.3px;position:relative;z-index:1}
+.pay-m .net-name{font-size:9px;color:var(--t3);margin-top:2px;letter-spacing:.5px;position:relative;z-index:1;text-transform:uppercase}
+.pay-m.selected .coin-name{color:#fff}
 
 /* ═══════════════════════════════════════════════════════════
    EFFECTS — Confetti / Gold Rain
@@ -4408,6 +4452,28 @@ function openItemDetail(id){
       <div class="vc-id-cat">${i.cat || 'COLLECTIBLE'}</div>
       <div class="vc-id-name">${i.name}</div>
 
+      <!-- Slots progress + quick stats -->
+      <div class="id-quickstat">
+        <div class="id-qs-row">
+          <div class="id-qs-i">
+            <div class="l">PRICE</div>
+            <div class="v">$${i.price.toLocaleString()}</div>
+          </div>
+          <div class="id-qs-i">
+            <div class="l">PER SLOT</div>
+            <div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div>
+          </div>
+          <div class="id-qs-i">
+            <div class="l">PERIOD</div>
+            <div class="v">${periodTxt}</div>
+          </div>
+        </div>
+        <div class="id-qs-bar">
+          <div class="id-qs-bh"><span>${slotsSold} of ${slotsTotal} slots sold</span><span class="g">${slotsAvail} left</span></div>
+          <div class="id-qs-pb"><div class="id-qs-pf" style="width:${(slotsSold/slotsTotal)*100}%"></div></div>
+        </div>
+      </div>
+
       <!-- Q9-final B: price-history chart placed UNDER name, BEFORE V5 slider -->
       <div class="id-chart">
         <div class="h"><span class="l">PRICE HISTORY</span><span class="pts">${phLen} data points</span></div>
@@ -4471,6 +4537,32 @@ function openItemDetail(id){
         <div class="did-right">
           <div class="did-cat">${i.cat || 'COLLECTIBLE'}</div>
           <h1 class="did-name">${i.name}</h1>
+
+          <!-- Slots progress + quick stats -->
+          <div class="id-quickstat">
+            <div class="id-qs-row">
+              <div class="id-qs-i">
+                <div class="l">ITEM PRICE</div>
+                <div class="v">$${i.price.toLocaleString()}</div>
+              </div>
+              <div class="id-qs-i">
+                <div class="l">PER SLOT</div>
+                <div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div>
+              </div>
+              <div class="id-qs-i">
+                <div class="l">SALE PERIOD</div>
+                <div class="v">${periodTxt}</div>
+              </div>
+              <div class="id-qs-i">
+                <div class="l">GUARANTEED</div>
+                <div class="v gr">+${i.ret[0]}%</div>
+              </div>
+            </div>
+            <div class="id-qs-bar">
+              <div class="id-qs-bh"><span>${slotsSold} of ${slotsTotal} slots sold</span><span class="g">${slotsAvail} left</span></div>
+              <div class="id-qs-pb"><div class="id-qs-pf" style="width:${(slotsSold/slotsTotal)*100}%"></div></div>
+            </div>
+          </div>
 
           <!-- Q9-final B: price chart under name, before V5 slider -->
           <div class="id-chart">
@@ -5459,9 +5551,9 @@ async function depStepAmount(){
       return;
     }
     list.innerHTML = coins.map(c => {
-      const m = COIN_META[c] || {name:c, network:c, sym:'●', color:'#666'};
+      const m = COIN_META[c] || {name:c, network:c, sym:'●', color:'#c9a84c'};
       const iconHtml = m.icon || `<span class="symbol">${m.sym}</span>`;
-      return `<div class="pay-m" data-cur="${c}" onclick="depPickCoin('${c}',this)">
+      return `<div class="pay-m" data-cur="${c}" style="--coin-c:${m.color}" onclick="depPickCoin('${c}',this)">
         <div class="coin-icon">${iconHtml}</div>
         <div class="coin-name">${m.name}</div>
         <div class="net-name">${m.network}</div>
@@ -5663,14 +5755,15 @@ async function depIPaid(){
     const data = await res.json();
     if(!data || !data.ok){
       if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.textContent = "I'VE PAID →"; }
-      alert('Could not submit: ' + (data?.error || 'try again'));
+      try{ showToast('error', 'Submit failed', data?.error || 'Please try again.'); }catch(e){ alert('Could not submit: ' + (data?.error || 'try again')); }
       return;
     }
+    try{ showToast('success', 'Payment submitted', 'We\'re verifying your transaction on-chain. You\'ll be notified.', 4000); }catch(e){}
     depShowWaiting();
     depStartPolling(id);
   }catch(e){
     if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.textContent = "I'VE PAID →"; }
-    alert('Network error. Please try again.');
+    try{ showToast('error', 'Network error', 'Please try again.'); }catch(_){ alert('Network error. Please try again.'); }
   }
 }
 
@@ -5720,6 +5813,11 @@ function depShowSuccess(data){
     try{ sessionStorage.setItem('luxor_user', JSON.stringify(U)); }catch(e){}
   }
   updateUI(); saveState();
+
+  try{
+    const bonusTxt = data.bonus_amount > 0 ? ' (incl. <b>+$'+data.bonus_amount.toLocaleString()+'</b> bonus)' : '';
+    showToast('success', 'Deposit credited', '<b>+$' + credited.toLocaleString() + '</b> added to your wallet' + bonusTxt + '.', 5000);
+  }catch(e){}
 
   showModal(`<div style="text-align:center;padding:24px 12px">
     <div style="width:72px;height:72px;background:var(--green);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff">✓</div>
@@ -6058,6 +6156,7 @@ function startWithdrawPolling(wid){
 }
 
 function showWithdrawSuccess(data){
+  try{ showToast('success', 'Withdrawal sent', '<b>$' + data.amount_usd.toLocaleString() + '</b> sent to ' + (data.crypto_currency||'crypto') + ' wallet.', 5000); }catch(e){}
   const txLine = data.tx_hash ? `<div style="margin-top:10px;padding:8px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;word-break:break-all;font-size:10px;font-family:monospace">${data.tx_hash}</div>` : '';
   showModal(`<div style="text-align:center;padding:8px">
     <div style="font-size:48px;margin-bottom:10px">✅</div>
@@ -6193,7 +6292,7 @@ async function processPoolInvest(plan, rate, tier){
         'user_not_found':'Session error. Please log in again.',
       };
       closeModal();
-      setTimeout(() => alert('Pool invest failed: ' + (map[errMsg] || errMsg)), 100);
+      try{ showToast('error', 'Pool invest failed', map[errMsg] || errMsg); }catch(e){ alert('Pool invest failed: ' + (map[errMsg] || errMsg)); }
       return;
     }
     state.wallet = data.new_wallet_balance;
@@ -6201,11 +6300,17 @@ async function processPoolInvest(plan, rate, tier){
     state.positions.unshift(data.position);
     closeModal();
     addTx('Pool: ' + plan + ' +$' + amt.toLocaleString(), 'done');
+    try{
+      const meta = (typeof PC_POOL_RATES!=='undefined' && PC_POOL_RATES[plan]) ? PC_POOL_RATES[plan] : null;
+      const ratePct = meta ? meta.monthlyPct.toFixed(1)+'%/mo' : '';
+      showToast('success', plan + ' Pool activated',
+        '<b>$' + amt.toLocaleString() + '</b> invested' + (ratePct ? ' at <b>'+ratePct+'</b>' : '') + '. Earnings start now.', 5000);
+    }catch(e){}
     updateUI(); showConfetti(); saveState();
     try{ await loadPoolPositions(); }catch(e){}
   }catch(e){
     closeModal();
-    setTimeout(() => alert('Network error. Please try again.'), 100);
+    try{ showToast('error', 'Network error', 'Please try again.'); }catch(_){ alert('Network error. Please try again.'); }
   }
 }
 
@@ -9893,9 +9998,9 @@ function renderCalculator(){
 }
 
 function _pcGetPortfolio(){
-  const pools = [];
-  let itemsInvested = 0;
-  let itemsCount = 0;
+  // Агрегируем pools по plan, items по item_id — несколько вложений в одну сущность = одна карточка
+  const poolMap = {};
+  const itemMap = {};
 
   if(typeof state !== 'undefined'){
     if(Array.isArray(state.positions)){
@@ -9904,20 +10009,40 @@ function _pcGetPortfolio(){
           const plan = p.plan || p.pool_plan || 'Silver';
           const amount = Number(p.amount || p.amount_usd) || 0;
           if(amount > 0){
-            pools.push({plan, amount});
+            if(!poolMap[plan]) poolMap[plan] = { plan, amount: 0, count: 0 };
+            poolMap[plan].amount += amount;
+            poolMap[plan].count += 1;
           }
         }
       });
     }
     if(Array.isArray(state.myItems)){
       state.myItems.filter(i => i.status === 'active').forEach(i => {
-        itemsInvested += Number(i.invested) || 0;
-        itemsCount++;
+        const id = i.id || i.item_id || i.name;
+        const inv = Number(i.invested) || 0;
+        const pct = Number(i.pct) || 0; // share of item owned
+        // Ожидаемая прибыль: используем guaranteed (10%) как минимум, ret/retMax — как макс
+        const retPct = Number(i.ret) || Number(i.retMax) || Number(i.guaranteed) || 10;
+        const days = Number(i.daysTotal) || 90;
+        if(inv <= 0) return;
+        if(!itemMap[id]){
+          itemMap[id] = { id, name: i.name, image_url: i.image_url || '', invested: 0, pct: 0, retPct, days, count: 0 };
+        }
+        itemMap[id].invested += inv;
+        itemMap[id].pct += pct;
+        itemMap[id].count += 1;
+        // максимум days, retPct остаётся первый (один и тот же item)
       });
     }
   }
 
-  return { pools, itemsInvested, itemsCount };
+  const pools = Object.values(poolMap);
+  const items = Object.values(itemMap);
+  const itemsInvested = items.reduce((s,i) => s + i.invested, 0);
+  const itemsCount = items.length;
+  const itemsTotalPositions = Object.values(itemMap).reduce((s,i) => s + i.count, 0);
+
+  return { pools, items, itemsInvested, itemsCount, itemsTotalPositions };
 }
 
 function _pcShellHTML(){
@@ -9975,7 +10100,7 @@ function _pcShellHTML(){
       </div>
     </div>
 
-    <div class="pc-card">
+    <div class="pc-card" id="pcPoolsCard" style="display:none">
       <div class="pc-card-h">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L4 6 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V6 Z"/></svg>
         YOUR ACTIVE POOLS
@@ -9983,22 +10108,30 @@ function _pcShellHTML(){
       <div class="pc-pool-list" id="pcPoolList"></div>
     </div>
 
-    <div class="pc-summary">
-      <div>
-        <div class="l">PERIOD</div>
-        <div class="v" id="pcPeriod">3 months</div>
+    <div class="pc-card" id="pcItemsCard" style="display:none">
+      <div class="pc-card-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H18 L22 9 L12 22 L2 9 Z"/></svg>
+        YOUR LUXURY ITEMS
       </div>
+      <div class="pc-pool-list" id="pcItemList"></div>
+    </div>
+
+    <div class="pc-summary pc-summary-v2">
       <div>
-        <div class="l">PROFIT</div>
-        <div class="v" id="pcProfit">+$0</div>
+        <div class="l">INVESTED</div>
+        <div class="v" id="pcInvested">$0</div>
       </div>
+      <div class="pc-sum-op">+</div>
       <div>
-        <div class="l">END BALANCE</div>
+        <div class="l">PROFIT · <span id="pcPeriod">3 months</span></div>
+        <div class="v" id="pcProfit">$0</div>
+      </div>
+      <div class="pc-sum-op">=</div>
+      <div>
+        <div class="l">FINAL BALANCE</div>
         <div class="v" id="pcEndBal">$0</div>
       </div>
     </div>
-
-    <div id="pcItemsNote"></div>
   </div>`;
 }
 
@@ -10011,22 +10144,28 @@ function _pcUpdate(months){
   setText('pcMonthsVal', monthsTxt);
   setText('pcPeriod', monthsTxt);
 
-  // Render pool list
   let totalInvested = 0;
   let totalProfit = 0;
-  const list = document.getElementById('pcPoolList');
-  if(list){
-    list.innerHTML = portfolio.pools.map(p => {
+
+  // ── POOLS (агрегированные по plan) ──
+  const poolsCard = document.getElementById('pcPoolsCard');
+  const poolList = document.getElementById('pcPoolList');
+  if(poolsCard) poolsCard.style.display = portfolio.pools.length > 0 ? '' : 'none';
+  if(poolList){
+    poolList.innerHTML = portfolio.pools.map(p => {
       const meta = PC_POOL_RATES[p.plan] || PC_POOL_RATES.Silver;
       const profit = p.amount * (meta.monthlyPct / 100) * months;
       totalInvested += p.amount;
       totalProfit += profit;
+      const subtitle = p.count > 1
+        ? `${fmt(p.amount)} invested across ${p.count} positions · ${meta.monthlyPct.toFixed(1)}%/mo`
+        : `${fmt(p.amount)} invested · ${meta.monthlyPct.toFixed(1)}%/mo fixed`;
       return `
         <div class="pc-pool-row">
           <div class="pc-pool-ic">${meta.icon}</div>
           <div class="pc-pool-info">
             <div class="n">${meta.label}</div>
-            <div class="d">${fmt(p.amount)} invested · ${meta.monthlyPct.toFixed(1)}%/month fixed</div>
+            <div class="d">${subtitle}</div>
           </div>
           <div class="pc-pool-amt">
             <div class="a">+${fmt(profit)}</div>
@@ -10037,30 +10176,44 @@ function _pcUpdate(months){
     }).join('');
   }
 
-  setText('pcProfit', '+' + fmt(totalProfit));
-  setText('pcEndBal', fmt(totalInvested + totalProfit));
-
-  // Items note
-  const noteEl = document.getElementById('pcItemsNote');
-  if(noteEl){
-    if(portfolio.itemsInvested > 0){
-      const itemsCount = portfolio.itemsCount;
-      // Items expected ~10%/month minimum guarantee per spec
-      const itemsMinProfit = portfolio.itemsInvested * 0.10 * months;
-      noteEl.innerHTML = `
-        <div class="pc-items-note" onclick="navTo('items')" style="cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background=''">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H18 L22 9 L12 22 L2 9 Z"/></svg>
-          <div style="flex:1">
-            <div class="t">PLUS YOUR LUXURY ITEMS</div>
-            <div class="d">You have <b>${itemsCount} active item${itemsCount > 1 ? 's' : ''}</b> totaling <b>${fmt(portfolio.itemsInvested)}</b>. Item returns depend on individual sale outcomes — see expected payouts in <b style="color:var(--gold)">My Items →</b></div>
+  // ── ITEMS (агрегированные по item_id) ──
+  const itemsCard = document.getElementById('pcItemsCard');
+  const itemList = document.getElementById('pcItemList');
+  if(itemsCard) itemsCard.style.display = portfolio.items.length > 0 ? '' : 'none';
+  if(itemList){
+    itemList.innerHTML = portfolio.items.map(i => {
+      // Прибыль вещи: invested * (retPct/100), масштабированная пропорционально месяцам
+      // Если daysTotal=90 (~3мес), full retPct применяется при months>=3
+      const monthsForFull = Math.max(1, (i.days / 30));
+      const k = Math.min(1, months / monthsForFull); // 0..1 — сколько от полного срока пройдёт
+      const profit = i.invested * (i.retPct / 100) * k;
+      totalInvested += i.invested;
+      totalProfit += profit;
+      const subtitle = i.count > 1
+        ? `${fmt(i.invested)} across ${i.count} purchases · ${i.retPct.toFixed(1)}% over ${i.days}d`
+        : `${fmt(i.invested)} invested · ${i.retPct.toFixed(1)}% expected over ${i.days}d`;
+      const ic = i.image_url
+        ? `<img src="${i.image_url}" style="width:36px;height:36px;border-radius:8px;object-fit:cover" alt="">`
+        : `<div class="pc-pool-ic" style="border-radius:8px">◈</div>`;
+      return `
+        <div class="pc-pool-row">
+          ${ic}
+          <div class="pc-pool-info">
+            <div class="n">${i.name}</div>
+            <div class="d">${subtitle}</div>
           </div>
-          <span style="color:var(--gold);font-size:18px;margin-left:8px">→</span>
+          <div class="pc-pool-amt">
+            <div class="a">+${fmt(profit)}</div>
+            <div class="e">over ${monthsTxt}</div>
+          </div>
         </div>
       `;
-    } else {
-      noteEl.innerHTML = '';
-    }
+    }).join('');
   }
+
+  setText('pcInvested', fmt(totalInvested));
+  setText('pcProfit', '+' + fmt(totalProfit));
+  setText('pcEndBal', fmt(totalInvested + totalProfit));
 }
 
 console.log('[stage8] Profit Calculator (simple) loaded');
