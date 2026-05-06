@@ -731,6 +731,8 @@ body.light-theme .f-card,
 .my-item-card .learn-more-row{text-align:center;padding:10px 0 4px;margin-bottom:4px}
 .my-item-card .learn-more-link{color:var(--t3);font-size:11px;cursor:pointer;text-decoration:underline;letter-spacing:.3px;display:inline-flex;align-items:center;gap:4px}
 .my-item-card .learn-more-link:hover{color:var(--gold)}
+.f-fineprint .learn-more-link,.learn-more-link{color:var(--t3);cursor:pointer;text-decoration:underline;letter-spacing:.3px;display:inline-block}
+.f-fineprint .learn-more-link:hover,.learn-more-link:hover{color:var(--gold)}
 .my-item-card .actions-row{display:flex;gap:8px;margin-top:10px}
 .my-item-card .actions-row button{flex:1;padding:9px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer;font-weight:600}
 .my-item-card .sell-btn{background:var(--red);color:#fff;border:none}
@@ -821,6 +823,7 @@ body.light-theme .f-card,
 .overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:14px;overflow-y:auto}
 .overlay.show{display:flex;animation:fadeIn .2s ease-out}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.arch-session.open{display:block !important}
 .modal{background:var(--card);border:1px solid var(--bd);max-width:520px;width:100%;position:relative;border-radius:14px;max-height:92vh;overflow-y:auto;animation:modalIn .2s ease-out;box-shadow:var(--shadow)}
 @keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
 .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--goldL),var(--gold));z-index:5;border-radius:14px 14px 0 0}
@@ -1984,7 +1987,10 @@ body.light-theme .f-card,
       <div class="h-title">LUXOR SUPPORT</div>
       <div class="h-sub"><span class="dot"></span>Online · typically replies within 1h</div>
     </div>
-    <button class="h-close" onclick="supportCloseConversation()">CLOSE CONVERSATION</button>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="h-close" onclick="supportShowArchive()" title="View past closed conversations" style="background:transparent;color:var(--t2)">📂 ARCHIVE</button>
+      <button class="h-close" onclick="supportCloseConversation()">CLOSE CONVERSATION</button>
+    </div>
   </div>
   <div class="chat-messages" id="dSupportMessages">
     <div class="empty-chat">
@@ -2600,7 +2606,10 @@ body.light-theme .f-card,
       <div class="h-title">LUXOR SUPPORT</div>
       <div class="h-sub"><span class="dot"></span>Online</div>
     </div>
-    <button class="h-close" onclick="supportCloseConversation()">CLOSE</button>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="h-close" onclick="supportShowArchive()" title="Past chats" style="background:transparent;color:var(--t2);padding:6px 10px;font-size:11px">📂</button>
+      <button class="h-close" onclick="supportCloseConversation()">CLOSE</button>
+    </div>
   </div>
   <div class="chat-messages" id="mSupportMessages">
     <div class="empty-chat">
@@ -3321,6 +3330,87 @@ function supportAutoresize(el){
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
+
+// ─── ARCHIVE: показывает прошлые закрытые сессии чата ────────────────────
+async function supportShowArchive(){
+  // Показать loader-модал
+  const modalHtml = `
+    <div id="supportArchiveModal" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s">
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:0;max-width:560px;width:100%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold)">📂 CHAT ARCHIVE</div>
+          <button onclick="document.getElementById('supportArchiveModal').remove()" style="background:transparent;border:none;color:var(--t3);font-size:22px;cursor:pointer;padding:0 4px">&times;</button>
+        </div>
+        <div id="supportArchiveBody" style="padding:18px 20px;overflow-y:auto;flex:1">
+          <div style="text-align:center;color:var(--t3);padding:30px">Loading...</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  try {
+    const r = await apiFetch('/api/support/history');
+    const data = await r.json().catch(() => ({}));
+    const body = document.getElementById('supportArchiveBody');
+    if(!body) return;
+
+    if(!r.ok || !data.ok){
+      body.innerHTML = '<div style="text-align:center;color:var(--red);padding:30px">Failed to load archive.</div>';
+      return;
+    }
+
+    const sessions = data.sessions || [];
+    if(sessions.length === 0){
+      body.innerHTML = `
+        <div style="text-align:center;padding:40px 20px">
+          <div style="font-size:42px;margin-bottom:10px;opacity:.5">💬</div>
+          <div style="color:var(--t2);font-size:14px;margin-bottom:6px">No archived chats yet.</div>
+          <div style="color:var(--t3);font-size:12px">Closed conversations will appear here.</div>
+        </div>`;
+      return;
+    }
+
+    body.innerHTML = sessions.map((s, idx) => {
+      const closedDate = s.closed_at ? new Date(s.closed_at).toLocaleString() : '—';
+      const msgCount = s.messages.length;
+      const firstMsg = s.messages[0];
+      const preview = firstMsg ? (firstMsg.text || '').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])).slice(0, 80) : '';
+      return `
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border .2s">
+          <div onclick="document.getElementById('archMsgs_${idx}').classList.toggle('open')" style="padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:.5px;margin-bottom:2px">SESSION · ${msgCount} messages</div>
+              <div style="font-size:11px;color:var(--t3)">Closed ${closedDate}</div>
+              <div style="font-size:12px;color:var(--t2);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${preview}${preview.length>=80?'...':''}</div>
+            </div>
+            <span style="color:var(--t3);font-size:18px">▾</span>
+          </div>
+          <div id="archMsgs_${idx}" class="arch-session" style="display:none;padding:0 14px 14px;border-top:1px solid var(--bd);max-height:300px;overflow-y:auto">
+            ${s.messages.map(m => {
+              const isUser = m.sender === 'user';
+              const time = m.created_at ? new Date(m.created_at).toLocaleString() : '';
+              const safeText = (m.text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+              const align = isUser ? 'flex-end' : 'flex-start';
+              const bg = isUser ? 'background:var(--gold);color:#0a0a0a' : 'background:var(--bg3);color:var(--t);border:1px solid var(--bd)';
+              return `<div style="display:flex;justify-content:${align};margin:8px 0">
+                <div style="max-width:75%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.4;word-wrap:break-word;${bg}">
+                  ${safeText}
+                  <div style="font-size:9px;opacity:.6;margin-top:3px;font-family:monospace">${time}</div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    console.error('[support] archive error:', e);
+    const body = document.getElementById('supportArchiveBody');
+    if(body) body.innerHTML = '<div style="text-align:center;color:var(--red);padding:30px">Network error.</div>';
+  }
+}
+window.supportShowArchive = supportShowArchive;
 
 // Hook into navTo to load messages when entering Support screen
 (function _supportHookNav(){
@@ -4489,7 +4579,7 @@ function openItemDetail(id){
             <div class="f-stat"><div class="l">Item price</div><div class="v">$${i.price.toLocaleString()}</div></div>
             <div class="f-stat"><div class="l">Per slot</div><div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
             <div class="f-stat"><div class="l">Sale period</div><div class="v">${periodTxt}</div></div>
-            <div class="f-stat"><div class="l">Guaranteed</div><div class="v green">+${i.ret[0]}%</div></div>
+            <div class="f-stat"><div class="l">Expected</div><div class="v green">+${i.ret[0]}–${i.ret[1]||i.ret[0]}%</div></div>
           </div>
           <div class="f-progress">
             <div class="f-progress-h"><span><b>${slotsSold}</b> of ${slotsTotal} sold</span><span class="g">${slotsAvail} left</span></div>
@@ -4529,7 +4619,7 @@ function openItemDetail(id){
             </div>
           </div>
 
-          <div class="f-fineprint">Guaranteed minimum: <b id="mFGuar">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt}</div>
+          <div class="f-fineprint">Guaranteed minimum: <b id="mFGuar">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt} · <a class="learn-more-link" onclick="event.stopPropagation();showItemEarningsInfo()">ⓘ Learn more</a></div>
 
           <button class="f-cta" id="mBuyBtn" onclick="buyFraction(${i.id})">BUY 1 SLOT — $${Math.round(pricePerSlot).toLocaleString()}</button>
           <input type="hidden" id="mFSlots" value="1">
@@ -4596,7 +4686,7 @@ function openItemDetail(id){
               <div class="f-stat"><div class="l">Item price</div><div class="v">$${i.price.toLocaleString()}</div></div>
               <div class="f-stat"><div class="l">Per slot</div><div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
               <div class="f-stat"><div class="l">Sale period</div><div class="v">${periodTxt}</div></div>
-              <div class="f-stat"><div class="l">Guaranteed</div><div class="v green">+${i.ret[0]}%</div></div>
+              <div class="f-stat"><div class="l">Expected</div><div class="v green">+${i.ret[0]}–${i.ret[1]||i.ret[0]}%</div></div>
             </div>
             <div class="f-progress">
               <div class="f-progress-h"><span><b>${slotsSold}</b> of ${slotsTotal} sold</span><span class="g">${slotsAvail} left</span></div>
@@ -4636,7 +4726,7 @@ function openItemDetail(id){
               </div>
             </div>
 
-            <div class="f-fineprint">Guaranteed minimum: <b id="dFGuar">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt}</div>
+            <div class="f-fineprint">Guaranteed minimum: <b id="dFGuar">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt} · <a class="learn-more-link" onclick="event.stopPropagation();showItemEarningsInfo()">ⓘ Learn more</a></div>
 
             <button class="f-cta" id="dBuyBtn" onclick="buyFraction(${i.id})">BUY 1 SLOT — $${Math.round(pricePerSlot).toLocaleString()}</button>
             <input type="hidden" id="dFSlots" value="1">
@@ -11025,7 +11115,7 @@ async function loadSaleNotifications(){
         showSaleNotificationModal(_saleNotifications[0]);
       } else {
         // Tost + badge на My Items
-        try { showToast(`💎 ${_saleNotifications.length} item${_saleNotifications.length>1?'s':''} sold! Tap My Items.`, 'success'); } catch(e){}
+        try { showToast('success', `💎 ${_saleNotifications.length} item${_saleNotifications.length>1?'s':''} sold!`, 'Tap My Items to see details.', 5000); } catch(e){}
       }
       // Update My Items badge
       updateMyItemsSalesBadge(_saleNotifications.length);
@@ -11113,6 +11203,18 @@ window.closeSaleModal = closeSaleModal;
 setTimeout(() => {
   try { if(typeof loadSaleNotifications === 'function') loadSaleNotifications(); } catch(e){}
 }, 2500);
+
+// Poll for new sale notifications every 60s — so when admin marks an item as sold,
+// the user gets a toast even without refreshing. Balance polling is separate (every 30s).
+setInterval(() => {
+  try {
+    if(typeof loadSaleNotifications === 'function' && document.visibilityState === 'visible'){
+      loadSaleNotifications();
+      // Reload My Items so the dashboard reflects new sold status
+      if(typeof loadMyItems === 'function') loadMyItems().catch(()=>{});
+    }
+  } catch(e){ /* ignore */ }
+}, 60000);
 
 // === BRAND FILTER (Etap 9.3) ===========================================
 window._currentBrand = 'all';
