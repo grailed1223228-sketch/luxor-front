@@ -720,8 +720,20 @@ textarea.inp{resize:vertical;min-height:60px;}
       </div>
     </div>
 
-    <!-- hidden image URL (filled after photo upload) -->
+    <!-- hidden image URL (filled after photo upload) — primary/main photo -->
     <input type="hidden" id="iImageUrl" value="">
+
+    <!-- ADDITIONAL PHOTOS (gallery) -->
+    <div style="margin-bottom:14px;padding:12px;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.2);border-radius:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--gold);font-weight:700">📷 ADDITIONAL PHOTOS</div>
+        <button type="button" class="btn btn-b btn-sm" onclick="addPhotoUrl()">+ ADD URL</button>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:8px;line-height:1.4">
+        ⓘ Main photo (above) is the cover. Add up to 5 more photos by URL — they'll show in a gallery on the item detail page.
+      </div>
+      <div id="extraPhotosList"></div>
+    </div>
 
     <button class="btn btn-g" onclick="saveItem()" style="width:100%;padding:12px;font-size:14px;margin-top:16px;">💾 SAVE ITEM</button>
   </div>
@@ -1399,15 +1411,19 @@ function renderUsers(users){
   if(!users.length){ c.innerHTML='<div style="color:var(--t3);text-align:center;padding:40px">No users found</div>'; return; }
   c.innerHTML = users.map(u=>{
     const wallet  = +(u.wallet_balance || 0);
+    const locked  = +(u.locked_balance || 0);
+    const refBal  = +(u.referral_balance || 0);
     const pPrinc  = +(u.pools_principal || 0);
     const pEarned = +(u.pools_earned || 0);
     const iInv    = +(u.items_invested || 0);
-    // total_balance посчитан на бэке, но fallback если поле отсутствует
+    // total_balance посчитан на бэке, fallback с учётом всех источников
     const total   = (u.total_balance !== undefined && u.total_balance !== null)
       ? +u.total_balance
-      : (wallet + pPrinc + pEarned + iInv);
+      : (wallet + locked + refBal + pPrinc + pEarned + iInv);
     const breakdownParts = [];
     if(wallet  > 0) breakdownParts.push(`💰 ${fmt(wallet)} free`);
+    if(locked  > 0) breakdownParts.push(`🔒 ${fmt(locked)} locked`);
+    if(refBal  > 0) breakdownParts.push(`👥 ${fmt(refBal)} ref`);
     if(pPrinc  > 0) breakdownParts.push(`📊 ${fmt(pPrinc + pEarned)} in pools`);
     if(iInv    > 0) breakdownParts.push(`💎 ${fmt(iInv)} in items`);
     const breakdown = breakdownParts.length ? breakdownParts.join(' · ') : '💰 No balance';
@@ -1430,7 +1446,7 @@ function renderUsers(users){
           ${u.referral_count?`<div style="font-size:11px;color:var(--green)">🔗 Referrals: ${u.referral_count} people · Earned: ${fmt(u.referral_earnings||0)}</div>`:''}
         </div>
         <div style="text-align:right;min-width:160px">
-          <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:2px" title="Total: wallet + pools (with earned) + items invested">${fmt(total)}</div>
+          <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:2px" title="All money: wallet + locked + referral + pools (with earned) + items invested">${fmt(total)}</div>
           <div style="font-size:9px;color:var(--t3);margin-bottom:6px;letter-spacing:.5px">TOTAL BALANCE</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">
             <button class="btn btn-b btn-sm" onclick="showUserDetail('${u.login}')">DETAIL</button>
@@ -1474,6 +1490,97 @@ async function sendMsgPrompt(login){
   if(r&&r.ok) notify('Message sent to '+login);
 }
 
+// ─── REF TIER OVERRIDE MODAL ────────────────────────────────────────────
+async function openRefOverrideModal(login, currentTier, currentRate, hasOverride){
+  const tier = (currentTier || 'bronze').toLowerCase();
+  const rate = currentRate;
+  let modal = document.getElementById('refOverrideModal');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'refOverrideModal';
+    modal.className = 'overlay';
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `
+    <div class="modal" style="max-width:460px">
+      <div class="modal-header">
+        <h3>⚙ REF TIER OVERRIDE</h3>
+        <button class="modal-close" onclick="document.getElementById('refOverrideModal').classList.remove('show')">&times;</button>
+      </div>
+      <div style="padding:16px">
+        <div style="font-size:13px;color:var(--t2);margin-bottom:14px">User: <strong style="color:var(--gold)">@${login}</strong></div>
+
+        <div style="background:rgba(255,255,255,.03);padding:12px;border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.5">
+          ⓘ Override lets you bypass the automatic tier system for this user.<br>
+          Set <b>tier</b> alone — they get that tier's standard rate (3/5/7/10%).<br>
+          Set <b>rate</b> alone — they get that exact %, tier label stays current.<br>
+          Set both — full custom (e.g. show "Gold" but pay 12%).
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="font-size:11px;color:var(--t3);font-weight:700;letter-spacing:.5px;display:block;margin-bottom:6px">TIER LABEL</label>
+          <select id="refOverrideTier" class="inp" style="width:100%">
+            <option value="">— Auto (current: ${tier})</option>
+            <option value="bronze" ${tier==='bronze'?'selected':''}>Bronze (default 3%)</option>
+            <option value="silver" ${tier==='silver'?'selected':''}>Silver (default 5%)</option>
+            <option value="gold" ${tier==='gold'?'selected':''}>Gold (default 7%)</option>
+            <option value="platinum" ${tier==='platinum'?'selected':''}>Platinum (default 10%)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="font-size:11px;color:var(--t3);font-weight:700;letter-spacing:.5px;display:block;margin-bottom:6px">CUSTOM RATE % (optional, 0-50)</label>
+          <input type="number" id="refOverrideRate" class="inp" min="0" max="50" step="0.5" placeholder="e.g. 12.5" value="${rate}" style="width:100%">
+          <div style="font-size:10px;color:var(--t3);margin-top:4px">Leave empty to use tier's default rate.</div>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-g" style="flex:1" onclick="submitRefOverride('${login}')">SAVE OVERRIDE</button>
+          ${hasOverride ? `<button class="btn btn-r" onclick="resetRefOverride('${login}')">RESET TO AUTO</button>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  modal.classList.add('show');
+}
+
+async function submitRefOverride(login){
+  const tier = document.getElementById('refOverrideTier').value || '';
+  const rateRaw = document.getElementById('refOverrideRate').value;
+  const rate = rateRaw === '' ? null : parseFloat(rateRaw);
+  if(rate !== null && (isNaN(rate) || rate < 0 || rate > 50)){
+    alert('Rate must be a number 0-50');
+    return;
+  }
+  const data = await post('/api/admin/users/' + encodeURIComponent(login) + '/ref-override',
+                          { tier, rate });
+  if(!data || !data.ok){
+    notify('Override failed: ' + (data?.error || 'unknown'), false);
+    return;
+  }
+  notify('✅ Override saved');
+  document.getElementById('refOverrideModal').classList.remove('show');
+  // Reload dossier to refresh
+  setTimeout(() => showUserDetail(login), 200);
+}
+
+async function resetRefOverride(login){
+  if(!confirm('Reset overrides for @' + login + '? They will return to automatic tier calculation based on referrals count.')) return;
+  const data = await post('/api/admin/users/' + encodeURIComponent(login) + '/ref-override',
+                          { reset: true });
+  if(!data || !data.ok){
+    notify('Reset failed: ' + (data?.error || 'unknown'), false);
+    return;
+  }
+  notify('✅ Override reset to auto');
+  document.getElementById('refOverrideModal').classList.remove('show');
+  setTimeout(() => showUserDetail(login), 200);
+}
+
+window.openRefOverrideModal = openRefOverrideModal;
+window.submitRefOverride = submitRefOverride;
+window.resetRefOverride = resetRefOverride;
+
 async function showUserDetail(login){
   const modal = document.getElementById('userDetailModal');
   const content = document.getElementById('userDetailContent');
@@ -1513,16 +1620,28 @@ async function showUserDetail(login){
     <h3 style="font-size:20px;font-weight:800;margin-bottom:6px">👤 ${u.first_name||''} ${u.last_name||''} <span style="color:var(--t3);font-weight:500;font-size:14px">@${u.login}</span> ${u.banned?'<span style="background:var(--red);color:#fff;padding:2px 8px;border-radius:6px;font-size:10px;margin-left:6px">BANNED</span>':''}</h3>
     <div style="color:var(--t3);font-size:12px;margin-bottom:16px">${u.email||''} · Plan: <strong style="color:var(--t)">${u.plan||'—'}</strong> · Registered: ${fmtDateShort(u.created_at)} · Last seen: <strong style="color:var(--t)">${lastSeenLabel}</strong></div>
 
-    <!-- TOP STATS -->
+    <!-- TOP STATS — финансовая разбивка всего что у юзера есть на платформе -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px">
       <div style="background:linear-gradient(135deg,rgba(241,196,15,.12),rgba(241,196,15,.04));padding:12px;border-radius:8px;text-align:center;border:1px solid var(--gold)">
-        <div style="font-size:22px;font-weight:800;color:var(--gold)">${fmt((+(sm.wallet_balance||0)) + (+(sm.total_in_pools_active||0)) + (+(sm.total_earned_pools||0)) + (+(sm.total_in_items_active||0)))}</div>
+        <div style="font-size:22px;font-weight:800;color:var(--gold)">${fmt(sm.total_balance != null ? sm.total_balance : ((+(sm.wallet_balance||0)) + (+(sm.locked_balance||0)) + (+(sm.referral_balance||0)) + (+(sm.total_in_pools_active||0)) + (+(sm.total_earned_pools||0)) + (+(sm.total_in_items_active||0))))}</div>
         <div style="font-size:10px;color:var(--gold);font-weight:700;letter-spacing:.5px">═ TOTAL BALANCE</div>
       </div>
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
         <div style="font-size:18px;font-weight:700;color:var(--gold)">${fmt(sm.wallet_balance||0)}</div>
         <div style="font-size:10px;color:var(--t3)">AVAILABLE (FREE)</div>
       </div>
+      ${(+sm.locked_balance) > 0 ? `
+        <div style="background:rgba(241,196,15,.1);border:1px solid rgba(241,196,15,.4);padding:12px;border-radius:8px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:#f1c40f">${fmt(sm.locked_balance||0)}</div>
+          <div style="font-size:10px;color:var(--t3)">🔒 LOCKED (BONUS)</div>
+        </div>
+      ` : ''}
+      ${(+sm.referral_balance) > 0 ? `
+        <div style="background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.4);padding:12px;border-radius:8px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--purple)">${fmt(sm.referral_balance||0)}</div>
+          <div style="font-size:10px;color:var(--t3)">👥 REF BALANCE</div>
+        </div>
+      ` : ''}
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
         <div style="font-size:18px;font-weight:700;color:var(--blue)">${fmt(sm.total_in_pools_active||0)}</div>
         <div style="font-size:10px;color:var(--t3)">IN POOLS (active)</div>
@@ -1543,7 +1662,7 @@ async function showUserDetail(login){
         <div style="font-size:18px;font-weight:700;color:${(sm.total_profit_items_realized||0)>=0?'var(--green)':'var(--red)'}">${(sm.total_profit_items_realized||0)>=0?'+':''}${fmt(sm.total_profit_items_realized||0)}</div>
         <div style="font-size:10px;color:var(--t3)">P/L ITEMS (realized)</div>
       </div>
-      ${(u.locked_balance||0) > 0 ? `
+      ${(u.locked_balance||0) > 0 && (sm.locked_balance == null) ? `
       <div style="background:rgba(241,196,15,.1);border:1px solid rgba(241,196,15,.4);padding:12px;border-radius:8px;text-align:center">
         <div style="font-size:18px;font-weight:700;color:#f1c40f">${fmt(u.locked_balance||0)}</div>
         <div style="font-size:10px;color:var(--t3)">🔒 LOCKED ${u.locked_unlocked_at ? '<br>(was '+(u.locked_unlock_reason||'?')+')' : ''}</div>
@@ -1558,10 +1677,13 @@ async function showUserDetail(login){
         const tierColor = {bronze:'#cd7f32', silver:'#c0c0c0', gold:'#ffd700', platinum:'#e5e4e2'}[tier] || '#cd7f32';
         const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
         const tierRate = {bronze:3, silver:5, gold:7, platinum:10}[tier] || 3;
-        return `<div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center;border-top:3px solid ${tierColor}">
-          <div style="font-size:14px;font-weight:700;color:${tierColor}">${tierName}</div>
-          <div style="font-size:10px;color:var(--t3)">REF TIER · ${tierRate}% rate</div>
+        const hasOverride = u.ref_tier_override || (u.ref_rate_override !== null && u.ref_rate_override !== undefined);
+        const effectiveRate = (u.ref_rate_override !== null && u.ref_rate_override !== undefined) ? u.ref_rate_override : tierRate;
+        return `<div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center;border-top:3px solid ${tierColor};position:relative">
+          <div style="font-size:14px;font-weight:700;color:${tierColor}">${tierName}${hasOverride?' <span title="Manual override active" style="font-size:9px;color:var(--orange)">●</span>':''}</div>
+          <div style="font-size:10px;color:var(--t3)">REF TIER · ${effectiveRate}% rate${hasOverride?' (manual)':''}</div>
           <div style="font-size:10px;color:var(--green);margin-top:2px">Earned $${(u.ref_total_earned_lifetime||0).toFixed(2)} lifetime</div>
+          <button class="btn btn-sm btn-b" style="margin-top:6px;font-size:9px;padding:3px 8px" onclick="openRefOverrideModal('${u.login}', '${tier}', ${effectiveRate}, ${hasOverride})">⚙ OVERRIDE</button>
         </div>`;
       })()}
     </div>
@@ -1894,6 +2016,12 @@ async function editItem(id){
   document.getElementById('iPeriod').value = item.return_period_days||'';
   document.getElementById('iStatus').value = item.status||'active';
   document.getElementById('iImageUrl').value = item.image_url||'';
+  // Init gallery — берём image_urls если есть, иначе пустой массив
+  // Главное фото (image_url) уже отдельно — здесь только дополнительные
+  const galleryUrls = Array.isArray(item.image_urls) ? item.image_urls.slice() : [];
+  // Удалим primary из галереи — оно показано как главное фото
+  const extraUrls = galleryUrls.filter((u, i) => !(i === 0 && u === item.image_url));
+  renderExtraPhotos(extraUrls);
   // COUNTDOWN
   document.getElementById('iCountdownDays').value = item.countdown_days || 5;
   document.getElementById('iSaleDaysAfter').value = item.expected_sale_days_after_close || 10;
@@ -1927,6 +2055,68 @@ async function editItem(id){
   }
   document.getElementById('addItemModal').classList.add('show');
 }
+
+// ─── GALLERY: дополнительные фото item ─────────────────────────────────────
+const MAX_EXTRA_PHOTOS = 5;
+
+function renderExtraPhotos(urls){
+  const container = document.getElementById('extraPhotosList');
+  if(!container) return;
+  const safeUrls = (urls || []).slice(0, MAX_EXTRA_PHOTOS);
+  if(safeUrls.length === 0){
+    container.innerHTML = '<div style="font-size:11px;color:var(--t3);text-align:center;padding:8px">No additional photos. Click + ADD URL to attach more.</div>';
+    return;
+  }
+  container.innerHTML = safeUrls.map((url, idx) => `
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+      <div style="width:48px;height:48px;flex-shrink:0;background:var(--bg2);border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd)">
+        <img src="${url.replace(/"/g, '&quot;')}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.parentNode.innerHTML='<span style=&quot;font-size:18px;color:var(--t3)&quot;>📷</span>'">
+      </div>
+      <input type="text" class="inp extra-photo-url" data-idx="${idx}" value="${url.replace(/"/g, '&quot;')}" oninput="onExtraPhotoChange(${idx}, this.value)" style="flex:1" placeholder="https://...">
+      <button type="button" class="btn btn-r btn-sm" onclick="removeExtraPhoto(${idx})" style="flex-shrink:0">✕</button>
+    </div>
+  `).join('');
+}
+
+function collectExtraPhotoUrls(){
+  const inputs = document.querySelectorAll('#extraPhotosList .extra-photo-url');
+  return Array.from(inputs).map(i => (i.value || '').trim()).filter(Boolean);
+}
+
+function addPhotoUrl(){
+  const current = collectExtraPhotoUrls();
+  if(current.length >= MAX_EXTRA_PHOTOS){
+    notify(`Max ${MAX_EXTRA_PHOTOS} additional photos`, false);
+    return;
+  }
+  current.push(''); // пустой slot для нового URL
+  renderExtraPhotos(current);
+  // Фокус на новый input
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#extraPhotosList .extra-photo-url');
+    if(inputs.length > 0) inputs[inputs.length - 1].focus();
+  }, 50);
+}
+
+function removeExtraPhoto(idx){
+  const current = collectExtraPhotoUrls();
+  current.splice(idx, 1);
+  renderExtraPhotos(current);
+}
+
+function onExtraPhotoChange(idx, val){
+  // Update preview without re-render (re-render лишь при добавлении/удалении)
+  const inputs = document.querySelectorAll('#extraPhotosList .extra-photo-url');
+  const row = inputs[idx]?.closest('div');
+  const img = row?.querySelector('img');
+  if(img && val.trim()){
+    img.src = val.trim();
+    img.style.display = '';
+  }
+}
+window.addPhotoUrl = addPhotoUrl;
+window.removeExtraPhoto = removeExtraPhoto;
+window.onExtraPhotoChange = onExtraPhotoChange;
 
 async function saveItem(){
   const name = document.getElementById('iName').value.trim();
@@ -1968,6 +2158,14 @@ async function saveItem(){
     }
   }
 
+  // GALLERY: собираем массив image_urls — главное фото первое + дополнительные
+  const extras = collectExtraPhotoUrls();
+  const imageUrls = [];
+  if(imageUrl && imageUrl.trim()) imageUrls.push(imageUrl.trim());
+  for(const u of extras){
+    if(u && u.trim() && !imageUrls.includes(u.trim())) imageUrls.push(u.trim());
+  }
+
   const data = {
     name,
     brand: (document.getElementById('iBrand')?.value || '').trim(),
@@ -1980,6 +2178,7 @@ async function saveItem(){
     return_period_days: +document.getElementById('iPeriod').value || 30,
     status: document.getElementById('iStatus').value,
     image_url: imageUrl,
+    image_urls: imageUrls,
     // ─── COUNTDOWN ──────────────────────────────────────────
     countdown_days: +document.getElementById('iCountdownDays').value || 5,
     expected_sale_days_after_close: +document.getElementById('iSaleDaysAfter').value || 10,
@@ -2303,6 +2502,8 @@ function openAddItem() {
   document.getElementById('iPeriod').value = '';
   document.getElementById('iStatus').value = 'active';
   document.getElementById('iImageUrl').value = '';
+  // GALLERY: сбросить extras
+  if(typeof renderExtraPhotos === 'function') renderExtraPhotos([]);
   // COUNTDOWN — defaults
   document.getElementById('iCountdownDays').value = 5;
   document.getElementById('iSaleDaysAfter').value = 10;
