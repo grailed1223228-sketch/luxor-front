@@ -961,7 +961,13 @@ async function selectAdminConversation(userLogin){
   renderAdminConversations(_adminAllConversations);
 
   const header = document.getElementById('adminChatHeader');
-  if(header) header.innerHTML = `💬 Chat with <b>${userLogin}</b>`;
+  if(header){
+    header.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+        <div>💬 Chat with <b>${userLogin}</b></div>
+        <button class="btn btn-r btn-sm" onclick="confirmCloseAdminChat('${userLogin}')" title="Force-close conversation. User will see it as cleared. Full history stays in DB and is viewable by user in Archive.">🗙 CLOSE</button>
+      </div>`;
+  }
   const inp = document.getElementById('adminChatInput');
   if(inp) inp.style.display = 'flex';
 
@@ -1019,6 +1025,21 @@ async function sendAdminReply(){
   inp.style.height = '42px';
   // Reload chat
   selectAdminConversation(_adminCurrentChatUser);
+}
+
+async function confirmCloseAdminChat(userLogin){
+  if(!confirm('Force-close conversation with @' + userLogin + '?\n\n• Active messages will be hidden from the user.\n• Full history stays in DB and will be viewable by you here, and by user in their Archive.\n• User can start a new chat anytime.')){
+    return;
+  }
+  const data = await post('/api/admin/support/conversations/' + encodeURIComponent(userLogin) + '/close', {});
+  if(!data || !data.ok){
+    alert('Failed to close: ' + (data?.error || 'unknown error'));
+    return;
+  }
+  notify('✅ Chat closed. History preserved.', 'ok');
+  // Reload conversation view + list
+  selectAdminConversation(userLogin);
+  setTimeout(loadAdminConversations, 400);
 }
 
 async function loadAdminUnreadTotal(){
@@ -1376,7 +1397,22 @@ function filterUsers(){
 function renderUsers(users){
   const c = document.getElementById('usersList');
   if(!users.length){ c.innerHTML='<div style="color:var(--t3);text-align:center;padding:40px">No users found</div>'; return; }
-  c.innerHTML = users.map(u=>`
+  c.innerHTML = users.map(u=>{
+    const wallet  = +(u.wallet_balance || 0);
+    const pPrinc  = +(u.pools_principal || 0);
+    const pEarned = +(u.pools_earned || 0);
+    const iInv    = +(u.items_invested || 0);
+    // total_balance посчитан на бэке, но fallback если поле отсутствует
+    const total   = (u.total_balance !== undefined && u.total_balance !== null)
+      ? +u.total_balance
+      : (wallet + pPrinc + pEarned + iInv);
+    const breakdownParts = [];
+    if(wallet  > 0) breakdownParts.push(`💰 ${fmt(wallet)} free`);
+    if(pPrinc  > 0) breakdownParts.push(`📊 ${fmt(pPrinc + pEarned)} in pools`);
+    if(iInv    > 0) breakdownParts.push(`💎 ${fmt(iInv)} in items`);
+    const breakdown = breakdownParts.length ? breakdownParts.join(' · ') : '💰 No balance';
+    const itemsActivity = (u.items_active_count || 0) + (u.items_sold_count || 0);
+    return `
     <div class="user-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
         <div style="flex:1;min-width:200px">
@@ -1388,12 +1424,14 @@ function renderUsers(users){
           </div>
           <div style="font-size:11px;color:var(--t3)">🔑 ${u.login} · Joined: ${u.created_at?new Date(u.created_at).toLocaleDateString():'—'}</div>
           <div style="font-size:11px;color:var(--t3)">📧 ${u.email||u.login} · Last seen: ${u.last_seen?new Date(u.last_seen).toLocaleString():'—'}</div>
-          <div style="font-size:11px;color:var(--blue)">💰 Wallet: ${fmt(u.wallet_balance||0)} · Balance: ${fmt(u.balance||0)}</div>
+          <div style="font-size:11px;color:var(--blue);margin-top:3px">${breakdown}</div>
+          ${(u.pools_active_count > 0 || itemsActivity > 0) ? `<div style="font-size:11px;color:var(--t3)">⚡ ${u.pools_active_count||0} active pools · ${u.items_active_count||0} active items${u.items_sold_count?' · '+u.items_sold_count+' sold':''}${u.items_lost_count?' · '+u.items_lost_count+' lost':''}</div>` : ''}
           ${u.referred_by_login?`<div style="font-size:11px;color:var(--purple)">👥 Referred by: ${u.referred_by_login}</div>`:''}
           ${u.referral_count?`<div style="font-size:11px;color:var(--green)">🔗 Referrals: ${u.referral_count} people · Earned: ${fmt(u.referral_earnings||0)}</div>`:''}
         </div>
         <div style="text-align:right;min-width:160px">
-          <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:6px">${fmt(u.wallet_balance||0)}</div>
+          <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:2px" title="Total: wallet + pools (with earned) + items invested">${fmt(total)}</div>
+          <div style="font-size:9px;color:var(--t3);margin-bottom:6px;letter-spacing:.5px">TOTAL BALANCE</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">
             <button class="btn btn-b btn-sm" onclick="showUserDetail('${u.login}')">DETAIL</button>
             <button class="btn btn-g btn-sm" onclick="addBalancePrompt('${u.login}','${u.first_name} ${u.last_name}')">+$</button>
@@ -1403,8 +1441,8 @@ function renderUsers(users){
           </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 async function addBalancePrompt(login, name){
@@ -1477,29 +1515,33 @@ async function showUserDetail(login){
 
     <!-- TOP STATS -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px">
-      <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
-        <div style="font-size:18px;font-weight:700;color:var(--gold)">${fmt(sm.wallet_balance||0)}</div>
-        <div style="font-size:10px;color:var(--t3)">AVAILABLE BALANCE</div>
+      <div style="background:linear-gradient(135deg,rgba(241,196,15,.12),rgba(241,196,15,.04));padding:12px;border-radius:8px;text-align:center;border:1px solid var(--gold)">
+        <div style="font-size:22px;font-weight:800;color:var(--gold)">${fmt((+(sm.wallet_balance||0)) + (+(sm.total_in_pools_active||0)) + (+(sm.total_earned_pools||0)) + (+(sm.total_in_items_active||0)))}</div>
+        <div style="font-size:10px;color:var(--gold);font-weight:700;letter-spacing:.5px">═ TOTAL BALANCE</div>
       </div>
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
-        <div style="font-size:18px;font-weight:700;color:var(--green)">${fmt(sm.total_deposited||0)}</div>
-        <div style="font-size:10px;color:var(--t3)">TOTAL DEPOSITED</div>
+        <div style="font-size:18px;font-weight:700;color:var(--gold)">${fmt(sm.wallet_balance||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">AVAILABLE (FREE)</div>
       </div>
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
         <div style="font-size:18px;font-weight:700;color:var(--blue)">${fmt(sm.total_in_pools_active||0)}</div>
         <div style="font-size:10px;color:var(--t3)">IN POOLS (active)</div>
       </div>
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
-        <div style="font-size:18px;font-weight:700;color:var(--purple)">${fmt(sm.total_in_items_active||0)}</div>
-        <div style="font-size:10px;color:var(--t3)">IN ITEMS (active)</div>
-      </div>
-      <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
         <div style="font-size:18px;font-weight:700;color:var(--green)">${fmt(sm.total_earned_pools||0)}</div>
         <div style="font-size:10px;color:var(--t3)">EARNED (pools)</div>
       </div>
       <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
-        <div style="font-size:18px;font-weight:700;color:${(sm.total_profit_items_realized||0)>=0?'var(--green)':'var(--red)'}">${fmt(sm.total_profit_items_realized||0)}</div>
-        <div style="font-size:10px;color:var(--t3)">PROFIT (items, realized)</div>
+        <div style="font-size:18px;font-weight:700;color:var(--purple)">${fmt(sm.total_in_items_active||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">IN ITEMS (active)</div>
+      </div>
+      <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--green)">${fmt(sm.total_deposited||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">TOTAL DEPOSITED</div>
+      </div>
+      <div style="background:var(--bg2);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:18px;font-weight:700;color:${(sm.total_profit_items_realized||0)>=0?'var(--green)':'var(--red)'}">${(sm.total_profit_items_realized||0)>=0?'+':''}${fmt(sm.total_profit_items_realized||0)}</div>
+        <div style="font-size:10px;color:var(--t3)">P/L ITEMS (realized)</div>
       </div>
       ${(u.locked_balance||0) > 0 ? `
       <div style="background:rgba(241,196,15,.1);border:1px solid rgba(241,196,15,.4);padding:12px;border-radius:8px;text-align:center">
@@ -1707,7 +1749,7 @@ async function loadItems(){
         <button class="btn btn-b btn-sm" onclick="editItem('${item.id}')">EDIT</button>
         <button class="btn btn-sm" style="background:#3498db;color:#fff" onclick="toggleItemStatus('${item.id}','active')">PAUSE</button>
         ${closePoolBtn}
-        <button class="btn btn-sm" style="background:var(--green);color:#000" onclick="openSellModal('${item.id}','${safeName}',${gRet},${eRet})">MARK AS SOLD</button>
+        <button class="btn btn-sm" style="background:var(--green);color:#000" onclick="openSellModal('${item.id}','${safeName}',${gRet},${eRet},${+(item.purchase_price)||0})">MARK AS SOLD</button>
         <button class="btn btn-r btn-sm" onclick="deleteItem('${item.id}')">DELETE</button>`;
     } else if(item.status === 'sold'){
       const soldMode = item.sold_mode ? String(item.sold_mode).toUpperCase() : '';
@@ -2006,17 +2048,23 @@ async function deleteItem(id){
 // ============================================================
 // MARK ITEM AS SOLD (два режима: guaranteed / profit)
 // ============================================================
-let _sellCtx = null; // {itemId, itemName, guaranteedPct, expectedPct}
+let _sellCtx = null; // {itemId, itemName, guaranteedPct, expectedPct, purchasePrice, mode}
 
-function openSellModal(itemId, itemName, guaranteedPct, expectedPct){
-  _sellCtx = { itemId, itemName, guaranteedPct: +guaranteedPct || 0, expectedPct: +expectedPct || 0 };
+function openSellModal(itemId, itemName, guaranteedPct, expectedPct, purchasePrice){
+  _sellCtx = {
+    itemId, itemName,
+    guaranteedPct: +guaranteedPct || 0,
+    expectedPct:   +expectedPct   || 0,
+    purchasePrice: +purchasePrice || 0,
+    inputMode: 'price',
+  };
   let overlay = document.getElementById('sellItemModal');
   if(!overlay){
     overlay = document.createElement('div');
     overlay.id = 'sellItemModal';
     overlay.className = 'overlay';
     overlay.innerHTML = `
-      <div class="modal" style="max-width:500px">
+      <div class="modal" style="max-width:520px">
         <div class="modal-header">
           <h3>MARK AS SOLD</h3>
           <button class="modal-close" onclick="closeSellModal()">&times;</button>
@@ -2024,34 +2072,64 @@ function openSellModal(itemId, itemName, guaranteedPct, expectedPct){
         <div style="padding:16px">
           <div style="font-size:13px;color:var(--t2);margin-bottom:16px">
             <strong id="sellItemName"></strong><br>
-            Guaranteed return: <span id="sellGuaranteedInfo" style="color:var(--gold);font-weight:700"></span> ·
+            Purchase price: <span id="sellPurchasePriceInfo" style="color:var(--t);font-weight:700"></span> ·
+            Guaranteed: <span id="sellGuaranteedInfo" style="color:var(--gold);font-weight:700"></span> ·
             Expected: <span id="sellExpectedInfo" style="color:var(--green);font-weight:700"></span>
           </div>
           <div style="border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px">
-            <div style="font-size:11px;color:var(--t3);margin-bottom:6px;font-weight:700">OPTION A</div>
-            <div style="font-size:12px;margin-bottom:8px">Sold <strong>under expectations</strong>. Pay holders the guaranteed rate. Any shortfall covered by the platform.</div>
+            <div style="font-size:11px;color:var(--t3);margin-bottom:6px;font-weight:700">OPTION A — UNDER EXPECTATIONS</div>
+            <div style="font-size:12px;margin-bottom:8px">Sold below market. Pay holders the guaranteed rate. Any shortfall covered by the platform.</div>
             <button class="btn btn-gold" style="width:100%" onclick="submitSell('guaranteed',0)">PAY GUARANTEED <span id="sellGuaranteedBtn"></span></button>
           </div>
           <div style="border:1px solid var(--bd);border-radius:8px;padding:12px">
-            <div style="font-size:11px;color:var(--t3);margin-bottom:6px;font-weight:700">OPTION B</div>
-            <div style="font-size:12px;margin-bottom:8px">Enter the <strong>real profit/loss %</strong>. Holders receive max(real, guaranteed) for protection.</div>
-            <input id="sellRealPct" type="number" step="0.1" min="-100" max="1000" placeholder="e.g. 40 for +40%" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-bottom:8px">
+            <div style="font-size:11px;color:var(--t3);margin-bottom:6px;font-weight:700">OPTION B — REAL SALE</div>
+            <div style="font-size:12px;margin-bottom:8px">Enter the real outcome — either as <strong>actual sale price ($)</strong> or as <strong>% above purchase</strong>. Holders receive max(real, guaranteed) for protection.</div>
+            <div style="display:flex;gap:6px;margin-bottom:8px">
+              <button type="button" id="sellModeBtnPrice" class="btn btn-sm" style="flex:1;background:var(--gold);color:#000" onclick="sellSetMode('price')">PRICE ($)</button>
+              <button type="button" id="sellModeBtnPct" class="btn btn-sm" style="flex:1;background:var(--bg2);color:var(--t)" onclick="sellSetMode('pct')">PERCENT (%)</button>
+            </div>
+            <input id="sellRealPrice" type="number" step="1" min="0" placeholder="e.g. 32500 (sold for $32,500)" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-bottom:8px">
+            <input id="sellRealPct" type="number" step="0.1" min="-100" max="1000" placeholder="e.g. 40 for +40%" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;color:var(--t);margin-bottom:8px;display:none">
             <div id="sellRealPreview" style="font-size:11px;color:var(--t3);margin-bottom:8px;min-height:14px"></div>
-            <button class="btn" style="width:100%;background:var(--green);color:#000" onclick="submitSellProfit()">APPLY REAL %</button>
+            <button class="btn" style="width:100%;background:var(--green);color:#000" onclick="submitSellProfit()">APPLY & PAY HOLDERS</button>
           </div>
         </div>
       </div>`;
     document.body.appendChild(overlay);
-    // preview on input
     overlay.querySelector('#sellRealPct').addEventListener('input', updateSellPreview);
+    overlay.querySelector('#sellRealPrice').addEventListener('input', updateSellPreview);
   }
   document.getElementById('sellItemName').textContent = itemName;
+  document.getElementById('sellPurchasePriceInfo').textContent = _sellCtx.purchasePrice ? '$'+_sellCtx.purchasePrice.toLocaleString() : '—';
   document.getElementById('sellGuaranteedInfo').textContent = '+'+_sellCtx.guaranteedPct+'%';
   document.getElementById('sellExpectedInfo').textContent = '+'+_sellCtx.expectedPct+'%';
   document.getElementById('sellGuaranteedBtn').textContent = '+'+_sellCtx.guaranteedPct+'%';
   document.getElementById('sellRealPct').value = '';
+  document.getElementById('sellRealPrice').value = '';
   document.getElementById('sellRealPreview').textContent = '';
+  sellSetMode('price'); // default to PRICE input
   overlay.classList.add('show');
+}
+
+function sellSetMode(m){
+  if(!_sellCtx) return;
+  _sellCtx.inputMode = m;
+  const priceInput = document.getElementById('sellRealPrice');
+  const pctInput   = document.getElementById('sellRealPct');
+  const btnPrice   = document.getElementById('sellModeBtnPrice');
+  const btnPct     = document.getElementById('sellModeBtnPct');
+  if(m === 'price'){
+    priceInput.style.display = '';
+    pctInput.style.display = 'none';
+    btnPrice.style.background = 'var(--gold)'; btnPrice.style.color = '#000';
+    btnPct.style.background = 'var(--bg2)';    btnPct.style.color = 'var(--t)';
+  } else {
+    priceInput.style.display = 'none';
+    pctInput.style.display = '';
+    btnPrice.style.background = 'var(--bg2)';  btnPrice.style.color = 'var(--t)';
+    btnPct.style.background = 'var(--gold)';   btnPct.style.color = '#000';
+  }
+  updateSellPreview();
 }
 
 function closeSellModal(){
@@ -2060,22 +2138,35 @@ function closeSellModal(){
 }
 
 function updateSellPreview(){
-  const v = parseFloat(document.getElementById('sellRealPct').value);
+  if(!_sellCtx) return;
   const preview = document.getElementById('sellRealPreview');
-  if(isNaN(v)){ preview.textContent=''; return; }
-  const g = _sellCtx ? _sellCtx.guaranteedPct : 0;
-  if(v < g){
-    preview.innerHTML = `<span style="color:var(--red)">⚠ Below guaranteed (${g}%). Holders will still get ${g}% due to protection.</span>`;
+  let pct;
+  if(_sellCtx.inputMode === 'price'){
+    const price = parseFloat(document.getElementById('sellRealPrice').value);
+    if(isNaN(price) || price <= 0){ preview.textContent=''; return; }
+    if(_sellCtx.purchasePrice <= 0){
+      preview.innerHTML = '<span style="color:var(--red)">⚠ Purchase price unknown — cannot compute %.</span>';
+      return;
+    }
+    pct = (price / _sellCtx.purchasePrice - 1) * 100;
+    preview.innerHTML = `<span style="color:var(--t2)">Sale = $${price.toLocaleString()} → <strong style="color:${pct >= _sellCtx.guaranteedPct ? 'var(--green)' : 'var(--orange)'}">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</strong> vs purchase</span>`;
   } else {
-    preview.innerHTML = `<span style="color:var(--green)">✓ Holders will receive ${v}%.</span>`;
+    pct = parseFloat(document.getElementById('sellRealPct').value);
+    if(isNaN(pct)){ preview.textContent=''; return; }
+  }
+  const g = _sellCtx.guaranteedPct;
+  if(pct < g){
+    preview.innerHTML += `<br><span style="color:var(--orange)">⚠ Below guaranteed (${g}%). Holders will still get ${g}% due to protection.</span>`;
+  } else {
+    preview.innerHTML += `<br><span style="color:var(--green)">✓ Holders will receive ${pct.toFixed(1)}%.</span>`;
   }
 }
 
 async function submitSell(mode, realPct){
   if(!_sellCtx) return;
   const itemName = _sellCtx.itemName;
-  if(!confirm('Mark "'+itemName+'" as sold?\n\nMode: '+mode.toUpperCase()+(mode==='profit'?'\nReal %: '+realPct:''))) return;
-  const body = {  mode: mode };
+  if(!confirm('Mark "'+itemName+'" as sold?\n\nMode: '+mode.toUpperCase()+(mode==='profit'?'\nReal %: '+realPct.toFixed(1):''))) return;
+  const body = { mode: mode };
   if(mode === 'profit') body.real_percent = realPct;
   const r = await post('/api/admin/items/'+_sellCtx.itemId+'/sell', body);
   if(!r || !r.ok){
@@ -2085,16 +2176,43 @@ async function submitSell(mode, realPct){
   }
   const paid = (r.total_paid_to_users||0).toFixed(2);
   const delta = (r.total_platform_cost||0).toFixed(2);
-  notify(`Sold! ${r.holders_count} holders paid $${paid} (platform delta $${delta})`);
+  notify(`✅ Sold! ${r.holders_count} holders paid $${paid} (platform delta $${delta})`);
+  closeSellModal();
+  loadItems();
+}
+
+async function submitSellByPrice(price){
+  if(!_sellCtx) return;
+  if(_sellCtx.purchasePrice <= 0){ alert('Purchase price for this item is unknown — cannot sell by price. Please use percent mode.'); return; }
+  const computedPct = (price / _sellCtx.purchasePrice - 1) * 100;
+  const itemName = _sellCtx.itemName;
+  if(!confirm('Mark "'+itemName+'" as sold?\n\nMode: PROFIT\nSale price: $'+price.toLocaleString()+'\nComputed %: '+(computedPct >= 0 ? '+' : '')+computedPct.toFixed(1)+'%')) return;
+  const body = { mode: 'profit', actual_price_usd: price };
+  const r = await post('/api/admin/items/'+_sellCtx.itemId+'/sell', body);
+  if(!r || !r.ok){
+    const err = (r && r.detail && r.detail.error) || (r && r.error) || 'unknown';
+    notify('Sell failed: '+err, 'error');
+    return;
+  }
+  const paid = (r.total_paid_to_users||0).toFixed(2);
+  const delta = (r.total_platform_cost||0).toFixed(2);
+  notify(`✅ Sold! ${r.holders_count} holders paid $${paid} (platform delta $${delta})`);
   closeSellModal();
   loadItems();
 }
 
 async function submitSellProfit(){
-  const v = parseFloat(document.getElementById('sellRealPct').value);
-  if(isNaN(v)){ alert('Please enter a number'); return; }
-  if(v < -100 || v > 1000){ alert('Value must be between -100 and 1000'); return; }
-  await submitSell('profit', v);
+  if(!_sellCtx) return;
+  if(_sellCtx.inputMode === 'price'){
+    const price = parseFloat(document.getElementById('sellRealPrice').value);
+    if(isNaN(price) || price <= 0){ alert('Please enter a valid sale price'); return; }
+    await submitSellByPrice(price);
+  } else {
+    const v = parseFloat(document.getElementById('sellRealPct').value);
+    if(isNaN(v)){ alert('Please enter a number'); return; }
+    if(v < -100 || v > 1000){ alert('Value must be between -100 and 1000'); return; }
+    await submitSell('profit', v);
+  }
 }
 
 
