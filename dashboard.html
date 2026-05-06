@@ -656,6 +656,23 @@ button{font-family:inherit}
 .f-soldout{padding:32px 18px;text-align:center;background:rgba(255,255,255,.03);border:1px dashed var(--bd);border-radius:18px;color:var(--t3);font-size:13px}
 .f-soldout h3{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red);letter-spacing:2px;margin-bottom:6px;font-weight:700}
 
+/* ─── Image carousel/gallery (для F-hero когда фото > 1) ─── */
+.gal-wrap{position:relative;width:100%;height:100%}
+.gal-wrap .gal-img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;transition:opacity .25s}
+.gal-wrap .gal-img.active{position:relative}
+.gal-nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:24px;font-weight:300;border-radius:50%;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .15s}
+.gal-nav:hover{background:rgba(0,0,0,.78)}
+.gal-prev{left:14px}
+.gal-next{right:14px}
+.gal-dots{position:absolute;bottom:64px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:5}
+.gal-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);border:none;cursor:pointer;padding:0;transition:all .15s}
+.gal-dot:hover{background:rgba(255,255,255,.7)}
+.gal-dot.active{background:#fff;width:24px;border-radius:4px}
+[data-theme="light"] .gal-nav{background:rgba(255,255,255,.85);color:#1a1a1a;border-color:rgba(0,0,0,.1)}
+[data-theme="light"] .gal-nav:hover{background:rgba(255,255,255,.95)}
+[data-theme="light"] .gal-dot{background:rgba(0,0,0,.35)}
+[data-theme="light"] .gal-dot.active{background:#1a1a1a}
+
 /* Tabs DETAILS / DESCRIPTION (inside a card) */
 .f-tabs{display:flex;background:rgba(255,255,255,.03);border-radius:12px;padding:4px;margin-bottom:14px;gap:2px}
 .f-tabs .tab{flex:1;padding:9px 12px;text-align:center;font-size:11px;color:var(--t2);letter-spacing:1.5px;font-weight:700;cursor:pointer;border-radius:8px;text-transform:uppercase;transition:all .2s;border:none;background:transparent}
@@ -671,13 +688,77 @@ button{font-family:inherit}
 .f-rows .row .v.green{color:var(--green)}
 .f-rows .descr{font-size:13px;line-height:1.65;color:var(--t2);padding:4px 4px 6px;font-family:Inter,sans-serif}
 
-/* Light-theme tweaks (re-color glass) */
-body.light-theme .f-card,
-.light-theme .f-card{background:rgba(255,255,255,.7);border-color:rgba(0,0,0,.08);box-shadow:0 8px 24px rgba(0,0,0,.06)}
-.light-theme .f-stat,.light-theme .f-progress,.light-theme .f-flow{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.05)}
-.light-theme .f-slider-track{background:rgba(0,0,0,.08)}
-.light-theme .f-slider-thumb{background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.08)}
-.light-theme .f-tabs{background:rgba(0,0,0,.04)}
+/* Light-theme tweaks for Variant F — обеспечиваем хороший контраст и читаемость */
+[data-theme="light"] .f-card,
+[data-theme="light"] .f-card{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.08);box-shadow:0 4px 18px rgba(0,0,0,.06)}
+[data-theme="light"] .f-card-h .t{color:var(--gold)}
+[data-theme="light"] .f-card-h .m{color:#888}
+
+/* Pills внутри AT A GLANCE — белый фон с лёгкой обводкой */
+[data-theme="light"] .f-stat{background:rgba(0,0,0,.02);border:1px solid rgba(0,0,0,.06)}
+[data-theme="light"] .f-stat .l{color:#888}
+[data-theme="light"] .f-stat .v{color:#1a1a1a}
+[data-theme="light"] .f-stat .v.gold{color:var(--gold)}
+[data-theme="light"] .f-stat .v.green{color:#2d8f3e}
+
+/* Slots progress */
+[data-theme="light"] .f-progress{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.06)}
+[data-theme="light"] .f-progress-h{color:#555}
+[data-theme="light"] .f-progress-h b{color:#1a1a1a}
+[data-theme="light"] .f-progress-h .g{color:#2d8f3e}
+[data-theme="light"] .f-progress-bar{background:rgba(0,0,0,.06)}
+
+/* Invest card — главная цифра + ползунок + flow */
+[data-theme="light"] .f-invest-label{color:var(--gold);opacity:.95}
+[data-theme="light"] .f-invest-amt{color:var(--gold);text-shadow:0 0 30px rgba(184,148,58,.18)}
+[data-theme="light"] .f-invest-sub{color:#777}
+[data-theme="light"] .f-slider-track{background:rgba(0,0,0,.08)}
+[data-theme="light"] .f-slider-fill{background:linear-gradient(90deg,var(--gold),var(--gold2));box-shadow:0 0 8px rgba(184,148,58,.35)}
+[data-theme="light"] .f-slider-thumb{background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 12px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.04)}
+[data-theme="light"] .f-slider-marks{color:#888}
+[data-theme="light"] .f-slider-manual{color:#666}
+[data-theme="light"] .f-slider-manual input{background:#fff;border-color:rgba(0,0,0,.12);color:#1a1a1a}
+[data-theme="light"] .f-slider-manual input:focus{border-color:var(--gold)}
+
+/* Flow under slider */
+[data-theme="light"] .f-flow{background:rgba(0,0,0,.02);border:1px solid rgba(184,148,58,.15)}
+[data-theme="light"] .f-flow .col .l{color:#888}
+[data-theme="light"] .f-flow .col.from .v{color:#1a1a1a}
+[data-theme="light"] .f-flow .col.to .v{color:var(--gold);text-shadow:0 0 12px rgba(184,148,58,.2)}
+[data-theme="light"] .f-flow .col.to .l{color:var(--gold)}
+[data-theme="light"] .f-flow .arr{color:var(--gold)}
+
+/* Fineprint */
+[data-theme="light"] .f-fineprint{color:#777}
+[data-theme="light"] .f-fineprint b{color:var(--gold)}
+[data-theme="light"] .f-fineprint .learn-more-link{color:#888}
+[data-theme="light"] .f-fineprint .learn-more-link:hover{color:var(--gold)}
+
+/* CTA button уже золотой — оставляем */
+
+/* Tabs */
+[data-theme="light"] .f-tabs{background:rgba(0,0,0,.04)}
+[data-theme="light"] .f-tabs .tab{color:#666}
+[data-theme="light"] .f-tabs .tab:hover{color:#1a1a1a}
+[data-theme="light"] .f-tabs .tab.active{background:rgba(184,148,58,.18);color:var(--gold);box-shadow:inset 0 0 0 1px rgba(184,148,58,.25)}
+
+/* Info rows */
+[data-theme="light"] .f-rows .row{border-bottom-color:rgba(0,0,0,.06)}
+[data-theme="light"] .f-rows .row .l{color:#888}
+[data-theme="light"] .f-rows .row .v{color:#1a1a1a}
+[data-theme="light"] .f-rows .row .v.gold{color:var(--gold)}
+[data-theme="light"] .f-rows .row .v.green{color:#2d8f3e}
+[data-theme="light"] .f-rows .descr{color:#555}
+
+/* Hero badges */
+[data-theme="light"] .f-hero-badge{background:rgba(255,255,255,.85);border-color:rgba(0,0,0,.08);color:var(--gold);backdrop-filter:blur(8px)}
+[data-theme="light"] .f-hero-fav{background:rgba(255,255,255,.85);border-color:rgba(0,0,0,.08);color:#1a1a1a}
+[data-theme="light"] .f-hero-fav.on{color:var(--gold);background:rgba(255,255,255,.92);border-color:rgba(184,148,58,.4)}
+/* Hero text всегда белый поверх изображения — оставляем как есть */
+
+/* Sold out card */
+[data-theme="light"] .f-soldout{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.1);color:#777}
+[data-theme="light"] .f-soldout h3{color:var(--red)}
 
 /* Responsive — desktop becomes single column on small screens */
 @media (max-width:980px){
@@ -4086,14 +4167,57 @@ async function withdrawFromPool(positionId){
 }
 
 /* ═══ MY ITEMS ═══ */
-function _itemThumbHTML(i){
-  if(i.image_url && typeof i.image_url === 'string' && i.image_url.trim()){
-    const safeName = (i.name || '').replace(/"/g, '&quot;');
-    const safeIco = (i.ico || '💎').replace(/'/g, "\\'");
-    return `<img src="${i.image_url}" alt="${safeName}" onerror="this.style.display='none';this.parentNode.insertAdjacentHTML('afterbegin','<span class=&quot;emoji&quot;>${safeIco}</span>')">`;
+function _itemThumbHTML(i, opts){
+  opts = opts || {};
+  // Если есть галерея image_urls — используем её, иначе fallback на image_url
+  const gallery = Array.isArray(i.image_urls) && i.image_urls.length > 0
+    ? i.image_urls.filter(u => u && typeof u === 'string' && u.trim())
+    : (i.image_url ? [i.image_url] : []);
+  const safeName = (i.name || '').replace(/"/g, '&quot;');
+  const safeIco = (i.ico || '💎').replace(/'/g, "\\'");
+  if(gallery.length === 0){
+    return `<span class="emoji">${i.ico || '💎'}</span>`;
   }
-  return `<span class="emoji">${i.ico || '💎'}</span>`;
+  // Если только одно фото или caller просит без карусели — простое изображение
+  if(gallery.length === 1 || opts.noCarousel){
+    return `<img src="${gallery[0]}" alt="${safeName}" onerror="this.style.display='none';this.parentNode.insertAdjacentHTML('afterbegin','<span class=&quot;emoji&quot;>${safeIco}</span>')">`;
+  }
+  // Карусель: показываем все фото, переключение клавишами/тапом
+  const cid = `gal_${i.id}_${Math.random().toString(36).slice(2, 8)}`;
+  const imgs = gallery.map((url, idx) => `<img src="${url}" alt="${safeName} #${idx+1}" data-idx="${idx}" class="gal-img${idx===0?' active':''}" style="${idx===0?'':'display:none'}" onerror="this.style.display='none'">`).join('');
+  const dots = gallery.map((_, idx) => `<button type="button" class="gal-dot${idx===0?' active':''}" data-idx="${idx}" onclick="event.stopPropagation();_galGo('${cid}', ${idx})"></button>`).join('');
+  return `
+    <div class="gal-wrap" id="${cid}" data-count="${gallery.length}">
+      ${imgs}
+      <button type="button" class="gal-nav gal-prev" onclick="event.stopPropagation();_galStep('${cid}', -1)" aria-label="Previous">‹</button>
+      <button type="button" class="gal-nav gal-next" onclick="event.stopPropagation();_galStep('${cid}', 1)" aria-label="Next">›</button>
+      <div class="gal-dots">${dots}</div>
+    </div>
+  `;
 }
+
+// Carousel navigation helpers — global so onclick can reach them
+window._galGo = function(wrapId, idx){
+  const w = document.getElementById(wrapId);
+  if(!w) return;
+  const imgs = w.querySelectorAll('.gal-img');
+  const dots = w.querySelectorAll('.gal-dot');
+  const count = imgs.length;
+  if(count === 0) return;
+  const safe = ((idx % count) + count) % count;
+  imgs.forEach((im, i) => {
+    if(i === safe){ im.style.display = ''; im.classList.add('active'); }
+    else { im.style.display = 'none'; im.classList.remove('active'); }
+  });
+  dots.forEach((d, i) => d.classList.toggle('active', i === safe));
+  w.dataset.cur = safe;
+};
+window._galStep = function(wrapId, dir){
+  const w = document.getElementById(wrapId);
+  if(!w) return;
+  const cur = parseInt(w.dataset.cur || '0', 10);
+  window._galGo(wrapId, cur + dir);
+};
 
 function renderMyItems(){
   // Update count badges
@@ -4290,10 +4414,10 @@ function renderFavs(){
       const closed = archived ? '<div class="closed-badge">CLOSED</div>' : '';
       const isMobile = id === 'mFavsList';
       // For favorites we use the marketplace card style without BUY button
-      const retTxt = (i.ret && i.ret[1]) ? '+' + i.ret[0] + '–' + i.ret[1] + '%' : '';
+      const retTxt = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : (i.ret && i.ret[0] ? '+' + i.ret[0] + '%' : '');
       if(isMobile){
         return `<div class="vc-m-card${archCls}" ${onclick} style="position:relative">
-          <div class="pic">${_itemThumbHTML(i)}${closed}${retTxt?`<div class="ret">${retTxt}</div>`:''}</div>
+          <div class="pic">${_itemThumbHTML(i,{noCarousel:true})}${closed}${retTxt?`<div class="ret">${retTxt}</div>`:''}</div>
           <div class="body">
             <div class="cat">${i.cat || ''}</div>
             <div class="name">${i.name}</div>
@@ -4302,7 +4426,7 @@ function renderFavs(){
         </div>`;
       } else {
         return `<div class="dmp-card${archCls}" ${onclick} style="position:relative">
-          <div class="img">${_itemThumbHTML(i)}${closed}${retTxt?`<div class="ret">${retTxt}</div>`:''}</div>
+          <div class="img">${_itemThumbHTML(i,{noCarousel:true})}${closed}${retTxt?`<div class="ret">${retTxt}</div>`:''}</div>
           <div class="body">
             <div class="cat">${i.cat || ''}</div>
             <div class="name">${i.name}</div>
@@ -4422,7 +4546,7 @@ function renderMarketplace(cat){
         <p style="font-size:12px">${isEmpty ? 'Check back soon — new items added regularly.' : 'Try a different category.'}</p></div>`;
     } else {
       dGrid.innerHTML = items.map(i => {
-        const ret = (i.ret && i.ret[1]) ? '+' + i.ret[0] + '–' + i.ret[1] + '%' : '';
+        const ret = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : (i.ret && i.ret[0] ? '+' + i.ret[0] + '%' : '');
         const slotsTotal = i.slots_total || 20;
         const slotsSold = i.slots_sold || 0;
         const isFav = _favIncludes(i.id);
@@ -4432,7 +4556,7 @@ function renderMarketplace(cat){
         // Compact return only %max — для зелёной плашки
         const retShort = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : '';
         return `<div class="dmp-card" data-mk-id="${i.id}" onclick="openItemDetail(${i.id})">
-          <div class="img">${_itemThumbHTML(i)}
+          <div class="img">${_itemThumbHTML(i,{noCarousel:true})}
             ${_countdownBadge(i)}
             <div class="fav ${isFav?'on':''}" onclick="event.stopPropagation();toggleFav(${i.id},this)">${isFav?'♥':'♡'}</div>
             ${retShort?`<div class="ret" style="background:rgba(39,174,96,.92);color:#fff">${retShort}</div>`:''}
@@ -4461,7 +4585,7 @@ function renderMarketplace(cat){
       mGrid.innerHTML = `<div class="vc-m-empty"><svg class="lx"><use href="#i-market"/></svg><h3 style="font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;margin-bottom:6px">${(!ITEMS||!ITEMS.length)?'NO ITEMS':'NO MATCHES'}</h3><p style="font-size:11px">Check back soon.</p></div>`;
     } else {
       mGrid.innerHTML = items.map(i => {
-        const ret = (i.ret && i.ret[1]) ? '+' + i.ret[0] + '–' + i.ret[1] + '%' : '';
+        const ret = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : (i.ret && i.ret[0] ? '+' + i.ret[0] + '%' : '');
         const slotsTotal = i.slots_total || 20;
         const slotsSold = i.slots_sold || 0;
         const isFav = _favIncludes(i.id);
@@ -4469,7 +4593,7 @@ function renderMarketplace(cat){
         const subLine = (i.brand && i.brand.trim()) ? i.name : '';
         const retShort = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : '';
         return `<div class="vc-m-card" data-mk-id="${i.id}" onclick="openItemDetail(${i.id})">
-          <div class="pic">${_itemThumbHTML(i)}
+          <div class="pic">${_itemThumbHTML(i,{noCarousel:true})}
             ${_countdownBadge(i)}
             <div class="fav ${isFav?'on':''}" onclick="event.stopPropagation();toggleFav(${i.id},this)">${isFav?'♥':'♡'}</div>
             ${retShort?`<div class="ret" style="background:rgba(39,174,96,.92);color:#fff">${retShort}</div>`:''}
@@ -4545,7 +4669,7 @@ function openItemDetail(id){
   const slotsSold = slotsTotal - slotsAvail;
   const pricePerSlot = i.price_per_slot || (i.price / slotsTotal);
   const canBuy = slotsAvail > 0;
-  const ret = (i.ret && i.ret[1]) ? '+' + i.ret[0] + '–' + i.ret[1] + '%' : '';
+  const ret = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : (i.ret && i.ret[0] ? '+' + i.ret[0] + '%' : '');
   const phLen = (i.price_history || []).length;
 
   // Period in days display
@@ -4579,7 +4703,7 @@ function openItemDetail(id){
             <div class="f-stat"><div class="l">Item price</div><div class="v">$${i.price.toLocaleString()}</div></div>
             <div class="f-stat"><div class="l">Per slot</div><div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
             <div class="f-stat"><div class="l">Sale period</div><div class="v">${periodTxt}</div></div>
-            <div class="f-stat"><div class="l">Expected</div><div class="v green">+${i.ret[0]}–${i.ret[1]||i.ret[0]}%</div></div>
+            <div class="f-stat"><div class="l">Expected</div><div class="v green">+${i.ret[1]||i.ret[0]}%</div></div>
           </div>
           <div class="f-progress">
             <div class="f-progress-h"><span><b>${slotsSold}</b> of ${slotsTotal} sold</span><span class="g">${slotsAvail} left</span></div>
@@ -4642,7 +4766,7 @@ function openItemDetail(id){
             <div class="row"><span class="l">Price per slot</span><span class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
             <div class="row"><span class="l">Slots sold</span><span class="v">${slotsSold} of ${slotsTotal}</span></div>
             <div class="row"><span class="l">Slots available</span><span class="v ${slotsAvail>0?'green':''}">${slotsAvail}</span></div>
-            <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[0]}% — +${i.ret[1]}%</span></div>
+            <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[1]||i.ret[0]}%</span></div>
             <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${i.ret[0]}%</span></div>
             <div class="row"><span class="l">Sale period</span><span class="v">${periodTxt}</span></div>
             <div class="row"><span class="l">Category</span><span class="v">${(i.cat||'').toUpperCase()}</span></div>
@@ -4686,7 +4810,7 @@ function openItemDetail(id){
               <div class="f-stat"><div class="l">Item price</div><div class="v">$${i.price.toLocaleString()}</div></div>
               <div class="f-stat"><div class="l">Per slot</div><div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
               <div class="f-stat"><div class="l">Sale period</div><div class="v">${periodTxt}</div></div>
-              <div class="f-stat"><div class="l">Expected</div><div class="v green">+${i.ret[0]}–${i.ret[1]||i.ret[0]}%</div></div>
+              <div class="f-stat"><div class="l">Expected</div><div class="v green">+${i.ret[1]||i.ret[0]}%</div></div>
             </div>
             <div class="f-progress">
               <div class="f-progress-h"><span><b>${slotsSold}</b> of ${slotsTotal} sold</span><span class="g">${slotsAvail} left</span></div>
@@ -4749,7 +4873,7 @@ function openItemDetail(id){
               <div class="row"><span class="l">Price per slot</span><span class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
               <div class="row"><span class="l">Slots sold</span><span class="v">${slotsSold} of ${slotsTotal}</span></div>
               <div class="row"><span class="l">Slots available</span><span class="v ${slotsAvail>0?'green':''}">${slotsAvail}</span></div>
-              <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[0]}% — +${i.ret[1]}%</span></div>
+              <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[1]||i.ret[0]}%</span></div>
               <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${i.ret[0]}%</span></div>
               <div class="row"><span class="l">Sale period</span><span class="v">${periodTxt}</span></div>
               <div class="row"><span class="l">Category</span><span class="v">${(i.cat||'').toUpperCase()}</span></div>
@@ -4890,7 +5014,7 @@ function switchIdTab(tab, mode){
       <div class="row"><span class="l">Price per slot</span><span class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
       <div class="row"><span class="l">Slots</span><span class="v">${slotsSold} of ${slotsTotal} sold</span></div>
       <div class="row"><span class="l">Slots available</span><span class="v ${slotsAvail>0?'green':''}">${slotsAvail}</span></div>
-      <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[0]}% — +${i.ret[1]}%</span></div>
+      <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[1]||i.ret[0]}%</span></div>
       <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${i.ret[0]}%</span></div>
       <div class="row"><span class="l">Sale period</span><span class="v">${periodTxt}</span></div>
       <div class="row"><span class="l">Category</span><span class="v">${(i.cat||'').toUpperCase()}</span></div>
@@ -5011,7 +5135,7 @@ async function buyFraction(id){
     await loadMyItems();
     try{ await loadMarketplaceItems(); }catch(e){}
     updateUI(); showConfetti(); saveState();
-    showToast('success', 'Purchase complete!', 'You now own <b>' + slotsN + ' slot' + (slotsN>1?'s':'') + '</b> of <b>' + i.name + '</b>. Expected profit: <b>+' + i.ret[0] + '–' + i.ret[1] + '%</b>', 5000);
+    showToast('success', 'Purchase complete!', 'You now own <b>' + slotsN + ' slot' + (slotsN>1?'s':'') + '</b> of <b>' + i.name + '</b>. Expected profit: <b>+' + (i.ret[1]||i.ret[0]) + '%</b>', 5000);
   }catch(e){
     document.getElementById('_buyLoader')?.remove();
     showToast('error', 'Network error', 'Please check your connection and try again.');
@@ -10459,840 +10583,4 @@ function _pcUpdate(months){
   if(itemsCard) itemsCard.style.display = portfolio.items.length > 0 ? '' : 'none';
   if(itemList){
     itemList.innerHTML = portfolio.items.map(i => {
-      // Прибыль вещи: invested * (retPct/100), масштабированная пропорционально месяцам
-      // Если daysTotal=90 (~3мес), full retPct применяется при months>=3
-      const monthsForFull = Math.max(1, (i.days / 30));
-      const k = Math.min(1, months / monthsForFull); // 0..1 — сколько от полного срока пройдёт
-      const profit = i.invested * (i.retPct / 100) * k;
-      totalInvested += i.invested;
-      totalProfit += profit;
-      const subtitle = i.count > 1
-        ? `${fmt(i.invested)} across ${i.count} purchases · ${i.retPct.toFixed(1)}% over ${i.days}d`
-        : `${fmt(i.invested)} invested · ${i.retPct.toFixed(1)}% expected over ${i.days}d`;
-      const ic = i.image_url
-        ? `<img src="${i.image_url}" style="width:36px;height:36px;border-radius:8px;object-fit:cover" alt="">`
-        : `<div class="pc-pool-ic" style="border-radius:8px">◈</div>`;
-      return `
-        <div class="pc-pool-row">
-          ${ic}
-          <div class="pc-pool-info">
-            <div class="n">${i.name}</div>
-            <div class="d">${subtitle}</div>
-          </div>
-          <div class="pc-pool-amt">
-            <div class="a">+${fmt(profit)}</div>
-            <div class="e">over ${monthsTxt}</div>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  setText('pcInvested', fmt(totalInvested));
-  setText('pcProfit', '+' + fmt(totalProfit));
-  setText('pcEndBal', fmt(totalInvested + totalProfit));
-}
-
-console.log('[stage8] Profit Calculator (simple) loaded');
-
-/* ═══════════════════════════════════════════════════════════
-   STAGE 9: CURRENCY SWITCHER (USD / EUR / GBP)
-   - Stores user preference in localStorage
-   - Fetches rates from Binance public API (no auth needed)
-   - Caches rates 5 min, fallback to hardcoded approx if API down
-   - Provides global fmtMoney() that all UI code can use
-═══════════════════════════════════════════════════════════ */
-
-const FX_FALLBACK = { USD: 1.0, EUR: 0.92, GBP: 0.79 };
-const FX_SYMBOL   = { USD: '$',  EUR: '€',  GBP: '£' };
-const FX_CACHE_KEY = 'luxor_fx_cache';
-const FX_PREF_KEY  = 'luxor_currency';
-const FX_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-
-window._fxRates = { USD: 1.0, EUR: 0.92, GBP: 0.79 };
-window._fxLoaded = false;
-
-function getDisplayCurrency(){
-  // Priority: explicit user setting > U.preferred_currency > USD
-  let c = null;
-  try{ c = localStorage.getItem(FX_PREF_KEY); }catch(e){}
-  if(c && FX_FALLBACK[c]) return c;
-  if(typeof U !== 'undefined' && U.preferred_currency && FX_FALLBACK[U.preferred_currency]){
-    return U.preferred_currency;
-  }
-  return 'USD';
-}
-
-function setDisplayCurrency(code){
-  if(!FX_FALLBACK[code]){ console.warn('Unknown currency', code); return; }
-  try{ localStorage.setItem(FX_PREF_KEY, code); }catch(e){}
-  if(typeof U !== 'undefined') U.preferred_currency = code;
-
-  // Sync the dropdowns
-  ['setCurrency', 'mSetCurrency'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el && el.value !== code) el.value = code;
-  });
-
-  // Also send to backend
-  try{ updateSettingField('display_currency', code); }catch(e){}
-
-  // Reload rates and rerender everything
-  _fxLoadRates().then(() => {
-    _fxApplyToUI();
-    try{ showToast('success', 'Currency updated', 'All amounts now in <b>' + code + '</b>.'); }catch(e){}
-  });
-}
-
-async function _fxLoadRates(force){
-  // Try cache first
-  if(!force){
-    try{
-      const raw = localStorage.getItem(FX_CACHE_KEY);
-      if(raw){
-        const cached = JSON.parse(raw);
-        if(cached && cached.ts && (Date.now() - cached.ts) < FX_CACHE_TTL_MS && cached.rates){
-          window._fxRates = cached.rates;
-          window._fxLoaded = true;
-          return cached.rates;
-        }
-      }
-    }catch(e){}
-  }
-
-  // Fetch from Binance — public API, USD-pegged via USDT
-  // Note: Binance returns USDT/EUR price, so 1 USD ~= 1 USDT, rate is "EUR per USD"
-  try{
-    const [eurRes, gbpRes] = await Promise.all([
-      fetch('https://api.binance.com/api/v3/ticker/price?symbol=EURUSDT').then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('https://api.binance.com/api/v3/ticker/price?symbol=GBPUSDT').then(r => r.ok ? r.json() : null).catch(() => null),
-    ]);
-    // EURUSDT means: 1 EUR = X USDT. So USD->EUR = 1/X
-    let eurPrice = eurRes && parseFloat(eurRes.price);
-    let gbpPrice = gbpRes && parseFloat(gbpRes.price);
-
-    const rates = {
-      USD: 1.0,
-      EUR: (eurPrice && eurPrice > 0) ? (1 / eurPrice) : FX_FALLBACK.EUR,
-      GBP: (gbpPrice && gbpPrice > 0) ? (1 / gbpPrice) : FX_FALLBACK.GBP,
-    };
-    window._fxRates = rates;
-    window._fxLoaded = true;
-    try{ localStorage.setItem(FX_CACHE_KEY, JSON.stringify({ ts: Date.now(), rates })); }catch(e){}
-    return rates;
-  }catch(e){
-    console.warn('FX rates fetch failed, using fallback', e);
-    window._fxRates = { ...FX_FALLBACK };
-    window._fxLoaded = true;
-    return window._fxRates;
-  }
-}
-
-/**
- * Format money amount.
- * @param {number} usdAmount — amount in USD (canonical storage)
- * @param {object} opts — { decimals?: 0, sign?: false, currency?: 'USD' }
- * @returns {string} — e.g. "£1,234" or "+€123.45"
- */
-function fmtMoney(usdAmount, opts){
-  opts = opts || {};
-  const code = opts.currency || getDisplayCurrency();
-  const rate = (window._fxRates && window._fxRates[code]) || FX_FALLBACK[code] || 1;
-  const sym = FX_SYMBOL[code] || '$';
-  const decimals = opts.decimals !== undefined ? opts.decimals : 0;
-
-  const amount = (Number(usdAmount) || 0) * rate;
-  const sign = (opts.sign && amount > 0) ? '+' : (amount < 0 ? '-' : '');
-  const abs = Math.abs(amount);
-  const formatted = decimals > 0
-    ? abs.toLocaleString(undefined, {minimumFractionDigits: decimals, maximumFractionDigits: decimals})
-    : Math.round(abs).toLocaleString();
-  return sign + sym + formatted;
-}
-
-// ─── Smooth balance animation (count-up with easing) ───────────────────────
-// Анимирует число в DOM-элементе от текущего значения до target
-// используя ease-out cubic для плавного "приземления"
-// Если установлено data-skip-anim или элемент не виден — присваивает мгновенно
-window._balanceAnimRafs = window._balanceAnimRafs || new WeakMap();
-
-function animateBalanceTo(el, targetUsd, opts){
-  if(!el) return;
-  opts = opts || {};
-  const formatter = opts.formatter || (typeof fmtMoney === 'function'
-    ? (v) => fmtMoney(v, opts.fmtOpts || {})
-    : (v) => '$' + Math.round(v).toLocaleString());
-  const duration = opts.duration !== undefined ? opts.duration : 900;  // ms
-  const targetVal = Number(targetUsd) || 0;
-
-  // Cancel previous animation на этом элементе
-  const prevRaf = window._balanceAnimRafs.get(el);
-  if(prevRaf){
-    cancelAnimationFrame(prevRaf);
-    window._balanceAnimRafs.delete(el);
-  }
-
-  // Парсим текущее значение из textContent
-  // Ищем число (с поддержкой - и .) внутри текста
-  const cur = el.textContent || '';
-  let startVal = 0;
-  // Сначала ищем _animBaseVal (если был ранее установлен), потом парсим
-  if(el.dataset && el.dataset.animBaseVal !== undefined){
-    startVal = parseFloat(el.dataset.animBaseVal) || 0;
-  } else {
-    const m = cur.replace(/,/g, '').match(/-?\d+(?:\.\d+)?/);
-    if(m) startVal = parseFloat(m[0]) || 0;
-  }
-
-  // Если значения совпадают — ничего не делаем
-  if(Math.abs(startVal - targetVal) < 0.005){
-    el.textContent = formatter(targetVal);
-    el.dataset.animBaseVal = String(targetVal);
-    return;
-  }
-
-  // Если duration <= 0 или элемент скрыт — мгновенно
-  const skip = (duration <= 0)
-    || (el.dataset && el.dataset.skipAnim === '1')
-    || (el.offsetParent === null && !el.closest('.show'));   // не в DOM/невидимый
-  if(skip){
-    el.textContent = formatter(targetVal);
-    el.dataset.animBaseVal = String(targetVal);
-    return;
-  }
-
-  const startT = performance.now();
-  const ease = (t) => 1 - Math.pow(1 - t, 3);   // easeOutCubic
-
-  const step = (now) => {
-    const elapsed = now - startT;
-    const t = Math.min(1, elapsed / duration);
-    const eased = ease(t);
-    const cur = startVal + (targetVal - startVal) * eased;
-    el.textContent = formatter(cur);
-    if(t < 1){
-      const raf = requestAnimationFrame(step);
-      window._balanceAnimRafs.set(el, raf);
-    } else {
-      el.textContent = formatter(targetVal);
-      el.dataset.animBaseVal = String(targetVal);
-      window._balanceAnimRafs.delete(el);
-    }
-  };
-  const raf = requestAnimationFrame(step);
-  window._balanceAnimRafs.set(el, raf);
-}
-
-// Helper: animate by ID (короткая запись)
-function animateById(id, targetUsd, opts){
-  const el = document.getElementById(id);
-  if(el) animateBalanceTo(el, targetUsd, opts);
-}
-
-// Expose globally (для Playwright тестов и для manual debugging в консоли)
-window.animateBalanceTo = animateBalanceTo;
-window.animateById = animateById;
-
-/**
- * Convert input by user (in display currency) to USD for backend.
- * E.g. user typed 5000 GBP → returns ~6322 USD.
- */
-function toUSD(amountInDisplayCurrency){
-  const code = getDisplayCurrency();
-  const rate = (window._fxRates && window._fxRates[code]) || FX_FALLBACK[code] || 1;
-  return (Number(amountInDisplayCurrency) || 0) / rate;
-}
-
-/**
- * Re-render parts of UI that show money. Lightweight — only updates
- * elements with [data-money-usd] attribute. For the rest, the next
- * updateUI() call will use fmtMoney().
- */
-function _fxApplyToUI(){
-  // Update standard balance/labels
-  try{ updateUI(); }catch(e){}
-  try{ _luxorUpdateBalanceSplit(); }catch(e){}
-  try{ renderTxs(); }catch(e){}
-
-  // Generic [data-money-usd] elements
-  document.querySelectorAll('[data-money-usd]').forEach(el => {
-    const usd = parseFloat(el.getAttribute('data-money-usd'));
-    if(isFinite(usd)){
-      const decimals = parseInt(el.getAttribute('data-money-decimals') || '0');
-      const sign = el.getAttribute('data-money-sign') === 'true';
-      el.textContent = fmtMoney(usd, { decimals, sign });
-    }
-  });
-
-  // Re-render dashboard widgets
-  try{ if(typeof drawGraph === 'function') drawGraph(); }catch(e){}
-}
-
-// Initial load — pull rates, set dropdown to user's preference
-async function _fxInit(){
-  await _fxLoadRates();
-  const cur = getDisplayCurrency();
-  ['setCurrency', 'mSetCurrency'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.value = cur;
-  });
-  // First apply so any currency-aware widget rendered before init catches up
-  _fxApplyToUI();
-}
-
-// Run on load + refresh every 5 min
-setTimeout(() => { try{ _fxInit(); }catch(e){ console.warn('FX init failed', e); } }, 1000);
-setInterval(() => { try{ _fxLoadRates(true).then(_fxApplyToUI); }catch(e){} }, FX_CACHE_TTL_MS);
-
-console.log('[stage9] Currency switcher (USD/EUR/GBP) loaded');
-
-// ═══════════════════════════════════════════════════════════════════════
-// [stage10] BONUSES + REFERRAL TIER (Etap 8)
-// ═══════════════════════════════════════════════════════════════════════
-
-// ─── Update bonus UI (called after balance reload) ────────────────────
-function updateBonusUI(){
-  const locked = Number(state.lockedBalance) || 0;
-  const showBanner = locked > 0;
-
-  // Dashboard banners
-  const dBanner = document.getElementById('dLockedBanner');
-  const mBanner = document.getElementById('mLockedBanner');
-  if(dBanner) dBanner.style.display = showBanner ? 'flex' : 'none';
-  if(mBanner) mBanner.style.display = showBanner ? 'block' : 'none';
-
-  // Animate locked amount
-  if(typeof animateById === 'function'){
-    animateById('dLockedAmt', locked);
-    animateById('mLockedAmt', locked);
-  }
-
-  // Sidebar badge
-  const dBadge = document.getElementById('dBonusBadge');
-  const mBadgeMore = document.getElementById('mBonusBadgeMore');
-  if(dBadge) dBadge.style.display = showBanner ? '' : 'none';
-  if(mBadgeMore) mBadgeMore.style.display = showBanner ? '' : 'none';
-
-  // Bonuses page locked card
-  const dBonCard = document.getElementById('dBonusLockedCard');
-  const mBonCard = document.getElementById('mBonusLockedCard');
-  if(dBonCard) dBonCard.style.display = showBanner ? 'block' : 'none';
-  if(mBonCard) mBonCard.style.display = showBanner ? 'block' : 'none';
-  if(typeof animateById === 'function'){
-    animateById('dBonusLockedAmount', locked);
-    animateById('mBonusLockedAmount', locked);
-  }
-
-  // Render unlock progress on Bonuses page
-  renderUnlockProgress();
-}
-
-function renderUnlockProgress(){
-  const prog = state.unlockProgress;
-  const html = (function buildHTML(){
-    if(!prog || !state.lockedBalance){
-      return '<div style="color:var(--t3);text-align:center;padding:14px">Conditions data unavailable</div>';
-    }
-    const t1 = prog.trigger_1 || {};
-    const t2 = prog.trigger_2 || {};
-    function checkbox(done){
-      return done
-        ? '<span style="color:var(--green);font-size:16px;margin-right:6px">✓</span>'
-        : '<span style="color:var(--t3);font-size:16px;margin-right:6px">○</span>';
-    }
-    const depDone = !!t1.deposit_ok;
-    const invDone = !!t1.invest_ok;
-    const refsDone = (t2.qualified_referrals || 0) >= (t2.required_referrals || 3);
-    const t1Done = !!t1.completed;
-    const t2Done = !!t2.completed;
-    const trigger1Done = depDone && invDone;
-    const t1bg = trigger1Done ? 'rgba(39,174,96,.08)' : 'rgba(255,255,255,.02)';
-    const t2bg = t2Done ? 'rgba(39,174,96,.08)' : 'rgba(255,255,255,.02)';
-    
-    // ETAP 9: показываем "осталось Xh Ym" таймер если qualifying_investment_at установлен но 24h ещё нет
-    let timerHtml = '';
-    if(t1.invest_hours_held > 0 && !invDone){
-      const remaining = (t1.invest_hours_required || 24) - t1.invest_hours_held;
-      const hours = Math.floor(remaining);
-      const mins = Math.floor((remaining - hours) * 60);
-      timerHtml = `<div style="margin-top:8px;padding:8px 12px;background:rgba(241,196,15,.08);border-radius:6px;font-size:11px;color:#f1c40f"><strong>⏱ Осталось: ${hours}h ${mins}m</strong> до разблокировки по Path 1</div>`;
-    }
-    
-    // CLAIM BUTTON: если any path completed → большая зелёная кнопка
-    const canClaim = (trigger1Done || t2Done);
-    const claimButton = canClaim ? `
-      <button onclick="claimLockedBonus()" style="margin-top:14px;width:100%;padding:14px;background:linear-gradient(135deg,var(--green),#1e8449);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;letter-spacing:1.5px;cursor:pointer;box-shadow:0 6px 16px rgba(39,174,96,.3);animation:pulse 1.5s infinite">
-        🎉 ЗАБРАТЬ $${(state.lockedBalance||0).toFixed(2)} БОНУС
-      </button>
-      <style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}</style>
-    ` : '';
-    
-    return `
-      <div style="display:grid;gap:10px">
-        <div style="padding:12px;border-radius:8px;background:${t1bg};border:1px solid var(--bd)">
-          <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:${trigger1Done?'var(--green)':'var(--t)'}">Path 1: Deposit + Investment</div>
-          <div style="font-size:12px;color:var(--t2);line-height:1.7">
-            <div>${checkbox(depDone)}Deposit ≥ <strong>$${(t1.deposit_required||50).toFixed(0)}</strong> <span style="color:var(--t3)">(current: $${(t1.deposit_current||0).toFixed(0)})</span></div>
-            <div>${checkbox(invDone)}Hold investment ≥ $50 for <strong>${t1.invest_hours_required||24}h</strong> <span style="color:var(--t3)">(${(t1.invest_hours_held||0).toFixed(1)}h held)</span></div>
-          </div>
-          ${timerHtml}
-        </div>
-        <div style="text-align:center;color:var(--t3);font-size:11px;font-weight:700;letter-spacing:2px">— OR —</div>
-        <div style="padding:12px;border-radius:8px;background:${t2bg};border:1px solid var(--bd)">
-          <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:${t2Done?'var(--green)':'var(--t)'}">Path 2: 3 Qualified Referrals</div>
-          <div style="font-size:12px;color:var(--t2);line-height:1.7">
-            <div>${checkbox(refsDone)}Invite <strong>${t2.required_referrals||3}</strong> qualified friends <span style="color:var(--t3)">(${t2.qualified_referrals||0}/${t2.required_referrals||3})</span></div>
-            <div>${checkbox(invDone)}Plus your own investment held ≥ <strong>${t1.invest_hours_required||24}h</strong></div>
-          </div>
-          ${!refsDone ? `<button onclick="navTo('referral')" style="margin-top:8px;padding:7px 12px;background:var(--purple);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">→ INVITE FRIENDS</button>` : ''}
-        </div>
-        ${claimButton}
-      </div>
-    `;
-  })();
-  ['dBonusUnlockProgress','mBonusUnlockProgress'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.innerHTML = html;
-  });
-}
-
-// === ETAP 9: Claim button handler — manual unlock ====================
-async function claimLockedBonus(){
-  try {
-    const r = await apiFetch('/api/bonuses/claim', {method:'POST'});
-    const data = await r.json().catch(() => ({}));
-    if(r.ok && data.ok){
-      if(data.unlocked){
-        try { showToast('🎉 Bonus claimed: $' + (data.amount_usd || 0).toFixed(2), 'success'); } catch(e){}
-        // Анимация: показываем вспышку, потом перезагружаем баланс
-        try { loadBalanceFromBackend(); } catch(e){}
-        // Скрываем locked плашку через 500мс
-        setTimeout(() => {
-          ['dLockedBanner','mLockedBanner','dBonusLockedCard','mBonusLockedCard'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.style.display = 'none';
-          });
-        }, 500);
-      } else {
-        try { showToast('Conditions not met yet — keep investing!', 'warn'); } catch(e){}
-      }
-    } else {
-      const err = (data.detail && data.detail.error) || data.error || 'unknown';
-      try { showToast('Claim failed: ' + err, 'error'); } catch(e){}
-    }
-  } catch(e){
-    console.error('claimLockedBonus failed:', e);
-  }
-}
-window.claimLockedBonus = claimLockedBonus;
-
-function showLockedDetailsModal(){
-  // Простая навигация в Bonuses (там видны условия)
-  navTo('bonus');
-}
-
-// ─── Coupon redeem ──────────────────────────────────────────────────
-async function bonusRedeemCoupon(prefix){
-  const inputId = (prefix === 'm' ? 'mBonusCouponInput' : 'dBonusCouponInput');
-  const msgId = (prefix === 'm' ? 'mBonusCouponMsg' : 'dBonusCouponMsg');
-  const code = (document.getElementById(inputId).value || '').trim().toUpperCase();
-  const msg = document.getElementById(msgId);
-  if(!code){
-    if(msg){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Please enter a code'; }
-    return;
-  }
-  try {
-    const r = await apiFetch('/api/coupons/redeem', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({code: code})
-    });
-    const data = await r.json().catch(() => ({}));
-    if(r.ok && data.ok){
-      if(msg){
-        msg.style.display='block';
-        msg.style.color='var(--green)';
-        msg.innerHTML = `✓ <strong>$${(data.amount_usd||0).toFixed(2)}</strong> added to locked balance${data.auto_unlocked?' and AUTO-UNLOCKED!':''}`;
-      }
-      try { showToast('Coupon redeemed: +$' + (data.amount_usd||0).toFixed(2), 'success'); } catch(e) {}
-      document.getElementById(inputId).value = '';
-      // Reload balance to show new locked + unlocked status
-      setTimeout(() => { try{ window.location.reload === undefined ? null : null; loadBalanceFromBackend(); }catch(e){} }, 600);
-      try { loadBalanceFromBackend(); } catch(e){}
-    } else {
-      const err = (data.detail && data.detail.error) || data.error || 'unknown';
-      const errMsgs = {
-        'coupon_already_used': 'You have already redeemed a coupon. Limit: 1 per account.',
-        'code_not_found': 'Invalid code. Please check and try again.',
-        'code_already_redeemed': 'This code has already been used.',
-        'code_expired': 'This code has expired.',
-        'invalid_code': 'Code format is invalid.',
-        'banned': 'Account is restricted.',
-      };
-      if(msg){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent = errMsgs[err] || ('Error: ' + err); }
-    }
-  } catch(e) {
-    if(msg){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Network error. Try again.'; }
-    console.error('redeem failed:', e);
-  }
-}
-
-// ─── Refresh loadBalanceFromBackend wrapper ─────────────────────────
-async function loadBalanceFromBackend(){
-  // Re-run the IIFE that was loaded at startup — fetch user data
-  try {
-    const userLogin = sessionStorage.getItem('luxor_login') || U.login;
-    if(!userLogin) return;
-    const r = await apiFetch('/api/user/' + encodeURIComponent(userLogin));
-    if(!r.ok) return;
-    const data = await r.json().catch(() => ({}));
-    if(data.ok && data.user){
-      state.wallet = Number(data.user.wallet_balance) || 0;
-      state.lockedBalance = Number(data.user.locked_balance) || 0;
-      state.lockedUnlockedAt = data.user.locked_unlocked_at || null;
-      state.referralBalance = Number(data.user.referral_balance) || 0;
-      state.refTier = (data.user.ref_tier || 'bronze').toLowerCase();
-      state.refTotalLifetime = Number(data.user.ref_total_earned_lifetime) || 0;
-      state.unlockProgress = data.user.unlock_progress || null;
-      state.couponRedeemedId = data.user.coupon_redeemed_id || null;
-      try{ updateUI(); }catch(e){}
-      try{ updateBonusUI(); }catch(e){}
-      try{ updateReferralPendingUI(); }catch(e){}
-    }
-  } catch(e){ console.warn('reloadBalance:', e); }
-}
-
-// ─── Update Referral Pending Card + Tier UI ─────────────────────────
-function updateReferralPendingUI(){
-  const refBal = Number(state.referralBalance) || 0;
-  const showCard = refBal > 0.005;
-  ['dRefPendingCard','mRefPendingCard'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.style.display = showCard ? '' : 'none';
-  });
-  if(typeof animateById === 'function'){
-    animateById('dRefPendingAmt', refBal);
-    animateById('mRefPendingAmt', refBal);
-  }
-  // Update tier display in referral page
-  const tier = state.refTier || 'bronze';
-  const tierInfo = {
-    bronze:   {name:'Bronze',   rate:3,  color:'#cd7f32', next:'Silver',   needed:3},
-    silver:   {name:'Silver',   rate:5,  color:'#c0c0c0', next:'Gold',     needed:10},
-    gold:     {name:'Gold',     rate:7,  color:'#ffd700', next:'Platinum', needed:30},
-    platinum: {name:'Platinum', rate:10, color:'#e5e4e2', next:null,       needed:null},
-  }[tier] || {name:'Bronze', rate:3, color:'#cd7f32'};
-  ['refTierName','mRefTierName'].forEach(id => {
-    const el = document.getElementById(id); if(el){ el.textContent = tierInfo.name; el.style.color = tierInfo.color; }
-  });
-  ['refTierPct','mRefTierPct'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.textContent = tierInfo.rate + '% from each deposit';
-  });
-  ['refStatPct'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.textContent = tierInfo.rate + '%';
-  });
-  ['refStatEarned'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el && typeof animateBalanceTo === 'function') animateBalanceTo(el, state.refTotalLifetime || 0);
-    else if(el) el.textContent = '$' + (state.refTotalLifetime || 0).toFixed(2);
-  });
-  
-  // ETAP 9: Update ref link display (using login as new ref code)
-  const userLogin = (U.login || sessionStorage.getItem('luxor_login') || '').trim();
-  const baseURL = 'https://grailed1223228-sketch.github.io/luxor-front/?ref=';
-  if(userLogin){
-    const linkText = baseURL + userLogin;
-    ['refLinkText', 'mRefLinkText'].forEach(id => {
-      const el = document.getElementById(id);
-      if(el) el.textContent = linkText;
-    });
-  }
-}
-
-async function withdrawRefBalanceToMain(){
-  if(!confirm('Transfer your referral balance to main wallet?')) return;
-  try {
-    const r = await apiFetch('/api/referral/withdraw-to-main', {method:'POST'});
-    const data = await r.json().catch(() => ({}));
-    if(r.ok && data.ok){
-      try { showToast('Transferred to main wallet', 'success'); } catch(e){}
-      // Reload balance
-      try { loadBalanceFromBackend(); } catch(e){}
-    } else {
-      try { showToast('Failed to transfer', 'error'); } catch(e){}
-    }
-  } catch(e){
-    try { showToast('Network error', 'error'); } catch(_){}
-  }
-}
-
-// ─── Hook updateBonusUI/updateReferralPendingUI into existing updateUI ───
-// Patch updateUI на лету чтобы вызывать новые UI обновления
-(function hookUpdateUI(){
-  const origUpdate = window.updateUI;
-  if(typeof origUpdate !== 'function') return;
-  window.updateUI = function(){
-    const r = origUpdate.apply(this, arguments);
-    try{ updateBonusUI(); }catch(e){ console.warn('updateBonusUI:', e); }
-    try{ updateReferralPendingUI(); }catch(e){ console.warn('updateRefPending:', e); }
-    return r;
-  };
-})();
-
-// Expose globals
-window.updateBonusUI = updateBonusUI;
-window.bonusRedeemCoupon = bonusRedeemCoupon;
-window.withdrawRefBalanceToMain = withdrawRefBalanceToMain;
-window.showLockedDetailsModal = showLockedDetailsModal;
-window.updateReferralPendingUI = updateReferralPendingUI;
-window.loadBalanceFromBackend = loadBalanceFromBackend;
-
-// Show welcome bonus popup if just registered (sessionStorage flag set by index.html)
-(function checkWelcomeBonusPopup(){
-  try {
-    const flag = sessionStorage.getItem('luxor_welcome_bonus');
-    if(flag){
-      const data = JSON.parse(flag);
-      sessionStorage.removeItem('luxor_welcome_bonus');
-      setTimeout(() => showWelcomeBonusModal(data), 800);
-    }
-  } catch(e){}
-})();
-
-function showWelcomeBonusModal(data){
-  const referrer = data.referrer || 'a friend';
-  const amount = data.amount || 50;
-  const html = `
-    <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px"
-         onclick="if(event.target===this){this.remove()}">
-      <div style="background:var(--bg2);border:2px solid var(--gold);border-radius:14px;max-width:400px;padding:32px 24px;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)">
-        <div style="font-size:54px;margin-bottom:14px">🎉</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);letter-spacing:1.5px;margin-bottom:8px">Welcome Bonus!</div>
-        <div style="font-size:15px;color:var(--t);margin-bottom:6px">
-          <strong style="color:var(--gold)">@${referrer}</strong> just gave you
-        </div>
-        <div style="font-size:46px;font-weight:800;color:var(--green);margin:14px 0">$${amount}</div>
-        <div style="font-size:12px;color:var(--t3);line-height:1.6;margin-bottom:18px">
-          Money is added to your locked balance.<br>Complete unlock conditions to use it.
-        </div>
-        <button onclick="this.closest('div[style*=fixed]').remove();navTo('bonus')"
-                style="width:100%;padding:13px;background:var(--gold);color:#000;border:none;border-radius:9px;font-size:13px;font-weight:800;letter-spacing:1px;cursor:pointer">
-          SHOW ME UNLOCK CONDITIONS →
-        </button>
-        <button onclick="this.closest('div[style*=fixed]').remove()"
-                style="width:100%;margin-top:8px;padding:9px;background:transparent;color:var(--t3);border:none;font-size:11px;cursor:pointer">
-          Close
-        </button>
-      </div>
-    </div>
-    <style>@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}</style>
-  `;
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  document.body.appendChild(div);
-}
-window.showWelcomeBonusModal = showWelcomeBonusModal;
-
-console.log('[stage10] Bonuses + Referral tier system loaded');
-
-// === ETAP 9: SALE NOTIFICATIONS ==========================================
-let _saleNotifications = [];
-
-async function loadSaleNotifications(){
-  try {
-    const r = await apiFetch('/api/sale-notifications/unread');
-    if(!r.ok) return;
-    const data = await r.json().catch(() => ({}));
-    if(!data.ok || !Array.isArray(data.notifications)) return;
-    _saleNotifications = data.notifications;
-    if(_saleNotifications.length > 0){
-      // Show modal first time on this session
-      const seenKey = 'luxor_sales_seen_' + (U.login || sessionStorage.getItem('luxor_login') || 'x');
-      const seen = sessionStorage.getItem(seenKey);
-      if(!seen){
-        sessionStorage.setItem(seenKey, '1');
-        // Show modal for the most recent notification
-        showSaleNotificationModal(_saleNotifications[0]);
-      } else {
-        // Tost + badge на My Items
-        try { showToast('success', `💎 ${_saleNotifications.length} item${_saleNotifications.length>1?'s':''} sold!`, 'Tap My Items to see details.', 5000); } catch(e){}
-      }
-      // Update My Items badge
-      updateMyItemsSalesBadge(_saleNotifications.length);
-    }
-  } catch(e) { console.warn('loadSaleNotifications:', e); }
-}
-
-function updateMyItemsSalesBadge(count){
-  // Add a badge to "My Items" sidebar item
-  const navItem = document.querySelector('a.nav-item[data-target="items"]');
-  if(navItem && count > 0){
-    let badge = navItem.querySelector('.sales-unread-badge');
-    if(!badge){
-      badge = document.createElement('span');
-      badge.className = 'nav-unread sales-unread-badge';
-      badge.style.cssText = 'background:var(--green);color:#fff;margin-left:auto;font-weight:700';
-      navItem.appendChild(badge);
-    }
-    badge.textContent = count;
-    badge.style.display = '';
-  }
-}
-
-function showSaleNotificationModal(notif){
-  if(!notif) return;
-  const profit = (Number(notif.payout_usd) || 0) - (Number(notif.principal_usd) || 0);
-  const profitSign = profit >= 0 ? '+' : '−';
-  const profitColor = profit >= 0 ? 'var(--green)' : 'var(--red)';
-  const belowMarket = !!notif.sold_below_market;
-  
-  const subText = belowMarket
-    ? '⚠️ Item was sold below market expectations, but you still earned profit thanks to our guaranteed minimum.'
-    : '🎉 Item sold at a great price! Profit credited to your wallet.';
-  
-  const html = `
-    <div style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .3s"
-         onclick="if(event.target===this){closeSaleModal(${notif.id})}">
-      <div style="background:linear-gradient(135deg,var(--bg2) 0%,var(--bg) 100%);border:2px solid var(--green);border-radius:14px;max-width:430px;width:100%;padding:30px 24px;text-align:center;box-shadow:0 20px 60px rgba(39,174,96,.4);animation:popIn .4s cubic-bezier(.34,1.56,.64,1)">
-        <div style="font-size:54px;margin-bottom:14px">💎</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--green);letter-spacing:1.5px;margin-bottom:6px">YOUR ITEM SOLD!</div>
-        <div style="font-size:14px;color:var(--t);margin-bottom:18px">
-          <strong style="color:var(--gold)">${notif.item_name || 'Item'}</strong>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px;text-align:left">
-          <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span style="color:var(--t3)">You invested</span><span><strong>$${Math.round(notif.principal_usd||0).toLocaleString()}</strong></span></div>
-          <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span style="color:var(--t3)">Profit (${(notif.return_percent||0).toFixed(1)}%)</span><span><strong style="color:${profitColor}">${profitSign}$${Math.round(Math.abs(profit)).toLocaleString()}</strong></span></div>
-          <div style="border-top:1px solid var(--bd);margin:6px 0;padding-top:8px;display:flex;justify-content:space-between;font-size:14px"><span><strong>Total credited</strong></span><span><strong style="color:var(--green);font-size:18px">$${Math.round(notif.payout_usd||0).toLocaleString()}</strong></span></div>
-        </div>
-        <div style="font-size:11px;color:var(--t3);margin-bottom:18px;line-height:1.5">${subText}</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <button onclick="closeSaleModal(${notif.id});navTo('market')" style="padding:13px;background:var(--gold);color:#000;border:none;border-radius:9px;font-size:12px;font-weight:800;letter-spacing:1px;cursor:pointer">INVEST AGAIN →</button>
-          <button onclick="closeSaleModal(${notif.id});navTo('items')" style="padding:13px;background:transparent;color:var(--t);border:1px solid var(--bd);border-radius:9px;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer">VIEW DETAILS</button>
-        </div>
-        <button onclick="closeSaleModal(${notif.id})" style="width:100%;margin-top:6px;padding:9px;background:transparent;color:var(--t3);border:none;font-size:11px;cursor:pointer">Close</button>
-      </div>
-    </div>
-    <style>@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}</style>
-  `;
-  const div = document.createElement('div');
-  div.id = 'saleNotifModal';
-  div.innerHTML = html;
-  document.body.appendChild(div);
-}
-
-async function closeSaleModal(notifId){
-  const m = document.getElementById('saleNotifModal');
-  if(m) m.remove();
-  // Mark read on backend
-  try {
-    await apiFetch('/api/sale-notifications/' + notifId + '/mark-read', {method:'POST'});
-  } catch(e){}
-  // Show next unread if exists
-  _saleNotifications = _saleNotifications.filter(n => n.id !== notifId);
-  if(_saleNotifications.length > 0){
-    setTimeout(() => showSaleNotificationModal(_saleNotifications[0]), 400);
-  } else {
-    // No more — hide badge
-    const badge = document.querySelector('.sales-unread-badge');
-    if(badge) badge.style.display = 'none';
-  }
-}
-window.closeSaleModal = closeSaleModal;
-
-// Run on dashboard load (after balance loaded)
-setTimeout(() => {
-  try { if(typeof loadSaleNotifications === 'function') loadSaleNotifications(); } catch(e){}
-}, 2500);
-
-// Poll for new sale notifications every 60s — so when admin marks an item as sold,
-// the user gets a toast even without refreshing. Balance polling is separate (every 30s).
-setInterval(() => {
-  try {
-    if(typeof loadSaleNotifications === 'function' && document.visibilityState === 'visible'){
-      loadSaleNotifications();
-      // Reload My Items so the dashboard reflects new sold status
-      if(typeof loadMyItems === 'function') loadMyItems().catch(()=>{});
-    }
-  } catch(e){ /* ignore */ }
-}, 60000);
-
-// === BRAND FILTER (Etap 9.3) ===========================================
-window._currentBrand = 'all';
-
-function _updateBrandChips(cat){
-  // Get unique brands in current category
-  const sourceItems = cat === 'all' ? ITEMS : ITEMS.filter(i => i.cat === cat);
-  const brandSet = new Set();
-  sourceItems.forEach(i => {
-    if(i.brand && i.brand.trim()) brandSet.add(i.brand.trim());
-  });
-  const brands = Array.from(brandSet).sort();
-  
-  ['dBrandChips', 'mBrandChips'].forEach(containerId => {
-    const c = document.getElementById(containerId);
-    if(!c) return;
-    if(!brands.length){
-      c.style.display = 'none';
-      return;
-    }
-    c.style.display = 'flex';
-    // Keep label + "All" chip, replace the rest
-    const isMobile = containerId === 'mBrandChips';
-    const labelHtml = isMobile
-      ? '<span style="font-size:10px;color:var(--t3);letter-spacing:1px;margin-right:4px;flex-shrink:0">BRAND:</span>'
-      : '<svg class="lx" style="width:14px;height:14px;color:var(--gold)"><use href="#i-filter"/></svg><span style="font-size:10px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-right:4px">BRAND</span>';
-    const padSm = isMobile ? '4px 9px' : '5px 11px';
-    const fontSm = isMobile ? '10px' : '11px';
-    const radSm = isMobile ? '12px' : '14px';
-    
-    let html = labelHtml;
-    const allActive = (window._currentBrand === 'all');
-    html += `<span class="brand-chip ${allActive?'active':''}" data-brand="all" onclick="setBrandFilter('all')" style="padding:${padSm};background:${allActive?'var(--gold)':'var(--bg)'};color:${allActive?'#000':'var(--t2)'};border:1px solid ${allActive?'var(--gold)':'var(--bd)'};border-radius:${radSm};font-size:${fontSm};cursor:pointer;font-weight:${allActive?'700':'500'};flex-shrink:0">All</span>`;
-    brands.forEach(br => {
-      const active = (window._currentBrand && window._currentBrand.toLowerCase() === br.toLowerCase());
-      html += `<span class="brand-chip ${active?'active':''}" data-brand="${br}" onclick="setBrandFilter('${br.replace(/'/g,'\\\'')}')" style="padding:${padSm};background:${active?'var(--gold)':'var(--bg)'};color:${active?'#000':'var(--t2)'};border:1px solid ${active?'var(--gold)':'var(--bd)'};border-radius:${radSm};font-size:${fontSm};cursor:pointer;font-weight:${active?'700':'500'};flex-shrink:0">${br}</span>`;
-    });
-    c.innerHTML = html;
-  });
-}
-
-function setBrandFilter(brand){
-  window._currentBrand = brand;
-  try { renderMarketplace(window._currentCat || 'all'); } catch(e){}
-}
-window.setBrandFilter = setBrandFilter;
-
-// Reset brand filter when category changes
-(function hookCategoryChange(){
-  // Listen on dCats and mCats
-  ['dCats', 'mCats'].forEach(id => {
-    const wrap = document.getElementById(id);
-    if(!wrap) return;
-    wrap.addEventListener('click', e => {
-      const target = e.target.closest('[data-cat]');
-      if(!target) return;
-      // Reset brand filter on cat change
-      window._currentBrand = 'all';
-    });
-  });
-})();
-
-// D5: Auto-refresh countdown badges каждые 60s
-setInterval(() => {
-  try {
-    if(typeof renderMarketplace === 'function' && Array.isArray(window.ITEMS) && window.ITEMS.some(i => i.countdown_ends_at || i.pool_closed_at)){
-      renderMarketplace(window._currentCat || 'all');
-    }
-  } catch(e){}
-}, 60000);
-
-// Перезапускаем UI обновления через 1 сек чтобы захватить state.refTier который был
-// загружен раньше (когда эти функции ещё не были определены)
-setTimeout(() => {
-  try { if(typeof updateBonusUI === 'function') updateBonusUI(); } catch(e){}
-  try { if(typeof updateReferralPendingUI === 'function') updateReferralPendingUI(); } catch(e){}
-}, 1500);
-
-</script>
-</body>
-</html>
+      // Прибыль вещи: invested * (retPct/100), масштабированная пропор
