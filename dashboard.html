@@ -913,6 +913,48 @@ button{font-family:inherit}
 .modal-body{padding:26px 22px}
 .stag{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);margin-bottom:6px;font-weight:700}
 
+/* [PR3] SALE NOTIFICATION MODAL ========================================== */
+.sn-modal{max-width:440px;text-align:center}
+.sn-modal .sn-hero{padding:28px 24px 20px;text-align:center}
+.sn-modal .sn-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:36px;line-height:1}
+.sn-modal.sn-profit .sn-icon{background:linear-gradient(135deg,rgba(45,143,62,.18),rgba(45,143,62,.06));border:1px solid rgba(45,143,62,.3);color:var(--green)}
+.sn-modal.sn-guaranteed .sn-icon{background:linear-gradient(135deg,rgba(201,168,76,.2),rgba(201,168,76,.06));border:1px solid rgba(201,168,76,.35);color:var(--gold)}
+.sn-modal .sn-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;margin-bottom:6px}
+.sn-modal.sn-profit .sn-title{color:var(--green)}
+.sn-modal.sn-guaranteed .sn-title{color:var(--gold)}
+.sn-modal .sn-subtitle{font-size:12px;color:var(--t2);font-weight:500;letter-spacing:.5px}
+.sn-modal .sn-item{padding:18px 24px;display:flex;align-items:center;gap:14px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);background:var(--bg3)}
+.sn-modal .sn-item-img{width:56px;height:56px;border-radius:10px;flex-shrink:0;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden}
+.sn-modal .sn-item-img img{width:100%;height:100%;object-fit:cover}
+.sn-modal .sn-item-info{text-align:left;flex:1;min-width:0}
+.sn-modal .sn-item-name{font-size:14px;font-weight:700;color:var(--t);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sn-modal .sn-item-days{font-size:11px;color:var(--t3);font-family:'Space Mono',monospace;letter-spacing:.5px}
+.sn-modal .sn-rows{padding:18px 24px}
+.sn-modal .sn-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px}
+.sn-modal .sn-row .l{color:var(--t2)}
+.sn-modal .sn-row .v{color:var(--t);font-weight:600;font-variant-numeric:tabular-nums}
+.sn-modal .sn-row.sn-row-divider{border-top:1px dashed var(--bd);margin-top:6px;padding-top:14px}
+.sn-modal .sn-row.sn-row-profit{font-size:15px}
+.sn-modal .sn-row.sn-row-profit .v{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;font-weight:400}
+.sn-modal.sn-profit .sn-row.sn-row-profit .v{color:var(--green)}
+.sn-modal.sn-guaranteed .sn-row.sn-row-profit .v{color:var(--gold)}
+.sn-modal .sn-info{margin:0 24px 18px;padding:12px 14px;border-radius:8px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);font-size:11.5px;line-height:1.55;color:var(--t2);text-align:left;display:flex;gap:10px;align-items:flex-start}
+.sn-modal .sn-info-ic{flex-shrink:0;color:var(--gold);font-size:14px;line-height:1.2}
+.sn-modal .sn-info b{color:var(--gold);font-weight:600}
+.sn-modal .sn-actions{padding:0 24px 24px;display:flex;gap:10px}
+.sn-modal .sn-btn{flex:1;padding:12px 14px;border-radius:8px;font-weight:700;font-size:12px;letter-spacing:1.5px;cursor:pointer;border:1px solid var(--bd);font-family:inherit;transition:all .15s;background:var(--bg2);color:var(--t)}
+.sn-modal .sn-btn:hover{background:var(--bg3);border-color:var(--bd2)}
+.sn-modal .sn-btn-primary{background:var(--gold);border-color:var(--gold);color:#0a0a0a}
+.sn-modal .sn-btn-primary:hover{background:var(--goldL);border-color:var(--goldL)}
+.sn-modal.sn-profit .sn-btn-primary{background:var(--green);border-color:var(--green);color:#fff}
+.sn-modal.sn-profit .sn-btn-primary:hover{background:#3da34d;border-color:#3da34d}
+.sn-modal .sn-counter{font-size:10px;color:var(--t3);text-align:center;padding:0 24px 14px;letter-spacing:1px;font-family:'Space Mono',monospace}
+@media(max-width:480px){
+  .sn-modal .sn-actions{flex-direction:column}
+  .sn-modal .sn-btn{width:100%}
+}
+/* [/PR3] ================================================================= */
+
 /* Pay methods grid (deposit modal) */
 .pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pay-m{padding:14px 8px 12px;background:var(--bg2);border:1px solid var(--bd);text-align:center;cursor:pointer;border-radius:12px;transition:all .18s;font-size:11px;font-weight:600;color:var(--t2);position:relative;overflow:hidden}
@@ -3048,6 +3090,213 @@ function saveState(){
   try{ sessionStorage.setItem('luxor_state2', JSON.stringify(state)); }catch(e){}
 }
 
+/* [PR3] ═══ SALE NOTIFICATIONS ═══════════════════════════════════════════
+   Показывает модал "Item sold" когда юзер заходит после продажи его доли.
+   Backend: GET /api/sale-notifications/unread → POST /{id}/mark-read.
+   Каждый notification показывается ОДИН раз навсегда (is_read=TRUE в БД). */
+const _sn = {
+  queue: [],
+  active: false,
+  inFlight: false,
+};
+
+async function _snFetch(){
+  if(_sn.inFlight) return;
+  _sn.inFlight = true;
+  try {
+    const r = await apiFetch('/api/sale-notifications/unread');
+    if(!r.ok) return;
+    const data = await r.json().catch(() => ({}));
+    if(data.ok && Array.isArray(data.notifications) && data.notifications.length){
+      // Кладём в очередь только новые (по id, чтобы не дублировать при повторном fetch)
+      const seen = new Set(_sn.queue.map(n => n.id));
+      data.notifications.forEach(n => { if(!seen.has(n.id)) _sn.queue.push(n); });
+      if(!_sn.active) _snShowNext();
+    }
+  } catch(e){
+    console.warn('[sale-notif] fetch failed:', e);
+  } finally {
+    _sn.inFlight = false;
+  }
+}
+
+function _snShowNext(){
+  if(!_sn.queue.length){ _sn.active = false; return; }
+  _sn.active = true;
+  const n = _sn.queue[0];
+  _snRender(n);
+}
+
+function _snRender(n){
+  // Безопасное экранирование (textContent, не innerHTML — XSS protection)
+  const safeName = String(n.item_name || 'Item');
+  const days = Number(n.days_held) || 0;
+  const principal = Number(n.principal_usd) || 0;
+  const payout    = Number(n.payout_usd) || 0;
+  const profit    = Number(n.profit_usd) || (payout - principal);
+  const pct       = Number(n.return_percent) || 0;
+  const isGuaranteed = (n.sold_mode === 'guaranteed');
+  const belowMarket  = !!n.sold_below_market;
+
+  const fmt = v => '$' + Math.round(v).toLocaleString();
+  const fmtSigned = v => (v >= 0 ? '+' : '−') + fmt(Math.abs(v));
+  const pctTxt = (pct >= 0 ? '+' : '') + Number(pct).toFixed(1) + '%';
+
+  // Различия между profit и guaranteed
+  const cls   = isGuaranteed ? 'sn-guaranteed' : 'sn-profit';
+  const icon  = isGuaranteed ? '🛡️' : '✨';
+  const title = isGuaranteed ? 'GUARANTEE HONORED' : 'ITEM SOLD';
+  const subtitle = isGuaranteed
+    ? 'Your protection paid off'
+    : 'Profit credited to balance';
+  const profitLabel = isGuaranteed ? 'Guaranteed' : 'Profit';
+  const showInfo = isGuaranteed && belowMarket;
+
+  // Очередь counter (если несколько)
+  const totalInQueue = _sn.queue.length;
+  const counterTxt = totalInQueue > 1 ? `1 of ${totalInQueue}` : '';
+
+  // Найти/создать overlay
+  let overlay = document.getElementById('saleNotifModal');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'saleNotifModal';
+    overlay.className = 'overlay';
+    overlay.innerHTML = `<div class="modal sn-modal" id="snModalInner"></div>`;
+    document.body.appendChild(overlay);
+  }
+  const modal = overlay.querySelector('#snModalInner');
+  modal.className = 'modal sn-modal ' + cls;
+
+  // image fallback — emoji или image_url. У nas нет image_url в notification — используем 💎
+  // (можно расширить, если backend начнёт писать image_url в sale_notifications)
+  const imgHTML = '💎';
+
+  // Безопасный рендер: используем textContent для динамики
+  modal.innerHTML = `
+    <div class="sn-hero">
+      <div class="sn-icon">${icon}</div>
+      <div class="sn-title" id="snTitle"></div>
+      <div class="sn-subtitle" id="snSubtitle"></div>
+    </div>
+    <div class="sn-item">
+      <div class="sn-item-img">${imgHTML}</div>
+      <div class="sn-item-info">
+        <div class="sn-item-name" id="snItemName"></div>
+        <div class="sn-item-days" id="snItemDays"></div>
+      </div>
+    </div>
+    <div class="sn-rows">
+      <div class="sn-row">
+        <span class="l">Your investment</span>
+        <span class="v" id="snInvested"></span>
+      </div>
+      <div class="sn-row">
+        <span class="l">Payout</span>
+        <span class="v" id="snPayout"></span>
+      </div>
+      <div class="sn-row sn-row-divider sn-row-profit">
+        <span class="l" id="snProfitLabel"></span>
+        <span class="v" id="snProfit"></span>
+      </div>
+    </div>
+    ${showInfo ? `
+    <div class="sn-info">
+      <span class="sn-info-ic">ⓘ</span>
+      <span>Item couldn't be sold at full profit, but as promised <b>we honored your guarantee</b>. The platform covered the difference from its own funds.</span>
+    </div>` : ''}
+    ${counterTxt ? `<div class="sn-counter">${counterTxt}</div>` : ''}
+    <div class="sn-actions">
+      <button type="button" class="sn-btn" id="snBtnDetails">VIEW DETAILS</button>
+      <button type="button" class="sn-btn sn-btn-primary" id="snBtnGotIt">GOT IT</button>
+    </div>
+  `;
+  // Заполняем динамику через textContent (XSS-safe)
+  modal.querySelector('#snTitle').textContent = title;
+  modal.querySelector('#snSubtitle').textContent = subtitle;
+  modal.querySelector('#snItemName').textContent = safeName;
+  modal.querySelector('#snItemDays').textContent = days > 0 ? `Held ${days} day${days === 1 ? '' : 's'}` : '';
+  modal.querySelector('#snInvested').textContent = fmt(principal);
+  modal.querySelector('#snPayout').textContent = fmt(payout);
+  modal.querySelector('#snProfitLabel').textContent = profitLabel;
+  modal.querySelector('#snProfit').textContent = fmtSigned(profit) + ' (' + pctTxt + ')';
+
+  // Listeners (заново на каждый рендер, потому что innerHTML меняется)
+  modal.querySelector('#snBtnDetails').onclick = () => _snDismiss(n.id, /*goToDetails*/ true, n.item_id);
+  modal.querySelector('#snBtnGotIt').onclick   = () => _snDismiss(n.id, /*goToDetails*/ false);
+
+  overlay.classList.add('show');
+}
+
+async function _snDismiss(notifId, goToDetails, itemId){
+  // Mark as read first (idempotent, fire-and-forget — не блокируем UX)
+  apiFetch('/api/sale-notifications/' + encodeURIComponent(notifId) + '/mark-read', {method:'POST'})
+    .catch(e => console.warn('[sale-notif] mark-read failed:', e));
+
+  // Убираем из очереди
+  _sn.queue.shift();
+
+  if(goToDetails){
+    // Скрыть модал, перейти в My Items / SOLD tab и проскроллить к item
+    _snHide();
+    _sn.active = false;
+    _sn.queue = []; // не показываем оставшиеся пока юзер на details
+    _snGoToItem(itemId);
+    return;
+  }
+
+  // Иначе показать следующий или скрыть
+  if(_sn.queue.length){
+    setTimeout(() => _snShowNext(), 200);
+  } else {
+    _snHide();
+    _sn.active = false;
+  }
+}
+
+function _snHide(){
+  const o = document.getElementById('saleNotifModal');
+  if(o) o.classList.remove('show');
+}
+
+function _snGoToItem(itemId){
+  // Перейти на My Items, открыть SOLD таб, проскроллить к карточке.
+  try {
+    // 1. Активировать sidebar nav (desktop) или bottom nav (mobile)
+    const navBtn = document.querySelector('a[data-target="items"]')
+                || document.querySelector('[data-target="items"]');
+    if(navBtn) navBtn.click();
+    // 2. Через тик — переключить filter на 'sold' (desktop + mobile attr)
+    setTimeout(() => {
+      window._itemsFilter = 'sold';
+      // Desktop tabs
+      document.querySelectorAll('[data-items-tab]').forEach(t => {
+        t.classList.toggle('active', t.dataset.itemsTab === 'sold');
+      });
+      // Mobile tabs
+      document.querySelectorAll('[data-items-tab-m]').forEach(t => {
+        t.classList.toggle('active', t.dataset.itemsTabM === 'sold');
+      });
+      try { renderMyItems(); } catch(e) { console.warn('[sn] renderMyItems failed:', e); }
+      // 3. Через ещё тик — найти карточку и проскроллить
+      setTimeout(() => {
+        const card = document.querySelector(`.my-item-card[data-item-row-id="${itemId}"]`);
+        if(card){
+          card.scrollIntoView({behavior:'smooth', block:'center'});
+          // Подсветка
+          card.style.transition = 'box-shadow .3s';
+          card.style.boxShadow = '0 0 0 2px var(--gold)';
+          setTimeout(() => { card.style.boxShadow = ''; }, 2000);
+        }
+      }, 200);
+    }, 100);
+  } catch(e){ console.warn('[sn] goToItem failed:', e); }
+}
+
+// Вызывается из loadBalanceFromBackend после auth-чека.
+window._snFetch = _snFetch;
+/* [/PR3] ═════════════════════════════════════════════════════════════════ */
+
 /* ═══ FAVORITE HELPERS ═══ */
 function _favIds(){
   return (state.favorites || []).map(f => typeof f === 'object' ? f.id : f);
@@ -3126,6 +3375,8 @@ function _favResolve(favEntry){
         state.wallet = Number(data.user.wallet_balance) || 0;
         state.balance = Number(data.user.balance) || 0;
         U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
+        // [PR4] Сохраняем total_deposited — для определения "уже делал депозит"
+        state.totalDeposited = Number(data.user.total_deposited) || 0;
         // NEW: Etap 6 fields
         state.lockedBalance = Number(data.user.locked_balance) || 0;
         state.lockedUnlockedAt = data.user.locked_unlocked_at || null;
@@ -3168,6 +3419,10 @@ function _favResolve(favEntry){
   try{ if(typeof _luxorUpdateBalanceSplit === 'function') _luxorUpdateBalanceSplit(); }catch(e){}
   try{ if(typeof renderTxs === 'function') renderTxs(); }catch(e){}
   try{ if(typeof renderMyItems === 'function') renderMyItems(); }catch(e){}
+
+  // [PR3] Sale notifications — после загрузки баланса проверяем непрочитанные продажи
+  try{ if(typeof _snFetch === 'function') _snFetch(); }catch(e){ console.warn('[balance] _snFetch failed:', e); }
+
   console.log('[balance] initial load complete');
 })();
 
@@ -3201,6 +3456,8 @@ async function _luxorPollBalance(){
         state.wallet = newWallet;
         window._lastWallet = newWallet;
         U.has_first_deposit_bonus = data.user.has_first_deposit_bonus || false;
+        // [PR4] Обновляем total_deposited при polling — чтобы banner спрятался после депозита
+        state.totalDeposited = Number(data.user.total_deposited) || 0;
       }
     }
   }catch(e){ console.warn('[poll-balance] user error:', e); }
@@ -3226,6 +3483,9 @@ async function _luxorPollBalance(){
   try{ updateUI(); }catch(e){}
   try{ if(typeof _luxorUpdateBalanceSplit === 'function') _luxorUpdateBalanceSplit(); }catch(e){}
   try{ if(typeof renderMyItems === 'function') renderMyItems(); }catch(e){}
+
+  // [PR3] Sale notifications — admin может продать item пока юзер на сайте
+  try{ if(typeof _snFetch === 'function') _snFetch(); }catch(e){}
 }
 
 // Start polling 5 seconds after initial load (give first load time to set _lastWallet)
@@ -3946,17 +4206,43 @@ function updateLevel(total){
   });
 }
 
-/* ═══ FIRST DEPOSIT BONUS BANNER ═══ */
+/* ═══ FIRST DEPOSIT BONUS BANNER ═══
+   [PR4] Логика:
+   - has_first_deposit_bonus === true → юзер ещё не получал бонус
+   - has_first_deposit_bonus === false → уже получал → СКРЫТЬ навсегда
+   - total_deposited > 0 → юзер УЖЕ делал депозит (без бонуса) → СКРЫТЬ
+   - state.txs содержит deposit → fallback если total_deposited не пришёл
+   Banner появляется только новому юзеру, который ещё ни разу не пополнялся.
+*/
 function updateBonusBanner(){
   const banners = ['dFirstBonus', 'mFirstBonus'].map(id => document.getElementById(id)).filter(Boolean);
   if(!banners.length) return;
+
+  // 1. Если бонус уже использован — скрыть навсегда
   if(U.has_first_deposit_bonus === false){
     banners.forEach(b => b.classList.add('hidden'));
     return;
   }
-  const hasDeposit = state.txs.some(t => t.desc && /deposit/i.test(t.desc));
-  const show = !hasDeposit && state.positions.length === 0 && state.myItems.length === 0;
-  banners.forEach(b => b.classList.toggle('hidden', !show));
+
+  // 2. Если total_deposited > 0 → юзер делал депозит без бонуса → скрыть
+  const totalDeposited = Number(state.totalDeposited) || 0;
+  if(totalDeposited > 0){
+    banners.forEach(b => b.classList.add('hidden'));
+    return;
+  }
+
+  // 3. Fallback: проверить tx history (на случай если backend не вернул total_deposited)
+  const hasDepositTx = (state.txs || []).some(t => {
+    const desc = t.desc || t.type || '';
+    return /deposit/i.test(desc) && t.status !== 'rejected';
+  });
+  if(hasDepositTx){
+    banners.forEach(b => b.classList.add('hidden'));
+    return;
+  }
+
+  // 4. Юзер новый, депозитов не делал — показываем banner
+  banners.forEach(b => b.classList.remove('hidden'));
 }
 
 /* ═══ RENDER POSITIONS (pools) ═══ */
@@ -5892,9 +6178,12 @@ function openTopUp(){
   if(window._dep.pollInt) clearInterval(window._dep.pollInt);
   window._dep = { amount:0, useBonus:false, currency:null, depositId:null, paymentData:null, timerInt:null, pollInt:null };
 
-  // Eligible for bonus = user has NOT received first-deposit bonus yet
-  // has_first_deposit_bonus === true means "already received" → not eligible
-  const eligible = U && U.has_first_deposit_bonus === false;
+  // [PR4] BUGFIX: семантика была инвертирована.
+  // Backend: has_first_deposit_bonus = 1 (DEFAULT) → бонус ДОСТУПЕН
+  // Frontend получает true → значит ELIGIBLE.
+  // Дополнительно: если total_deposited > 0 — юзер уже делал депозит (без бонуса) → не показываем выбор.
+  const totalDeposited = Number(state.totalDeposited) || 0;
+  const eligible = U && U.has_first_deposit_bonus === true && totalDeposited === 0;
   if(eligible){
     showModal(`<div style="text-align:center;margin-bottom:14px">
       <div class="stag">STEP 1 OF 3</div>
@@ -5927,8 +6216,9 @@ function depSetBonus(useBonus){
 async function depStepAmount(){
   const useBonus = window._dep.useBonus;
   const minHint = useBonus ? '500' : '100';
-  // Step label depends on whether bonus is offered (has_first_deposit_bonus === false)
-  const eligibleForBonus = U && U.has_first_deposit_bonus === false;
+  // [PR4] BUGFIX: см. openTopUp — семантика была инвертирована.
+  const _td = Number(state.totalDeposited) || 0;
+  const eligibleForBonus = U && U.has_first_deposit_bonus === true && _td === 0;
   const stepLabel = eligibleForBonus ? 'STEP 2 OF 3' : 'STEP 1 OF 2';
 
   showModal(`<div style="text-align:center;margin-bottom:14px">
@@ -5955,7 +6245,7 @@ async function depStepAmount(){
   </div>
   <div id="depErr" style="display:none;background:var(--red-l);border:1px solid var(--red);color:var(--red);padding:10px;border-radius:6px;font-size:11px;margin-bottom:10px;text-align:center"></div>
   <button class="btn-primary" onclick="depSubmitStart()">CONTINUE →</button>
-  ${U.has_first_deposit_bonus?'<button class="btn-out" style="margin-top:6px" onclick="openTopUp()">← Back</button>':''}`);
+  ${eligibleForBonus?'<button class="btn-out" style="margin-top:6px" onclick="openTopUp()">← Back</button>':''}`);
 
   depRenderBonusLine();
   try{
@@ -6235,6 +6525,8 @@ function depStartPolling(id){
 function depShowSuccess(data){
   const credited = (data.amount_usd || 0) + (data.bonus_amount || 0);
   state.wallet = (state.wallet || 0) + credited;
+  // [PR4] Инкрементируем totalDeposited локально — banner спрячется до polling
+  state.totalDeposited = (Number(state.totalDeposited) || 0) + (data.amount_usd || 0);
   addTx('Deposit +$' + (data.amount_usd || 0).toLocaleString(), 'done');
   if(data.bonus_amount && data.bonus_amount > 0){
     addTx('First deposit bonus +$' + data.bonus_amount.toLocaleString(), 'done');
