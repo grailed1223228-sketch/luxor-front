@@ -189,7 +189,7 @@ textarea.inp{resize:vertical;min-height:60px;}
   <div class="grid-3">
     <div class="stat" style="border-left-color:var(--green)"><div class="val" style="color:var(--green)" id="sTotalDep">$0</div><div class="lbl">Total Deposits</div></div>
     <div class="stat" style="border-left-color:var(--blue)"><div class="val" style="color:var(--blue)" id="sTotalUsers">0</div><div class="lbl">Total Users</div></div>
-    <div class="stat" style="border-left-color:var(--gold)" title="Total user funds = wallets + active pools + active items"><div class="val" style="color:var(--gold)" id="sTotalBal">$0</div><div class="lbl">Total User Funds</div></div>
+    <div class="stat" style="border-left-color:var(--gold)" title="Total user liability = wallets + locked + pools (principal + accrued earnings) + items + referral balance. This is the full amount the platform owes to all users."><div class="val" style="color:var(--gold)" id="sTotalBal">$0</div><div class="lbl">Total User Funds (incl. earned)</div></div>
     <div class="stat" style="border-left-color:var(--orange)"><div class="val" style="color:var(--orange)" id="sPendWd">0 / $0</div><div class="lbl">Pending Withdrawals</div></div>
     <div class="stat" style="border-left-color:var(--purple)"><div class="val" style="color:var(--purple)" id="sNewToday">0</div><div class="lbl">New Today</div></div>
     <div class="stat" style="border-left-color:var(--red)"><div class="val" style="color:var(--red)" id="sDepToday">$0</div><div class="lbl">Deposits Today</div></div>
@@ -1159,11 +1159,14 @@ async function loadOverview(){
   
   document.getElementById('sTotalDep').textContent = fmt(stats.deposits_total_amount);
   document.getElementById('sTotalUsers').textContent = stats.total_users||0;
-  // sTotalBal теперь = Total User Funds (wallets + pools + items, без accrued earned)
-  // С fallback на старое поле total_balance для обратной совместимости.
-  const totalUserFunds = (stats.total_user_funds_simple !== undefined)
-    ? stats.total_user_funds_simple
-    : (stats.total_balance || 0);
+  // [PR2] sTotalBal = Total User Funds (wallets + pools + items + accrued earned).
+  // Это полная liability платформы — должна совпадать с суммой балансов в карточках юзеров.
+  // Fallback на _simple → total_balance для обратной совместимости со старым backend.
+  const totalUserFunds = (stats.total_user_funds !== undefined)
+    ? stats.total_user_funds
+    : (stats.total_user_funds_simple !== undefined)
+      ? stats.total_user_funds_simple
+      : (stats.total_balance || 0);
   document.getElementById('sTotalBal').textContent = fmt(totalUserFunds);
 
   // Funds breakdown panel
@@ -1498,7 +1501,7 @@ async function openRefOverrideModal(login, currentTier, currentRate, hasOverride
   if(!modal){
     modal = document.createElement('div');
     modal.id = 'refOverrideModal';
-    modal.className = 'overlay';
+    modal.className = 'modal-bg'; // [PR2] BUGFIX: было 'overlay' — несуществующий CSS класс
     document.body.appendChild(modal);
   }
   modal.innerHTML = `
@@ -2261,7 +2264,7 @@ function openSellModal(itemId, itemName, guaranteedPct, expectedPct, purchasePri
   if(!overlay){
     overlay = document.createElement('div');
     overlay.id = 'sellItemModal';
-    overlay.className = 'overlay';
+    overlay.className = 'modal-bg'; // [PR2] BUGFIX: было 'overlay' — несуществующий CSS класс, модал не показывался
     overlay.innerHTML = `
       <div class="modal" style="max-width:520px">
         <div class="modal-header">
@@ -2298,15 +2301,22 @@ function openSellModal(itemId, itemName, guaranteedPct, expectedPct, purchasePri
     overlay.querySelector('#sellRealPct').addEventListener('input', updateSellPreview);
     overlay.querySelector('#sellRealPrice').addEventListener('input', updateSellPreview);
   }
-  document.getElementById('sellItemName').textContent = itemName;
-  document.getElementById('sellPurchasePriceInfo').textContent = _sellCtx.purchasePrice ? '$'+_sellCtx.purchasePrice.toLocaleString() : '—';
-  document.getElementById('sellGuaranteedInfo').textContent = '+'+_sellCtx.guaranteedPct+'%';
-  document.getElementById('sellExpectedInfo').textContent = '+'+_sellCtx.expectedPct+'%';
-  document.getElementById('sellGuaranteedBtn').textContent = '+'+_sellCtx.guaranteedPct+'%';
-  document.getElementById('sellRealPct').value = '';
-  document.getElementById('sellRealPrice').value = '';
-  document.getElementById('sellRealPreview').textContent = '';
-  sellSetMode('price'); // default to PRICE input
+  // [PR2] Defensive: если какой-то ID не найден — продолжаем открывать модал, не блокируем юзера
+  try {
+    const setText = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+    const setVal  = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+    setText('sellItemName', itemName || '—');
+    setText('sellPurchasePriceInfo', _sellCtx.purchasePrice ? '$'+_sellCtx.purchasePrice.toLocaleString() : '—');
+    setText('sellGuaranteedInfo', '+'+_sellCtx.guaranteedPct+'%');
+    setText('sellExpectedInfo',   '+'+_sellCtx.expectedPct+'%');
+    setText('sellGuaranteedBtn',  '+'+_sellCtx.guaranteedPct+'%');
+    setVal ('sellRealPct',   '');
+    setVal ('sellRealPrice', '');
+    setText('sellRealPreview', '');
+    sellSetMode('price');
+  } catch(e){
+    console.error('[openSellModal] DOM update failed:', e);
+  }
   overlay.classList.add('show');
 }
 
