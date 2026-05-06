@@ -248,7 +248,7 @@ button{font-family:inherit}
 }
 
 .pc-pool-list{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
-.pc-pool-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 14px;background:var(--bg);border:1px solid var(--bd);border-radius:8px}
+.pc-pool-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px}
 .pc-pool-ic{width:36px;height:36px;border-radius:50%;background:var(--gold-d,rgba(201,168,76,.12));color:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;flex-shrink:0}
 .pc-pool-info .n{font-size:13px;font-weight:700;margin-bottom:2px}
 .pc-pool-info .d{font-size:11px;color:var(--t3)}
@@ -1194,7 +1194,7 @@ button{font-family:inherit}
 .sm-preset:hover{background:var(--gold-d);color:var(--gold);border-color:var(--gold)}
 .sm-preset.sm-preset-active{background:var(--gold);color:#0a0a0a;border-color:var(--gold)}
 
-.sm-balance-opt{margin-top:14px;padding:12px 16px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;text-align:left}
+.sm-balance-opt{margin-top:14px;padding:12px 16px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;text-align:left}
 .sm-checkbox{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px;color:var(--t2)}
 .sm-checkbox input{display:none}
 .sm-checkbox-mark{width:18px;height:18px;border:2px solid var(--bd2);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
@@ -1247,7 +1247,7 @@ button{font-family:inherit}
 .sm-bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
 .sm-bar-val{text-align:right;font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--gold)}
 
-.sm-strategy-items{margin-bottom:16px;padding:12px;background:var(--bg);border:1px solid var(--bd);border-radius:8px}
+.sm-strategy-items{margin-bottom:16px;padding:12px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px}
 .sm-strategy-items-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--t3)}
 .sm-shuffle-btn{background:transparent;border:1px solid var(--bd);color:var(--t2);padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;transition:all .15s}
 .sm-shuffle-btn:hover{border-color:var(--gold);color:var(--gold)}
@@ -1256,7 +1256,7 @@ button{font-family:inherit}
 .sm-skeleton{height:30px;background:linear-gradient(90deg,var(--bd) 0%,var(--bg3) 50%,var(--bd) 100%);background-size:200% 100%;border-radius:6px;animation:sm-shimmer 1.5s infinite}
 @keyframes sm-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-.sm-strategy-projection{margin-bottom:16px;padding:14px;background:var(--bg);border:1px solid var(--bd);border-radius:8px}
+.sm-strategy-projection{margin-bottom:16px;padding:14px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px}
 .sm-proj-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;color:var(--t2)}
 .sm-proj-v{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--green);font-weight:700}
 .sm-proj-v-big{font-size:24px}
@@ -1283,7 +1283,7 @@ button{font-family:inherit}
 .sm-coin-pick{margin-bottom:18px}
 .sm-coin-pick-h{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:10px}
 .sm-coin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.sm-coin{padding:14px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;cursor:pointer;transition:all .15s;text-align:center}
+.sm-coin{padding:14px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;cursor:pointer;transition:all .15s;text-align:center}
 .sm-coin:hover{border-color:var(--gold)}
 .sm-coin.sm-coin-selected{background:var(--gold-d);border-color:var(--gold)}
 .sm-coin-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:2px}
@@ -3052,6 +3052,28 @@ function saveState(){
 function _favIds(){
   return (state.favorites || []).map(f => typeof f === 'object' ? f.id : f);
 }
+/* [PR1] Возвращает expected return как ОДНО число.
+   Приоритет: i.expected_return → i.retMax → i.ret[1] → i.ret[0] → 0
+   Используется во всех местах где раньше показывался диапазон ret[0]-ret[1]. */
+function _itemExpectedPct(i){
+  if(!i) return 0;
+  const v = (i.expected_return != null) ? i.expected_return
+          : (i.retMax != null)          ? i.retMax
+          : (Array.isArray(i.ret) && i.ret[1] != null) ? i.ret[1]
+          : (Array.isArray(i.ret) && i.ret[0] != null) ? i.ret[0]
+          : 0;
+  return Number(v) || 0;
+}
+/* [PR1] Возвращает guaranteed (минимум) — для расчётов и detail модала. */
+function _itemGuaranteedPct(i){
+  if(!i) return 0;
+  const v = (i.guaranteed_return != null) ? i.guaranteed_return
+          : (i.retMin != null)             ? i.retMin
+          : (Array.isArray(i.ret) && i.ret[0] != null) ? i.ret[0]
+          : 0;
+  return Number(v) || 0;
+}
+
 function _favIncludes(id){
   return _favIds().includes(Number(id));
 }
@@ -4414,7 +4436,8 @@ function renderFavs(){
       const closed = archived ? '<div class="closed-badge">CLOSED</div>' : '';
       const isMobile = id === 'mFavsList';
       // For favorites we use the marketplace card style without BUY button
-      const retTxt = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : (i.ret && i.ret[0] ? '+' + i.ret[0] + '%' : '');
+      const retExp = _itemExpectedPct(i);
+      const retTxt = retExp > 0 ? '+' + retExp + '%' : '';
       if(isMobile){
         return `<div class="vc-m-card${archCls}" ${onclick} style="position:relative">
           <div class="pic">${_itemThumbHTML(i,{noCarousel:true})}${closed}${retTxt?`<div class="ret">${retTxt}</div>`:''}</div>
@@ -4546,15 +4569,16 @@ function renderMarketplace(cat){
         <p style="font-size:12px">${isEmpty ? 'Check back soon — new items added regularly.' : 'Try a different category.'}</p></div>`;
     } else {
       dGrid.innerHTML = items.map(i => {
-        const ret = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : (i.ret && i.ret[0] ? '+' + i.ret[0] + '%' : '');
+        const expectedPct = _itemExpectedPct(i);
+        const ret = expectedPct > 0 ? '+' + expectedPct + '%' : '';
         const slotsTotal = i.slots_total || 20;
         const slotsSold = i.slots_sold || 0;
         const isFav = _favIncludes(i.id);
         // NEW: brand сверху крупно, name мелко снизу
         const brandLine = i.brand && i.brand.trim() ? i.brand : (i.name || 'Item');
         const subLine = (i.brand && i.brand.trim()) ? i.name : '';
-        // Compact return only %max — для зелёной плашки
-        const retShort = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : '';
+        // Compact return — одно число expected (плашка сверху)
+        const retShort = ret;
         return `<div class="dmp-card" data-mk-id="${i.id}" onclick="openItemDetail(${i.id})">
           <div class="img">${_itemThumbHTML(i,{noCarousel:true})}
             ${_countdownBadge(i)}
@@ -4570,6 +4594,7 @@ function renderMarketplace(cat){
               <div style="text-align:right"><div class="l">PER SLOT</div><div class="v t-light">$${Math.round(i.price_per_slot||0).toLocaleString()}</div></div>
             </div>
             <div class="slots"><span data-slots-count>${slotsSold}/${slotsTotal}</span><div class="pb"><div class="f" data-funded-bar style="width:${i.funded||0}%;transition:width .6s ease-out"></div></div></div>
+            ${ret ? `<div class="ret-corner" style="margin-top:8px;display:flex;justify-content:flex-end;align-items:center;gap:6px"><span style="font-size:9px;letter-spacing:1px;color:var(--t3);font-family:'Space Mono',monospace">EXPECTED PROFIT</span><span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#27ae60;font-weight:700">${ret}</span></div>` : ''}
           </div>
         </div>`;
       }).join('');
@@ -4585,13 +4610,14 @@ function renderMarketplace(cat){
       mGrid.innerHTML = `<div class="vc-m-empty"><svg class="lx"><use href="#i-market"/></svg><h3 style="font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;margin-bottom:6px">${(!ITEMS||!ITEMS.length)?'NO ITEMS':'NO MATCHES'}</h3><p style="font-size:11px">Check back soon.</p></div>`;
     } else {
       mGrid.innerHTML = items.map(i => {
-        const ret = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : (i.ret && i.ret[0] ? '+' + i.ret[0] + '%' : '');
+        const expectedPct = _itemExpectedPct(i);
+        const ret = expectedPct > 0 ? '+' + expectedPct + '%' : '';
         const slotsTotal = i.slots_total || 20;
         const slotsSold = i.slots_sold || 0;
         const isFav = _favIncludes(i.id);
         const brandLine = i.brand && i.brand.trim() ? i.brand : (i.name || 'Item');
         const subLine = (i.brand && i.brand.trim()) ? i.name : '';
-        const retShort = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : '';
+        const retShort = ret;
         return `<div class="vc-m-card" data-mk-id="${i.id}" onclick="openItemDetail(${i.id})">
           <div class="pic">${_itemThumbHTML(i,{noCarousel:true})}
             ${_countdownBadge(i)}
@@ -4605,6 +4631,7 @@ function renderMarketplace(cat){
             <div class="price">$${(+i.price||0).toLocaleString()}</div>
             <div class="price-sub">$${Math.round(i.price_per_slot||0).toLocaleString()}/slot</div>
             <div class="slots"><span data-slots-count>${slotsSold}/${slotsTotal}</span><div class="pb"><div class="f" data-funded-bar style="width:${i.funded||0}%;transition:width .6s ease-out"></div></div></div>
+            ${ret ? `<div class="ret-corner" style="margin-top:6px;display:flex;justify-content:flex-end;align-items:center;gap:5px"><span style="font-size:8px;letter-spacing:1px;color:var(--t3);font-family:'Space Mono',monospace">EXPECTED</span><span style="font-family:'Bebas Neue',sans-serif;font-size:14px;color:#27ae60;font-weight:700">${ret}</span></div>` : ''}
           </div>
         </div>`;
       }).join('');
@@ -4669,7 +4696,13 @@ function openItemDetail(id){
   const slotsSold = slotsTotal - slotsAvail;
   const pricePerSlot = i.price_per_slot || (i.price / slotsTotal);
   const canBuy = slotsAvail > 0;
-  const ret = (i.ret && i.ret[1]) ? '+' + i.ret[1] + '%' : (i.ret && i.ret[0] ? '+' + i.ret[0] + '%' : '');
+  const ret = (() => {
+    const exp = _itemExpectedPct(i);
+    return exp > 0 ? '+' + exp + '%' : '';
+  })();
+  // [PR1] Локальные переменные для всех расчётов в detail/buy модале:
+  const expPct  = _itemExpectedPct(i);
+  const guarPct = _itemGuaranteedPct(i);
   const phLen = (i.price_history || []).length;
 
   // Period in days display
@@ -4703,7 +4736,7 @@ function openItemDetail(id){
             <div class="f-stat"><div class="l">Item price</div><div class="v">$${i.price.toLocaleString()}</div></div>
             <div class="f-stat"><div class="l">Per slot</div><div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
             <div class="f-stat"><div class="l">Sale period</div><div class="v">${periodTxt}</div></div>
-            <div class="f-stat"><div class="l">Expected</div><div class="v green">+${i.ret[1]||i.ret[0]}%</div></div>
+            <div class="f-stat"><div class="l">Expected</div><div class="v green">+${expPct}%</div></div>
           </div>
           <div class="f-progress">
             <div class="f-progress-h"><span><b>${slotsSold}</b> of ${slotsTotal} sold</span><span class="g">${slotsAvail} left</span></div>
@@ -4723,10 +4756,10 @@ function openItemDetail(id){
         <!-- INVEST CARD -->
         <div class="f-card f-invest">
           <div class="f-invest-label">Expected return</div>
-          <div class="f-invest-amt" id="mFAmt">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div>
+          <div class="f-invest-amt" id="mFAmt">$${Math.round(pricePerSlot * (1 + expPct/100)).toLocaleString()}</div>
           <div class="f-invest-sub"><span id="mFSub">at 1 slot · $${Math.round(pricePerSlot).toLocaleString()} invested</span></div>
 
-          <div class="f-slider-wrap" id="mFSlider" data-id="${i.id}" data-mode="mobile" data-max="${slotsAvail}" data-per="${Math.round(pricePerSlot)}" data-rmax="${i.ret[1]||0}" data-rmin="${i.ret[0]||0}">
+          <div class="f-slider-wrap" id="mFSlider" data-id="${i.id}" data-mode="mobile" data-max="${slotsAvail}" data-per="${Math.round(pricePerSlot)}" data-rmax="${expPct}" data-rmin="${guarPct}">
             <div class="f-slider-track"><div class="f-slider-fill" id="mFFill" style="width:0%"></div></div>
             <div class="f-slider-thumb" id="mFThumb" style="left:0%"></div>
           </div>
@@ -4738,12 +4771,12 @@ function openItemDetail(id){
             <div class="arr">→</div>
             <div class="col to">
               <div class="l">Expected</div>
-              <div class="v" id="mFGet">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div>
-              <div class="extra" id="mFProfit">+$${Math.round(pricePerSlot * (i.ret[1]||0)/100).toLocaleString()} profit</div>
+              <div class="v" id="mFGet">$${Math.round(pricePerSlot * (1 + expPct/100)).toLocaleString()}</div>
+              <div class="extra" id="mFProfit">+$${Math.round(pricePerSlot * expPct/100).toLocaleString()} profit</div>
             </div>
           </div>
 
-          <div class="f-fineprint">Guaranteed minimum: <b id="mFGuar">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt} · <a class="learn-more-link" onclick="event.stopPropagation();showItemEarningsInfo()">ⓘ Learn more</a></div>
+          <div class="f-fineprint">Guaranteed minimum: <b id="mFGuar">$${Math.round(pricePerSlot * (1 + guarPct/100)).toLocaleString()}</b> · Sale period: ${periodTxt} · <a class="learn-more-link" onclick="event.stopPropagation();showItemEarningsInfo()">ⓘ Learn more</a></div>
 
           <button class="f-cta" id="mBuyBtn" onclick="buyFraction(${i.id})">BUY 1 SLOT — $${Math.round(pricePerSlot).toLocaleString()}</button>
           <input type="hidden" id="mFSlots" value="1">
@@ -4766,8 +4799,8 @@ function openItemDetail(id){
             <div class="row"><span class="l">Price per slot</span><span class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
             <div class="row"><span class="l">Slots sold</span><span class="v">${slotsSold} of ${slotsTotal}</span></div>
             <div class="row"><span class="l">Slots available</span><span class="v ${slotsAvail>0?'green':''}">${slotsAvail}</span></div>
-            <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[1]||i.ret[0]}%</span></div>
-            <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${i.ret[0]}%</span></div>
+            <div class="row"><span class="l">Expected return</span><span class="v green">+${expPct}%</span></div>
+            <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${guarPct}%</span></div>
             <div class="row"><span class="l">Sale period</span><span class="v">${periodTxt}</span></div>
             <div class="row"><span class="l">Category</span><span class="v">${(i.cat||'').toUpperCase()}</span></div>
           </div>
@@ -4810,7 +4843,7 @@ function openItemDetail(id){
               <div class="f-stat"><div class="l">Item price</div><div class="v">$${i.price.toLocaleString()}</div></div>
               <div class="f-stat"><div class="l">Per slot</div><div class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</div></div>
               <div class="f-stat"><div class="l">Sale period</div><div class="v">${periodTxt}</div></div>
-              <div class="f-stat"><div class="l">Expected</div><div class="v green">+${i.ret[1]||i.ret[0]}%</div></div>
+              <div class="f-stat"><div class="l">Expected</div><div class="v green">+${expPct}%</div></div>
             </div>
             <div class="f-progress">
               <div class="f-progress-h"><span><b>${slotsSold}</b> of ${slotsTotal} sold</span><span class="g">${slotsAvail} left</span></div>
@@ -4830,10 +4863,10 @@ function openItemDetail(id){
           <!-- INVEST CARD -->
           <div class="f-card f-invest">
             <div class="f-invest-label">Expected return</div>
-            <div class="f-invest-amt" id="dFAmt">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div>
+            <div class="f-invest-amt" id="dFAmt">$${Math.round(pricePerSlot * (1 + expPct/100)).toLocaleString()}</div>
             <div class="f-invest-sub"><span id="dFSub">at 1 slot · $${Math.round(pricePerSlot).toLocaleString()} invested</span></div>
 
-            <div class="f-slider-wrap" id="dFSlider" data-id="${i.id}" data-mode="desktop" data-max="${slotsAvail}" data-per="${Math.round(pricePerSlot)}" data-rmax="${i.ret[1]||0}" data-rmin="${i.ret[0]||0}">
+            <div class="f-slider-wrap" id="dFSlider" data-id="${i.id}" data-mode="desktop" data-max="${slotsAvail}" data-per="${Math.round(pricePerSlot)}" data-rmax="${expPct}" data-rmin="${guarPct}">
               <div class="f-slider-track"><div class="f-slider-fill" id="dFFill" style="width:0%"></div></div>
               <div class="f-slider-thumb" id="dFThumb" style="left:0%"></div>
             </div>
@@ -4845,12 +4878,12 @@ function openItemDetail(id){
               <div class="arr">→</div>
               <div class="col to">
                 <div class="l">Expected</div>
-                <div class="v" id="dFGet">$${Math.round(pricePerSlot * (1 + (i.ret[1]||0)/100)).toLocaleString()}</div>
-                <div class="extra" id="dFProfit">+$${Math.round(pricePerSlot * (i.ret[1]||0)/100).toLocaleString()} profit</div>
+                <div class="v" id="dFGet">$${Math.round(pricePerSlot * (1 + expPct/100)).toLocaleString()}</div>
+                <div class="extra" id="dFProfit">+$${Math.round(pricePerSlot * expPct/100).toLocaleString()} profit</div>
               </div>
             </div>
 
-            <div class="f-fineprint">Guaranteed minimum: <b id="dFGuar">$${Math.round(pricePerSlot * (1 + (i.ret[0]||0)/100)).toLocaleString()}</b> · Sale period: ${periodTxt} · <a class="learn-more-link" onclick="event.stopPropagation();showItemEarningsInfo()">ⓘ Learn more</a></div>
+            <div class="f-fineprint">Guaranteed minimum: <b id="dFGuar">$${Math.round(pricePerSlot * (1 + guarPct/100)).toLocaleString()}</b> · Sale period: ${periodTxt} · <a class="learn-more-link" onclick="event.stopPropagation();showItemEarningsInfo()">ⓘ Learn more</a></div>
 
             <button class="f-cta" id="dBuyBtn" onclick="buyFraction(${i.id})">BUY 1 SLOT — $${Math.round(pricePerSlot).toLocaleString()}</button>
             <input type="hidden" id="dFSlots" value="1">
@@ -4873,8 +4906,8 @@ function openItemDetail(id){
               <div class="row"><span class="l">Price per slot</span><span class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
               <div class="row"><span class="l">Slots sold</span><span class="v">${slotsSold} of ${slotsTotal}</span></div>
               <div class="row"><span class="l">Slots available</span><span class="v ${slotsAvail>0?'green':''}">${slotsAvail}</span></div>
-              <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[1]||i.ret[0]}%</span></div>
-              <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${i.ret[0]}%</span></div>
+              <div class="row"><span class="l">Expected return</span><span class="v green">+${expPct}%</span></div>
+              <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${guarPct}%</span></div>
               <div class="row"><span class="l">Sale period</span><span class="v">${periodTxt}</span></div>
               <div class="row"><span class="l">Category</span><span class="v">${(i.cat||'').toUpperCase()}</span></div>
             </div>
@@ -5009,13 +5042,15 @@ function switchIdTab(tab, mode){
 
   if(tab === 'details'){
     td.classList.add('active'); tdesc?.classList.remove('active');
+    const _ep = _itemExpectedPct(i);
+    const _gp = _itemGuaranteedPct(i);
     content.innerHTML = `
       <div class="row"><span class="l">Item price</span><span class="v">$${i.price.toLocaleString()}</span></div>
       <div class="row"><span class="l">Price per slot</span><span class="v gold">$${Math.round(pricePerSlot).toLocaleString()}</span></div>
       <div class="row"><span class="l">Slots</span><span class="v">${slotsSold} of ${slotsTotal} sold</span></div>
       <div class="row"><span class="l">Slots available</span><span class="v ${slotsAvail>0?'green':''}">${slotsAvail}</span></div>
-      <div class="row"><span class="l">Expected return</span><span class="v green">+${i.ret[1]||i.ret[0]}%</span></div>
-      <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${i.ret[0]}%</span></div>
+      <div class="row"><span class="l">Expected return</span><span class="v green">+${_ep}%</span></div>
+      <div class="row"><span class="l">Guaranteed min</span><span class="v gold">+${_gp}%</span></div>
       <div class="row"><span class="l">Sale period</span><span class="v">${periodTxt}</span></div>
       <div class="row"><span class="l">Category</span><span class="v">${(i.cat||'').toUpperCase()}</span></div>
     `;
@@ -5056,8 +5091,8 @@ function _updateItemSlots(n, mode, i){
   const slotsAvail = i.slots_available !== undefined ? i.slots_available : (i.slots_total || 20);
   const pricePerSlot = i.price_per_slot || (i.price / (i.slots_total || 20));
   const totalUSD = Math.round(n * pricePerSlot);
-  const expectedMax = Math.round(totalUSD * (1 + (i.ret[1] || 0) / 100));
-  const expectedMin = Math.round(totalUSD * (1 + (i.ret[0] || 0) / 100));
+  const expectedMax = Math.round(totalUSD * (1 + _itemExpectedPct(i) / 100));
+  const expectedMin = Math.round(totalUSD * (1 + _itemGuaranteedPct(i) / 100));
   const fillPct = (n / slotsAvail) * 100;
   const get = id => document.getElementById(prefix + id);
   if(get('V5Fill')) get('V5Fill').style.width = fillPct + '%';
@@ -5135,7 +5170,7 @@ async function buyFraction(id){
     await loadMyItems();
     try{ await loadMarketplaceItems(); }catch(e){}
     updateUI(); showConfetti(); saveState();
-    showToast('success', 'Purchase complete!', 'You now own <b>' + slotsN + ' slot' + (slotsN>1?'s':'') + '</b> of <b>' + i.name + '</b>. Expected profit: <b>+' + (i.ret[1]||i.ret[0]) + '%</b>', 5000);
+    showToast('success', 'Purchase complete!', 'You now own <b>' + slotsN + ' slot' + (slotsN>1?'s':'') + '</b> of <b>' + i.name + '</b>. Expected profit: <b>+' + _itemExpectedPct(i) + '%</b>', 5000);
   }catch(e){
     document.getElementById('_buyLoader')?.remove();
     showToast('error', 'Network error', 'Please check your connection and try again.');
@@ -7966,8 +8001,8 @@ function _tmGetCatalog(){
       brand: (i.brand || i.name || 'Item').toUpperCase(),
       name: i.name || '',
       price: +i.price_per_slot || 500,
-      retMin: i.ret ? i.ret[0] : 10,
-      retMax: i.ret ? i.ret[1] : 25,
+      retMin: _itemGuaranteedPct(i),
+      retMax: _itemExpectedPct(i),
       days: i.days ? i.days[1] : 30,
       ico: ((i.brand || i.name || 'X').substring(0,2)).toUpperCase()
     }));
@@ -10583,4 +10618,43 @@ function _pcUpdate(months){
   if(itemsCard) itemsCard.style.display = portfolio.items.length > 0 ? '' : 'none';
   if(itemList){
     itemList.innerHTML = portfolio.items.map(i => {
-      // Прибыль вещи: invested * (retPct/100), масштабированная пропор
+      // Прибыль вещи: invested * (retPct/100), масштабированная пропорционально периоду.
+      // Если i.days = 90 (стандартный sale period), за period месяцев получаем:
+      //   profit = invested * (retPct/100) * min(months, daysToMonths) / daysToMonths
+      // Простая формула: считаем прибыль за 1 цикл продажи (i.days) и масштабируем по months.
+      const itemDaysAsMonths = Math.max(1, (i.days || 90) / 30);
+      // Пропорция: если months >= itemDaysAsMonths — полная прибыль, иначе линейно
+      const completion = Math.min(1, months / itemDaysAsMonths);
+      const profit = i.invested * (i.retPct / 100) * completion;
+      totalInvested += i.invested;
+      totalProfit += profit;
+      const countTxt = i.count > 1 ? ` · ${i.count} positions` : '';
+      const subtitle = `${fmt(i.invested)} invested · expected +${i.retPct}%${countTxt}`;
+      const ic = i.image_url
+        ? `<img src="${i.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none'">`
+        : '💎';
+      return `
+        <div class="pc-pool-row">
+          <div class="pc-pool-ic" style="overflow:hidden">${ic}</div>
+          <div class="pc-pool-info">
+            <div class="n">${i.name || 'Item'}</div>
+            <div class="d">${subtitle}</div>
+          </div>
+          <div class="pc-pool-amt">
+            <div class="a">+${fmt(profit)}</div>
+            <div class="e">over ${monthsTxt}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── SUMMARY ──
+  setText('pcInvested', fmt(totalInvested));
+  setText('pcProfit',   '+' + fmt(totalProfit));
+  setText('pcEndBal',   fmt(totalInvested + totalProfit));
+}
+
+</script>
+</body>
+</html>
