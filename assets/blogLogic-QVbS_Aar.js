@@ -1,0 +1,1 @@
+function e(){console.log(`📰 LUXOR Blog loaded successfully`)}export{e as initBlog};
